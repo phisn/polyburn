@@ -1,0 +1,18 @@
+{
+    "folders": [
+        {
+            "name": "webapp",
+            "path": "webapp"
+        },
+        {
+            "name": "root",
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.watcherExclude": {
+            "**/target": true
+        },
+        "typescript.tsdk": "webapp\\node_modules\\typescript\\lib"
+    }
+}

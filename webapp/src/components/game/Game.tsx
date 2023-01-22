@@ -1,5 +1,5 @@
 import { Stage, Graphics } from "@inlet/react-pixi"
-import { Container, InteractionEvent } from "pixi.js"
+import PIXI from "pixi.js"
 import { useCallback, useEffect, useState } from "react"
 import { useRef } from "react"
 
@@ -12,11 +12,17 @@ interface Shape {
     vertices: Vertex[]
 }
 
+interface VertexIdentifier {
+    point: Vertex
+    shapeIndex: number
+    vertexIndex: number
+}
+        
 function findClosestVertex(shapes: Shape[], point: Vertex, snapDistance: number) {
     let minDistance = Number.MAX_VALUE;
-    let closestPoint: Vertex | null = null;
-    let shapeIndex: number | null = null;
-    let vertexIndex: number | null = null;
+    let closestPoint: Vertex = { x: 0, y: 0 };
+    let shapeIndex: number = 0;
+    let vertexIndex: number = 0;
 
     for (let i = 0; i < shapes.length; i++) {
         for (let j = 0; j < shapes[i].vertices.length; ++j) {
@@ -35,14 +41,14 @@ function findClosestVertex(shapes: Shape[], point: Vertex, snapDistance: number)
         return null;
     }
 
-    return { point: closestPoint, shape: shapeIndex, vertex: vertexIndex };
+    return { point: closestPoint, shapeIndex: shapeIndex, vertexIndex: vertexIndex };
 }
 
 function findClosestEdge(shapes: Shape[], point: Vertex, snapDistance: number) {
     let minDistance = Number.MAX_VALUE;
-    let closestPoint: Vertex | null = null;
-    let shapeIndex: number | null = null;
-    let edgeIndices: [ number, number] | null = null;
+    let closestPoint: Vertex = { x: 0, y: 0 };
+    let shapeIndex: number = 0;
+    let edgeIndices: [ number, number] = [ 0, 0 ];
 
     for (let i = 0; i < shapes.length; i++) {
         for (let j = 0; j < shapes[i].vertices.length; ++j) {
@@ -66,7 +72,7 @@ function findClosestEdge(shapes: Shape[], point: Vertex, snapDistance: number) {
         return null;
     }
 
-    return { point: closestPoint, shapeIndex, edge: edgeIndices };
+    return { point: closestPoint, shapeIndex: shapeIndex, edge: edgeIndices };
 }
 
 function getClosestPointOnEdge(p1: Vertex, p2: Vertex, point: Vertex) {
@@ -94,9 +100,20 @@ function getDistance(a: Vertex, b: Vertex) {
     return Math.sqrt(dx * dx + dy * dy);
 }
 
+enum Mode {
+    None,
+    MoveVertex
+}
+
+const snapDistance = 20;
+
 function Game() {
     const [shapes, setShapes] = useState<Shape[]>([])
-    const [pointOnEdge, setPointOnEdge] = useState<Vertex | null>(null)
+    
+    const [vertexSelected, setVertexSelected] = useState<VertexIdentifier | null>(null)
+    const [highlightPoint, setHighlightPoint] = useState<Vertex | null>(null)
+    
+    const [mode, setMode] = useState<Mode>(Mode.None)
 
     useEffect(() => {
         setShapes([
@@ -127,50 +144,158 @@ function Game() {
     }, [])
 
     useEffect(() => {
-        window.addEventListener("mousemove", (e) => {
-            const mouse = { x: e.clientX, y: e.clientY }
+        const onMouseDown = (e: MouseEvent) => {
+            const point = { x: e.clientX, y: e.clientY }
 
-            // first find closest vertex than edge
-            const closestVertex = findClosestVertex(shapes, mouse, 20)
+            const vertex = findClosestVertex(shapes, point, snapDistance)
+            
+            if (vertex) {
+                if (e.ctrlKey) {
+                    setShapes((shapes) => {
+                        const newShapes = [...shapes]
 
-            if (closestVertex) {
-                setPointOnEdge(closestVertex.point)
+                        if (newShapes[vertex.shapeIndex].vertices.length <= 3) {
+                            newShapes.splice(vertex.shapeIndex, 1)
+                            return newShapes
+                        }
+
+                        newShapes[vertex.shapeIndex].vertices.splice(vertex.vertexIndex, 1)
+                        return newShapes
+                    })
+                    setVertexSelected(null)
+                    setMode(Mode.None)
+                    return
+                }
+
+                setVertexSelected(vertex)
+                setMode(Mode.MoveVertex)
                 return
             }
 
-            const closestEdge = findClosestEdge(shapes, mouse, 20)
+            const edge = findClosestEdge(shapes, point, snapDistance)
 
-            if (closestEdge) {
-                setPointOnEdge(closestEdge.point)
+            if (edge) {
+                setShapes((shapes) => {
+                    const newShapes = [...shapes]
+                    newShapes[edge.shapeIndex].vertices.splice(edge.edge[1], 0, edge.point)
+                    return newShapes
+                })
+
+                setVertexSelected({ point: edge.point, shapeIndex: edge.shapeIndex, vertexIndex: edge.edge[1] })
+                setMode(Mode.MoveVertex)
                 return
             }
 
-            setPointOnEdge(null)
-        })
+            setShapes((shapes) => {
+                const newShapes = [...shapes]
+                newShapes.push({
+                    vertices: [
+                        { x: point.x - 50, y: point.y - 50 },
+                        { x: point.x + 50, y: point.y - 50 },
+                        { x: point.x, y: point.y + 50 },
+                    ]
+                })
+                return newShapes
+            })
 
-        return () => {
-            window.removeEventListener("mousemove", () => { })
+            setVertexSelected(null)
+            setMode(Mode.None)
         }
-    }, [ ])
 
-    const draw = useCallback((g) => {
+        const onMouseUp = (e: MouseEvent) => {
+            setVertexSelected(null)
+            setMode(Mode.None)
+
+            // log number of vertices
+            console.log(shapes.map((s) => s.vertices.length))
+        }
+
+        window.addEventListener("mousedown", onMouseDown)
+        window.addEventListener("mouseup", onMouseUp)
+        return () => {
+            window.removeEventListener("mousedown", onMouseDown)
+            window.removeEventListener("mouseup", onMouseUp)
+        }
+    }, [ shapes ])
+
+    useEffect(() => {
+        const onMove = (e: MouseEvent) => {
+            const point = { x: e.clientX, y: e.clientY }
+
+            if (mode === Mode.MoveVertex && vertexSelected) {
+                // if holding shift then snap to grid
+                if (e.shiftKey) {
+                    point.x = Math.round(point.x / 20) * 20
+                    point.y = Math.round(point.y / 20) * 20
+                }
+
+                setShapes((shapes) => {
+                    const newShapes = [...shapes]
+                    newShapes[vertexSelected.shapeIndex].vertices[vertexSelected.vertexIndex] = point
+                    return newShapes
+                })
+
+                setHighlightPoint(point)
+
+                console.log("move", vertexSelected, point)
+            }
+        }
+
+        window.addEventListener("mousemove", onMove)
+        return () => window.removeEventListener("mousemove", onMove)
+    }, [ vertexSelected, mode ])
+
+    useEffect(() => {
+        const onMove = (e: MouseEvent) => {
+            const point = { x: e.clientX, y: e.clientY }
+            
+            if (mode === Mode.None) {
+                const vertex = findClosestVertex(shapes, point, snapDistance)
+
+                if (vertex) {
+                    console.log("vertex", vertex)
+                    setHighlightPoint(vertex.point)
+                    return
+                }
+
+                const edge = findClosestEdge(shapes, point, snapDistance)
+
+                if (edge) {
+                    setHighlightPoint(edge.point)
+                    return
+                }
+
+                setHighlightPoint(null)
+            }
+        }
+
+        window.addEventListener("mousemove", onMove)
+        return () => window.removeEventListener("mousemove", onMove)
+    }, [ mode, shapes ])
+
+    const draw = useCallback((g: PIXI.Graphics) => {
         g.clear()
 
         shapes.forEach((shape) => {
             g.lineStyle(0)
-            g.beginFill(0xff0000)
+            g.beginFill(0xbb3333)
             g.drawPolygon(shape.vertices)
+            g.endFill()
+
+            g.lineStyle(0)
+            g.beginFill(0x33bbbb)
+            shape.vertices.forEach((v) => g.drawCircle(v.x, v.y, 4))
             g.endFill()
         })
 
-        if (pointOnEdge) {
+        if (highlightPoint) {
             g.lineStyle(0)
             g.beginFill(0x00ff00)
-            g.drawCircle(pointOnEdge.x, pointOnEdge.y, 5)
+            g.drawCircle(highlightPoint.x, highlightPoint.y, 5)
             g.endFill()
         }
 
-    }, [pointOnEdge, shapes])
+    }, [ shapes, highlightPoint ])
 
     return (
         <div className="overflow-hidden">

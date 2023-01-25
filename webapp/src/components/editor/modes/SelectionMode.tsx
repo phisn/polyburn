@@ -13,8 +13,6 @@ const moveVertexIntermediateAction = (store: EditorStore, vertexIndex: number, s
     onmousemove: (e: MouseEvent) => {
         let point = { x: e.clientX, y: e.clientY }
 
-        console.log("moveVertexIntermediateAction", point)
-
         if (e.shiftKey) {
             point = {
                 x: Math.round(point.x / snapDistance) * snapDistance,
@@ -32,8 +30,11 @@ const moveVertexIntermediateAction = (store: EditorStore, vertexIndex: number, s
     onmouseup: (e: MouseEvent) => {
         const point = { x: e.clientX, y: e.clientY }
 
+        // clone world with new shape
         shape.vertices[vertexIndex] = point
-        store.setWorld({ ...store.world, shapes: [...store.world.shapes] })
+        const shapes = [...store.world.shapes]
+        shapes[shapeIndex] = shape
+        store.setWorld({ ...store.world, shapes })
     }
 })
 
@@ -47,18 +48,17 @@ const useSelectionMode = (store: EditorStore) => {
 
     useEffect(() => {
         if (intermediateAction) {
-            console.log("intermediateAction", intermediateAction)
-
-            window.addEventListener("mousemove", intermediateAction.onmousemove)
-
-            window.addEventListener("mouseup", e => {
+            const onMouseUp = (e: MouseEvent) => {
                 intermediateAction.onmouseup(e)
                 setIntermediateAction(null)
-            })
+            }
+
+            window.addEventListener("mousemove", intermediateAction.onmousemove)
+            window.addEventListener("mouseup", onMouseUp)
 
             return () => {
                 window.removeEventListener("mousemove", intermediateAction.onmousemove)
-                window.removeEventListener("mouseup", intermediateAction.onmouseup)
+                window.removeEventListener("mouseup", onMouseUp)
             }
         }
 
@@ -83,7 +83,7 @@ const useSelectionMode = (store: EditorStore) => {
 
         window.addEventListener("mousemove", onMouseMove)
         return () => window.removeEventListener("mousemove", onMouseMove)
-    }, [ intermediateAction, store ])
+    }, [ intermediateAction, store.world ])
 
     return {
         editorMenu: () => {

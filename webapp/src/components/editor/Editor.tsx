@@ -42,8 +42,14 @@ function Editor() {
         })
     }, [])
 
-    useHotkeys("ctrl+z", store.undo)
+    useHotkeys("ctrl+z", () => {
+        console.log("undo", store.world)
+        store.undo()
+    })
     useHotkeys("ctrl+y", store.redo)
+    useHotkeys("ctrl+s", () => {
+        console.log("save", store.world)
+    })
 
     const Mode = useSelectionMode(store)
 

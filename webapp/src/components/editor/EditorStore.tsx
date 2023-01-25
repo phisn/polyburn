@@ -54,6 +54,9 @@ const useEditorStore = create<EditorStore>((set) => ({
         })),
     undo: () =>
         set((state) => {
+            console.log(`Undoing ${state.undos.length} undos left`);
+            console.log(`later ${state.undos.slice(0, state.undos.length - 1).length} undos left`);
+
             if (state.undos.length > 0) {
                 return {
                     world: state.undos[state.undos.length - 1],
@@ -73,6 +76,8 @@ const useEditorStore = create<EditorStore>((set) => ({
                     redos: state.redos.slice(0, state.redos.length - 1),
                 };
             }
+
+            console.log("No redos left");
 
             return state;
         }),

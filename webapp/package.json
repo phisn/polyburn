@@ -12,12 +12,15 @@
     "@dimforge/rapier2d": "^0.11.1",
     "@inlet/react-pixi": "^6.8.0",
     "@pixi/interaction": "^6.5.8",
+    "daisyui": "^2.47.0",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.0",
+    "react-hotkeys-hook": "^4.3.2",
     "react-router-dom": "^6.7.0",
-    "sort-by": "^1.2.0"
+    "sort-by": "^1.2.0",
+    "zustand": "^4.3.2"
   },
   "devDependencies": {
     "@types/react": "^17.0.39",

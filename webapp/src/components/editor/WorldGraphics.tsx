@@ -1,34 +1,40 @@
 import { Graphics } from "@inlet/react-pixi"
-import { useCallback } from "react"
 import PIXI from "pixi.js"
-import { World } from "./World"
+import useEditorStore from "./EditorStore"
 
-interface GraphicsWorldProps {
-    world: World
+function WorldGraphics() {
+    const [world, visualWorldMods] = useEditorStore((s) => [s.world, s.worldMods])
 
-    noRenderShapes?: boolean
-}
-
-function WorldGraphics({ world, noRenderShapes }: GraphicsWorldProps) {
-    const draw = useCallback((g: PIXI.Graphics) => {
+    const draw = (g: PIXI.Graphics) => {
         g.clear()
 
-        world.shapes.forEach((shape) => {
-            if (!noRenderShapes) {
-                g.lineStyle(0)
-                g.beginFill(0xbb3333)
-                g.drawPolygon(shape.vertices)
-                g.endFill()
+        world.shapes.forEach((shape, i) => {
+            shape = visualWorldMods.replaceShapeAt?.index === i ? visualWorldMods.replaceShapeAt.shape : shape
 
-                g.lineStyle(2, 0x000000)
-                g.beginFill(0xcccccc)
-                shape.vertices.forEach((vertex) => {
-                    g.drawCircle(vertex.x, vertex.y, 5)
-                })
-            }
+            g.lineStyle(0)
+            g.beginFill(0xbb3333)
+            g.drawPolygon(shape.vertices)
+            g.endFill()
         })
 
-    }, [ world ])
+        world.shapes.forEach((shape, i) => {
+            shape = visualWorldMods.replaceShapeAt?.index === i ? visualWorldMods.replaceShapeAt.shape : shape
+
+            shape.vertices.forEach((vertex) => {
+                g.lineStyle(2, 0x000000)
+                g.beginFill(0xcccccc)
+                g.drawCircle(vertex.x, vertex.y, 5)
+                g.endFill()
+            })
+        })
+
+        visualWorldMods.highlightVertices?.forEach((vertex) => {
+            g.lineStyle(0)
+            g.beginFill(0x00ff00)
+            g.drawCircle(vertex.x, vertex.y, 5)
+            g.endFill()
+        })
+    }
 
     return (
         <Graphics draw={draw} />

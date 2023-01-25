@@ -1,90 +1,18 @@
 import { Stage, Graphics } from "@inlet/react-pixi"
-import PIXI from "pixi.js"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { useRef } from "react"
-import { ActionProps } from "./ActionProps"
-import SelectionPassiveAction from "./SelectionPassiveAction"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useHotkeys } from "react-hotkeys-hook"
+import useEditorStore from "./EditorStore"
+import useSelectionMode from "./modes/SelectionMode"
 import { World, Vertex, Shape } from "./World"
-
-enum Mode {
-    Selection
-}
+import WorldGraphics from "./WorldGraphics"
+import PIXI from "pixi.js"
+import EditorNavbar from "./EditorNavbar"
 
 function Editor() {
-    const [previousWorlds, setPreviousWorlds] = useState<World[]>([])
-    const [futureWorlds, setFutureWorlds] = useState<World[]>([])
-
-    const [world, setWorld] = useState<World>({ shapes: [] })
-    const [mode, setMode] = useState<Mode>(Mode.Selection)
-
-    const [intermediateAction, setIntermediateAction] = useState<((props: ActionProps) => JSX.Element) | null>(null)
-
-    // The action component depends on the mode and if an intermediate action is active.
-    const Action = useMemo(() => {
-        if (intermediateAction) {
-            return intermediateAction
-        }
-
-        switch (mode) {
-            case Mode.Selection:
-                return SelectionPassiveAction
-        }
-    }, [ intermediateAction, mode ])
-
-    const proposeSetWorld = useCallback((world: (p: World) => World) => {
-        setWorld((w) => {
-            const newWorld = world(w)
-            
-            setPreviousWorlds((p) => [ ...p, w ])
-            setFutureWorlds([])
-            
-            return newWorld
-        })
-    }, [])
+    const store = useEditorStore()
 
     useEffect(() => {
-        if (previousWorlds.length > 0) {
-            const undo = (e: KeyboardEvent) => {
-                if (e.key === "z" && e.ctrlKey) {
-                    setWorld((w) => {
-                        setFutureWorlds((f) => [ ...f, w ])
-                        return previousWorlds[previousWorlds.length - 1]
-                    })
-                    setPreviousWorlds((p) => p.slice(0, p.length - 1))
-                }
-            }
-
-            window.addEventListener("keydown", undo)
-
-            return () => {
-                window.removeEventListener("keydown", undo)
-            }
-        }
-    }, [ previousWorlds ])
-
-    useEffect(() => {
-        if (futureWorlds.length > 0) {
-            const redo = (e: KeyboardEvent) => {
-                if (e.key === "y" && e.ctrlKey) {
-                    setWorld((w) => {
-                        setPreviousWorlds((p) => [ ...p, w ])
-                        return futureWorlds[futureWorlds.length - 1]
-                    })
-                    setFutureWorlds((f) => f.slice(0, f.length - 1))
-                }
-            }
-
-            window.addEventListener("keydown", redo)
-            
-            return () => {
-                window.removeEventListener("keydown", redo)
-            }
-        }
-    }, [ futureWorlds ])
-
-    // create a triangle, a rectangle and a circle
-    useEffect(() => {
-        setWorld({
+        store.setWorld({
             shapes: [
                 {
                     vertices: [
@@ -114,12 +42,27 @@ function Editor() {
         })
     }, [])
 
+    useHotkeys("ctrl+z", store.undo)
+    useHotkeys("ctrl+y", store.redo)
+
+    const Mode = useSelectionMode(store)
+
     return (
         <div className="overflow-hidden">
-            <Stage width={window.innerWidth} height={window.innerHeight} options={ { resizeTo: window } }>
-                <Action world={world}
-                        setIntermediateAction={(action) => setIntermediateAction(() => action)}
-                        setWorld={proposeSetWorld} />
+            <div className="flex flex-col space-y-4 absolute top-0 left-0 p-4">
+                <EditorNavbar />
+                <Mode.editorMenu />
+            </div>
+
+            <Stage onPointerDown={(e) => {
+                console.log("click", e)
+                Mode.onClick(e.clientX, e.clientY, e.ctrlKey, e.shiftKey) 
+            }
+            }
+                   width={window.innerWidth} 
+                   height={window.innerHeight} 
+                   options={ { resizeTo: window } } >
+                <WorldGraphics />
             </Stage>
         </div>
     )

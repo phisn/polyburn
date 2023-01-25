@@ -4,7 +4,7 @@ function EditorNavbar() {
     const [undos, redos] = useEditorStore((state) => [state.undos, state.redos])
 
     return (
-        <div className="flex space-x-8 items-center bg-base-100 rounded-lg">
+        <div className="flex w-min space-x-8 items-center bg-base-100 rounded-lg">
             <button className="btn btn-square btn-ghost">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { Shape, Vertex, World } from "./World";
+import PIXI from "pixi.js";
 
 interface VisualWorldMods {
     replaceShapeAt?: { index: number, shape: Shape }

@@ -1,50 +1,95 @@
+import { AppProvider, useApp } from "@inlet/react-pixi"
 import { useEffect, useState } from "react"
-import { EditorStore } from "../EditorStore"
+import useEditorStore, { EditorStore } from "../EditorStore"
 import { findClosestEdge, findClosestVertex, Shape, VertexIdentifier } from "../World"
+import PIXI from "pixi.js"
 
 const snapDistance = 20
 
-interface EditorMode {
+export interface EditorMode {
     editorMenu: () => JSX.Element
-    onClick: (x: number, y: number, ctrl: Boolean, shift: Boolean) => void
+    onClick: (x: number, y: number, ctrl: boolean, shift: boolean) => void
 }
 
-const moveVertexIntermediateAction = (store: EditorStore, vertexIndex: number, shapeIndex: number, shape: Shape) => ({
-    onmousemove: (e: MouseEvent) => {
-        let point = { x: e.clientX, y: e.clientY }
+type IntermediateEffect = () => () => void
 
-        if (e.shiftKey) {
-            point = {
-                x: Math.round(point.x / snapDistance) * snapDistance,
-                y: Math.round(point.y / snapDistance) * snapDistance
+function SelectionMode(props: { app: PIXI.Application }) {
+    const store = useEditorStore()
+    const app = props.app
+
+    useEffect(() => {
+        const onMouseMove = (e: PIXI.InteractionEvent) => {
+            const point = { x: e.data.global.x, y: e.data.global.y }
+            const vertex = findClosestVertex(store.world.shapes, point, snapDistance)
+    
+            if (vertex) {
+                store.applyVisualMods({ highlightVertices: [vertex.point]})
+                return
             }
+    
+            const edge = findClosestEdge(store.world.shapes, point, snapDistance)
+    
+            if (edge) {
+                store.applyVisualMods({ highlightVertices: [edge.point]})
+                return
+            }
+    
+            store.resetVisualMods()
         }
 
-        shape.vertices[vertexIndex] = point
+        app.stage.on("mousemove", onMouseMove)
+        return () => { app.stage.off("mousemove", onMouseMove) }
+    }, [ app.stage, store.world ])
 
-        store.applyVisualMods({ 
-            highlightVertices: [point],
-            replaceShapeAt: { index: shapeIndex, shape }
-        })
-    },
-    onmouseup: (e: MouseEvent) => {
-        const point = { x: e.clientX, y: e.clientY }
-
-        // clone world with new shape
-        shape.vertices[vertexIndex] = point
-        const shapes = [...store.world.shapes]
-        shapes[shapeIndex] = shape
-        store.setWorld({ ...store.world, shapes })
-    }
-})
-
-interface IntermediateAction {
-    onmousemove: (e: MouseEvent) => void
-    onmouseup: (e: MouseEvent) => void
+    return (
+        <div className="flex p-4 flex-col items-center bg-base-100 rounded-lg h-full self-end">
+            <button className="btn">
+                Hello
+            </button>
+        </div>
+    )
 }
 
+function SelectionEditorMenu() {
+    const state = useEditorStore()
+} 
+
+/*
 const useSelectionMode = (store: EditorStore) => {
-    const [intermediateAction, setIntermediateAction] = useState<IntermediateAction | null>(null)
+    const moveVertexIntermediateAction = (store: EditorStore, vertexIndex: number, shapeIndex: number, shape: Shape) => ({
+        onKeydown: (e: KeyboardEvent) => {
+            let point = 
+        },
+        onKeyup: (e: KeyboardEvent) => {
+        },
+        onmousemove: (e: MouseEvent) => {
+            let point = { x: e.clientX, y: e.clientY }
+    
+            if (e.shiftKey) {
+                point = {
+                    x: Math.round(point.x / snapDistance) * snapDistance,
+                    y: Math.round(point.y / snapDistance) * snapDistance
+                }
+            }
+    
+            shape.vertices[vertexIndex] = point
+    
+            store.applyVisualMods({ 
+                highlightVertices: [point],
+                replaceShapeAt: { index: shapeIndex, shape }
+            })
+        },
+        onmouseup: (e: MouseEvent) => {
+            const point = { x: e.clientX, y: e.clientY }
+    
+            // clone world with new shape
+            shape.vertices[vertexIndex] = point
+            const shapes = [...store.world.shapes]
+            shapes[shapeIndex] = shape
+            store.setWorld({ ...store.world, shapes })
+            setIntermediateAction(null)
+        }
+    })
 
     useEffect(() => {
         if (intermediateAction) {
@@ -53,12 +98,25 @@ const useSelectionMode = (store: EditorStore) => {
                 setIntermediateAction(null)
             }
 
+            const onKeyDown = (e: KeyboardEvent) => {
+                intermediateAction.onKeydown(e)
+
+                if (e.key === "Escape") {
+                    setIntermediateAction(null)
+                    store.resetVisualMods()
+                }
+            }
+
             window.addEventListener("mousemove", intermediateAction.onmousemove)
             window.addEventListener("mouseup", onMouseUp)
+            window.addEventListener("keydown", onKeyDown)
+            window.addEventListener("keyup", intermediateAction.onKeyup)
 
             return () => {
                 window.removeEventListener("mousemove", intermediateAction.onmousemove)
                 window.removeEventListener("mouseup", onMouseUp)
+                window.removeEventListener("keydown", onKeyDown)
+                window.removeEventListener("keyup", intermediateAction.onKeyup)
             }
         }
 
@@ -86,15 +144,7 @@ const useSelectionMode = (store: EditorStore) => {
     }, [ intermediateAction, store.world ])
 
     return {
-        editorMenu: () => {
-            return (
-                <div className="flex p-4 flex-col items-center bg-base-100 rounded-lg h-full self-end">
-                    <button className="btn">
-                        Hello
-                    </button>
-                </div>
-            )
-        },
+        editorMenu: SelectionEditorMenu,
         onClick: (x: number, y: number, ctrl: boolean, shift: boolean) => {
             const point = { x, y }
             const vertex = findClosestVertex(store.world.shapes, point, snapDistance)
@@ -154,5 +204,5 @@ const useSelectionMode = (store: EditorStore) => {
         }
     }
 }
-
-export default useSelectionMode
+*/
+export default SelectionMode

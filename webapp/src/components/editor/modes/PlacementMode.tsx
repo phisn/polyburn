@@ -263,6 +263,16 @@ function PlacementMode(props: { app: PIXI.Application }) {
             <button className="btn">
                 Hello
             </button>
+            <div className="fixed bottom-0 left-0 p-4 pointer-events-none select-none">
+                <div className="flex flex-col">
+                    <div className="text-white opacity-50">
+                        Hold <kbd>Ctrl</kbd> to delete a vertex
+                    </div>
+                    <div className="text-white opacity-50">
+                        Hold <kbd>Shift</kbd> to snap to grid
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }

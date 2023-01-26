@@ -2,21 +2,28 @@ import { Stage, Graphics } from "@inlet/react-pixi"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useHotkeys } from "react-hotkeys-hook"
 import useEditorStore, { EditorModeType, EditorStore } from "./EditorStore"
-import useSelectionMode from "./modes/SelectionMode"
+import useSelectionMode from "./modes/PlacementMode"
 import { World, Vertex, Shape } from "./World"
 import WorldGraphics from "./WorldGraphics"
 import PIXI from "pixi.js"
 import EditorNavbar from "./EditorNavbar"
-import SelectionMode from "./modes/SelectionMode"
+import SelectionMode from "./modes/PlacementMode"
 import EditorMode from "./modes/EditorMode"
 
-function selectionEditorEffect(): () => void {
-    return () => { }
-}
+function useShortcut(key: string, callback: () => void, deps: any[] = []) {
+    useEffect(() => {
+        const listener = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.key === key) {
+                callback()
+            }
 
-function useEditorMode(mode: EditorModeType, editorModeEffect: () => () => void) {
-}
+            e.preventDefault()
+        }
 
+        window.addEventListener("keydown", listener)
+        return () => window.removeEventListener("keydown", listener)
+    }, deps)
+}
 
 function Editor() {
     const [app, setApp] = useState<PIXI.Application | undefined>(undefined)
@@ -26,11 +33,10 @@ function Editor() {
         app.stage.interactive = true
         setApp(app)
     }
-
     init(store)
 
-    useHotkeys("ctrl+z", () => store.undo())
-    useHotkeys("ctrl+y", store.redo)
+    useShortcut("z", store.undo)
+    useShortcut("y", store.redo)
 
     return (
         <div className="overflow-hidden">
@@ -55,8 +61,9 @@ function Editor() {
 
 const init = (store: EditorStore) =>
     useEffect(() => {
-        store.setWorld({
-            shapes: [
+        store.mutateWorld({
+            undo: world => ({ shapes: [] }),
+            redo: world => ({ shapes: [
                 {
                     vertices: [
                         { x: 100, y: 100 },
@@ -81,7 +88,7 @@ const init = (store: EditorStore) =>
                         { x: 550, y: 600 }
                     ]
                 },
-            ]
+            ]})
         })
     }, [])
 

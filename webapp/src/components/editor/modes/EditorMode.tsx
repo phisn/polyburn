@@ -1,6 +1,6 @@
 import useEditorStore, { EditorModeType } from "../EditorStore";
-import SelectionMode from "./SelectionMode";
 import PIXI from "pixi.js"
+import PlacementMode from "./PlacementMode";
 
 function EditorMode(props: { app?: PIXI.Application }) {
     const app = props.app
@@ -12,11 +12,11 @@ function EditorMode(props: { app?: PIXI.Application }) {
 
     switch (mode) {
         case EditorModeType.Selection:
-            return <SelectionMode app={app} />
+            return <div>Selection</div>
         case EditorModeType.Movement:
             return <div>Movement</div>
         case EditorModeType.Placement:
-            return <div>Placement</div>
+            return <PlacementMode app={app} />
     }
 }
 

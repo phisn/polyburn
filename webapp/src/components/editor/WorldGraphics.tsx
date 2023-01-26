@@ -1,9 +1,11 @@
 import { Graphics } from "@inlet/react-pixi"
 import PIXI from "pixi.js"
+import { useCallback } from "react"
 import useEditorStore from "./EditorStore"
+import { EditorModeType } from "./EditorStore"
 
 function WorldGraphics() {
-    const [world, visualWorldMods] = useEditorStore((s) => [s.world, s.worldMods])
+    const [world, visualWorldMods, mode] = useEditorStore((s) => [s.world, s.worldMods, s.mode])
 
     const draw = (g: PIXI.Graphics) => {
         g.clear()
@@ -17,16 +19,18 @@ function WorldGraphics() {
             g.endFill()
         })
 
-        world.shapes.forEach((shape, i) => {
-            shape = visualWorldMods.replaceShapeAt?.index === i ? visualWorldMods.replaceShapeAt.shape : shape
+        if (mode === EditorModeType.Placement) {
+            world.shapes.forEach((shape, i) => {
+                shape = visualWorldMods.replaceShapeAt?.index === i ? visualWorldMods.replaceShapeAt.shape : shape
 
-            shape.vertices.forEach((vertex) => {
-                g.lineStyle(2, 0x000000)
-                g.beginFill(0xcccccc)
-                g.drawCircle(vertex.x, vertex.y, 5)
-                g.endFill()
+                shape.vertices.forEach((vertex) => {
+                    g.lineStyle(2, 0x000000)
+                    g.beginFill(0xcccccc)
+                    g.drawCircle(vertex.x, vertex.y, 5)
+                    g.endFill()
+                })
             })
-        })
+        }
 
         visualWorldMods.highlightVertices?.forEach((vertex) => {
             g.lineStyle(0)

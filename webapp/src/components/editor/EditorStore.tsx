@@ -13,18 +13,25 @@ export enum EditorModeType {
     Placement,
 }
 
+interface Mutation {
+    undo: (world: World) => World
+    redo: (world: World) => World
+}
+
 interface EditorState {
     mode: EditorModeType,
 
     world: World
     worldMods: VisualWorldMods
 
-    undos: World[]
-    redos: World[]
+    undos: Mutation[]
+    redos: Mutation[]
 }
 
 export interface EditorStore extends EditorState {
-    setWorld: (world: World) => void
+    setMode: (mode: EditorModeType) => void
+
+    mutateWorld: (mutation: Mutation) => void
     undo: () => void
     redo: () => void
 
@@ -33,7 +40,7 @@ export interface EditorStore extends EditorState {
 }
 
 const initialEditorState: EditorState = {
-    mode: EditorModeType.Selection,
+    mode: EditorModeType.Placement,
 
     world: {
         shapes: [],
@@ -47,33 +54,37 @@ const initialEditorState: EditorState = {
 
 const useEditorStore = create<EditorStore>((set) => ({
     ...initialEditorState,
-    setWorld: (world: World) =>
+    setMode: (mode: EditorModeType) => set(() => ({ mode })),
+    mutateWorld: (mutation: Mutation) =>
         set((state) => ({
-            world: world,
-            undos: [...state.undos, state.world],
+            world: mutation.redo(state.world),
+            undos: [...state.undos, mutation],
             redos: [],
         })),
     undo: () =>
         set((state) => {
-            console.log(`Undoing ${state.undos.length} undos left`);
-            console.log(`later ${state.undos.slice(0, state.undos.length - 1).length} undos left`);
-
             if (state.undos.length > 0) {
+                const lastUndo = state.undos[state.undos.length - 1];
+
                 return {
-                    world: state.undos[state.undos.length - 1],
+                    world: lastUndo.undo(state.world),
                     undos: state.undos.slice(0, state.undos.length - 1),
-                    redos: [...state.redos, state.world],
+                    redos: [...state.redos, lastUndo],
                 };
             }
+
+            console.log("No undos left");
 
             return state;
         }),
     redo: () =>
         set((state) => {
             if (state.redos.length > 0) {
+                const lastRedo = state.redos[state.redos.length - 1];
+
                 return {
-                    world: state.redos[state.redos.length - 1],
-                    undos: [...state.undos, state.world],
+                    world: lastRedo.redo(state.world),
+                    undos: [...state.undos, lastRedo],
                     redos: state.redos.slice(0, state.redos.length - 1),
                 };
             }

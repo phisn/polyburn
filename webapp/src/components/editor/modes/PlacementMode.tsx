@@ -24,26 +24,6 @@ function PlacementMode(props: { app: PIXI.Application }) {
     const [movingVertex, setMovingVertex] = useState<MovingVertexState | undefined>(undefined)
 
     const moveVertexEffect = ({ vertexIndex, shapeIndex, shape }: MovingVertexState) => {
-        const onMouseMoveRaw = (data: PIXI.InteractionData) => {
-            let point = { x: data.global.x, y: data.global.y }
-    
-            if (data.originalEvent.shiftKey) {
-                point = {
-                    x: Math.round(point.x / snapDistance) * snapDistance,
-                    y: Math.round(point.y / snapDistance) * snapDistance
-                }
-            }
-    
-            shape.vertices[vertexIndex] = point
-    
-            store.applyVisualMods({ 
-                highlightVertices: [point],
-                replaceShapeAt: { index: shapeIndex, shape }
-            })
-        }
-
-        const onMouseMove = (e: PIXI.InteractionEvent) => onMouseMoveRaw(e.data)
-
         const onMouseUp = (e: PIXI.InteractionEvent) => {
             let point = { x: e.data.global.x, y: e.data.global.y }
 
@@ -73,6 +53,34 @@ function PlacementMode(props: { app: PIXI.Application }) {
             store.resetVisualMods()
 
             setMovingVertex(undefined)
+        }
+
+        const onMouseMoveRaw = (data: PIXI.InteractionData) => {
+            let point = { x: data.global.x, y: data.global.y }
+    
+            if (data.originalEvent.shiftKey) {
+                point = {
+                    x: Math.round(point.x / snapDistance) * snapDistance,
+                    y: Math.round(point.y / snapDistance) * snapDistance
+                }
+            }
+    
+            shape.vertices[vertexIndex] = point
+    
+            store.applyVisualMods({ 
+                highlightVertices: [point],
+                replaceShapeAt: { index: shapeIndex, shape }
+            })
+        }
+
+        const onMouseMove = (e: PIXI.InteractionEvent) => {
+            // mouseup event is not fired when mouse is released outside of the canvas. This is a workaround.
+            if (e.data.originalEvent instanceof MouseEvent && e.data.originalEvent.buttons === 0) {
+                onMouseUp(e)
+            }
+            else {
+                onMouseMoveRaw(e.data)
+            }
         }
 
         const onKeyUp = (e: KeyboardEvent) => {

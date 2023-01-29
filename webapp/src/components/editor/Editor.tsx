@@ -1,6 +1,5 @@
 import { Stage, Graphics } from "@inlet/react-pixi"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { useHotkeys } from "react-hotkeys-hook"
 import useEditorStore, { EditorModeType, EditorStore } from "./EditorStore"
 import useSelectionMode from "./modes/PlacementMode"
 import { World, Vertex, Shape } from "./World"
@@ -9,6 +8,7 @@ import PIXI from "pixi.js"
 import EditorNavbar from "./EditorNavbar"
 import SelectionMode from "./modes/PlacementMode"
 import EditorMode from "./modes/EditorMode"
+import { shallow } from 'zustand/shallow'
 
 function useShortcut(key: string, callback: () => void, deps: any[] = []) {
     useEffect(() => {
@@ -26,17 +26,19 @@ function useShortcut(key: string, callback: () => void, deps: any[] = []) {
 }
 
 function Editor() {
-    const [app, setApp] = useState<PIXI.Application | undefined>(undefined)
-    const store = useEditorStore()
+    const [app, setApp] = useState<PIXI.Application>()
+    const [undo, redo, mutateWorld] = useEditorStore(state => [state.undo, state.redo, state.mutateWorld], shallow)
 
-    const initializeApp = (app: PIXI.Application) => {
-        app.stage.interactive = true
-        setApp(app)
-    }
-    init(store)
+    useEffect(() => {
+        if (app) {
+            app.stage.interactive = true
+        }
+    }, [ app ])
 
-    useShortcut("z", store.undo)
-    useShortcut("y", store.redo)
+    init(mutateWorld)
+
+    useShortcut("z", undo)
+    useShortcut("y", redo)
 
     return (
         <div className="overflow-hidden">
@@ -48,7 +50,8 @@ function Editor() {
                 <EditorMode app={app} />
             </div>
 
-            <Stage onMount={initializeApp}
+            <Stage 
+                onMount={setApp}
                 width={window.innerWidth}
                 height={window.innerHeight} 
                 options={ { resizeTo: window, antialias: true } } >
@@ -59,11 +62,11 @@ function Editor() {
     )
 }
 
-const init = (store: EditorStore) =>
+const init = (mutateWorld: ((mutation: any) => void)) =>
     useEffect(() => {
-        store.mutateWorld({
-            undo: world => ({ shapes: [] }),
-            redo: world => ({ shapes: [
+        mutateWorld({
+            undo: () => ({ shapes: [] }),
+            redo: () => ({ shapes: [
                 {
                     vertices: [
                         { x: 100, y: 100 },

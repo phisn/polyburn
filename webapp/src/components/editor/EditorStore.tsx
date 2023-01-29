@@ -2,9 +2,21 @@ import { create } from "zustand";
 import { Shape, Vertex, World } from "./World";
 import PIXI from "pixi.js";
 
-interface VisualWorldMods {
+interface HighlightedVertex {
+    vertex: Vertex
+    color: number
+}
+
+interface PreviewObject {
+    src: string
+    position: Vertex
+    rotation: number
+}
+
+export interface VisualWorldMods {
     replaceShapeAt?: { index: number, shape: Shape }
-    highlightVertices?: Vertex[]
+    highlightVertices?: HighlightedVertex[]
+    previewObject?: PreviewObject
 }
 
 export enum EditorModeType {

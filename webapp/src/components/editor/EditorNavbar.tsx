@@ -1,4 +1,5 @@
 import useEditorStore, { EditorModeType } from "./EditorStore"
+import { shallow } from 'zustand/shallow'
 
 const MenuSvg = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -19,8 +20,9 @@ const RedoSvg = () => (
 )
 
 function EditorNavbar() {
-    const store = useEditorStore()
-    const [undos, redos] = useEditorStore((state) => [state.undos, state.redos])
+    const [
+        undos, redos, undo, redo, mode, setMode,
+    ] = useEditorStore((state) => [state.undos, state.redos, state.undo, state.redo, state.mode, state.setMode], shallow)
 
     return (
         <div className="flex w-min space-x-8 items-center bg-base-100 rounded-lg">
@@ -30,12 +32,12 @@ function EditorNavbar() {
             
             <div className="btn-group">
                 <button
-                    onClick={() => store.undo()} 
+                    onClick={() => undo()} 
                     className={`btn btn-square btn-ghost ${(undos.length > 0 ? "" : "btn-disabled")}`}>
                     <UndoSvg />
                 </button>
                 <button 
-                    onClick={e => store.redo()}
+                    onClick={e => redo()}
                     className={`btn btn-square btn-ghost ${(redos.length > 0 ? "" : "btn-disabled")}`}>
                     <RedoSvg />
                 </button>
@@ -43,18 +45,18 @@ function EditorNavbar() {
 
             <div className="btn-group">
                 <button 
-                    className={`btn ${(store.mode === EditorModeType.Selection ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => store.setMode(EditorModeType.Selection)}>
+                    className={`btn ${(mode === EditorModeType.Selection ? "btn-active btn-disabled" : "")}` }
+                    onClick={() => setMode(EditorModeType.Selection)}>
                     Selection
                 </button>
                 <button
-                    className={`btn ${(store.mode === EditorModeType.Placement ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => store.setMode(EditorModeType.Placement)}>
+                    className={`btn ${(mode === EditorModeType.Placement ? "btn-active btn-disabled" : "")}` }
+                    onClick={() => setMode(EditorModeType.Placement)}>
                     Placement
                 </button>
                 <button
-                    className={`btn ${(store.mode === EditorModeType.Movement ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => store.setMode(EditorModeType.Movement)}>
+                    className={`btn ${(mode === EditorModeType.Movement ? "btn-active btn-disabled" : "")}` }
+                    onClick={() => setMode(EditorModeType.Movement)}>
                     Movement
                 </button>
             </div>

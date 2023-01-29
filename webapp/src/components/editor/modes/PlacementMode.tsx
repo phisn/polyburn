@@ -1,7 +1,7 @@
 import { AppProvider, useApp } from "@inlet/react-pixi"
 import { useCallback, useEffect, useState } from "react"
 import useEditorStore from "../EditorStore"
-import { findClosestEdge, findClosestVertex, Shape, VertexIdentifier } from "../World"
+import { findClosestEdge, findClosestVertex, Shape, Vertex, VertexIdentifier } from "../World"
 import PIXI from "pixi.js"
 
 import greenFlag from "../../../assets/flag-green.svg"
@@ -21,7 +21,8 @@ export interface EditorMode {
 
 interface PlacableObject {
     src: string
-    name: string
+    name: string,
+    anchor: { x: number, y: number }
 }
 
 interface PlaceableObjectSelectProps {
@@ -60,8 +61,8 @@ const PlaceableObjectSelect = (props: PlaceableObjectSelectProps) => {
     }, [ props.onSelect, props.selected ])
 
     const objects: PlacableObject[] = [
-        { src: redFlag, name: "Red Flag" },
-        { src: greenFlag, name: "Green Flag" },
+        { src: redFlag, name: "Red Flag", anchor: { x: 0.0, y: 1 } },
+        { src: greenFlag, name: "Green Flag", anchor: { x: 0.0, y: 1 } },
     ]
 
     return (
@@ -202,21 +203,146 @@ function PlacementMode(props: { app: PIXI.Application }) {
     }
 
     const placeObjectEffect = (placeObject: PlacableObject) => {
-        const onMouseMove = (e: PIXI.InteractionEvent) => {
-            const position = { x: e.data.global.x, y: e.data.global.y }
-    
-            applyVisualMods({ 
-                previewObject: {
-                    src: placeObject.src,
-                    position,
-                    rotation: 0
-                }
-            })
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                resetVisualMods()
+                setPlaceObject(undefined)
+            }
+
+            onMouseMoveRaw(app.renderer.plugins.interaction.mouse)
         }
 
+        const onMouseMove = (e: PIXI.InteractionEvent) =>
+            onMouseMoveRaw(e.data)
+
+        const findEdgeForObject = (position: Vertex, snap: Boolean) => {
+            const edge = findClosestEdge(world.shapes, position, snapDistance)
+
+            if (!edge) {
+                return edge
+            }
+
+            // edge.point is the closest point on the edge
+            // edge.edge contains the two indices of the edge's vertices
+
+            const edgeStart = world.shapes[edge.shapeIndex].vertices[edge.edge[0]]
+            const edgeEnd = world.shapes[edge.shapeIndex].vertices[edge.edge[1]]
+
+            const rotation = Math.atan2(edgeEnd.y - edgeStart.y, edgeEnd.x - edgeStart.x)
+
+            if (snap) {
+                const edgeVector = { x: edgeEnd.x - edgeStart.x, y: edgeEnd.y - edgeStart.y }
+                const edgeLength = Math.sqrt(edgeVector.x * edgeVector.x + edgeVector.y * edgeVector.y)
+                const edgeDirection = { x: edgeVector.x / edgeLength, y: edgeVector.y / edgeLength }
+
+                const edgeStartToPosition = { x: position.x - edgeStart.x, y: position.y - edgeStart.y }
+                const edgeStartToPositionLength = Math.sqrt(edgeStartToPosition.x * edgeStartToPosition.x + edgeStartToPosition.y * edgeStartToPosition.y)
+
+                const snapDistanceFromEdgeStart = Math.round(edgeStartToPositionLength / snapDistance) * snapDistance
+                const snappedPoint = {
+                    x: edgeStart.x + edgeDirection.x * snapDistanceFromEdgeStart,
+                    y: edgeStart.y + edgeDirection.y * snapDistanceFromEdgeStart
+                }
+
+                return {
+                    point: snappedPoint,
+                    rotation
+                }
+            }
+            else {
+                return {
+                    point: edge.point,
+                    rotation
+                }
+            }
+        }
+
+        const onMouseMoveRaw = (data: PIXI.InteractionData) => {
+            const position = { x: data.global.x, y: data.global.y }
+
+            const edge = findEdgeForObject(position, data.originalEvent.shiftKey)
+
+            if (edge) {
+                applyVisualMods({
+                    previewObject: {
+                        src: placeObject.src,
+                        position: edge.point,
+                        rotation: edge.rotation,
+                        anchor: placeObject.anchor
+                    }
+                })
+            }
+            else {
+                if (data.originalEvent.shiftKey) {
+                    position.x = Math.round(position.x / snapDistance) * snapDistance
+                    position.y = Math.round(position.y / snapDistance) * snapDistance
+                }
+
+                applyVisualMods({ 
+                    previewObject: {
+                        src: placeObject.src,
+                        position,
+                        rotation: 0,
+                        anchor: { x: 0.5, y: 0.5 }
+                    }
+                })
+            }
+        }
+
+        const onMouseDown = (e: PIXI.InteractionEvent) => {
+            const position = { x: e.data.global.x, y: e.data.global.y }
+
+            const edge = findEdgeForObject(position, e.data.originalEvent.shiftKey)
+
+            if (edge) {
+                mutateWorld({
+                    undo: world => {
+                        world.objects.pop()
+                        return world
+                    },
+                    redo: world => {
+                        world.objects.push({
+                            name: "object",
+                            src: placeObject.src,
+                            position: edge.point,
+                            rotation: edge.rotation,
+                            anchor: placeObject.anchor
+                        })
+                        return world
+                    }
+                })
+            }
+            else {
+                if (e.data.originalEvent.shiftKey) {
+                    position.x = Math.round(position.x / snapDistance) * snapDistance
+                    position.y = Math.round(position.y / snapDistance) * snapDistance
+                }
+
+                mutateWorld({
+                    undo: world => {
+                        world.objects.pop()
+                        return world
+                    },
+                    redo: world => {
+                        world.objects.push({
+                            name: "object",
+                            src: placeObject.src,
+                            position,
+                            rotation: 0,
+                            anchor: { x: 0.5, y: 0.5 }
+                        })
+                        return world
+                    }
+                })
+            }
+        }
+
+
         app.renderer.plugins.interaction.on("mousemove", onMouseMove)
+        window.addEventListener("keydown", onKeyDown)
         return () => {
             app.renderer.plugins.interaction.off("mousemove", onMouseMove)
+            window.removeEventListener("keydown", onKeyDown)
         }
     }
 
@@ -364,13 +490,28 @@ function PlacementMode(props: { app: PIXI.Application }) {
             />
 
             <div className="fixed bottom-0 left-0 p-4 pointer-events-none select-none">
-                <div className="flex flex-col">
-                    <div className="text-white opacity-50">
-                        Hold <kbd>Ctrl</kbd> and click to delete a vertex
-                    </div>
-                    <div className="text-white opacity-50">
-                        Hold <kbd>Shift</kbd> to snap to grid
-                    </div>
+                <div className="flex flex-col text-white opacity-50">
+                    {
+                        placeObject && (
+                            <div>
+                                Press <kbd>Esc</kbd> to cancel placing
+                            </div>
+                        )
+                    }
+                    {
+                        (!movingVertex && !placeObject) && (
+                            <div>
+                                Hold <kbd>Ctrl</kbd> and click to delete a vertex
+                            </div>
+                        )
+                    }
+                    {
+                        (movingVertex || placeObject) && (
+                            <div>
+                                Hold <kbd>Shift</kbd> to snap to grid
+                            </div>
+                        )
+                    }
                 </div>
             </div>
         </div>

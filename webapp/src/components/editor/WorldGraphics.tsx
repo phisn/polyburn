@@ -8,40 +8,55 @@ import { EditorModeType } from "./EditorStore"
 function WorldGraphics() {
     const app = useApp()
 
-    // worldmodsref is a ref to the current worldmods. we store it in a ref and do *not* get it from useEditorStore to avoid
-    // rendering WorldGraphics when worldmods changes. This is because worldmods changes *very very* frequently and pixi only
-    // needs some value changes in the callbacks to update the graphics.
-    const worldModsRef = useRef<VisualWorldMods>()
-    const spriteRef = useRef<PIXI.Sprite | undefined>()
+    const objectSpritesRef = useRef<PIXI.Sprite[]>([])
+    const previewSpriteRef = useRef<PIXI.Sprite | undefined>()
     const graphicsRef = useRef<PIXI.Graphics | undefined>()
 
     useEffect(() => useEditorStore.subscribe((state) => {
         if (state.worldMods.previewObject) {
-            if (spriteRef.current === undefined) {
-                const { src, position, rotation } = state.worldMods.previewObject
-
-                const sprite = PIXI.Sprite.from(src)
-                sprite.anchor.set(0.5)
+            if (previewSpriteRef.current === undefined) {
+                const sprite = new PIXI.Sprite()
                 sprite.scale.set(0.2)
-                sprite.position.set(position.x, position.y)
-                sprite.rotation = rotation
-
                 app.stage.addChild(sprite)
-                spriteRef.current = sprite
+                previewSpriteRef.current = sprite
             }
-            else {
-                const { src, position, rotation } = state.worldMods.previewObject
+            
+            const { src, position, rotation, anchor } = state.worldMods.previewObject
 
-                spriteRef.current.texture = PIXI.Texture.from(src)
-                spriteRef.current.position.set(position.x, position.y)
-                spriteRef.current.rotation = rotation
-            }
+            previewSpriteRef.current.texture = PIXI.Texture.from(src)
+            previewSpriteRef.current.anchor.set(anchor.x, anchor.y)
+            previewSpriteRef.current.position.set(position.x, position.y)
+            previewSpriteRef.current.rotation = rotation
         }
         else {
-            if (spriteRef.current) {
-                spriteRef.current.destroy()
-                spriteRef.current = undefined
+            if (previewSpriteRef.current) {
+                previewSpriteRef.current.destroy()
+                previewSpriteRef.current = undefined
             }
+        }
+
+        if (state.world.objects?.length > objectSpritesRef.current.length) {
+            for (let i = objectSpritesRef.current.length; i < state.world.objects.length; i++) {
+                const sprite = new PIXI.Sprite()
+                sprite.scale.set(0.2)
+                app.stage.addChild(sprite)
+                objectSpritesRef.current.push(sprite)
+            }
+        }
+        else if (state.world.objects?.length < objectSpritesRef.current.length) {
+            for (let i = objectSpritesRef.current.length - 1; i >= state.world.objects.length; i--) {
+                objectSpritesRef.current[i].destroy()
+                objectSpritesRef.current.pop()
+            }
+        }
+
+        for (let i = 0; i < state.world.objects?.length; i++) {
+            const { src, position, rotation, anchor } = state.world.objects[i]
+
+            objectSpritesRef.current[i].texture = PIXI.Texture.from(src)
+            objectSpritesRef.current[i].anchor.set(anchor.x, anchor.y)
+            objectSpritesRef.current[i].position.set(position.x, position.y)
+            objectSpritesRef.current[i].rotation = rotation
         }
 
         const draw = (g: PIXI.Graphics) => {
@@ -93,34 +108,7 @@ function WorldGraphics() {
     
 
     useEffect(() => useEditorStore.subscribe(({ worldMods }) => {
-
-        if (worldMods.previewObject) {
-            if (spriteRef.current === undefined) {
-                const { src, position, rotation } = worldMods.previewObject
-
-                const sprite = PIXI.Sprite.from(src)
-                sprite.anchor.set(0.5)
-                sprite.scale.set(0.2)
-                sprite.position.set(position.x, position.y)
-                sprite.rotation = rotation
-
-                app.stage.addChild(sprite)
-                spriteRef.current = sprite
-            }
-            else {
-                const { src, position, rotation } = worldMods.previewObject
-
-                spriteRef.current.texture = PIXI.Texture.from(src)
-                spriteRef.current.position.set(position.x, position.y)
-                spriteRef.current.rotation = rotation
-            }
-        }
-        else {
-            if (spriteRef.current) {
-                spriteRef.current.destroy()
-                spriteRef.current = undefined
-            }
-        }
+        
 
     })), [ app ]
 

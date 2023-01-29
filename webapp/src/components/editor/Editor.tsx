@@ -39,7 +39,7 @@ function Editor() {
 
     useShortcut("z", undo)
     useShortcut("y", redo)
-
+    
     return (
         <div className="overflow-hidden">
             <div className="absolute top-0 left-0 p-4">

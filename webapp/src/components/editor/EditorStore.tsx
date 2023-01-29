@@ -11,6 +11,7 @@ interface PreviewObject {
     src: string
     position: Vertex
     rotation: number
+    anchor: { x: number, y: number }
 }
 
 export interface VisualWorldMods {
@@ -56,6 +57,7 @@ const initialEditorState: EditorState = {
 
     world: {
         shapes: [],
+        objects: [],
     },
 
     worldMods: {},

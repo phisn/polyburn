@@ -11,6 +11,7 @@
   "dependencies": {
     "@dimforge/rapier2d": "^0.11.1",
     "@inlet/react-pixi": "^6.8.0",
+    "@pixi/filter-outline": "^4.2.0",
     "@pixi/interaction": "^6.5.8",
     "daisyui": "^2.47.0",
     "localforage": "^1.10.0",

@@ -1,7 +1,7 @@
 import { AppProvider, useApp } from "@inlet/react-pixi"
 import { useCallback, useEffect, useState } from "react"
 import useEditorStore from "../EditorStore"
-import { findClosestEdge, findClosestVertex, Shape, Vertex, VertexIdentifier } from "../World"
+import { findClosestEdge, findClosestVertex, ObjectInWorld, Shape, Vertex, VertexIdentifier } from "../World"
 import PIXI from "pixi.js"
 
 import greenFlag from "../../../assets/flag-green.svg"
@@ -22,6 +22,7 @@ export interface EditorMode {
 interface PlacableObject {
     src: string
     name: string,
+    size: { width: number, height: number }
     anchor: { x: number, y: number }
 }
 
@@ -61,8 +62,8 @@ const PlaceableObjectSelect = (props: PlaceableObjectSelectProps) => {
     }, [ props.onSelect, props.selected ])
 
     const objects: PlacableObject[] = [
-        { src: redFlag, name: "Red Flag", anchor: { x: 0.0, y: 1 } },
-        { src: greenFlag, name: "Green Flag", anchor: { x: 0.0, y: 1 } },
+        { src: redFlag, name: "Red Flag", anchor: { x: 0.0, y: 1 }, size: { width: 275 * 0.2, height: 436 * 0.2 } },
+        { src: greenFlag, name: "Green Flag", anchor: { x: 0.0, y: 1 }, size: { width: 275 * 0.2, height: 436 * 0.2 } },
     ]
 
     return (
@@ -209,11 +210,21 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 setPlaceObject(undefined)
             }
 
-            onMouseMoveRaw(app.renderer.plugins.interaction.mouse)
+            onMouseMoveRaw(
+                app.renderer.plugins.interaction.mouse.global.x,
+                app.renderer.plugins.interaction.mouse.global.y,
+                e.shiftKey)
+        }
+
+        const onKeyUp = (e: KeyboardEvent) => {
+            onMouseMoveRaw(
+                app.renderer.plugins.interaction.mouse.global.x,
+                app.renderer.plugins.interaction.mouse.global.y,
+                e.shiftKey)
         }
 
         const onMouseMove = (e: PIXI.InteractionEvent) =>
-            onMouseMoveRaw(e.data)
+            onMouseMoveRaw(e.data.global.x, e.data.global.y, e.data.originalEvent.shiftKey)
 
         const findEdgeForObject = (position: Vertex, snap: Boolean) => {
             const edge = findClosestEdge(world.shapes, position, snapDistance)
@@ -257,10 +268,10 @@ function PlacementMode(props: { app: PIXI.Application }) {
             }
         }
 
-        const onMouseMoveRaw = (data: PIXI.InteractionData) => {
-            const position = { x: data.global.x, y: data.global.y }
+        const onMouseMoveRaw = (x: number, y: number, snap: boolean) => {
+            const position = { x, y }
 
-            const edge = findEdgeForObject(position, data.originalEvent.shiftKey)
+            const edge = findEdgeForObject(position, snap)
 
             if (edge) {
                 applyVisualMods({
@@ -273,7 +284,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 })
             }
             else {
-                if (data.originalEvent.shiftKey) {
+                if (snap) {
                     position.x = Math.round(position.x / snapDistance) * snapDistance
                     position.y = Math.round(position.y / snapDistance) * snapDistance
                 }
@@ -305,12 +316,14 @@ function PlacementMode(props: { app: PIXI.Application }) {
                             name: "object",
                             src: placeObject.src,
                             position: edge.point,
+                            size: placeObject.size,
                             rotation: edge.rotation,
                             anchor: placeObject.anchor
                         })
                         return world
                     }
                 })
+                setPlaceObject(undefined)
             }
             else {
                 if (e.data.originalEvent.shiftKey) {
@@ -328,21 +341,27 @@ function PlacementMode(props: { app: PIXI.Application }) {
                             name: "object",
                             src: placeObject.src,
                             position,
+                            size: placeObject.size,
                             rotation: 0,
                             anchor: { x: 0.5, y: 0.5 }
                         })
                         return world
                     }
                 })
+                setPlaceObject(undefined)
             }
         }
 
-
         app.renderer.plugins.interaction.on("mousemove", onMouseMove)
         window.addEventListener("keydown", onKeyDown)
+        window.addEventListener("keyup", onKeyUp)
+        app.renderer.plugins.interaction.on("mousedown", onMouseDown)
+        
         return () => {
             app.renderer.plugins.interaction.off("mousemove", onMouseMove)
             window.removeEventListener("keydown", onKeyDown)
+            window.removeEventListener("keyup", onKeyUp)
+            app.renderer.plugins.interaction.off("mousedown", onMouseDown)
         }
     }
 
@@ -364,6 +383,32 @@ function PlacementMode(props: { app: PIXI.Application }) {
 
         const onMouseMoveRaw = (x: number, y: number, ctrl: boolean) => {
             const point = { x, y }
+
+            const isPointInsideObject = ({x, y}: { x: number, y: number }, object: ObjectInWorld) => {
+                const { x: objectX, y: objectY } = object.position
+                const { width, height } = object.size
+                const { x: anchorX, y: anchorY } = object.anchor
+
+                const left = objectX - width * anchorX
+                const right = objectX + width * (1 - anchorX)
+                const top = objectY - height * anchorY
+                const bottom = objectY + height * (1 - anchorY)
+
+                return x >= left && x <= right && y >= top && y <= bottom
+            }
+
+            // find object under cursor
+            for (let i = world.objects.length - 1; i >= 0; i--) {
+                const object = world.objects[i]
+                
+                if (isPointInsideObject(point, object)) {
+                    applyVisualMods({ 
+                        highlightObjects: [ { index: i, color: highlightColor } ]
+                    })
+                    return
+                }
+            }
+
             const vertex = findClosestVertex(world.shapes, point, snapDistance)
     
             if (vertex) {

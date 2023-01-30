@@ -39,7 +39,7 @@ function Editor() {
 
     useShortcut("z", undo)
     useShortcut("y", redo)
-    
+
     return (
         <div className="overflow-hidden">
             <div className="absolute top-0 left-0 p-4">
@@ -65,8 +65,8 @@ function Editor() {
 const init = (mutateWorld: ((mutation: any) => void)) =>
     useEffect(() => {
         mutateWorld({
-            undo: () => ({ shapes: [] }),
-            redo: () => ({ shapes: [
+            undo: (world: World) => ({ ...world, shapes: [] }),
+            redo: (world: World) => ({ ...world, shapes: [
                 {
                     vertices: [
                         { x: 100, y: 100 },

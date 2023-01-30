@@ -7,18 +7,19 @@ export interface Shape {
     vertices: Vertex[]
 }
 
-export interface Object {
+export interface ObjectInWorld {
     name: string
     src: string
 
     position: Vertex
+    size: { width: number, height: number }
     rotation: number
     anchor: { x: number, y: number }
 }
 
 export interface World {
     shapes: Shape[],
-    objects: Object[],
+    objects: ObjectInWorld[],
 }
 
 export interface VertexIdentifier {

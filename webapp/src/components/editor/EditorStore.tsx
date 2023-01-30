@@ -7,6 +7,11 @@ interface HighlightedVertex {
     color: number
 }
 
+interface HighlightedObject {
+    index: number
+    color: number
+}
+
 interface PreviewObject {
     src: string
     position: Vertex
@@ -17,6 +22,7 @@ interface PreviewObject {
 export interface VisualWorldMods {
     replaceShapeAt?: { index: number, shape: Shape }
     highlightVertices?: HighlightedVertex[]
+    highlightObjects?: HighlightedObject[]
     previewObject?: PreviewObject
 }
 

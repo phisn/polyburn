@@ -1,4 +1,5 @@
 import { Graphics, Sprite, useApp } from "@inlet/react-pixi"
+import { OutlineFilter } from "@pixi/filter-outline"
 import * as PIXI from "pixi.js"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { shallow } from "zustand/shallow"
@@ -38,6 +39,7 @@ function WorldGraphics() {
         if (state.world.objects?.length > objectSpritesRef.current.length) {
             for (let i = objectSpritesRef.current.length; i < state.world.objects.length; i++) {
                 const sprite = new PIXI.Sprite()
+                sprite.filters = [new OutlineFilter()]
                 sprite.scale.set(0.2)
                 app.stage.addChild(sprite)
                 objectSpritesRef.current.push(sprite)
@@ -57,6 +59,22 @@ function WorldGraphics() {
             objectSpritesRef.current[i].anchor.set(anchor.x, anchor.y)
             objectSpritesRef.current[i].position.set(position.x, position.y)
             objectSpritesRef.current[i].rotation = rotation
+
+            const filter = objectSpritesRef.current[i].filters?.[0]
+
+            if (state.worldMods.highlightObjects?.filter((o) => o.index === i)?.length ?? 0 > 0) {
+                if (filter instanceof OutlineFilter) {
+                    filter.color = 0xffff00
+                    filter.thickness = 0
+                    filter.blendMode = PIXI.BLEND_MODES.ADD
+                }
+            }
+            else {
+                if (filter instanceof OutlineFilter) {
+                    filter.color = 0xffffff
+                    filter.thickness = 0
+                }
+            }
         }
 
         const draw = (g: PIXI.Graphics) => {

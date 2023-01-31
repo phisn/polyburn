@@ -21,7 +21,7 @@ export interface EditorMode {
 }
 
 interface SinglePlaceableObjectProps {
-    obj: PlacableObject
+    obj: PlacableObjectSelectable
     selected: boolean
     onSelect: (obj: PlacableObject) => void
 }
@@ -31,12 +31,16 @@ interface PlaceableObjectSelectProps {
     onSelect: (obj: PlacableObject | undefined) => void
 }
 
+type PlacableObjectSelectable = PlacableObject & {
+    className: string
+}
+
 const SinglePlaceableObject = (props: SinglePlaceableObjectProps) => (
     <button
         onClick={() => props.onSelect(props.obj)} 
         className={`btn h-min ${props.selected ? "btn-active" : ""}`}>
         <div className="flex flex-col p-5 space-y-4 items-center">
-            <img src={props.obj.src} className="pl-2 w-8" />
+            <img src={props.obj.src} className={`${props.obj.className} w-8`} />
             <div>
                 { props.obj.type.toString() }
             </div>
@@ -44,10 +48,10 @@ const SinglePlaceableObject = (props: SinglePlaceableObjectProps) => (
     </button>
 )
 
-const placeableObjects = [
-    { src: redFlag,   type: PlaceableObjectType.RedFlag,   anchor: { x: 0.0, y: 1 },   size: { width: 275 * 0.2, height: 436 * 0.2 } },
-    { src: greenFlag, type: PlaceableObjectType.GreenFlag, anchor: { x: 0.0, y: 1 },   size: { width: 275 * 0.2, height: 436 * 0.2 } },
-    { src: rocket,    type: PlaceableObjectType.Rocket,    anchor: { x: 0.5, y: 1 },   size: { width: 300 * 0.2, height: 600 * 0.2 } },
+const placeableObjects: PlacableObjectSelectable[] = [
+    { src: redFlag,   type: PlaceableObjectType.RedFlag,   anchor: { x: 0.0, y: 1 },   size: { width: 275 * 0.2, height: 436 * 0.2 }, className: "pl-2" },
+    { src: greenFlag, type: PlaceableObjectType.GreenFlag, anchor: { x: 0.0, y: 1 },   size: { width: 275 * 0.2, height: 436 * 0.2 }, className: "pl-2" },
+    { src: rocket,    type: PlaceableObjectType.Rocket,    anchor: { x: 0.5, y: 1 },   size: { width: 300 * 0.2, height: 600 * 0.2 }, className: "h-12" },
 ]
 
 const PlaceableObjectSelect = (props: PlaceableObjectSelectProps) => {
@@ -96,29 +100,35 @@ function PlacementMode(props: { app: PIXI.Application }) {
 
     const moveVertexEffect = ({ vertexIndex, shapeIndex, shape }: MovingVertexState) => {
         const onMouseUp = (e: PIXI.InteractionEvent) => {
-            let point = { x: e.data.global.x, y: e.data.global.y }
+            let vertex = { x: e.data.global.x, y: e.data.global.y }
 
             if (e.data.originalEvent.shiftKey) {
-                point = {
-                    x: Math.round(point.x / snapDistance) * snapDistance,
-                    y: Math.round(point.y / snapDistance) * snapDistance
+                vertex = {
+                    x: Math.round(vertex.x / snapDistance) * snapDistance,
+                    y: Math.round(vertex.y / snapDistance) * snapDistance
                 }
+                console.log(`actually snapped to ${vertex.x}, ${vertex.y}`)
             }
     
-            // clone world with new shape
-            shape.vertices[vertexIndex] = point
+            // Workaround. Somehow the vertex is not updated in the world, so we have to do it manually
+            let newShape = { vertices: [...shape.vertices] }
+            newShape.vertices[vertexIndex] = vertex
+
             const shapes = [...world.shapes]
-            shapes[shapeIndex] = shape
+            shapes[shapeIndex] = newShape
 
             mutateWorld({
                 undo: previousWorld => ({
                     ...previousWorld,
                     shapes: [...world.shapes]
                 }),
-                redo: () => ({
-                    ...world,
-                    shapes
-                })
+                redo: () => {
+                    console.log(`redoing move vertex ${vertexIndex} in shape ${shapeIndex} to ${vertex.x}, ${vertex.y}`)
+                    return ({
+                        ...world,
+                        shapes
+                    })
+                }
             })
             
             resetVisualMods()
@@ -134,6 +144,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
                     x: Math.round(vertex.x / snapDistance) * snapDistance,
                     y: Math.round(vertex.y / snapDistance) * snapDistance
                 }
+                console.log(`snapped to ${vertex.x}, ${vertex.y}`)
             }
     
             shape.vertices[vertexIndex] = vertex

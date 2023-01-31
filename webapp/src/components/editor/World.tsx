@@ -10,6 +10,7 @@ export interface Shape {
 export const PlaceableObjectType = {
     RedFlag: "Red Flag",
     GreenFlag: "Green Flag",
+    Rocket: "Rocket",
 }
 
 export interface PlacableObject {

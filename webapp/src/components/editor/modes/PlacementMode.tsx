@@ -6,6 +6,7 @@ import PIXI from "pixi.js"
 
 import greenFlag from "../../../assets/flag-green.svg"
 import redFlag from "../../../assets/flag-red.svg"
+import rocket from "../../../assets/rocket.svg"
 import { shallow } from "zustand/shallow"
 
 const snapDistance = 20
@@ -44,8 +45,9 @@ const SinglePlaceableObject = (props: SinglePlaceableObjectProps) => (
 )
 
 const placeableObjects = [
-    { src: redFlag,   type: PlaceableObjectType.RedFlag,   anchor: { x: 0.0, y: 1 }, size: { width: 275 * 0.2, height: 436 * 0.2 } },
-    { src: greenFlag, type: PlaceableObjectType.GreenFlag, anchor: { x: 0.0, y: 1 }, size: { width: 275 * 0.2, height: 436 * 0.2 } },
+    { src: redFlag,   type: PlaceableObjectType.RedFlag,   anchor: { x: 0.0, y: 1 },   size: { width: 275 * 0.2, height: 436 * 0.2 } },
+    { src: greenFlag, type: PlaceableObjectType.GreenFlag, anchor: { x: 0.0, y: 1 },   size: { width: 275 * 0.2, height: 436 * 0.2 } },
+    { src: rocket,    type: PlaceableObjectType.Rocket,    anchor: { x: 0.5, y: 1 },   size: { width: 300 * 0.2, height: 600 * 0.2 } },
 ]
 
 const PlaceableObjectSelect = (props: PlaceableObjectSelectProps) => {
@@ -319,6 +321,10 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 setPlaceObject(undefined)
             }
             else {
+                // computed by placeObject.anchor and placeObject.size, position should be center of object
+                position.x += placeObject.size.width * placeObject.anchor.x - placeObject.size.width * 0.5
+                position.y += placeObject.size.height * placeObject.anchor.y - placeObject.size.height * 0.5
+
                 if (e.data.originalEvent.shiftKey) {
                     position.x = Math.round(position.x / snapDistance) * snapDistance
                     position.y = Math.round(position.y / snapDistance) * snapDistance

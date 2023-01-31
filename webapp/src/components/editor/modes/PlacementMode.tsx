@@ -1,7 +1,7 @@
 import { AppProvider, useApp } from "@inlet/react-pixi"
 import { useCallback, useEffect, useState } from "react"
 import useEditorStore from "../EditorStore"
-import { findClosestEdge, findClosestVertex, ObjectInWorld, Shape, Vertex, VertexIdentifier } from "../World"
+import { findClosestEdge, findClosestVertex, isPointInsideObject, PlacableObject, ObjectInWorld, Shape, Vertex, VertexIdentifier, PlaceableObjectType } from "../World"
 import PIXI from "pixi.js"
 
 import greenFlag from "../../../assets/flag-green.svg"
@@ -19,22 +19,15 @@ export interface EditorMode {
     onClick: (x: number, y: number, ctrl: boolean, shift: boolean) => void
 }
 
-interface PlacableObject {
-    src: string
-    name: string,
-    size: { width: number, height: number }
-    anchor: { x: number, y: number }
+interface SinglePlaceableObjectProps {
+    obj: PlacableObject
+    selected: boolean
+    onSelect: (obj: PlacableObject) => void
 }
 
 interface PlaceableObjectSelectProps {
     selected: PlacableObject | undefined
     onSelect: (obj: PlacableObject | undefined) => void
-}
-
-interface SinglePlaceableObjectProps {
-    obj: PlacableObject
-    selected: boolean
-    onSelect: (obj: PlacableObject) => void
 }
 
 const SinglePlaceableObject = (props: SinglePlaceableObjectProps) => (
@@ -44,11 +37,16 @@ const SinglePlaceableObject = (props: SinglePlaceableObjectProps) => (
         <div className="flex flex-col p-5 space-y-4 items-center">
             <img src={props.obj.src} className="pl-2 w-8" />
             <div>
-                { props.obj.name }
+                { props.obj.type.toString() }
             </div>
         </div>
     </button>
 )
+
+const placeableObjects = [
+    { src: redFlag,   type: PlaceableObjectType.RedFlag,   anchor: { x: 0.0, y: 1 }, size: { width: 275 * 0.2, height: 436 * 0.2 } },
+    { src: greenFlag, type: PlaceableObjectType.GreenFlag, anchor: { x: 0.0, y: 1 }, size: { width: 275 * 0.2, height: 436 * 0.2 } },
+]
 
 const PlaceableObjectSelect = (props: PlaceableObjectSelectProps) => {
     const onSelect = useCallback((obj: PlacableObject) => {
@@ -61,16 +59,11 @@ const PlaceableObjectSelect = (props: PlaceableObjectSelectProps) => {
 
     }, [ props.onSelect, props.selected ])
 
-    const objects: PlacableObject[] = [
-        { src: redFlag, name: "Red Flag", anchor: { x: 0.0, y: 1 }, size: { width: 275 * 0.2, height: 436 * 0.2 } },
-        { src: greenFlag, name: "Green Flag", anchor: { x: 0.0, y: 1 }, size: { width: 275 * 0.2, height: 436 * 0.2 } },
-    ]
-
     return (
         <div className="btn-group btn-group-vertical">
-            { objects.map(obj => (
+            { placeableObjects.map(obj => (
                 <SinglePlaceableObject
-                    key={obj.name}
+                    key={obj.type}
                     obj={obj}
                     selected={props.selected?.src === obj.src}
                     onSelect={onSelect}
@@ -131,10 +124,10 @@ function PlacementMode(props: { app: PIXI.Application }) {
             setMovingVertex(undefined)
         }
 
-        const onMouseMoveRaw = (data: PIXI.InteractionData) => {
-            let vertex = { x: data.global.x, y: data.global.y }
+        const onMouseMoveRaw = (x: number, y: number, snap: boolean) => {
+            let vertex = { x, y }
     
-            if (data.originalEvent.shiftKey) {
+            if (snap) {
                 vertex = {
                     x: Math.round(vertex.x / snapDistance) * snapDistance,
                     y: Math.round(vertex.y / snapDistance) * snapDistance
@@ -155,7 +148,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 onMouseUp(e)
             }
             else {
-                onMouseMoveRaw(e.data)
+                onMouseMoveRaw(e.data.global.x, e.data.global.y, e.data.originalEvent.shiftKey)
             }
         }
 
@@ -185,8 +178,11 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 })
             }
         }
-
-        onMouseMoveRaw(app.renderer.plugins.interaction.mouse)
+        
+        onMouseMoveRaw(
+            app.renderer.plugins.interaction.mouse.global.x, 
+            app.renderer.plugins.interaction.mouse.global.y, 
+            false)
 
         app.renderer.plugins.interaction.on("mousemove", onMouseMove)
         app.renderer.plugins.interaction.on("mouseup", onMouseUp)
@@ -313,12 +309,9 @@ function PlacementMode(props: { app: PIXI.Application }) {
                     },
                     redo: world => {
                         world.objects.push({
-                            name: "object",
-                            src: placeObject.src,
+                            placeable: placeObject,
                             position: edge.point,
-                            size: placeObject.size,
                             rotation: edge.rotation,
-                            anchor: placeObject.anchor
                         })
                         return world
                     }
@@ -338,12 +331,9 @@ function PlacementMode(props: { app: PIXI.Application }) {
                     },
                     redo: world => {
                         world.objects.push({
-                            name: "object",
-                            src: placeObject.src,
+                            placeable: placeObject,
                             position,
-                            size: placeObject.size,
-                            rotation: 0,
-                            anchor: { x: 0.5, y: 0.5 }
+                            rotation: 0
                         })
                         return world
                     }
@@ -351,6 +341,11 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 setPlaceObject(undefined)
             }
         }
+
+        onMouseMoveRaw(
+            app.renderer.plugins.interaction.mouse.global.x,
+            app.renderer.plugins.interaction.mouse.global.y,
+            false)
 
         app.renderer.plugins.interaction.on("mousemove", onMouseMove)
         window.addEventListener("keydown", onKeyDown)
@@ -384,20 +379,6 @@ function PlacementMode(props: { app: PIXI.Application }) {
         const onMouseMoveRaw = (x: number, y: number, ctrl: boolean) => {
             const point = { x, y }
 
-            const isPointInsideObject = ({x, y}: { x: number, y: number }, object: ObjectInWorld) => {
-                const { x: objectX, y: objectY } = object.position
-                const { width, height } = object.size
-                const { x: anchorX, y: anchorY } = object.anchor
-
-                const left = objectX - width * anchorX
-                const right = objectX + width * (1 - anchorX)
-                const top = objectY - height * anchorY
-                const bottom = objectY + height * (1 - anchorY)
-
-                return x >= left && x <= right && y >= top && y <= bottom
-            }
-
-            // find object under cursor
             for (let i = world.objects.length - 1; i >= 0; i--) {
                 const object = world.objects[i]
                 
@@ -405,6 +386,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
                     applyVisualMods({ 
                         highlightObjects: [ { index: i, color: highlightColor } ]
                     })
+
                     return
                 }
             }
@@ -432,6 +414,28 @@ function PlacementMode(props: { app: PIXI.Application }) {
 
         const onMouseDown = (e: PIXI.InteractionEvent) => {
             const point = { x: e.data.global.x, y: e.data.global.y }
+
+            for (let i = world.objects.length - 1; i >= 0; i--) {
+                const object = world.objects[i]
+                
+                if (isPointInsideObject(point, object)) {
+                    mutateWorld({
+                        undo: world => ({
+                            ...world,
+                            objects: [...world.objects, object] 
+                        }),
+                        redo: world => ({
+                            ...world,
+                            objects: world.objects.filter((_, index) => index != i)
+                        })
+                    })
+
+                    setPlaceObject(object.placeable)
+
+                    return
+                }
+            }
+
             const vertex = findClosestVertex(world.shapes, point, snapDistance)
             
             if (vertex) {
@@ -503,10 +507,16 @@ function PlacementMode(props: { app: PIXI.Application }) {
             })
         }
 
+        onMouseMoveRaw(
+            app.renderer.plugins.interaction.mouse.global.x, 
+            app.renderer.plugins.interaction.mouse.global.y, 
+            false)
+
         window.addEventListener("keydown", onKeyDown)
         window.addEventListener("keyup", onKeyUp)
         app.renderer.plugins.interaction.on("mousemove", onMouseMove)
         app.renderer.plugins.interaction.on("mousedown", onMouseDown)
+
         return () => {
             window.removeEventListener("keydown", onKeyDown)
             window.removeEventListener("keyup", onKeyUp)

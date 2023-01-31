@@ -1,5 +1,4 @@
 import { Graphics, Sprite, useApp } from "@inlet/react-pixi"
-import { OutlineFilter } from "@pixi/filter-outline"
 import * as PIXI from "pixi.js"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { shallow } from "zustand/shallow"
@@ -39,7 +38,7 @@ function WorldGraphics() {
         if (state.world.objects?.length > objectSpritesRef.current.length) {
             for (let i = objectSpritesRef.current.length; i < state.world.objects.length; i++) {
                 const sprite = new PIXI.Sprite()
-                sprite.filters = [new OutlineFilter()]
+                sprite.filters = [new PIXI.filters.ColorMatrixFilter()]
                 sprite.scale.set(0.2)
                 app.stage.addChild(sprite)
                 objectSpritesRef.current.push(sprite)
@@ -53,26 +52,24 @@ function WorldGraphics() {
         }
 
         for (let i = 0; i < state.world.objects?.length; i++) {
-            const { src, position, rotation, anchor } = state.world.objects[i]
+            const { placeable, position, rotation } = state.world.objects[i]
 
-            objectSpritesRef.current[i].texture = PIXI.Texture.from(src)
-            objectSpritesRef.current[i].anchor.set(anchor.x, anchor.y)
+            objectSpritesRef.current[i].texture = PIXI.Texture.from(placeable.src)
+            objectSpritesRef.current[i].anchor.set(placeable.anchor.x, placeable.anchor.y)
             objectSpritesRef.current[i].position.set(position.x, position.y)
             objectSpritesRef.current[i].rotation = rotation
 
             const filter = objectSpritesRef.current[i].filters?.[0]
 
             if (state.worldMods.highlightObjects?.filter((o) => o.index === i)?.length ?? 0 > 0) {
-                if (filter instanceof OutlineFilter) {
-                    filter.color = 0xffff00
-                    filter.thickness = 0
-                    filter.blendMode = PIXI.BLEND_MODES.ADD
+                if (filter instanceof PIXI.filters.ColorMatrixFilter) {
+                    filter.brightness(2, false)
+                    filter.tint(0xffff00, true)
                 }
             }
             else {
-                if (filter instanceof OutlineFilter) {
-                    filter.color = 0xffffff
-                    filter.thickness = 0
+                if (filter instanceof PIXI.filters.ColorMatrixFilter) {
+                    filter.reset()
                 }
             }
         }

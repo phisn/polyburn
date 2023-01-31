@@ -7,14 +7,23 @@ export interface Shape {
     vertices: Vertex[]
 }
 
-export interface ObjectInWorld {
-    name: string
+export const PlaceableObjectType = {
+    RedFlag: "Red Flag",
+    GreenFlag: "Green Flag",
+}
+
+export interface PlacableObject {
+    type: string
     src: string
+    size: { width: number, height: number }
+    anchor: { x: number, y: number }
+}
+
+export interface ObjectInWorld {
+    placeable: PlacableObject
 
     position: Vertex
-    size: { width: number, height: number }
     rotation: number
-    anchor: { x: number, y: number }
 }
 
 export interface World {
@@ -26,6 +35,25 @@ export interface VertexIdentifier {
     point: Vertex
     shapeIndex: number
     vertexIndex: number
+}
+
+export function isPointInsideObject({x, y}: { x: number, y: number }, object: ObjectInWorld) {
+    const rotatedX =
+        Math.cos(-object.rotation) * (x - object.position.x) -
+        Math.sin(-object.rotation) * (y - object.position.y) +
+        object.position.x
+    
+    const rotatedY =
+        Math.sin(-object.rotation) * (x - object.position.x) +
+        Math.cos(-object.rotation) * (y - object.position.y) +
+        object.position.y
+    
+    const xMin = object.position.x - object.placeable.size.width * object.placeable.anchor.x
+    const xMax = object.position.x + object.placeable.size.width * (1 - object.placeable.anchor.x)
+    const yMin = object.position.y - object.placeable.size.height * object.placeable.anchor.y
+    const yMax = object.position.y + object.placeable.size.height * (1 - object.placeable.anchor.y)
+
+    return rotatedX >= xMin && rotatedX <= xMax && rotatedY >= yMin && rotatedY <= yMax
 }
         
 export function findClosestVertex(shapes: Shape[], point: Vertex, snapDistance: number) {

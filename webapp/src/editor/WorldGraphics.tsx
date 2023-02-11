@@ -3,7 +3,7 @@ import * as PIXI from "pixi.js"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { shallow } from "zustand/shallow"
 import useEditorStore, { VisualWorldMods } from "./EditorStore"
-import { EditorModeType } from "./EditorStore"
+import { EditingModeType } from "./EditorStore"
 
 function WorldGraphics() {
     const app = useApp()
@@ -16,17 +16,19 @@ function WorldGraphics() {
         if (state.worldMods.previewObject) {
             if (previewSpriteRef.current === undefined) {
                 const sprite = new PIXI.Sprite()
-                sprite.scale.set(0.2)
                 app.stage.addChild(sprite)
                 previewSpriteRef.current = sprite
             }
             
-            const { src, position, rotation, anchor } = state.worldMods.previewObject
+            const { position, rotation, placeable, customAnchor } = state.worldMods.previewObject
 
-            previewSpriteRef.current.texture = PIXI.Texture.from(src)
+            const anchor = customAnchor ?? placeable.anchor
+
+            previewSpriteRef.current.texture = PIXI.Texture.from(placeable.src)
             previewSpriteRef.current.anchor.set(anchor.x, anchor.y)
             previewSpriteRef.current.position.set(position.x, position.y)
             previewSpriteRef.current.rotation = rotation
+            previewSpriteRef.current.scale.set(placeable.scale)
         }
         else {
             if (previewSpriteRef.current) {
@@ -39,7 +41,6 @@ function WorldGraphics() {
             for (let i = objectSpritesRef.current.length; i < state.world.objects.length; i++) {
                 const sprite = new PIXI.Sprite()
                 sprite.filters = [new PIXI.filters.ColorMatrixFilter()]
-                sprite.scale.set(0.2)
                 app.stage.addChild(sprite)
                 objectSpritesRef.current.push(sprite)
             }
@@ -58,6 +59,7 @@ function WorldGraphics() {
             objectSpritesRef.current[i].anchor.set(placeable.anchor.x, placeable.anchor.y)
             objectSpritesRef.current[i].position.set(position.x, position.y)
             objectSpritesRef.current[i].rotation = rotation
+            objectSpritesRef.current[i].scale.set(placeable.scale)
 
             const filter = objectSpritesRef.current[i].filters?.[0]
 
@@ -88,7 +90,7 @@ function WorldGraphics() {
                 g.endFill()
             }
 
-            if (state.mode === EditorModeType.Placement) {
+            if (state.editingMode === EditingModeType.Placement) {
                 for (const [i, shape] of state.world.shapes.entries()) {
                     const newShape = state.worldMods.replaceShapeAt?.index === i 
                         ? state.worldMods.replaceShapeAt.shape 
@@ -118,12 +120,6 @@ function WorldGraphics() {
         }
 
         draw(graphicsRef.current)
-
-    })), [ app ]
-    
-
-    useEffect(() => useEditorStore.subscribe(({ worldMods }) => {
-        
 
     })), [ app ]
 

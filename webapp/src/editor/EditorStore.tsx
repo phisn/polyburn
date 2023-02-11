@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Shape, Vertex, World } from "./World";
+import { ObjectInWorld, Shape, Vertex, World } from "./World";
 import PIXI from "pixi.js";
 
 interface HighlightedVertex {
@@ -12,21 +12,19 @@ interface HighlightedObject {
     color: number
 }
 
-interface PreviewObject {
-    src: string
-    position: Vertex
-    rotation: number
-    anchor: { x: number, y: number }
-}
-
 export interface VisualWorldMods {
     replaceShapeAt?: { index: number, shape: Shape }
     highlightVertices?: HighlightedVertex[]
     highlightObjects?: HighlightedObject[]
-    previewObject?: PreviewObject
+    previewObject?: ObjectInWorld & { customAnchor?: Vertex }
 }
 
 export enum EditorModeType {
+    Editing,
+    Playing,
+}
+
+export enum EditingModeType {
     Selection,
     Movement,
     Placement,
@@ -39,6 +37,7 @@ interface Mutation {
 
 interface EditorState {
     mode: EditorModeType,
+    editingMode: EditingModeType,
 
     world: World
     worldMods: VisualWorldMods
@@ -48,7 +47,8 @@ interface EditorState {
 }
 
 export interface EditorStore extends EditorState {
-    setMode: (mode: EditorModeType) => void
+    setMode(mode: EditorModeType): void
+    setEditingMode: (mode: EditingModeType) => void
 
     mutateWorld: (mutation: Mutation) => void
     undo: () => void
@@ -59,7 +59,8 @@ export interface EditorStore extends EditorState {
 }
 
 const initialEditorState: EditorState = {
-    mode: EditorModeType.Placement,
+    mode: EditorModeType.Editing,
+    editingMode: EditingModeType.Placement,
 
     world: {
         shapes: [],
@@ -74,7 +75,8 @@ const initialEditorState: EditorState = {
 
 const useEditorStore = create<EditorStore>((set) => ({
     ...initialEditorState,
-    setMode: (mode: EditorModeType) => set(() => ({ mode })),
+    setMode: (mode: EditorModeType) => set(state => ({ ...state, mode })),
+    setEditingMode: (editingMode: EditingModeType) => set(state => ({ ...state, editingMode })),
     mutateWorld: (mutation: Mutation) =>
         set((state) => ({
             world: mutation.redo(state.world),

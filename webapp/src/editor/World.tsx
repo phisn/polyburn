@@ -16,6 +16,7 @@ export const PlaceableObjectType = {
 export interface PlacableObject {
     type: string
     src: string
+    scale: number
     size: { width: number, height: number }
     anchor: { x: number, y: number }
 }
@@ -39,6 +40,11 @@ export interface VertexIdentifier {
 }
 
 export function isPointInsideObject({x, y}: { x: number, y: number }, object: ObjectInWorld) {
+    const size = { 
+        width: object.placeable.size.width * object.placeable.scale, 
+        height: object.placeable.size.height * object.placeable.scale 
+    }
+
     const rotatedX =
         Math.cos(-object.rotation) * (x - object.position.x) -
         Math.sin(-object.rotation) * (y - object.position.y) +
@@ -49,10 +55,10 @@ export function isPointInsideObject({x, y}: { x: number, y: number }, object: Ob
         Math.cos(-object.rotation) * (y - object.position.y) +
         object.position.y
     
-    const xMin = object.position.x - object.placeable.size.width * object.placeable.anchor.x
-    const xMax = object.position.x + object.placeable.size.width * (1 - object.placeable.anchor.x)
-    const yMin = object.position.y - object.placeable.size.height * object.placeable.anchor.y
-    const yMax = object.position.y + object.placeable.size.height * (1 - object.placeable.anchor.y)
+    const xMin = object.position.x - size.width * object.placeable.anchor.x
+    const xMax = object.position.x + size.width * (1 - object.placeable.anchor.x)
+    const yMin = object.position.y - size.height * object.placeable.anchor.y
+    const yMax = object.position.y + size.height * (1 - object.placeable.anchor.y)
 
     return rotatedX >= xMin && rotatedX <= xMax && rotatedY >= yMin && rotatedY <= yMax
 }

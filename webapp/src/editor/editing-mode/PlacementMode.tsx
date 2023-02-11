@@ -4,10 +4,11 @@ import useEditorStore from "../EditorStore"
 import { findClosestEdge, findClosestVertex, isPointInsideObject, PlacableObject, ObjectInWorld, Shape, Vertex, VertexIdentifier, PlaceableObjectType } from "../World"
 import PIXI from "pixi.js"
 
-import greenFlag from "../../../assets/flag-green.svg"
-import redFlag from "../../../assets/flag-red.svg"
-import rocket from "../../../assets/rocket.svg"
+import greenFlag from "../../assets/flag-green.svg"
+import redFlag from "../../assets/flag-red.svg"
+import rocket from "../../assets/rocket.svg"
 import { shallow } from "zustand/shallow"
+import { useShortcut } from "../../utility/useShortcut"
 
 const snapDistance = 20
 
@@ -49,9 +50,9 @@ const SinglePlaceableObject = (props: SinglePlaceableObjectProps) => (
 )
 
 const placeableObjects: PlacableObjectSelectable[] = [
-    { src: redFlag,   type: PlaceableObjectType.RedFlag,   anchor: { x: 0.0, y: 1 },   size: { width: 275 * 0.2, height: 436 * 0.2 }, className: "pl-2" },
-    { src: greenFlag, type: PlaceableObjectType.GreenFlag, anchor: { x: 0.0, y: 1 },   size: { width: 275 * 0.2, height: 436 * 0.2 }, className: "pl-2" },
-    { src: rocket,    type: PlaceableObjectType.Rocket,    anchor: { x: 0.5, y: 1 },   size: { width: 300 * 0.2, height: 600 * 0.2 }, className: "h-12" },
+    { src: redFlag,   type: PlaceableObjectType.RedFlag,   anchor: { x: 0.0, y: 1 },   size: { width: 275, height: 436 }, scale: 0.15, className: "pl-2" },
+    { src: greenFlag, type: PlaceableObjectType.GreenFlag, anchor: { x: 0.0, y: 1 },   size: { width: 275, height: 436 }, scale: 0.15, className: "pl-2" },
+    { src: rocket,    type: PlaceableObjectType.Rocket,    anchor: { x: 0.5, y: 1 },   size: { width: 300, height: 600 }, scale: 0.15, className: "h-12" },
 ]
 
 const PlaceableObjectSelect = (props: PlaceableObjectSelectProps) => {
@@ -82,12 +83,17 @@ const PlaceableObjectSelect = (props: PlaceableObjectSelectProps) => {
 function PlacementMode(props: { app: PIXI.Application }) {
     const { app } = props
 
-    const [
-        mutateWorld,
-        applyVisualMods,
-        resetVisualMods,
-        world
-    ] = useEditorStore(state => [ state.mutateWorld, state.applyVisualMods, state.resetVisualMods, state.world ], shallow)
+    const state = useEditorStore(state => ({
+        mutateWorld: state.mutateWorld, 
+        applyVisualMods: state.applyVisualMods, 
+        resetVisualMods: state.resetVisualMods, 
+        undo: state.undo,
+        redo: state.redo,
+        world: state.world
+    }), shallow)
+
+    useShortcut("z", state.undo)
+    useShortcut("y", state.redo)
 
     interface MovingVertexState {
         vertexIndex: number
@@ -114,24 +120,24 @@ function PlacementMode(props: { app: PIXI.Application }) {
             let newShape = { vertices: [...shape.vertices] }
             newShape.vertices[vertexIndex] = vertex
 
-            const shapes = [...world.shapes]
+            const shapes = [...state.world.shapes]
             shapes[shapeIndex] = newShape
 
-            mutateWorld({
+            state.mutateWorld({
                 undo: previousWorld => ({
                     ...previousWorld,
-                    shapes: [...world.shapes]
+                    shapes: [...state.world.shapes]
                 }),
                 redo: () => {
                     console.log(`redoing move vertex ${vertexIndex} in shape ${shapeIndex} to ${vertex.x}, ${vertex.y}`)
                     return ({
-                        ...world,
+                        ...state.world,
                         shapes
                     })
                 }
             })
             
-            resetVisualMods()
+            state.resetVisualMods()
 
             setMovingVertex(undefined)
         }
@@ -149,7 +155,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
     
             shape.vertices[vertexIndex] = vertex
     
-            applyVisualMods({ 
+            state.applyVisualMods({ 
                 highlightVertices: [ { vertex, color: highlightMoveColor } ],
                 replaceShapeAt: { index: shapeIndex, shape }
             })
@@ -170,7 +176,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 const vertex = { x: app.renderer.plugins.interaction.mouse.global.x, y: app.renderer.plugins.interaction.mouse.global.y }
                 shape.vertices[vertexIndex] = vertex
 
-                applyVisualMods({
+                state.applyVisualMods({
                     highlightVertices: [ { vertex, color: highlightMoveColor } ],
                     replaceShapeAt: { index: shapeIndex, shape }
                 })
@@ -185,7 +191,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 }
                 shape.vertices[vertexIndex] = point
 
-                applyVisualMods({
+                state.applyVisualMods({
                     highlightVertices: [ { vertex: point, color: highlightMoveColor } ],
                     replaceShapeAt: { index: shapeIndex, shape }
                 })
@@ -215,7 +221,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
     const placeObjectEffect = (placeObject: PlacableObject) => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
-                resetVisualMods()
+                state.resetVisualMods()
                 setPlaceObject(undefined)
             }
 
@@ -236,7 +242,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
             onMouseMoveRaw(e.data.global.x, e.data.global.y, e.data.originalEvent.shiftKey)
 
         const findEdgeForObject = (position: Vertex, snap: Boolean) => {
-            const edge = findClosestEdge(world.shapes, position, snapDistance)
+            const edge = findClosestEdge(state.world.shapes, position, snapDistance)
 
             if (!edge) {
                 return edge
@@ -245,8 +251,8 @@ function PlacementMode(props: { app: PIXI.Application }) {
             // edge.point is the closest point on the edge
             // edge.edge contains the two indices of the edge's vertices
 
-            const edgeStart = world.shapes[edge.shapeIndex].vertices[edge.edge[0]]
-            const edgeEnd = world.shapes[edge.shapeIndex].vertices[edge.edge[1]]
+            const edgeStart = state.world.shapes[edge.shapeIndex].vertices[edge.edge[0]]
+            const edgeEnd = state.world.shapes[edge.shapeIndex].vertices[edge.edge[1]]
 
             const rotation = Math.atan2(edgeEnd.y - edgeStart.y, edgeEnd.x - edgeStart.x)
 
@@ -283,12 +289,11 @@ function PlacementMode(props: { app: PIXI.Application }) {
             const edge = findEdgeForObject(position, snap)
 
             if (edge) {
-                applyVisualMods({
+                state.applyVisualMods({
                     previewObject: {
-                        src: placeObject.src,
+                        placeable: placeObject,
                         position: edge.point,
                         rotation: edge.rotation,
-                        anchor: placeObject.anchor
                     }
                 })
             }
@@ -298,12 +303,12 @@ function PlacementMode(props: { app: PIXI.Application }) {
                     position.y = Math.round(position.y / snapDistance) * snapDistance
                 }
 
-                applyVisualMods({ 
+                state.applyVisualMods({ 
                     previewObject: {
-                        src: placeObject.src,
+                        placeable: placeObject,
                         position,
                         rotation: 0,
-                        anchor: { x: 0.5, y: 0.5 }
+                        customAnchor: { x: 0.5, y: 0.5 }
                     }
                 })
             }
@@ -315,7 +320,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
             const edge = findEdgeForObject(position, e.data.originalEvent.shiftKey)
 
             if (edge) {
-                mutateWorld({
+                state.mutateWorld({
                     undo: world => {
                         world.objects.pop()
                         return world
@@ -333,15 +338,15 @@ function PlacementMode(props: { app: PIXI.Application }) {
             }
             else {
                 // computed by placeObject.anchor and placeObject.size, position should be center of object
-                position.x += placeObject.size.width * placeObject.anchor.x - placeObject.size.width * 0.5
-                position.y += placeObject.size.height * placeObject.anchor.y - placeObject.size.height * 0.5
+                position.x += placeObject.scale * placeObject.size.width * placeObject.anchor.x - placeObject.scale * placeObject.size.width * 0.5
+                position.y += placeObject.scale * placeObject.size.height * placeObject.anchor.y - placeObject.scale * placeObject.size.height * 0.5
 
                 if (e.data.originalEvent.shiftKey) {
                     position.x = Math.round(position.x / snapDistance) * snapDistance
                     position.y = Math.round(position.y / snapDistance) * snapDistance
                 }
 
-                mutateWorld({
+                state.mutateWorld({
                     undo: world => {
                         world.objects.pop()
                         return world
@@ -396,11 +401,11 @@ function PlacementMode(props: { app: PIXI.Application }) {
         const onMouseMoveRaw = (x: number, y: number, ctrl: boolean) => {
             const point = { x, y }
 
-            for (let i = world.objects.length - 1; i >= 0; i--) {
-                const object = world.objects[i]
+            for (let i = state.world.objects.length - 1; i >= 0; i--) {
+                const object = state.world.objects[i]
                 
                 if (isPointInsideObject(point, object)) {
-                    applyVisualMods({ 
+                    state.applyVisualMods({ 
                         highlightObjects: [ { index: i, color: highlightColor } ]
                     })
 
@@ -408,35 +413,35 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 }
             }
 
-            const vertex = findClosestVertex(world.shapes, point, snapDistance)
+            const vertex = findClosestVertex(state.world.shapes, point, snapDistance)
     
             if (vertex) {
                 const color = ctrl
                     ? highlightDeleteColor
                     : highlightColor
 
-                applyVisualMods({ highlightVertices: [ { vertex: vertex.point, color } ]})
+                    state.applyVisualMods({ highlightVertices: [ { vertex: vertex.point, color } ]})
                 return
             }
     
-            const edge = findClosestEdge(world.shapes, point, snapDistance)
+            const edge = findClosestEdge(state.world.shapes, point, snapDistance)
     
             if (edge) {
-                applyVisualMods({ highlightVertices: [ { vertex: edge.point, color: highlightColor } ]})
+                state.applyVisualMods({ highlightVertices: [ { vertex: edge.point, color: highlightColor } ]})
                 return
             }
     
-            resetVisualMods()
+            state.resetVisualMods()
         }
 
         const onMouseDown = (e: PIXI.InteractionEvent) => {
             const point = { x: e.data.global.x, y: e.data.global.y }
 
-            for (let i = world.objects.length - 1; i >= 0; i--) {
-                const object = world.objects[i]
+            for (let i = state.world.objects.length - 1; i >= 0; i--) {
+                const object = state.world.objects[i]
                 
                 if (isPointInsideObject(point, object)) {
-                    mutateWorld({
+                    state.mutateWorld({
                         undo: world => ({
                             ...world,
                             objects: [...world.objects, object] 
@@ -453,11 +458,11 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 }
             }
 
-            const vertex = findClosestVertex(world.shapes, point, snapDistance)
+            const vertex = findClosestVertex(state.world.shapes, point, snapDistance)
             
             if (vertex) {
                 if (e.data.originalEvent.ctrlKey) {
-                    const newShapes = [...world.shapes]
+                    const newShapes = [...state.world.shapes]
 
                     if (newShapes[vertex.shapeIndex].vertices.length <= 3) {
                         newShapes.splice(vertex.shapeIndex, 1)
@@ -466,13 +471,13 @@ function PlacementMode(props: { app: PIXI.Application }) {
                         newShapes[vertex.shapeIndex].vertices.splice(vertex.vertexIndex, 1)
                     }
                     
-                    mutateWorld({
+                    state.mutateWorld({
                         undo: previousWorld => ({
                             ...previousWorld,
-                            shapes: [...world.shapes]
+                            shapes: [...state.world.shapes]
                         }),
                         redo: () => ({
-                            ...world,
+                            ...state.world,
                             shapes: newShapes
                         })
                     })
@@ -483,18 +488,18 @@ function PlacementMode(props: { app: PIXI.Application }) {
                     setMovingVertex({
                         vertexIndex: vertex.vertexIndex,
                         shapeIndex: vertex.shapeIndex,
-                        shape: { vertices: [...world.shapes[vertex.shapeIndex].vertices] }
+                        shape: { vertices: [...state.world.shapes[vertex.shapeIndex].vertices] }
                     })
 
                     return
                 }
             }
 
-            const edge = findClosestEdge(world.shapes, point, snapDistance)
+            const edge = findClosestEdge(state.world.shapes, point, snapDistance)
 
             if (edge) {
                 // Need to copy the shape because we're going to mutate it. We need to make sure to not mutate the original shape.
-                const shape = { vertices: [...world.shapes[edge.shapeIndex].vertices] }
+                const shape = { vertices: [...state.world.shapes[edge.shapeIndex].vertices] }
                 shape.vertices.splice(edge.edge[1], 0, edge.point)
 
                 setMovingVertex({
@@ -506,14 +511,14 @@ function PlacementMode(props: { app: PIXI.Application }) {
                 return
             }
 
-            mutateWorld({
+            state.mutateWorld({
                 undo: previousWorld => ({
                     ...previousWorld,
-                    shapes: [...world.shapes]
+                    shapes: [...state.world.shapes]
                 }),
                 redo: () => ({
-                    ...world,
-                    shapes: [...world.shapes, { vertices: 
+                    ...state.world,
+                    shapes: [...state.world.shapes, { vertices: 
                         [
                             { x: point.x - 50, y: point.y - 50 },
                             { x: point.x + 50, y: point.y - 50 },
@@ -552,7 +557,7 @@ function PlacementMode(props: { app: PIXI.Application }) {
         }
 
         return defaultEffect()
-    }, [ app.stage, movingVertex, placeObject, world ])
+    }, [ app.stage, movingVertex, placeObject, state.world ])
 
     return (
         <div className="flex p-4 flex-col items-center bg-base-100 rounded-lg h-full self-end">

@@ -13,6 +13,7 @@
         "files.watcherExclude": {
             "**/target": true
         },
-        "typescript.tsdk": "webapp\\node_modules\\typescript\\lib"
+        "typescript.tsdk": "webapp\\node_modules\\typescript\\lib",
+        "svg.preview.background": "black"
     }
 }

@@ -66,7 +66,7 @@ function WorldGraphics() {
             if (state.worldMods.highlightObjects?.filter((o) => o.index === i)?.length ?? 0 > 0) {
                 if (filter instanceof PIXI.filters.ColorMatrixFilter) {
                     filter.brightness(2, false)
-                    filter.tint(0xffff00, true)
+                    filter.tint(state.worldMods.highlightObjects?.at(i)?.color ?? 0, true)
                 }
             }
             else {

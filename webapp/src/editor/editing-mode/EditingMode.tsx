@@ -1,6 +1,6 @@
 import useEditorStore, { EditingModeType } from "../EditorStore";
 import PIXI from "pixi.js"
-import PlacementMode from "./PlacementMode";
+import PlacementMode from "./placement-mode/PlacementMode";
 import { shallow } from "zustand/shallow";
 
 function EditingMode(props: { app?: PIXI.Application }): JSX.Element {

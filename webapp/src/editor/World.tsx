@@ -13,7 +13,7 @@ export const PlaceableObjectType = {
     Rocket: "Rocket",
 }
 
-export interface PlacableObject {
+export interface PlaceableObject {
     type: string
     src: string
     scale: number
@@ -22,7 +22,7 @@ export interface PlacableObject {
 }
 
 export interface ObjectInWorld {
-    placeable: PlacableObject
+    placeable: PlaceableObject
 
     position: Vertex
     rotation: number

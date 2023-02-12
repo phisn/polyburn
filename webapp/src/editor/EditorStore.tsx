@@ -63,7 +63,16 @@ const initialEditorState: EditorState = {
     editingMode: EditingModeType.Placement,
 
     world: {
-        shapes: [],
+        shapes: [
+            {
+                vertices: [
+                    { x: 300, y: 300 },
+                    { x: 400, y: 300 },
+                    { x: 400, y: 400 },
+                    { x: 300, y: 400 }
+                ]
+            },
+        ],
         objects: [],
     },
 

@@ -67,8 +67,6 @@ function EditingComponent() {
             app.stage.interactive = true
         }
     }, [ app ])
-    
-    useInitEditorWorld()
 
     return (
         <div className="overflow-hidden">
@@ -93,42 +91,6 @@ function EditingComponent() {
             </Stage>
         </div>
     )
-}
-
-const useInitEditorWorld = () => {
-    const mutateWorld = useEditorStore(state => state.mutateWorld, shallow)
-
-    useEffect(() => {
-        mutateWorld({
-            undo: (world: World) => ({ ...world, shapes: [] }),
-            redo: (world: World) => ({ ...world, shapes: [
-                /*{
-                    vertices: [
-                        { x: 100, y: 100 },
-                        { x: 200, y: 100 },
-                        { x: 200, y: 200 },
-                        { x: 100, y: 200 }
-                    ]
-                },*/
-                {
-                    vertices: [
-                        { x: 300, y: 300 },
-                        { x: 400, y: 300 },
-                        { x: 400, y: 400 },
-                        { x: 300, y: 400 }
-                    ]
-                },
-                /*{
-                    // triangle
-                    vertices: [
-                        { x: 500, y: 500 },
-                        { x: 600, y: 500 },
-                        { x: 550, y: 600 }
-                    ]
-                },*/
-            ]})
-        })
-    }, [])
 }
 
 export default Editor

@@ -62,11 +62,12 @@ function WorldGraphics() {
             objectSpritesRef.current[i].scale.set(placeable.scale)
 
             const filter = objectSpritesRef.current[i].filters?.[0]
+            const highlight = state.worldMods.highlightObjects?.find((o) => o.index === i)
 
-            if (state.worldMods.highlightObjects?.filter((o) => o.index === i)?.length ?? 0 > 0) {
+            if (highlight) {
                 if (filter instanceof PIXI.filters.ColorMatrixFilter) {
                     filter.brightness(2, false)
-                    filter.tint(state.worldMods.highlightObjects?.at(i)?.color ?? 0, true)
+                    filter.tint(highlight?.color ?? 0, true)
                 }
             }
             else {

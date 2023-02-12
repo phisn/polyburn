@@ -43,6 +43,9 @@ const useGameStore = create<GameStore>((set, get) => ({
                 vertices[i * 2 + 1] = vertex.y - top
             })
 
+            vertices[vertices.length - 2] = shape.vertices[0].x - left
+            vertices[vertices.length - 1] = shape.vertices[0].y - top
+
             const colliderDesc = RAPIER.ColliderDesc.polyline(vertices)
 
             if (colliderDesc == null) {

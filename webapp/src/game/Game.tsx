@@ -1,16 +1,14 @@
-import { Stage, Graphics, useApp } from "@inlet/react-pixi"
+import { Stage, Graphics, useApp, useTick } from "@inlet/react-pixi"
 import PIXI from "pixi.js"
 import { useCallback, useEffect, useState } from "react"
 import { useRef } from "react"
-
-export function GameVisual() { 
-   const app = useApp()
-   
-   
-}
+import useGameStore from "./GameStore"
+import { GameVisual } from "./GameVisual"
 
 export function Game() {
     const [app, setApp] = useState<PIXI.Application>()
+
+    const state = useGameStore()
 
     return (
         <div className="overflow-hidden">
@@ -22,6 +20,7 @@ export function Game() {
                 height={window.innerHeight} 
                 options={ { resizeTo: window, antialias: true } } >
 
+                <GameVisual />
             </Stage>
         </div>
     )

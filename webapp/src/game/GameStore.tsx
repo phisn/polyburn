@@ -1,6 +1,8 @@
-import RAPIER from "@dimforge/rapier2d"
+import RAPIER from "@dimforge/rapier2d-compat"
 import { create } from "zustand";
 import { ObjectInWorld, World } from "../editor/World";
+
+RAPIER.init()
 
 export interface GameState {
     rapierWorld: RAPIER.World | null
@@ -22,22 +24,26 @@ const useGameStore = create<GameStore>((set, get) => ({
     ...initialGameState,
     prepare: (world: World) => {
         const rapierWorld = new RAPIER.World(
-            { x: 0.0, y: -9.81 }
+            { x: 0.0, y: 9.81 }
         )
 
         world.shapes.forEach(shape => {
+            const left = shape.vertices.reduce((acc, vertex) => Math.min(acc, vertex.x), Infinity)
+            const top  = shape.vertices.reduce((acc, vertex) => Math.min(acc, vertex.y), Infinity)
+
             const body = rapierWorld.createRigidBody(
-                RAPIER.RigidBodyDesc.dynamic()
+                RAPIER.RigidBodyDesc.fixed()
+                    .setTranslation(left, top)
             )
 
             const vertices = new Float32Array(shape.vertices.length * 2)
 
             shape.vertices.forEach((vertex, i) => {
-                vertices[i * 2] = vertex.x
-                vertices[i * 2 + 1] = vertex.y
+                vertices[i * 2] = vertex.x - left
+                vertices[i * 2 + 1] = vertex.y - top
             })
 
-            const colliderDesc = RAPIER.ColliderDesc.convexHull(vertices)
+            const colliderDesc = RAPIER.ColliderDesc.polyline(vertices)
 
             if (colliderDesc == null) {
                 throw new Error("Failed to create collider")
@@ -50,14 +56,15 @@ const useGameStore = create<GameStore>((set, get) => ({
         })
 
         const objectBodies = world.objects.map((object: ObjectInWorld) => {
+            console.log(`Creating object ${object}`)
+            
             const body = rapierWorld.createRigidBody(
                 RAPIER.RigidBodyDesc.dynamic()
+                    .setTranslation(object.position.x, object.position.y)
+                    .setRotation(object.rotation)
             )
 
-            const colliderDesc = RAPIER.ColliderDesc.cuboid(
-                object.placeable.size.width / 2,
-                object.placeable.size.height / 2
-            )
+            const colliderDesc = RAPIER.ColliderDesc.ball(10)
 
             if (colliderDesc == null) {
                 throw new Error("Failed to create collider")
@@ -68,10 +75,7 @@ const useGameStore = create<GameStore>((set, get) => ({
                 body
             )
 
-            body.setTranslation({ x: object.position.x, y: object.position.y }, true)
-            body.setRotation(object.rotation, true)
-
-            return {  object, body }
+            return { object, body }
         })
 
         set({

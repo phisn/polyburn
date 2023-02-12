@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@dimforge/rapier2d": "^0.11.1",
+    "@dimforge/rapier2d-compat": "^0.11.1",
     "@inlet/react-pixi": "^6.8.0",
     "@pixi/filter-outline": "^4.2.0",
     "@pixi/interaction": "^6.5.8",
@@ -32,5 +32,10 @@
     "tailwindcss": "^3.2.4",
     "typescript": "^4.9.3",
     "vite": "^4.0.0"
-  }
+  },
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

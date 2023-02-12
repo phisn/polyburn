@@ -2,6 +2,7 @@ import useEditorStore, { EditingModeType, EditorModeType } from "./EditorStore"
 import { shallow } from 'zustand/shallow'
 import Navbar from "./Navbar"
 import useGameStore from "../game/GameStore"
+import useGlobalStore from "../global/GlobalStore"
 
 const MenuSvg = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -38,6 +39,8 @@ function EditorNavbar() {
         setMode: state.setMode,
         setEditingMode: state.setEditingMode
     }), shallow)
+
+    const newAlert = useGlobalStore(state => state.newAlert)
 
     return (
         <Navbar>
@@ -78,8 +81,16 @@ function EditorNavbar() {
 
             <button className="btn btn-square btn-ghost"
                     onClick={() => {
-                        useGameStore.getState().prepare(state.world)
-                        state.setMode(EditorModeType.Playing)
+                        try {
+                            useGameStore.getState().prepare(state.world)
+                            state.setMode(EditorModeType.Playing)
+                        }
+                        catch (e) {
+                            if (e instanceof Error) {
+                                newAlert({ message: e.message, type: "error" })
+                                console.error(e)
+                            }
+                        }
                     }}>
                 <PlaySvg />
             </button>

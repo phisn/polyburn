@@ -5,23 +5,18 @@ import { ObjectInWorld, Shape, World } from "../editor/World";
 RAPIER.init()
 
 export interface GameState {
-    rapierWorld: RAPIER.World | null
-    world: World | null
-    objectBodies: { object: ObjectInWorld, body: RAPIER.RigidBody }[]
+    rapierWorld: RAPIER.World
+    world: World
+    rocket: RAPIER.RigidBody
 }
 
-export interface GameStore extends GameState {
+export interface GameStore {
+    state: GameState | null
     prepare: (world: World) => void
 }
 
-export const initialGameState: GameState = {
-    rapierWorld: null,
-    world: null,
-    objectBodies: []
-}
-
 const useGameStore = create<GameStore>((set, get) => ({
-    ...initialGameState,
+    state: null,
     prepare: (world: World) => {
         const rapierWorld = new RAPIER.World(
             { x: 0.0, y: 9.81 }
@@ -31,16 +26,21 @@ const useGameStore = create<GameStore>((set, get) => ({
             createShapeBody(shape, rapierWorld)
         )
 
-        const objectBodies = world.objects.map((object: ObjectInWorld) => ({
-            object: object,
-            body: createObjectBody(rapierWorld, object)
-        }))
+        const rockets = world.objects.filter(object => object.placeable.type === "Rocket")
 
-        set({
+        if (rockets.length === 0) {
+            throw new Error("No rocket found")
+        }
+
+        if (rockets.length > 1) {
+            throw new Error("Multiple rockets found")
+        }
+
+        set({ state: {
             rapierWorld,
             world,
-            objectBodies
-        })
+            rocket: undefined!
+        }})
     }
 }))
 

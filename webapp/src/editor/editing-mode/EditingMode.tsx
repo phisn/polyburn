@@ -2,6 +2,7 @@ import useEditorStore, { EditingModeType } from "../EditorStore";
 import PIXI from "pixi.js"
 import PlacementMode from "./placement-mode/PlacementMode";
 import { shallow } from "zustand/shallow";
+import MovementMode from "./movement-mode/MovementMode";
 
 function EditingMode(props: { app?: PIXI.Application }): JSX.Element {
     const app = props.app
@@ -15,7 +16,7 @@ function EditingMode(props: { app?: PIXI.Application }): JSX.Element {
         case EditingModeType.Selection:
             return <div>Selection</div>
         case EditingModeType.Movement:
-            return <div>Movement</div>
+            return <MovementMode />
         case EditingModeType.Placement:
             return <PlacementMode app={app} />
     }

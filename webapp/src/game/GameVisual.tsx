@@ -6,32 +6,41 @@ import * as PIXI from "pixi.js"
 export function GameVisual() { 
     const app = useApp()
    
-    const objectSpritesRef = useRef<PIXI.Sprite[]>([])
-    const graphicsRef = useRef<PIXI.Graphics | undefined>()
+    const rocketSpriteRef = useRef<PIXI.Sprite>()
+    const graphicsRef = useRef<PIXI.Graphics>()
 
-    const update = useCallback((state: GameStore) => {
+    const update = useCallback((store: GameStore) => {
+        if (store.state == null) {
+            return
+        }
+        
+        if (rocketSpriteRef.current === undefined) {
+            const sprite = new PIXI.Sprite()
+            app.stage.addChild(sprite)
+            rocketSpriteRef.current = sprite
+            
+            rocketSpriteRef.current.texture = PIXI.Texture.from(
+                store.state.rocketObject.placeable.src)
+            rocketSpriteRef.current.anchor.set(0, 0)
+            rocketSpriteRef.current.scale.set(store.state.rocketObject.placeable.scale)
+        }
+
+        rocketSpriteRef.current.position.set(
+            store.state.rocket.translation().x,
+            store.state.rocket.translation().y)
+        rocketSpriteRef.current.rotation = store.state.rocket.rotation()
+
         const draw = (g: PIXI.Graphics) => {
-            if (state.world == null) {
+            if (store.state == null) {
                 return
             }
 
             g.clear()
 
-            for (const [_, shape] of state.world.shapes.entries()) {
+            for (const [_, shape] of store.state.world.shapes.entries()) {
                 g.lineStyle(0)
                 g.beginFill(0xbb3333)
                 g.drawPolygon(shape.vertices)
-                g.endFill()
-            }
-
-            for (const [i, pair] of state.objectBodies.entries()) {
-                // pair.body
-                // pair.object
-                // draw pair.body as circle
-
-                g.lineStyle(0)
-                g.beginFill(0x3333bb)
-                g.drawCircle(pair.body.translation().x, pair.body.translation().y, 10)
                 g.endFill()
             }
         }
@@ -50,16 +59,13 @@ export function GameVisual() {
         return useGameStore.subscribe(update)
     }), [ app ]
 
-    const rapierWorld = useGameStore(state => state.rapierWorld)
+    const rapierWorld = useGameStore(store => store.state?.rapierWorld)
 
     useEffect(() => {
         // every rapierWorld?.timestep
         const interval = setInterval(() => {
             rapierWorld?.step()
             update(useGameStore.getState())
-            rapierWorld?.bodies.forEach((body) => {
-                console.log(body.translation())
-            })
         }, rapierWorld?.timestep)
 
         return () => {

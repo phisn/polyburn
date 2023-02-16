@@ -1,15 +1,76 @@
-import RAPIER, { ColliderDesc } from "@dimforge/rapier2d-compat"
+import RAPIER, { ColliderDesc, RayColliderToi } from "@dimforge/rapier2d-compat"
 import { create } from "zustand";
 import { ObjectInWorld, Shape, World } from "../editor/World";
+import { changeAnchor } from "../utility/math";
 
 RAPIER.init()
 
-export interface GameState {
-    rapierWorld: RAPIER.World
-    world: World
+export class GameState {
+    constructor(
+        public rapierWorld: RAPIER.World,
+        public world: World,
+    
+        public rocket: RAPIER.RigidBody,
+        public rocketObject: ObjectInWorld
+    ) {}
 
-    rocket: RAPIER.RigidBody
-    rocketObject: ObjectInWorld
+    rocketGroundRayRaw() {
+        let rayStart = changeAnchor(
+            this.rocket.translation(),
+            this.rocket.rotation(),
+            {
+                width: this.rocketObject.placeable.size.width * this.rocketObject.placeable.scale,
+                height: this.rocketObject.placeable.size.height * this.rocketObject.placeable.scale
+            },
+            { x: 0.5, y: 0.5 },
+            { x: 0.5, y: 0.8 }
+        )
+
+        let rayTarget = changeAnchor(
+            this.rocket.translation(),
+            this.rocket.rotation(),
+            {
+                width: this.rocketObject.placeable.size.width * this.rocketObject.placeable.scale,
+                height: this.rocketObject.placeable.size.height * this.rocketObject.placeable.scale
+            },
+            { x: 0.5, y: 0.5 },
+            { x: 0.5, y: 2 }
+        )
+
+        let rayDir = new RAPIER.Vector2(
+            rayTarget.x - rayStart.x,
+            rayTarget.y - rayStart.y
+        )
+
+        let length = Math.sqrt(rayDir.x * rayDir.x + rayDir.y * rayDir.y)
+        let ray = new RAPIER.Ray(rayStart, rayDir)
+
+        const cast: RayColliderToi | null = this.rapierWorld.castRay(
+            ray,
+            1,
+            false,
+            undefined,
+            undefined,
+            undefined,
+            this.rocket
+        )
+
+        return {
+            cast,
+            ray,
+            rayStart,
+            rayTarget
+        }
+    }
+    rocketGroundRay() {
+        return this.rocketGroundRayRaw()?.cast
+    }
+}
+
+interface RayResult {
+    cast: RayColliderToi,
+    rayStart: RAPIER.Vector2,
+    rayTarget: RAPIER.Vector2,
 }
 
 export interface GameStore {
@@ -32,12 +93,12 @@ const useGameStore = create<GameStore>((set, get) => ({
 
         const [ rocket, rocketObject ] = createRocket(rapierWorld, world)
 
-        const state = {
+        const state = new GameState(
             rapierWorld,
             world,
             rocket,
             rocketObject
-        }
+        )
 
         set({ state })
     }
@@ -58,14 +119,16 @@ function createRocket(rapierWorld: RAPIER.World, world: World): [ RAPIER.RigidBo
 
     // given rocket.position rocket.rotation rocket.placeable.size rocket.placeable.scale rocket.placeable.anchor
     // find position of center of rocket
-    const positionAtCenter = {
-        x: rocket.position.x 
-            + Math.cos(rocket.rotation) * (rocket.placeable.size.width  * rocket.placeable.scale * (0.5 - rocket.placeable.anchor.x)) 
-            - Math.sin(rocket.rotation) * (rocket.placeable.size.height * rocket.placeable.scale * (0.5 - rocket.placeable.anchor.y)),
-        y: rocket.position.y 
-            + Math.sin(rocket.rotation) * (rocket.placeable.size.width  * rocket.placeable.scale * (0.5 - rocket.placeable.anchor.x)) 
-            + Math.cos(rocket.rotation) * (rocket.placeable.size.height * rocket.placeable.scale * (0.5 - rocket.placeable.anchor.y))
-    }
+    const positionAtCenter = changeAnchor(
+        rocket.position,
+        rocket.rotation,
+        { 
+            width: rocket.placeable.size.width  * rocket.placeable.scale,
+            height: rocket.placeable.size.height * rocket.placeable.scale
+        },
+        rocket.placeable.anchor,
+        { x: 0.5, y: 0.5 }
+    )
 
     console.log(`rotation: ${rocket.rotation}`)
 

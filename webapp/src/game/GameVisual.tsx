@@ -2,6 +2,8 @@ import { useApp, useTick } from "@inlet/react-pixi"
 import { useCallback, useEffect, useRef, useState } from "react"
 import useGameStore, { GameState, GameStore } from "./GameStore"
 import * as PIXI from "pixi.js"
+import RAPIER from "@dimforge/rapier2d-compat"
+import { changeAnchor } from "../utility/math"
 
 export function GameVisual() { 
     const app = useApp()
@@ -43,6 +45,35 @@ export function GameVisual() {
                 g.drawPolygon(shape.vertices)
                 g.endFill()
             }
+
+            const {
+                cast,
+                ray,
+                rayStart,
+                rayTarget
+            } = store.state.rocketGroundRayRaw()
+
+            if (cast) {
+                g.lineStyle(2, 0xff0000)
+                g.moveTo(rayStart.x, rayStart.y)
+                g.lineTo(rayTarget.x, rayTarget.y)
+
+                const p = ray.pointAt(cast.toi)
+
+                g.beginFill(0xff0000)
+                g.drawCircle(p.x, p.y, 5)
+                g.endFill()
+            }
+            else {
+                g.lineStyle(2, 0x00ff00)
+                g.moveTo(rayStart.x, rayStart.y)
+                g.lineTo(rayTarget.x, rayTarget.y)
+            }
+
+            g.lineStyle(0) 
+            g.beginFill(0x00ff00 )
+            g.drawCircle(rayStart.x, rayStart.y, 5)
+            g.endFill()
         }
 
         if (graphicsRef.current == undefined) {
@@ -59,21 +90,16 @@ export function GameVisual() {
         return useGameStore.subscribe(update)
     }), [ app ]
 
-    const state = useGameStore(store => 
-        store.state != null ? ({
-            rapierWorld: store.state.rapierWorld,
-            rocket: store.state.rocket,
-            initialRotation: store.state.rocket.rotation()
-    }) : null)
+    const state = useGameStore(store => store.state)
     
     const spacebarPressedRef = useRef<boolean>(false)
     const rotation = useRef<number>(0)
 
     useEffect(() => {
         if (state != null) {
-            rotation.current = state.initialRotation
+            rotation.current = state?.rocketObject.rotation
         }
-    }, [ state?.initialRotation ])
+    }, [ state?.rocketObject.rotation ])
 
     useEffect(() => {
         if (state == null) {
@@ -87,6 +113,11 @@ export function GameVisual() {
                 const force = {
                     x: 0,
                     y: -2.675
+                }
+                
+                if (state.rocketGroundRay()) {
+                    force.x *= 1.3
+                    force.y *= 1.3
                 }
 
                 const rotation = state.rocket.rotation()

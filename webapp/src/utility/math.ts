@@ -1,3 +1,5 @@
+import sin from "@stdlib/math/base/special/sin"
+import cos from "@stdlib/math/base/special/cos"
 
 export const changeAnchor = (
     position: { x: number; y: number },
@@ -8,9 +10,9 @@ export const changeAnchor = (
 ) =>
     ({
         x: position.x 
-            + Math.cos(rotation) * (size.width  * (targetAnchor.x - sourceAnchor.x)) 
-            - Math.sin(rotation) * (size.height * (targetAnchor.y - sourceAnchor.y)),
+            + cos(rotation) * (size.width  * (targetAnchor.x - sourceAnchor.x)) 
+            - sin(rotation) * (size.height * (targetAnchor.y - sourceAnchor.y)),
         y: position.y 
-            + Math.sin(rotation) * (size.width  * (targetAnchor.x - sourceAnchor.x)) 
-            + Math.cos(rotation) * (size.height * (targetAnchor.y - sourceAnchor.y))
+            + sin(rotation) * (size.width  * (targetAnchor.x - sourceAnchor.x)) 
+            + cos(rotation) * (size.height * (targetAnchor.y - sourceAnchor.y))
     })

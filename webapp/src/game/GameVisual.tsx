@@ -4,6 +4,8 @@ import useGameStore, { GameState, GameStore } from "./GameStore"
 import * as PIXI from "pixi.js"
 import RAPIER from "@dimforge/rapier2d-compat"
 import { changeAnchor } from "../utility/math"
+import sin from "@stdlib/math/base/special/sin"
+import cos from "@stdlib/math/base/special/cos"
 
 export function GameVisual() { 
     const app = useApp()
@@ -123,8 +125,8 @@ export function GameVisual() {
                 const rotation = state.rocket.rotation()
 
                 const rotatedForce = {
-                    x: force.x * Math.cos(rotation) - force.y * Math.sin(rotation),
-                    y: force.x * Math.sin(rotation) + force.y * Math.cos(rotation)
+                    x: force.x * cos(rotation) - force.y * sin(rotation),
+                    y: force.x * sin(rotation) + force.y * cos(rotation)
                 }
 
                 state.rocket.applyImpulse(rotatedForce, true)

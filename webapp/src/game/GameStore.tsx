@@ -1,7 +1,7 @@
 import RAPIER, { ColliderDesc, RayColliderToi } from "@dimforge/rapier2d-compat"
-import { create } from "zustand";
-import { ObjectInWorld, Shape, World } from "../editor/World";
-import { changeAnchor } from "../utility/math";
+import { create } from "zustand"
+import { ObjectInWorld, Shape, World } from "../editor/World"
+import { changeAnchor } from "../utility/math"
 
 RAPIER.init()
 
@@ -218,7 +218,7 @@ function verticesForShape(shape: Shape): [ Float32Array, number, number ] {
     const left = shape.vertices.reduce((acc, vertex) => Math.min(acc, vertex.x), Infinity)
     const top  = shape.vertices.reduce((acc, vertex) => Math.min(acc, vertex.y), Infinity)
 
-    const vertices = new Float32Array(shape.vertices.length * 2);
+    const vertices = new Float32Array(shape.vertices.length * 2 + 2);
 
     shape.vertices.forEach((vertex, i) => {
         vertices[i * 2] = vertex.x - left;

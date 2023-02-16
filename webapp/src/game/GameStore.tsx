@@ -20,8 +20,10 @@ export interface GameStore {
 const useGameStore = create<GameStore>((set, get) => ({
     state: null,
     prepare: (world: World) => {
+        console.log(`Preparing game world: '${JSON.stringify(world)}'`)
+
         const rapierWorld = new RAPIER.World(
-            { x: 0.0, y: 9.81 }
+            { x: 0.0, y: 9.81 * 4 }
         )
 
         world.shapes.forEach(shape => 
@@ -54,10 +56,15 @@ function createRocket(rapierWorld: RAPIER.World, world: World): [ RAPIER.RigidBo
 
     const rocket = rockets[0]
 
-    // upper left corner of rocket from rocket.position, rocket.placaable.anchor, rocket.placeable.scale and rocket.rotation
+    // given rocket.position rocket.rotation rocket.placeable.size rocket.placeable.scale rocket.placeable.anchor
+    // find position of center of rocket
     const positionAtCenter = {
-        x: rocket.position.x - rocket.placeable.size.width * rocket.placeable.anchor.x * rocket.placeable.scale * Math.cos(rocket.rotation) + rocket.placeable.size.height * rocket.placeable.anchor.y * rocket.placeable.scale * Math.sin(rocket.rotation),
-        y: rocket.position.y - rocket.placeable.size.width * rocket.placeable.anchor.x * rocket.placeable.scale * Math.sin(rocket.rotation) - rocket.placeable.size.height * rocket.placeable.anchor.y * rocket.placeable.scale * Math.cos(rocket.rotation)
+        x: rocket.position.x 
+            + Math.cos(rocket.rotation) * (rocket.placeable.size.width  * rocket.placeable.scale * (0.5 - rocket.placeable.anchor.x)) 
+            - Math.sin(rocket.rotation) * (rocket.placeable.size.height * rocket.placeable.scale * (0.5 - rocket.placeable.anchor.y)),
+        y: rocket.position.y 
+            + Math.sin(rocket.rotation) * (rocket.placeable.size.width  * rocket.placeable.scale * (0.5 - rocket.placeable.anchor.x)) 
+            + Math.cos(rocket.rotation) * (rocket.placeable.size.height * rocket.placeable.scale * (0.5 - rocket.placeable.anchor.y))
     }
 
     console.log(`rotation: ${rocket.rotation}`)
@@ -66,6 +73,9 @@ function createRocket(rapierWorld: RAPIER.World, world: World): [ RAPIER.RigidBo
         RAPIER.RigidBodyDesc.dynamic()
             .setTranslation(positionAtCenter.x, positionAtCenter.y)
             .setRotation(rocket.rotation)
+            .lockRotations()
+            .setCcdEnabled(true)
+            .setAngularDamping(0.05)
     )
 
     // Points directly taken from svg
@@ -75,12 +85,18 @@ function createRocket(rapierWorld: RAPIER.World, world: World): [ RAPIER.RigidBo
         291, 297, 296, 334, 300, 600, 300, 600, 190, 502, 110, 502
     ])
 
+    // Move all points by 50% up and 50% left
+    for (let i = 0; i < points.length; i += 2) {
+        points[i] -= 150
+        points[i + 1] -= 300
+    }
+
     // Svg is will be scaled before draw, therefore we need to scale the points
     for (let i = 0; i < points.length; i++) {
         points[i] *= rocket.placeable.scale;
     }
 
-    const colliderDesc = RAPIER.ColliderDesc.convexHull(points)
+    const colliderDesc = RAPIER.ColliderDesc.convexHull(points)?.setMass(4)
 
     if (colliderDesc == null) {
         throw new Error("Failed to create collider")

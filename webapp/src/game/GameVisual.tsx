@@ -96,6 +96,7 @@ export function GameVisual() {
     
     const spacebarPressedRef = useRef<boolean>(false)
     const rotation = useRef<number>(0)
+    const rotationLocked = useRef<boolean>(true)
 
     useEffect(() => {
         if (state != null) {
@@ -107,6 +108,8 @@ export function GameVisual() {
         if (state == null) {
             return () => {}
         }
+
+        const queue = new RAPIER.EventQueue(true)
 
         // every rapierWorld?.timestep
         const interval = setInterval(() => {
@@ -132,9 +135,29 @@ export function GameVisual() {
                 state.rocket.applyImpulse(rotatedForce, true)
             }
 
-            state.rocket.setRotation(rotation.current, true)
+            if (rotationLocked.current) {
+                state.rocket.setRotation(rotation.current, true)
+            }
+            else {
+                rotation.current = state.rocket.rotation()
+            }
 
-            state.rapierWorld.step()
+            state.rapierWorld.step(queue)
+
+            queue.drainCollisionEvents((h1, h2, started) => {
+                const r1 = state.rapierWorld.getCollider(h1).parent()
+                const r2 = state.rapierWorld.getCollider(h2).parent()
+
+                if (r1 == state.rocket || r2 == state.rocket) {
+                    if (started) {
+                        rotationLocked.current = false
+                    }
+                    else {
+                        rotationLocked.current = true
+                    }
+                }
+            })
+
             update(useGameStore.getState())
         }, state.rapierWorld.timestep)
 
@@ -164,8 +187,6 @@ export function GameVisual() {
             referencePoint = e.data.global.x
             referenceRotation = rotation.current
             isMouseDown = true
-
-            console.log(`referencePoint: ${referencePoint}, referenceRotation: ${referenceRotation}`)
         }
 
         const onMouseMove = (e: PIXI.InteractionEvent) => {
@@ -175,8 +196,6 @@ export function GameVisual() {
 
             const delta = e.data.global.x - referencePoint
             rotation.current = referenceRotation + delta / 200
-   
-            console.log(rotation.current)
         }
 
         const onMouseUp = (e: PIXI.InteractionEvent) => {

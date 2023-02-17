@@ -136,7 +136,6 @@ function createRocket(rapierWorld: RAPIER.World, world: World): [ RAPIER.RigidBo
         RAPIER.RigidBodyDesc.dynamic()
             .setTranslation(positionAtCenter.x, positionAtCenter.y)
             .setRotation(rocket.rotation)
-            .lockRotations()
             .setCcdEnabled(true)
             .setAngularDamping(0.05)
     )
@@ -159,7 +158,9 @@ function createRocket(rapierWorld: RAPIER.World, world: World): [ RAPIER.RigidBo
         points[i] *= rocket.placeable.scale;
     }
 
-    const colliderDesc = RAPIER.ColliderDesc.convexHull(points)?.setMass(4)
+    const colliderDesc = RAPIER.ColliderDesc.convexHull(points)
+        ?.setMass(4)
+        ?.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
 
     if (colliderDesc == null) {
         throw new Error("Failed to create collider")
@@ -173,34 +174,13 @@ function createRocket(rapierWorld: RAPIER.World, world: World): [ RAPIER.RigidBo
     return [ body, rocket ]
 }
 
-function createObjectBody(rapierWorld: RAPIER.World, object: ObjectInWorld) {
-    const body = rapierWorld.createRigidBody(
-        RAPIER.RigidBodyDesc.dynamic()
-            .setTranslation(object.position.x, object.position.y)
-            .setRotation(object.rotation)
-    );
-
-    const colliderDesc = RAPIER.ColliderDesc.ball(10);
-
-    if (colliderDesc == null) {
-        throw new Error("Failed to create collider");
-    }
-
-    const collider = rapierWorld.createCollider(
-        colliderDesc,
-        body
-    );
-
-    return body
-}
-
 function createShapeBody(shape: Shape, rapierWorld: RAPIER.World) {
     const [vertices, top, left] = verticesForShape(shape);
 
     const body = rapierWorld.createRigidBody(
         RAPIER.RigidBodyDesc.fixed()
             .setTranslation(left, top)
-    );
+    )
 
     const colliderDesc = RAPIER.ColliderDesc.polyline(vertices);
 
@@ -211,7 +191,7 @@ function createShapeBody(shape: Shape, rapierWorld: RAPIER.World) {
     const collider = rapierWorld.createCollider(
         colliderDesc,
         body
-    );
+    )
 }
 
 function verticesForShape(shape: Shape): [ Float32Array, number, number ] {

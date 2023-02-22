@@ -16,217 +16,150 @@ const useTestStore = create<TestStore>((set) => ({
     increaseTest: () => set((state) => ({ test: state.test + 1 }))
 }))
 
+interface ThreeRefs {
+    box: THREE.PlaneGeometry
+}
+
 export function ThreeTest() {
     const [width, setWidth] = useState<number>(window.innerWidth)
     const [height, setHeight] = useState<number>(window.innerHeight)
 
-    const boxRef = useRef<THREE.PlaneGeometry>()
-    const sceneRef = useRef<THREE.Scene>(new Scene())
-    const cameraRef = useRef<THREE.OrthographicCamera>(new OrthographicCamera())
+    const threeRefs = useRef<ThreeRefs>()
 
-    const updateCamera = (width: number, height: number) => {
-        if (cameraRef.current) {
-            console.log("updating camera")
-            console.log(`width: ${width}, height: ${height}`)
+    const onStoreChange = useCallback(
+        (state: TestStore, camera: THREE.Camera, scene: THREE.Scene) => {
+            if (!threeRefs.current) {
+                console.log("Creating three refs")
 
-            const camera = cameraRef.current
-            camera.left = -width / 2
-            camera.right = width / 2
-            camera.top = height / 2
-            camera.bottom = -height / 2
-            camera.updateProjectionMatrix()
-        }
-    }
+                threeRefs.current = {
+                    box: new THREE.PlaneGeometry(100, 100)
+                }
+                
+                const box = new THREE.Mesh(threeRefs.current.box, new THREE.MeshBasicMaterial({ color: 0x00ff00 }))
+                box.position.set(0, 0, -1)
+                scene.add(box)
+            }
+        }, 
+        []
+    )
 
     useEffect(() => {
-        const box = new THREE.PlaneGeometry(100, 100)
-        boxRef.current = box
-
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide })
-        const cube = new THREE.Mesh(box, material)
-
-        cube.position.set(0, 0, -1)
-
-        sceneRef.current.add(cube)
-
-        updateCamera(width, height)
-
+        useTestStore.getState().increaseTest()
     }, [])
 
-    useEffect(() => {
-        const resize = () => {
-            console.log(`resizing to ${window.innerWidth}x${window.innerHeight}`)
-
-            setWidth(window.innerWidth)
-            setHeight(window.innerHeight)
-
-            updateCamera(window.innerWidth, window.innerHeight)
-
-            useTestStore.getState().increaseTest()
-        }
-
-        window.addEventListener("resize", resize)
-
-        return () => {
-            window.removeEventListener("resize", resize)
-        }
-    }, [updateCamera])
-
     return (
-        <div className="overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
             <div className="absolute">
                 <h1>Three.js Test</h1>
             </div>
-            <ThreeZustandRenderer 
+            <ThreeCanvas
+                store={useTestStore}
                 width={width}
                 height={height}
-                store={useTestStore} 
-                handler={(state) => {
-                    console.log(`left: ${cameraRef.current.left}`)
-                    return [ sceneRef.current, cameraRef.current ]
-                }}
+                onStoreChange={onStoreChange}
             />
         </div>
     )
 }
 
-
-
-interface ThreeZustandRendererProps<T> {
-    width: number
-    height: number
-    store: UseBoundStore<StoreApi<T>>
-    handler: (t: T) => [ THREE.Scene?, THREE.Camera? ]
-}
-
-function ThreeZustandRenderer<T>(props: ThreeZustandRendererProps<T>) {
-    const sceneRenderer = useCallback((renderer: THREE.Renderer) => {
-        const handler = (state: T) => {
-            const [ scene, camera ] = props.handler(state)
-
-            if (!scene || !camera) {
-                console.log("No scene or camera")
-                return
-            }
-
-            console.log("Rendering")
-
-            renderer.render(scene, camera)
-        }
-
-        handler(props.store.getState())
-        return props.store.subscribe(handler)
-    }, [ props.handler ])
-
-    return (
-        <ThreeCanvas
-            width={props.width}
-            height={props.height}
-            sceneRenderer={sceneRenderer} />
-    )
-}
-
-interface ThreeWorldProps {
-    scene: THREE.Scene
-    camera: THREE.Camera
-
-    width: number
-    height: number
-}
-
-function ThreeWorld(props: ThreeWorldProps) {
-    const sceneRenderer = useCallback((renderer: THREE.Renderer) => {
-        const handler = (state: T) => {
-            const [ scene, camera ] = props.handler(state)
-
-            if (!scene || !camera) {
-                console.log("No scene or camera")
-                return
-            }
-
-            console.log("Rendering")
-
-            renderer.render(scene, camera)
-        }
-
-        handler(props.store.getState())
-        return props.store.subscribe(handler)
-        
-    }, [ props.camera, props.scene ])
-
-    return (
-        <ThreeCanvas
-            width={props.width}
-            height={props.height}
-            sceneRenderer={sceneRenderer} />
-    )
-}
-
-interface ThreeCanvasEvent<T> {
-    width: number
-    height: number
-
-    state: T
-    scene: THREE.Scene
-    camera: THREE.Camera
-}
-
 interface ThreeCanvasProps<T> {
     store: UseBoundStore<StoreApi<T>>
-    handler: (state: T, scene: THREE.Scene, camera: THREE.Camera) => void    
+
+    onStoreChange: (state: T, camera: THREE.Camera, scene: THREE.Scene) => void
+    onSizeChange?: (width: number, height: number, camera: THREE.Camera, scene: THREE.Scene) => void
 
     width: number
     height: number
+}
+
+interface ThreeCanvasRefs {
+    three: THREE.WebGLRenderer
+    scene: THREE.Scene
+    camera: THREE.OrthographicCamera
 }
 
 function ThreeCanvas<T>(props: ThreeCanvasProps<T>) {
-    const threeRef = useRef<THREE.WebGLRenderer>(new THREE.WebGLRenderer({ antialias: true }))
-    const sceneRef = useRef<THREE.Scene>(new THREE.Scene())
-    const cameraRef = useRef<THREE.OrthographicCamera>(new THREE.OrthographicCamera())
+    const refs = useRef<ThreeCanvasRefs>()
+    const canvasRef = useRef<HTMLCanvasElement>(null)
 
     useEffect(() => {
-        const three = document.getElementById("three")
-        
-        if (!three) {
-            console.error("Could not find element with id 'three'")
+        // sanity check
+        if (!canvasRef.current) {
+            throw new Error("Canvas ref is null")
+        }
+
+        // when using react debugging tools, useEffect can be called
+        // multiple times when refs is already set. To prevent overriding
+        // the refs, we check if it is already set
+        if (refs.current) {
             return
         }
 
-        three.replaceWith(threeRef.current.domElement)
-        threeRef.current.setSize(props.width, props.height)
-
-        const process = (state: T) => {
-            props.handler(state, sceneRef.current, cameraRef.current)
-            threeRef.current.render(sceneRef.current, cameraRef.current)
+        refs.current = {
+            three: new THREE.WebGLRenderer({
+                canvas: canvasRef.current,
+                antialias: true
+            }),
+            scene: new THREE.Scene(),
+            camera: new THREE.OrthographicCamera()
         }
 
-        process(props.store.getState())
-        return props.store.subscribe(process)
+        const updateRendererWithState = (refs: ThreeCanvasRefs) => (state: T) => {
+            props.onStoreChange(state, refs.camera, refs.scene)
+            refs.three.render(refs.scene, refs.camera)
+        }
+
+        updateRendererWithState(refs.current)(props.store.getState())
+        return props.store.subscribe(updateRendererWithState(refs.current))
 
     }, [])
 
     useEffect(() => {
-        if (!threeRef.current) {
-            return
+        if (!refs.current || !canvasRef.current) {
+            throw new Error("Refs are null")
         }
 
-        threeRef.current.setSize(
-            Math.ceil(props.width - 1), 
-            Math.ceil(props.height - 1)
-        )
+        const onResize = (refs: ThreeCanvasRefs, canvas: HTMLCanvasElement) => () => {
+            refs.three.setSize(canvas.clientWidth, canvas.clientHeight, false)
 
-        cameraRef.current.left = -props.width / 2
-        cameraRef.current.right = props.width / 2
-        cameraRef.current.top = props.height / 2
-        cameraRef.current.bottom = -props.height / 2
+            canvas.width = canvas.clientWidth
+            canvas.height = canvas.clientHeight
 
-        cameraRef.current.updateProjectionMatrix()
+            if (props.onSizeChange) {
+                props.onSizeChange(props.width, props.height, refs.camera, refs.scene)
+            }
+            else {
+                refs.camera.left = -canvas.clientWidth / 2
+                refs.camera.right = canvas.clientWidth / 2
+                refs.camera.top = canvas.clientHeight / 2
+                refs.camera.bottom = -canvas.clientHeight / 2
+
+                refs.camera.updateProjectionMatrix()
+            }
+
+            refs.three.render(refs.scene, refs.camera)
+        }
+
+        // see https://stackoverflow.com/a/73831830
+        const observer = new ResizeObserver(onResize(refs.current, canvasRef.current))
+        observer.observe(canvasRef.current)
+
+        onResize(refs.current, canvasRef.current)()
+
+        console.log("Resizing")
+
+        return () => {
+            observer.disconnect()
+        }
 
     }, [ props.width, props.height ])
 
+    // we reaaaly want to use our own canvas. the given canvas by threejs does not respond
+    // to resize events correctly and also when resizing does not set the correct size resulting
+    // in a scroll bar
     return (
-        <div id="three" />
+        <canvas ref={canvasRef} className="display-block w-full h-full" />
     )
 }
   
-export default ThreeZustandRenderer
+export default ThreeCanvas

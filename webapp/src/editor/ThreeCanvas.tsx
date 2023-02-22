@@ -90,6 +90,8 @@ export function ThreeTest() {
     )
 }
 
+
+
 interface ThreeZustandRendererProps<T> {
     width: number
     height: number
@@ -117,21 +119,70 @@ function ThreeZustandRenderer<T>(props: ThreeZustandRendererProps<T>) {
     }, [ props.handler ])
 
     return (
-        <ThreeRenderer
+        <ThreeCanvas
             width={props.width}
             height={props.height}
             sceneRenderer={sceneRenderer} />
     )
 }
 
-interface ThreeRendererProps {
+interface ThreeWorldProps {
+    scene: THREE.Scene
+    camera: THREE.Camera
+
     width: number
     height: number
-    sceneRenderer: (renderer: THREE.Renderer) => () => void
 }
 
-function ThreeRenderer(props: ThreeRendererProps) {
-    const threeRef = useRef<THREE.WebGLRenderer>()
+function ThreeWorld(props: ThreeWorldProps) {
+    const sceneRenderer = useCallback((renderer: THREE.Renderer) => {
+        const handler = (state: T) => {
+            const [ scene, camera ] = props.handler(state)
+
+            if (!scene || !camera) {
+                console.log("No scene or camera")
+                return
+            }
+
+            console.log("Rendering")
+
+            renderer.render(scene, camera)
+        }
+
+        handler(props.store.getState())
+        return props.store.subscribe(handler)
+        
+    }, [ props.camera, props.scene ])
+
+    return (
+        <ThreeCanvas
+            width={props.width}
+            height={props.height}
+            sceneRenderer={sceneRenderer} />
+    )
+}
+
+interface ThreeCanvasEvent<T> {
+    width: number
+    height: number
+
+    state: T
+    scene: THREE.Scene
+    camera: THREE.Camera
+}
+
+interface ThreeCanvasProps<T> {
+    store: UseBoundStore<StoreApi<T>>
+    handler: (state: T, scene: THREE.Scene, camera: THREE.Camera) => void    
+
+    width: number
+    height: number
+}
+
+function ThreeCanvas<T>(props: ThreeCanvasProps<T>) {
+    const threeRef = useRef<THREE.WebGLRenderer>(new THREE.WebGLRenderer({ antialias: true }))
+    const sceneRef = useRef<THREE.Scene>(new THREE.Scene())
+    const cameraRef = useRef<THREE.OrthographicCamera>(new THREE.OrthographicCamera())
 
     useEffect(() => {
         const three = document.getElementById("three")
@@ -141,12 +192,16 @@ function ThreeRenderer(props: ThreeRendererProps) {
             return
         }
 
-        threeRef.current = new THREE.WebGLRenderer()
         three.replaceWith(threeRef.current.domElement)
-        
         threeRef.current.setSize(props.width, props.height)
 
-        return props.sceneRenderer(threeRef.current)
+        const process = (state: T) => {
+            props.handler(state, sceneRef.current, cameraRef.current)
+            threeRef.current.render(sceneRef.current, cameraRef.current)
+        }
+
+        process(props.store.getState())
+        return props.store.subscribe(process)
 
     }, [])
 
@@ -160,11 +215,18 @@ function ThreeRenderer(props: ThreeRendererProps) {
             Math.ceil(props.height - 1)
         )
 
+        cameraRef.current.left = -props.width / 2
+        cameraRef.current.right = props.width / 2
+        cameraRef.current.top = props.height / 2
+        cameraRef.current.bottom = -props.height / 2
+
+        cameraRef.current.updateProjectionMatrix()
+
     }, [ props.width, props.height ])
 
     return (
         <div id="three" />
     )
 }
-
+  
 export default ThreeZustandRenderer

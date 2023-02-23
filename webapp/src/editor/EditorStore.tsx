@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { ObjectInWorld, Shape, Vertex, World } from "./World";
-import PIXI from "pixi.js";
+import * as PIXI from "pixi.js";
+import { EditorWorld, insertShape, newEditorShape } from "./EditorWorld";
 
 interface HighlightedVertex {
     vertex: Vertex
@@ -36,9 +37,10 @@ interface Mutation {
 }
 
 interface EditorState {
-    mode: EditorModeType,
-    editingMode: EditingModeType,
+    mode: EditorModeType
+    editingMode: EditingModeType
 
+    editorWorld: EditorWorld
     world: World
     worldMods: VisualWorldMods
 
@@ -56,12 +58,17 @@ export interface EditorStore extends EditorState {
 
     applyVisualMods: (mods: VisualWorldMods) => void
     resetVisualMods: () => void
+
+    test: () => void
 }
 
 const initialEditorState: EditorState = {
     mode: EditorModeType.Editing,
     editingMode: EditingModeType.Placement,
 
+    editorWorld: {
+        shapes: [],
+    },
     world: JSON.parse("{\"shapes\":[{\"vertices\":[{\"x\":337,\"y\":621},{\"x\":380,\"y\":620},{\"x\":360,\"y\":560},{\"x\":600,\"y\":560},{\"x\":600,\"y\":640},{\"x\":387,\"y\":721}]},{\"vertices\":[{\"x\":900,\"y\":880},{\"x\":840,\"y\":820},{\"x\":780,\"y\":880},{\"x\":660,\"y\":800},{\"x\":700,\"y\":700},{\"x\":920,\"y\":700},{\"x\":940,\"y\":740},{\"x\":1014,\"y\":707},{\"x\":1040,\"y\":800},{\"x\":964,\"y\":807}]},{\"vertices\":[{\"x\":1040,\"y\":300},{\"x\":860,\"y\":300},{\"x\":880,\"y\":220},{\"x\":960,\"y\":240},{\"x\":1080,\"y\":240},{\"x\":1125,\"y\":197},{\"x\":1180,\"y\":220},{\"x\":1240,\"y\":200},{\"x\":1240,\"y\":260},{\"x\":1175,\"y\":297}]},{\"vertices\":[{\"x\":1253,\"y\":532},{\"x\":1353,\"y\":532},{\"x\":1420,\"y\":680},{\"x\":1360,\"y\":820},{\"x\":1440,\"y\":860},{\"x\":1520,\"y\":860},{\"x\":1640,\"y\":820},{\"x\":1580,\"y\":740},{\"x\":1680,\"y\":740},{\"x\":1700,\"y\":640},{\"x\":1820,\"y\":560},{\"x\":1900,\"y\":580},{\"x\":1980,\"y\":580},{\"x\":1900,\"y\":640},{\"x\":1960,\"y\":760},{\"x\":1900,\"y\":760},{\"x\":1860,\"y\":840},{\"x\":1840,\"y\":740},{\"x\":1780,\"y\":700},{\"x\":1720,\"y\":880},{\"x\":1440,\"y\":940},{\"x\":1280,\"y\":900},{\"x\":1303,\"y\":632}]},{\"vertices\":[{\"x\":932,\"y\":1110},{\"x\":1020,\"y\":1140},{\"x\":1080,\"y\":1080},{\"x\":1180,\"y\":1080},{\"x\":1260,\"y\":1120},{\"x\":1200,\"y\":1180},{\"x\":982,\"y\":1210}]}],\"objects\":[]}"),
 
     worldMods: {},
@@ -72,6 +79,11 @@ const initialEditorState: EditorState = {
 
 const useEditorStore = create<EditorStore>((set) => ({
     ...initialEditorState,
+    test: () => {
+        // random position
+        const position = new PIXI.Point(Math.random() * 1000 - 500, Math.random() * 1000 - 500);
+        return set(state => ({ ...state, editorWorld: insertShape(state.editorWorld, newEditorShape([{ x: position.x, y: position.y }, { x: position.x + 100, y: position.y }, { x: position.x + 100, y: position.y + 100 }, { x: position.x, y: 100 }])) }))
+    },
     setMode: (mode: EditorModeType) => set(state => ({ ...state, mode })),
     setEditingMode: (editingMode: EditingModeType) => set(state => ({ ...state, editingMode })),
     mutateWorld: (mutation: Mutation) =>

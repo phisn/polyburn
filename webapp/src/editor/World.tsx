@@ -89,7 +89,7 @@ export function findClosestVertex(shapes: Shape[], point: Vertex, snapDistance: 
     return { point: closestPoint, shapeIndex: shapeIndex, vertexIndex: vertexIndex };
 }
 
-export function findClosestEdge(shapes: Shape[], point: Vertex, snapDistance: number) {
+export function findClosestEdge(shapes: { vertices: Vertex[] }[], point: Vertex, snapDistance: number) {
     let minDistance = Number.MAX_VALUE;
     let closestPoint: Vertex = { x: 0, y: 0 };
     let shapeIndex: number = 0;

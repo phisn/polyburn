@@ -1,9 +1,42 @@
 import { Graphics, Sprite, useApp } from "@inlet/react-pixi"
 import * as PIXI from "pixi.js"
 import { useCallback, useEffect, useRef, useState } from "react"
+import * as THREE from "three"
 import { shallow } from "zustand/shallow"
-import useEditorStore, { VisualWorldMods } from "./EditorStore"
+import ThreeCanvas from "../utility/ThreeCanvas"
+import useEditorStore, { EditorStore, VisualWorldMods } from "./EditorStore"
 import { EditingModeType } from "./EditorStore"
+import { EditorWorld } from "./EditorWorld"
+
+export function WorldCanvas() {
+    const onStoreChange = useCallback(
+        (store: EditorStore, camera: THREE.OrthographicCamera, scene: THREE.Scene) => {
+            console.log(`camera: ${camera}, scene: ${scene}`)
+
+            scene.clear()
+            
+            if (store.editorWorld.shapes.length > 0) {
+                scene.add(...store.editorWorld.shapes.map((shape) => shape.mesh))
+            }
+        },
+        []
+    )
+
+    const onSizeChange = useCallback(
+        (width: number, height: number) => {
+        }, 
+        []
+    )
+
+    return (
+        <div>
+            <ThreeCanvas
+                store={useEditorStore}
+                onStoreChange={onStoreChange}
+            />
+        </div>
+    )
+}
 
 function WorldGraphics() {
     const app = useApp()

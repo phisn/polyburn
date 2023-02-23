@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import App from './App'
 import Editor from './editor/Editor'
-import { ThreeTest } from './editor/ThreeCanvas'
+import { ThreeTest } from './utility/ThreeCanvas'
 import './main.css'
 
 ReactDOM.render(

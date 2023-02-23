@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import * as THREE from "three"
 import { OrthographicCamera, Scene } from "three"
 import { UseBoundStore, StoreApi, create } from "zustand"
+import useEditorStore from "../editor/EditorStore"
+import { WorldCanvas } from "../editor/WorldCanvas"
 
 interface TestStore {
     test: number
@@ -21,43 +23,17 @@ interface ThreeRefs {
 }
 
 export function ThreeTest() {
-    const [width, setWidth] = useState<number>(window.innerWidth)
-    const [height, setHeight] = useState<number>(window.innerHeight)
-
-    const threeRefs = useRef<ThreeRefs>()
-
-    const onStoreChange = useCallback(
-        (state: TestStore, camera: THREE.Camera, scene: THREE.Scene) => {
-            if (!threeRefs.current) {
-                console.log("Creating three refs")
-
-                threeRefs.current = {
-                    box: new THREE.PlaneGeometry(100, 100)
-                }
-                
-                const box = new THREE.Mesh(threeRefs.current.box, new THREE.MeshBasicMaterial({ color: 0x00ff00 }))
-                box.position.set(0, 0, -1)
-                scene.add(box)
-            }
-        }, 
-        []
-    )
-
-    useEffect(() => {
-        useTestStore.getState().increaseTest()
-    }, [])
-
     return (
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
             <div className="absolute">
                 <h1>Three.js Test</h1>
+                <button className="btn" onClick={() => {
+                    useEditorStore.getState().test()
+                }}>
+                    Increase
+                </button>
             </div>
-            <ThreeCanvas
-                store={useTestStore}
-                width={width}
-                height={height}
-                onStoreChange={onStoreChange}
-            />
+            <WorldCanvas />
         </div>
     )
 }
@@ -65,11 +41,8 @@ export function ThreeTest() {
 interface ThreeCanvasProps<T> {
     store: UseBoundStore<StoreApi<T>>
 
-    onStoreChange: (state: T, camera: THREE.Camera, scene: THREE.Scene) => void
-    onSizeChange?: (width: number, height: number, camera: THREE.Camera, scene: THREE.Scene) => void
-
-    width: number
-    height: number
+    onStoreChange: (state: T, camera: THREE.OrthographicCamera, scene: THREE.Scene) => void
+    onSizeChange?: (width: number, height: number, camera: THREE.OrthographicCamera, scene: THREE.Scene) => void
 }
 
 interface ThreeCanvasRefs {
@@ -106,6 +79,7 @@ function ThreeCanvas<T>(props: ThreeCanvasProps<T>) {
 
         const updateRendererWithState = (refs: ThreeCanvasRefs) => (state: T) => {
             props.onStoreChange(state, refs.camera, refs.scene)
+            console.log("Rendering")
             refs.three.render(refs.scene, refs.camera)
         }
 
@@ -126,7 +100,7 @@ function ThreeCanvas<T>(props: ThreeCanvasProps<T>) {
             canvas.height = canvas.clientHeight
 
             if (props.onSizeChange) {
-                props.onSizeChange(props.width, props.height, refs.camera, refs.scene)
+                props.onSizeChange(canvas.clientWidth, canvas.clientHeight, refs.camera, refs.scene)
             }
             else {
                 refs.camera.left = -canvas.clientWidth / 2
@@ -135,6 +109,8 @@ function ThreeCanvas<T>(props: ThreeCanvasProps<T>) {
                 refs.camera.bottom = -canvas.clientHeight / 2
 
                 refs.camera.updateProjectionMatrix()
+                
+                console.log("Resizing")
             }
 
             refs.three.render(refs.scene, refs.camera)
@@ -146,13 +122,11 @@ function ThreeCanvas<T>(props: ThreeCanvasProps<T>) {
 
         onResize(refs.current, canvasRef.current)()
 
-        console.log("Resizing")
-
         return () => {
             observer.disconnect()
         }
 
-    }, [ props.width, props.height ])
+    }, [])
 
     // we reaaaly want to use our own canvas. the given canvas by threejs does not respond
     // to resize events correctly and also when resizing does not set the correct size resulting

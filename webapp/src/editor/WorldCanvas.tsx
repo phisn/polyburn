@@ -11,8 +11,7 @@ import { EditorWorld } from "./EditorWorld"
 export function WorldCanvas() {
     const onStoreChange = useCallback(
         (store: EditorStore, camera: THREE.OrthographicCamera, scene: THREE.Scene) => {
-            console.log(`camera: ${camera}, scene: ${scene}`)
-
+            console.log(`camera: ${camera}, scene: ${scene}, scene.children: ${scene.children.length}, shapes: ${store.editorWorld.shapes.length}`)
             scene.clear()
             
             if (store.editorWorld.shapes.length > 0) {
@@ -30,10 +29,12 @@ export function WorldCanvas() {
 
     return (
         <div>
+            {/*
             <ThreeCanvas
                 store={useEditorStore}
                 onStoreChange={onStoreChange}
             />
+            */}
         </div>
     )
 }

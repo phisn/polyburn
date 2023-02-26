@@ -20,9 +20,13 @@ function MoveVertexHandler(props: MoveVertexHandlerProps) {
 
     useEffect(() => {
         const onMouseUp = (e: PIXI.InteractionEvent) => {
-            let vertex = { x: e.data.global.x, y: e.data.global.y }
+            onMouseUpRaw(e.data.global.x, e.data.global.y, e.data.originalEvent.ctrlKey)
+        }
+
+        const onMouseUpRaw = (x: number, y: number, ctrl: boolean) => {
+            let vertex = { x, y }
     
-            if (e.data.originalEvent.shiftKey) {
+            if (ctrl) {
                 vertex = {
                     x: Math.round(vertex.x / snapDistance) * snapDistance,
                     y: Math.round(vertex.y / snapDistance) * snapDistance
@@ -126,9 +130,14 @@ function MoveVertexHandler(props: MoveVertexHandlerProps) {
     
         props.app.renderer.plugins.interaction.on("mousemove", onMouseMove)
         props.app.renderer.plugins.interaction.on("mouseup", onMouseUp)
-        props.app.renderer.plugins.interaction.on("mouseupoutside", onMouseUp)
         window.addEventListener("keyup", onKeyUp)
         window.addEventListener("keydown", onKeyDown)
+
+        const onMouseMoveJS = (e: MouseEvent) => onMouseMoveRaw(e.clientX, e.clientY, e.ctrlKey)
+        const onMouseUpJS = (e: MouseEvent) => onMouseUpRaw(e.clientX, e.clientY, e.ctrlKey)
+
+        document.getElementById("canvas")?.addEventListener("mousemove", onMouseMoveJS)
+        document.addEventListener("mouseup", onMouseUpJS)
     
         return () => {
             props.app.renderer.plugins.interaction.off("mousemove", onMouseMove)
@@ -136,6 +145,9 @@ function MoveVertexHandler(props: MoveVertexHandlerProps) {
             props.app.renderer.plugins.interaction.off("mouseupoutside", onMouseUp)
             window.removeEventListener("keyup", onKeyUp)
             window.removeEventListener("keydown", onKeyDown)
+
+            document.getElementById("canvas")?.removeEventListener("mousemove", onMouseMoveJS)
+            document.removeEventListener("mouseup", onMouseUpJS)
         }
     }, [ state.world, props ])
 

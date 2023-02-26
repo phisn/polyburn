@@ -51,3 +51,7 @@ export function mutateShapeAt(world: EditorWorld, index: number, mutate: (shape:
 export function insertShape(world: EditorWorld, shape: EditorShape) {
     return { ...world, shapes: [...world.shapes, shape] }
 }
+
+export function removeShape(world: EditorWorld, index: number) {
+    return { ...world, shapes: world.shapes.filter((_, i) => i !== index) }
+}

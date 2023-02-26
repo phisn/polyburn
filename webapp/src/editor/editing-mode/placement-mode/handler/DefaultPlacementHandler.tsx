@@ -5,11 +5,14 @@ import useEditorStore from "../../../EditorStore"
 import { shallow } from "zustand/shallow"
 import { findClosestEdge, findClosestVertex, isPointInsideObject } from "../../../World"
 import { highlightColor, highlightDeleteColor, highlightObjectColor, snapDistance } from "../PlacementModeSettings"
+import { insertShape, newEditorShape, removeShape } from "../../../EditorWorld"
 
 const DefaultHandler = (props: DefaultHandlerProps) => {
     const state = useEditorStore(state => ({
         world: state.world,
+        editorWorld: state.editorWorld,
         mutateWorld: state.mutateWorld,
+        mutateEditorWorld: state.mutateEditorWorld,
         resetVisualMods: state.resetVisualMods,
         applyVisualMods: state.applyVisualMods
     }), shallow)
@@ -70,11 +73,16 @@ const DefaultHandler = (props: DefaultHandlerProps) => {
                 return
             }
     
-            state.resetVisualMods()
+            // state.resetVisualMods()
         }
 
         const onMouseDown = (e: PIXI.InteractionEvent) => {
-            const point = { x: e.data.global.x, y: e.data.global.y }
+            onMouseDownRaw(e.data.global.x, e.data.global.y, e.data.originalEvent.ctrlKey)
+        }
+
+        const onMouseDownRaw = (x: number, y: number, ctrl: boolean) => {
+            console.log("Mouse down")
+            const point = { x, y }
 
             for (let i = state.world.objects.length - 1; i >= 0; i--) {
                 const object = state.world.objects[i]
@@ -91,7 +99,7 @@ const DefaultHandler = (props: DefaultHandlerProps) => {
                         })
                     })
 
-                    if (!e.data.originalEvent.ctrlKey) {
+                    if (!ctrl) {
                         props.setHandler({
                             ...props,
                             type: PlacementHandlerType.PlaceObject,
@@ -106,7 +114,7 @@ const DefaultHandler = (props: DefaultHandlerProps) => {
             const vertex = findClosestVertex(state.world.shapes, point, snapDistance)
             
             if (vertex) {
-                if (e.data.originalEvent.ctrlKey) {
+                if (ctrl) {
                     const newShapes = [...state.world.shapes]
 
                     if (newShapes[vertex.shapeIndex].vertices.length <= 3) {
@@ -159,7 +167,6 @@ const DefaultHandler = (props: DefaultHandlerProps) => {
 
                 return
             }
-
             state.mutateWorld({
                 undo: previousWorld => ({
                     ...previousWorld,
@@ -176,6 +183,25 @@ const DefaultHandler = (props: DefaultHandlerProps) => {
                     }]
                 })
             })
+
+            console.log("Creating new shape in editor")
+
+            state.mutateEditorWorld({
+                undo: _ => removeShape(
+                    state.editorWorld,
+                    state.editorWorld.shapes.length - 1
+                ),
+                redo: previousWorld => insertShape(
+                    previousWorld,
+                    newEditorShape(
+                        [
+                            { x: point.x - 50, y: point.y - 50 },
+                            { x: point.x + 50, y: point.y - 50 },
+                            { x: point.x, y: point.y + 50 },
+                        ]
+                    )
+                )
+            })
         }
 
         onMouseMoveRaw(
@@ -188,11 +214,22 @@ const DefaultHandler = (props: DefaultHandlerProps) => {
         props.app.renderer.plugins.interaction.on("mousemove", onMouseMove)
         props.app.renderer.plugins.interaction.on("mousedown", onMouseDown)
 
+        const onMouseMoveJS = (e: MouseEvent) => onMouseMoveRaw(e.clientX, e.clientY, e.ctrlKey)
+        const onMouseDownJS = (e: MouseEvent) => {
+            onMouseDownRaw(e.clientX, e.clientY, e.ctrlKey)
+        }
+
+        document.getElementById("canvas")!.addEventListener("mousemove", onMouseMoveJS)
+        document.getElementById("canvas")!.addEventListener("mousedown", onMouseDownJS)
+
         return () => {
             window.removeEventListener("keydown", onKeyDown)
             window.removeEventListener("keyup", onKeyUp)
             props.app.renderer.plugins.interaction.off("mousemove", onMouseMove)
             props.app.renderer.plugins.interaction.off("mousedown", onMouseDown)
+
+            document.getElementById("canvas")?.removeEventListener("mousemove", onMouseMoveJS)
+            document.getElementById("canvas")?.removeEventListener("mousedown", onMouseDownJS)
         }
     }, [ state.world, props ])
 

@@ -115,9 +115,13 @@ function PlaceObjectHandler(props: PlaceObjectHandlerProps) {
         }
 
         const onMouseDown = (e: PIXI.InteractionEvent) => {
-            const position = { x: e.data.global.x, y: e.data.global.y }
+            onMouseDownRaw(e.data.global.x, e.data.global.y, e.data.originalEvent.ctrlKey)
+        }
 
-            const edge = findEdgeForObject(position, e.data.originalEvent.shiftKey)
+        const onMouseDownRaw = (x: number, y: number, ctrl: boolean) => {
+            const position = { x, y }
+
+            const edge = findEdgeForObject(position, ctrl)
 
             if (edge) {
                 state.mutateWorld({
@@ -145,7 +149,7 @@ function PlaceObjectHandler(props: PlaceObjectHandlerProps) {
                 position.x += props.obj.scale * props.obj.size.width * props.obj.anchor.x - props.obj.scale * props.obj.size.width * 0.5
                 position.y += props.obj.scale * props.obj.size.height * props.obj.anchor.y - props.obj.scale * props.obj.size.height * 0.5
 
-                if (e.data.originalEvent.shiftKey) {
+                if (ctrl) {
                     position.x = Math.round(position.x / snapDistance) * snapDistance
                     position.y = Math.round(position.y / snapDistance) * snapDistance
                 }
@@ -181,12 +185,21 @@ function PlaceObjectHandler(props: PlaceObjectHandlerProps) {
         window.addEventListener("keydown", onKeyDown)
         window.addEventListener("keyup", onKeyUp)
         props.app.renderer.plugins.interaction.on("mousedown", onMouseDown)
+
+        const onMouseMoveJS = (e: MouseEvent) => onMouseMoveRaw(e.clientX, e.clientY, e.ctrlKey)
+        const onMouseDownJS = (e: MouseEvent) => onMouseDownRaw(e.clientX, e.clientY, e.ctrlKey)
+
+        document.getElementById("canvas")?.addEventListener("mousemove", onMouseMoveJS)
+        document.getElementById("canvas")?.addEventListener("mousedown", onMouseDownJS)
         
         return () => {
             props.app.renderer.plugins.interaction.off("mousemove", onMouseMove)
             window.removeEventListener("keydown", onKeyDown)
             window.removeEventListener("keyup", onKeyUp)
             props.app.renderer.plugins.interaction.off("mousedown", onMouseDown)
+
+            document.getElementById("canvas")?.removeEventListener("mousemove", onMouseMoveJS)
+            document.getElementById("canvas")?.removeEventListener("mousedown", onMouseDownJS)
         }
     },  [ state.world, props ])
 

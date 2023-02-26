@@ -5,6 +5,7 @@ import App from './App'
 import Editor from './editor/Editor'
 import { ThreeTest } from './utility/ThreeCanvas'
 import './main.css'
+import EditorEditor from './editor/EditorEditor'
 
 ReactDOM.render(
   <BrowserRouter>

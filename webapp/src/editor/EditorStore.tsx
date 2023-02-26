@@ -36,6 +36,11 @@ interface Mutation {
     redo: (world: World) => World
 }
 
+interface EditorWorldMutation {
+    undo: (world: EditorWorld) => EditorWorld
+    redo: (world: EditorWorld) => EditorWorld
+}
+
 interface EditorState {
     mode: EditorModeType
     editingMode: EditingModeType
@@ -46,6 +51,9 @@ interface EditorState {
 
     undos: Mutation[]
     redos: Mutation[]
+
+    editorUndos: EditorWorldMutation[]
+    editorRedos: EditorWorldMutation[]
 }
 
 export interface EditorStore extends EditorState {
@@ -53,13 +61,13 @@ export interface EditorStore extends EditorState {
     setEditingMode: (mode: EditingModeType) => void
 
     mutateWorld: (mutation: Mutation) => void
+    mutateEditorWorld: (mutation: EditorWorldMutation) => void
+    
     undo: () => void
     redo: () => void
 
     applyVisualMods: (mods: VisualWorldMods) => void
     resetVisualMods: () => void
-
-    test: () => void
 }
 
 const initialEditorState: EditorState = {
@@ -75,15 +83,13 @@ const initialEditorState: EditorState = {
 
     undos: [],
     redos: [],
+
+    editorUndos: [],
+    editorRedos: [],
 }
 
 const useEditorStore = create<EditorStore>((set) => ({
     ...initialEditorState,
-    test: () => {
-        // random position
-        const position = new PIXI.Point(Math.random() * 1000 - 500, Math.random() * 1000 - 500);
-        return set(state => ({ ...state, editorWorld: insertShape(state.editorWorld, newEditorShape([{ x: position.x, y: position.y }, { x: position.x + 100, y: position.y }, { x: position.x + 100, y: position.y + 100 }, { x: position.x, y: 100 }])) }))
-    },
     setMode: (mode: EditorModeType) => set(state => ({ ...state, mode })),
     setEditingMode: (editingMode: EditingModeType) => set(state => ({ ...state, editingMode })),
     mutateWorld: (mutation: Mutation) =>
@@ -91,6 +97,12 @@ const useEditorStore = create<EditorStore>((set) => ({
             world: mutation.redo(state.world),
             undos: [...state.undos, mutation],
             redos: [],
+        })),
+    mutateEditorWorld: (mutation: EditorWorldMutation) => 
+        set((state) => ({
+            editorWorld: mutation.redo(state.editorWorld),
+            editorUndos: [...state.editorUndos, mutation],
+            editorRedos: [],
         })),
     undo: () =>
         set((state) => {

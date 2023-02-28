@@ -4,37 +4,37 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import * as THREE from "three"
 import { shallow } from "zustand/shallow"
 import ThreeCanvas from "../utility/ThreeCanvas"
-import useEditorStore, { EditorStore, VisualWorldMods } from "./EditorStore"
+import useEditorStore, { EditorStore, useEditorEditorStore, VisualWorldMods } from "./EditorStore"
 import { EditingModeType } from "./EditorStore"
-import { EditorWorld } from "./EditorWorld"
 
 export function WorldCanvas() {
-    const onStoreChange = useCallback(
-        (store: EditorStore, camera: THREE.OrthographicCamera, scene: THREE.Scene) => {
-            console.log(`camera: ${camera}, scene: ${scene}, scene.children: ${scene.children.length}, shapes: ${store.editorWorld.shapes.length}`)
-            scene.clear()
-            
-            if (store.editorWorld.shapes.length > 0) {
-                scene.add(...store.editorWorld.shapes.map((shape) => shape.mesh))
-            }
-        },
-        []
+    const [renderer, camera] = useEditorEditorStore(
+        (state) => [state.rendering.renderer, state.rendering.camera],
+        shallow
     )
 
-    const onSizeChange = useCallback(
-        (width: number, height: number) => {
-        }, 
-        []
-    )
+    useEffect(() => useEditorEditorStore.subscribe((state) => {
+        console.log(state.rendering.scene.children.length)
+        state.rendering.renderer.render(state.rendering.scene, state.rendering.camera)
+    }))
 
     return (
         <div>
-            {/*
             <ThreeCanvas
-                store={useEditorStore}
-                onStoreChange={onStoreChange}
+                renderer={renderer}
+                camera={camera}
+                onSizeChange={(w, h) => 
+                    useEditorEditorStore.setState(store => ({
+                        rendering: {
+                            ...store.rendering,
+                            canvasSize: {
+                                width: w,
+                                height: h
+                            }
+                        }
+                    }))
+                }
             />
-            */}
         </div>
     )
 }

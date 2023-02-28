@@ -8,9 +8,15 @@ import rocket from "../../assets/rocket.svg"
 import { shallow } from "zustand/shallow"
 import { MoveVertexHandlerProps, PlacementHandlerType } from "./PlacementHandlerProps"
 import { highlightMoveColor, snapDistance } from "../PlacementModeSettings"
-import useEditorStore from "../../../EditorStore"
+import useEditorStore, { useEditorEditorStore } from "../../../EditorStore"
 
 function MoveVertexHandler(props: MoveVertexHandlerProps) {
+    const store = useEditorEditorStore(state => ({
+        renderer: state.rendering.renderer,
+        world: state.world,
+        mutate: state.mutate,
+    }), shallow)
+
     const state = useEditorStore(state => ({
         world: state.world,
         mutateWorld: state.mutateWorld,
@@ -136,7 +142,7 @@ function MoveVertexHandler(props: MoveVertexHandlerProps) {
         const onMouseMoveJS = (e: MouseEvent) => onMouseMoveRaw(e.clientX, e.clientY, e.ctrlKey)
         const onMouseUpJS = (e: MouseEvent) => onMouseUpRaw(e.clientX, e.clientY, e.ctrlKey)
 
-        document.getElementById("canvas")?.addEventListener("mousemove", onMouseMoveJS)
+        store.renderer.domElement.addEventListener("mousemove", onMouseMoveJS)
         document.addEventListener("mouseup", onMouseUpJS)
     
         return () => {
@@ -146,7 +152,7 @@ function MoveVertexHandler(props: MoveVertexHandlerProps) {
             window.removeEventListener("keyup", onKeyUp)
             window.removeEventListener("keydown", onKeyDown)
 
-            document.getElementById("canvas")?.removeEventListener("mousemove", onMouseMoveJS)
+            store.renderer.domElement.removeEventListener("mousemove", onMouseMoveJS)
             document.removeEventListener("mouseup", onMouseUpJS)
         }
     }, [ state.world, props ])

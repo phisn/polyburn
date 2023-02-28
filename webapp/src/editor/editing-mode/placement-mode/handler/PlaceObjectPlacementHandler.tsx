@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import useEditorStore from "../../../EditorStore";
+import useEditorStore, { useEditorEditorStore } from "../../../EditorStore";
 import { PlacementHandlerType, PlaceObjectHandlerProps } from "./PlacementHandlerProps";
 import * as PIXI from "pixi.js"
 import { findClosestEdge, Vertex } from "../../../World";
@@ -7,6 +7,12 @@ import { snapDistance } from "../PlacementModeSettings";
 import { shallow } from "zustand/shallow";
 
 function PlaceObjectHandler(props: PlaceObjectHandlerProps) {
+    const store = useEditorEditorStore(state => ({
+        renderer: state.rendering.renderer,
+        world: state.world,
+        mutate: state.mutate,
+    }), shallow)
+
     const state = useEditorStore(state => ({
         world: state.world,
         mutateWorld: state.mutateWorld,
@@ -189,8 +195,8 @@ function PlaceObjectHandler(props: PlaceObjectHandlerProps) {
         const onMouseMoveJS = (e: MouseEvent) => onMouseMoveRaw(e.clientX, e.clientY, e.ctrlKey)
         const onMouseDownJS = (e: MouseEvent) => onMouseDownRaw(e.clientX, e.clientY, e.ctrlKey)
 
-        document.getElementById("canvas")?.addEventListener("mousemove", onMouseMoveJS)
-        document.getElementById("canvas")?.addEventListener("mousedown", onMouseDownJS)
+        store.renderer.domElement.addEventListener("mousemove", onMouseMoveJS)
+        store.renderer.domElement.addEventListener("mousedown", onMouseDownJS)
         
         return () => {
             props.app.renderer.plugins.interaction.off("mousemove", onMouseMove)
@@ -198,8 +204,8 @@ function PlaceObjectHandler(props: PlaceObjectHandlerProps) {
             window.removeEventListener("keyup", onKeyUp)
             props.app.renderer.plugins.interaction.off("mousedown", onMouseDown)
 
-            document.getElementById("canvas")?.removeEventListener("mousemove", onMouseMoveJS)
-            document.getElementById("canvas")?.removeEventListener("mousedown", onMouseDownJS)
+            store.renderer.domElement.removeEventListener("mousemove", onMouseMoveJS)
+            store.renderer.domElement.removeEventListener("mousedown", onMouseDownJS)
         }
     },  [ state.world, props ])
 

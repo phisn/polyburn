@@ -23,7 +23,7 @@ interface TestStore {
     scene: THREE.Scene
 
     newTest: () => void
-    increaseTest: () => void
+    increaseTest: (n: number) => void
 }
 
 const useTestStore = create<TestStore>((set) => ({
@@ -48,14 +48,14 @@ const useTestStore = create<TestStore>((set) => ({
             test
         }
     }),
-    increaseTest: () => set((state) => {
+    increaseTest: (n: number) => set((state) => {
         if (state.test) {
-            state.test.mesh.position.x += 1
+            state.test.mesh.position.x += n
 
             return {
                 test: {
                     ...state.test,
-                    n: state.test.n + 1
+                    n: state.test.n + n
                 }
             }
         }
@@ -78,14 +78,21 @@ export function ThreeTest() {
             <div className="absolute">
                 <h1>Three.js Test</h1>
                 <button className="btn" onClick={() => {
-                    useTestStore.getState().increaseTest()
+                    useTestStore.getState().increaseTest(100)
                 }}>
                     Increase
+                </button>
+
+                <button className="btn" onClick={() => {
+                    useTestStore.getState().increaseTest(-100)
+                }}>
+                    Decrease
                 </button>
             </div>
 
             <ThreeCanvas
-                store={useTestStore}
+                renderer={useTestStore.getState().three}
+                camera={useTestStore.getState().camera}
                 onRender={() => {
                     console.log("render")
                     const state = useTestStore.getState()
@@ -101,17 +108,16 @@ interface ThreeCanvasStore {
 }
 
 interface ThreeCanvasProps<T extends ThreeCanvasStore> {
-    store: UseBoundStore<StoreApi<T>>
+    renderer: THREE.WebGLRenderer
+    camera?: THREE.OrthographicCamera
 
     onRender?: () => void
-    onSizeChange?: (width: number, height: number) => void
+    onSizeChange?: (width: number, height: number) => boolean | void
 }
 
 function ThreeCanvas<T extends ThreeCanvasStore>(props: ThreeCanvasProps<T>) {
     const canvasToReplace = "canvas-id"
-    const [three, camera] = props.store((state) => [state.three, state.camera], shallow)
-    
-    console.log(`three: ${three}, camera: ${camera}`)
+    console.log(`rendering ${canvasToReplace}`)
 
     useEffect(() => {
         const element = document.getElementById(canvasToReplace)
@@ -120,20 +126,18 @@ function ThreeCanvas<T extends ThreeCanvasStore>(props: ThreeCanvasProps<T>) {
             throw new Error(`Could not find element with id ${canvasToReplace}`)
         }
 
-        if (element !== three.domElement) {
-            element.replaceWith(three.domElement)
+        if (element !== props.renderer.domElement) {
+            element.replaceWith(props.renderer.domElement)
             
-            three.domElement.id = canvasToReplace
-            three.domElement.className = "block w-screen h-screen"
+            props.renderer.domElement.id = canvasToReplace
+            props.renderer.domElement.className = "block w-screen h-screen"
         }
 
-    }, [three, camera])
+    }, [props.renderer, props.camera])
 
     useEffect(() => {
         const onResize = (canvas: HTMLCanvasElement) => () => {
-            three.setSize(canvas.clientWidth, canvas.clientHeight, false)
-
-            console.log(`Resizing to ${canvas.clientWidth}x${canvas.clientHeight}`)
+            props.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false)
 
             canvas.width = canvas.clientWidth
             canvas.height = canvas.clientHeight
@@ -141,29 +145,32 @@ function ThreeCanvas<T extends ThreeCanvasStore>(props: ThreeCanvasProps<T>) {
             if (props.onSizeChange) {
                 props.onSizeChange(canvas.clientWidth, canvas.clientHeight)
             }
-            else if (camera) {
-                camera.left = -canvas.clientWidth / 2
-                camera.right = canvas.clientWidth / 2
-                camera.top = canvas.clientHeight / 2
-                camera.bottom = -canvas.clientHeight / 2
 
-                camera.updateProjectionMatrix()
+            if (props.camera) {
+                props.camera.left = -canvas.clientWidth / 2
+                props.camera.right = canvas.clientWidth / 2
+                props.camera.top = canvas.clientHeight / 2
+                props.camera.bottom = -canvas.clientHeight / 2
+
+                props.camera.updateProjectionMatrix()
+
+                console.log(`Resizing camera to ${canvas.clientWidth}x${canvas.clientHeight}`)
             }
 
             props.onRender?.()
         }
 
         // see https://stackoverflow.com/a/73831830
-        const observer = new ResizeObserver(onResize(three.domElement))
-        observer.observe(three.domElement)
+        const observer = new ResizeObserver(onResize(props.renderer.domElement))
+        observer.observe(props.renderer.domElement)
 
-        onResize(three.domElement)()
+        onResize(props.renderer.domElement)()
 
         return () => {
             observer.disconnect()
         }
 
-    }, [])
+    }, [props.onSizeChange, props.onRender, props.renderer, props.camera])
 
     return (
         <div id={canvasToReplace} />

@@ -12,7 +12,7 @@ ReactDOM.render(
     <Routes>
       <Route path="/" element={<App />}>
         <Route path="editor" element={<Editor />} />
-        <Route path="test" element={<ThreeTest />} />
+        <Route path="test" element={<EditorEditor />} />
         <Route path="*" element={
           <div>
             404

@@ -1,19 +1,19 @@
-import { Stage, Graphics } from "@inlet/react-pixi"
+export {}
+/*
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import useEditorStore, { EditingModeType, EditorModeType, EditorStore } from "./EditorStore"
 import useSelectionMode from "./editing-mode/placement-mode/PlacementMode"
 import { World, Vertex, Shape } from "./World"
-import WorldGraphics, { WorldCanvas } from "./WorldCanvas"
-import PIXI from "pixi.js"
+import WorldGraphics from "./WorldCanvas"
 import EditorNavbar from "./EditorNavbar"
 import SelectionMode from "./editing-mode/placement-mode/PlacementMode"
 import EditingMode from "./editing-mode/EditingMode"
 import { shallow } from 'zustand/shallow'
 import Game from "../game/Game"
 import Navbar from "./Navbar"
-import ThreeCanvas from "../utility/ThreeCanvas"
+import WorldCanvas from "./WorldCanvas"
 
-function EditorEditor() {
+function Editor() {
     const mode = useEditorStore(state => state.mode, shallow)
 
     switch (mode) {
@@ -43,7 +43,7 @@ function PlayingComponent() {
         <>
             <Game />
             <div className="absolute top-0 right-0 p-4">
-                {/*notification*/}
+                {/*notification}
                 Previewing Map
             </div>
             <div className="absolute top-0 left-0 p-4">
@@ -61,17 +61,9 @@ function PlayingComponent() {
 }
 
 function EditingComponent() {
-    const [app, setApp] = useState<PIXI.Application>()
-
-    useEffect(() => {
-        if (app) {
-            app.stage.interactive = true
-        }
-    }, [ app ])
-
     return (
         <div className="overflow-hidden">
-            {/* Prevent transition artifacts between editor and game with static black backround */}
+            {/* Prevent transition artifacts between editor and game with static black backround }
             <div className="fixed top-0 left-0 right-0 bottom-0 bg-black -z-10" />
             
             <div className="absolute top-0 left-0 p-4">
@@ -79,22 +71,13 @@ function EditingComponent() {
             </div>
 
             <div className="absolute top-0 right-0 p-4">
-                <EditingMode app={app} />
+                <EditingMode />
             </div>
 
             <WorldCanvas />
-
-            
-            <Stage 
-                onMount={setApp}
-                width={window.innerWidth}
-                height={window.innerHeight} 
-                options={ { resizeTo: window, antialias: true } } >
-
-                <WorldGraphics />
-            </Stage>
         </div>
     )
 }
 
-export default EditorEditor
+export default Editor
+*/

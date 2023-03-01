@@ -1,3 +1,5 @@
+export {}
+/*
 import { useCallback } from "react"
 import { PlaceableObject } from "../../World"
 import { placeableObjects, PlaceableObjectSelectable } from "./PlaceableObjects"
@@ -52,3 +54,4 @@ function PlacableObjectSelector(props: PlaceableObjectSelectProps) {
 }
 
 export default PlacableObjectSelector
+*/

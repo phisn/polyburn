@@ -1,6 +1,6 @@
 import RAPIER, { ColliderDesc, RayColliderToi } from "@dimforge/rapier2d-compat"
 import { create } from "zustand"
-import { ObjectInWorld, Shape, World } from "../editor/World"
+import { ObjectInWorld, Shape, World } from "../editor/legacy/World"
 import { changeAnchor } from "../utility/math"
 
 RAPIER.init()

@@ -1,22 +1,15 @@
-import { AppProvider, useApp } from "@inlet/react-pixi"
+export {}
+/*
 import { useCallback, useEffect, useState } from "react"
-import PIXI from "pixi.js"
-
 import greenFlag from "../../assets/flag-green.svg"
 import redFlag from "../../assets/flag-red.svg"
 import rocket from "../../assets/rocket.svg"
 import { shallow } from "zustand/shallow"
 import { MoveVertexHandlerProps, PlacementHandlerType } from "./PlacementHandlerProps"
 import { highlightMoveColor, snapDistance } from "../PlacementModeSettings"
-import useEditorStore, { useEditorEditorStore } from "../../../EditorStore"
+import useEditorStore from "../../../EditorStore"
 
 function MoveVertexHandler(props: MoveVertexHandlerProps) {
-    const store = useEditorEditorStore(state => ({
-        renderer: state.rendering.renderer,
-        world: state.world,
-        mutate: state.mutate,
-    }), shallow)
-
     const state = useEditorStore(state => ({
         world: state.world,
         mutateWorld: state.mutateWorld,
@@ -25,14 +18,14 @@ function MoveVertexHandler(props: MoveVertexHandlerProps) {
     }), shallow)
 
     useEffect(() => {
-        const onMouseUp = (e: PIXI.InteractionEvent) => {
-            onMouseUpRaw(e.data.global.x, e.data.global.y, e.data.originalEvent.ctrlKey)
+        const onMouseUp = (e: MouseEvent) => {
+            onMouseUpRaw(e.clientX, e.clientY, e.shiftKey)
         }
 
-        const onMouseUpRaw = (x: number, y: number, ctrl: boolean) => {
+        const onMouseUpRaw = (x: number, y: number, shift: boolean) => {
             let vertex = { x, y }
     
-            if (ctrl) {
+            if (shift) {
                 vertex = {
                     x: Math.round(vertex.x / snapDistance) * snapDistance,
                     y: Math.round(vertex.y / snapDistance) * snapDistance
@@ -88,13 +81,13 @@ function MoveVertexHandler(props: MoveVertexHandlerProps) {
             })
         }
     
-        const onMouseMove = (e: PIXI.InteractionEvent) => {
+        const onMouseMove = (e: MouseEvent) => {
             // mouseup event is not fired when mouse is released outside of the canvas. This is a workaround.
-            if (e.data.originalEvent instanceof MouseEvent && e.data.originalEvent.buttons === 0) {
+            if (e.buttons === 0) {
                 onMouseUp(e)
             }
             else {
-                onMouseMoveRaw(e.data.global.x, e.data.global.y, e.data.originalEvent.shiftKey)
+                onMouseMoveRaw(e.clientX, e.clientY, e.shiftKey)
             }
         }
     
@@ -142,18 +135,12 @@ function MoveVertexHandler(props: MoveVertexHandlerProps) {
         const onMouseMoveJS = (e: MouseEvent) => onMouseMoveRaw(e.clientX, e.clientY, e.ctrlKey)
         const onMouseUpJS = (e: MouseEvent) => onMouseUpRaw(e.clientX, e.clientY, e.ctrlKey)
 
-        store.renderer.domElement.addEventListener("mousemove", onMouseMoveJS)
-        document.addEventListener("mouseup", onMouseUpJS)
-    
         return () => {
             props.app.renderer.plugins.interaction.off("mousemove", onMouseMove)
             props.app.renderer.plugins.interaction.off("mouseup", onMouseUp)
             props.app.renderer.plugins.interaction.off("mouseupoutside", onMouseUp)
             window.removeEventListener("keyup", onKeyUp)
             window.removeEventListener("keydown", onKeyDown)
-
-            store.renderer.domElement.removeEventListener("mousemove", onMouseMoveJS)
-            document.removeEventListener("mouseup", onMouseUpJS)
         }
     }, [ state.world, props ])
 
@@ -170,3 +157,4 @@ function MoveVertexHandler(props: MoveVertexHandlerProps) {
 }
 
 export default MoveVertexHandler
+*/

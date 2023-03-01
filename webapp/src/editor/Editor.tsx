@@ -1,94 +1,178 @@
-import { Stage, Graphics } from "@inlet/react-pixi"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import useEditorStore, { EditingModeType, EditorModeType, EditorStore } from "./EditorStore"
-import useSelectionMode from "./editing-mode/placement-mode/PlacementMode"
-import { World, Vertex, Shape } from "./World"
-import WorldGraphics from "./WorldCanvas"
-import PIXI from "pixi.js"
-import EditorNavbar from "./EditorNavbar"
-import SelectionMode from "./editing-mode/placement-mode/PlacementMode"
-import EditingMode from "./editing-mode/EditingMode"
-import { shallow } from 'zustand/shallow'
-import Game from "../game/Game"
-import Navbar from "./Navbar"
+import { Canvas, render, useFrame, useThree } from "@react-three/fiber"
+import { OrthographicCamera, Stats } from "@react-three/drei"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEditorStore } from "./EditorStore";
+import { insertShape } from "./world/World";
+import { findClosestEdge, findClosestVertex, Shape as WorldShape } from "./world/Shape";
+import * as THREE from "three"
+import { Point } from "./world/Point"
 
-function Editor() {
-    const mode = useEditorStore(state => state.mode, shallow)
+export const snapDistance = 20
 
-    switch (mode) {
-        case EditorModeType.Playing:
-            return <PlayingComponent />
+export const highlightColor = 0x33ff33
+export const highlightObjectColor = 0xffff00
+export const highlightDeleteColor = 0xff2222
+export const highlightMoveColor = 0x00aaaa
 
-        case EditorModeType.Editing:
-            return <EditingComponent />
-
-        default:
-            return <></>
-    }
+function Vertex(props: { vertex: Point }) {
+    return (
+        <mesh position={[props.vertex.x, props.vertex.y, 0]} >
+            <circleGeometry args={[5.0]} />
+            <meshBasicMaterial color="#222228" />
+            
+            <mesh>
+                <circleGeometry args={[4.0]} />
+                <meshBasicMaterial color="#C8DB35" />
+            </mesh>
+        </mesh>
+    )
 }
 
-const StopFillSvg = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#CD5C5C" viewBox="0 0 16 16">
-        <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/>
-    </svg>
-)
+function Shape(props: { shape: WorldShape }) {
+    const threeShape = new THREE.Shape(
+        props.shape.vertices.map(vertex => new THREE.Vector2(vertex.x, vertex.y))
+    )
 
-function PlayingComponent() {
-    const state = useEditorStore(state => ({ 
-        setMode: state.setMode
-    }))
+    useThree(state => state.onPointerMissed)
+
+    const [hovered, setHovered] = useState(false)
 
     return (
         <>
-            <Game />
-            <div className="absolute top-0 right-0 p-4">
-                {/*notification*/}
-                Previewing Map
-            </div>
-            <div className="absolute top-0 left-0 p-4">
-                <Navbar>
-                    <button className="btn btn-square btn-ghost"
-                            onClick={() => {
-                                state.setMode(EditorModeType.Editing)
-                            }}>
-                        <StopFillSvg />
-                    </button>
-                </Navbar>
-            </div>
+            <mesh>
+                <shapeGeometry args={[threeShape]} />
+                <meshBasicMaterial color={"#DC5249"} />
+            </mesh>
+            { props.shape.vertices.map((vertex, i) =>
+                <Vertex key={i} vertex={vertex} />
+            ) }
         </>
     )
 }
 
-function EditingComponent() {
-    const [app, setApp] = useState<PIXI.Application>()
+interface MousePointerHintProps {
+    position: Point
+    event: React.PointerEvent<HTMLDivElement>
+}
 
-    useEffect(() => {
-        if (app) {
-            app.stage.interactive = true
+function MousePointerHint(props: MousePointerHintProps) {
+    const world = useEditorStore(state => state.world)
+
+    const hint: Point | null = useMemo(() => {
+        /*
+        for (let i = world.entities.length - 1; i >= 0; i--) {
+            const object = world.objects[i]
+            
+            if (isPointInsideObject(point, object)) {
+                if (ctrl) {
+                    state.applyVisualMods({ 
+                        highlightObjects: [ { index: i, color: highlightDeleteColor } ]
+                    })
+                }
+                else {
+                    state.applyVisualMods({ 
+                        highlightObjects: [ { index: i, color: highlightObjectColor } ]
+                    })
+                }
+    
+                return
+            }
         }
-    }, [ app ])
+        */
+    
+        const vertex = findClosestVertex(world.shapes, props.position, snapDistance)
+    
+        if (vertex) {
+            const color = props.event.ctrlKey
+                ? highlightDeleteColor
+                : highlightColor
+    
+            return vertex.point
+        }
+    
+        const edge = findClosestEdge(world.shapes, props.position, snapDistance)
+    
+        if (edge) {
+            return edge.point
+        }
+
+        return null
+    }, [world, props])
 
     return (
-        <div className="overflow-hidden">
-            {/* Prevent transition artifacts between editor and game with static black backround */}
-            <div className="fixed top-0 left-0 right-0 bottom-0 bg-black -z-10" />
+        <>
+            { hint && 
+                <mesh position={[hint.x, hint.y, 0]}>
+                    <circleGeometry args={[5.0]} />
+                    <meshBasicMaterial color="#aaffff" />
+                </mesh>
+            }
+        </>
+    )
+}
+
+function Editor() {
+    const world = useEditorStore(state => state.world)
+    const mutate = useEditorStore(state => state.mutate)
+
+    const cameraRef = useRef<THREE.Camera>()
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    
+    const canvasToWorld = useCallback((canvasX: number, canvasY: number) => {
+        if (cameraRef.current == null || canvasRef.current == null) {
+            throw new Error("Camera or canvas ref is null")
+        }
+
+        const vector = new THREE.Vector3(
+            (canvasX / canvasRef.current.clientWidth) * 2 - 1,
+            -(canvasY / canvasRef.current.clientHeight) * 2 + 1,
+            0.5
+        )
+
+        vector.unproject(cameraRef.current)
+
+        return {
+            x: vector.x,
+            y: vector.y
+        }
+    }, [cameraRef, canvasRef])
+
+    const onPointerMissed = useCallback((e: React.PointerEvent) => {
+        const { x, y } = canvasToWorld(e.clientX, e.clientY)
             
-            <div className="absolute top-0 left-0 p-4">
-                <EditorNavbar />
-            </div>
+        mutate(insertShape({
+            vertices: [
+                { x: x - 50, y: y + 50 },
+                { x: x + 50, y: y + 50 },
+                { x: x, y: y - 50 },
+            ]
+        }))
+    }, [])
 
-            <div className="absolute top-0 right-0 p-4">
-                <EditingMode app={app} />
-            </div>
+    const [hintProps, setHintProps] = useState<MousePointerHintProps>()
 
-            <Stage 
-                onMount={setApp}
-                width={window.innerWidth}
-                height={window.innerHeight} 
-                options={ { resizeTo: window, antialias: true } } >
-
-                <WorldGraphics />
-            </Stage>
+    return (
+        <div className="h-screen w-screen">
+            <Canvas
+                style={{ background: "#222228" }}
+                onPointerDown={onPointerMissed}
+                onPointerMove={event => setHintProps({
+                    position: canvasToWorld(event.clientX, event.clientY),
+                    event
+                })}
+                ref={canvasRef} >
+                <OrthographicCamera
+                    ref={cameraRef}
+                    makeDefault position={[0, 0, 10]} />
+                { world.shapes.map((shape, i) => 
+                    <Shape key={i} shape={shape} />
+                ) }
+                { hintProps && 
+                    <MousePointerHint {...hintProps} /> 
+                }
+                <Stats />
+                <primitive object={world} />
+            </Canvas>
         </div>
     )
 }

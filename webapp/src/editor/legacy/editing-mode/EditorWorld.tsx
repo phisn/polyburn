@@ -1,4 +1,4 @@
-import { Shape, Vertex } from "./World"
+import { Shape, Vertex } from "../World"
 import * as THREE from "three"
 
 export class EditorShape {
@@ -12,7 +12,7 @@ export class EditorShape {
         this.vertices = vertices
 
         this.geometry = new THREE.ShapeGeometry()
-        this.material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        this.material = new THREE.MeshBasicMaterial({ color: 0xbb3333 })
         this.mesh = new THREE.Mesh(this.geometry, this.material).translateZ(-1)
 
         this.updateGeometry()

@@ -1,5 +1,6 @@
+export {}
+/*
 import { PlaceableObject, Shape } from "../../../World"
-import * as PIXI from "pixi.js"
 
 export enum PlacementHandlerType {
     Default,
@@ -8,7 +9,6 @@ export enum PlacementHandlerType {
 }
 
 export type CommonHandlerProps = {
-    app: PIXI.Application
     setHandler: (handler: PlacementHandlerProps) => void
 }
 
@@ -29,3 +29,4 @@ export type PlacementHandlerProps =
       DefaultHandlerProps     & { type: PlacementHandlerType.Default } 
     | MoveVertexHandlerProps  & { type: PlacementHandlerType.MoveVertex }
     | PlaceObjectHandlerProps & { type: PlacementHandlerType.PlaceObject }
+*/

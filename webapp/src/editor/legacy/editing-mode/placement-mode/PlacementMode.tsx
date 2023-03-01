@@ -1,3 +1,5 @@
+export {}
+/*
 import { AppProvider, useApp } from "@inlet/react-pixi"
 import { useCallback, useEffect, useState } from "react"
 import useEditorStore from "../../EditorStore"
@@ -82,3 +84,4 @@ function PlacementMode(props: { app: PIXI.Application }) {
 }
 
 export default PlacementMode
+*/

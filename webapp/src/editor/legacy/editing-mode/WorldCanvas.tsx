@@ -1,44 +1,36 @@
-import { Graphics, Sprite, useApp } from "@inlet/react-pixi"
-import * as PIXI from "pixi.js"
+import { OrthographicCamera } from "@react-three/drei"
+import { Canvas } from "@react-three/fiber"
 import { useCallback, useEffect, useRef, useState } from "react"
 import * as THREE from "three"
 import { shallow } from "zustand/shallow"
-import ThreeCanvas from "../utility/ThreeCanvas"
-import useEditorStore, { EditorStore, useEditorEditorStore, VisualWorldMods } from "./EditorStore"
+import useEditorStore, { EditorStore, VisualWorldMods } from "./EditorStore"
 import { EditingModeType } from "./EditorStore"
 
-export function WorldCanvas() {
-    const [renderer, camera] = useEditorEditorStore(
-        (state) => [state.rendering.renderer, state.rendering.camera],
-        shallow
-    )
+function WorldCanvas() {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const setCanvas = useEditorStore(state => state.setCanvas, shallow)
 
-    useEffect(() => useEditorEditorStore.subscribe((state) => {
-        console.log(state.rendering.scene.children.length)
-        state.rendering.renderer.render(state.rendering.scene, state.rendering.camera)
-    }))
+    useEffect(() => {
+        if (canvasRef.current == null) {
+            throw new Error("Canvas ref is null")
+        }
+
+        setCanvas(canvasRef.current)
+    }, [])
 
     return (
-        <div>
-            <ThreeCanvas
-                renderer={renderer}
-                camera={camera}
-                onSizeChange={(w, h) => 
-                    useEditorEditorStore.setState(store => ({
-                        rendering: {
-                            ...store.rendering,
-                            canvasSize: {
-                                width: w,
-                                height: h
-                            }
-                        }
-                    }))
-                }
-            />
-        </div>
+        <Canvas ref={canvasRef}>
+            <OrthographicCamera makeDefault position={[0, 0, 10]} />
+            <mesh
+                position={[0, 0, -1]}>
+                <planeGeometry args={[1, 1]} />
+                <meshBasicMaterial color="hotpink" />
+            </mesh>
+        </Canvas>
     )
 }
 
+/*
 function WorldGraphics() {
     const app = useApp()
 
@@ -163,5 +155,6 @@ function WorldGraphics() {
         </>    
     )
 }
+*/
 
-export default WorldGraphics
+export default WorldCanvas

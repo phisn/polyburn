@@ -1,3 +1,5 @@
+export {}
+/*
 import useEditorStore, { EditingModeType } from "../EditorStore";
 import PIXI from "pixi.js"
 import PlacementMode from "./placement-mode/PlacementMode";
@@ -23,3 +25,4 @@ function EditingMode(props: { app?: PIXI.Application }): JSX.Element {
 }
 
 export default EditingMode
+*/

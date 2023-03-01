@@ -1,7 +1,8 @@
+export {}
+/*
 import { useEffect } from "react";
-import useEditorStore, { useEditorEditorStore } from "../../../EditorStore";
+import useEditorStore from "../../../EditorStore";
 import { PlacementHandlerType, PlaceObjectHandlerProps } from "./PlacementHandlerProps";
-import * as PIXI from "pixi.js"
 import { findClosestEdge, Vertex } from "../../../World";
 import { snapDistance } from "../PlacementModeSettings";
 import { shallow } from "zustand/shallow";
@@ -219,3 +220,4 @@ function PlaceObjectHandler(props: PlaceObjectHandlerProps) {
 }
 
 export default PlaceObjectHandler
+*/

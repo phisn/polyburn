@@ -4,8 +4,8 @@ import { scale, Size } from "./Size"
 
 export enum EntityType {
     Rocket = "Rocket",
-    GreenFlag = "GreenFlag",
-    RedFlag = "RedFlag",
+    GreenFlag = "Green Flag",
+    RedFlag = "Red Flag",
 }
 
 export interface Entity {

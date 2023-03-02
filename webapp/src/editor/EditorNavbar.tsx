@@ -1,10 +1,12 @@
 export {}
-/*
-import useEditorStore, { EditingModeType, EditorModeType } from "./EditorStore"
+
 import { shallow } from 'zustand/shallow'
 import Navbar from "./Navbar"
 import useGameStore from "../game/GameStore"
 import useGlobalStore from "../global/GlobalStore"
+import { useEditorStore } from './editor-store/useEditorStore'
+import { Mode } from './editor-store/ModeStateBase'
+import { initialPlacementState } from './placement/state/PlacementState'
 
 const MenuSvg = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -31,16 +33,13 @@ const PlaySvg = () => (
 )
 
 function EditorNavbar() {
-    const state = useEditorStore((state) => ({
-        world: state.world,
-        undos: state.undos,
-        redos: state.redos, 
-        undo: state.undo, 
-        redo: state.redo, 
-        mode: state.editingMode, 
-        setMode: state.setMode,
-        setEditingMode: state.setEditingMode
-    }), shallow)
+    const mode = useEditorStore(state => state.modeState.mode)
+    const hasUndos = useEditorStore(state => state.undos.length > 0, shallow)
+    const hasRedos = useEditorStore(state => state.redos.length > 0, shallow)
+
+    const undo = useEditorStore(state => state.undo)
+    const redo = useEditorStore(state => state.redo)
+    const setModeState = useEditorStore(state => state.setModeState)
 
     const newAlert = useGlobalStore(state => state.newAlert)
 
@@ -52,31 +51,31 @@ function EditorNavbar() {
             
             <div className="btn-group">
                 <button
-                    onClick={() => state.undo()} 
-                    className={`btn btn-square btn-ghost ${(state.undos.length > 0 ? "" : "btn-disabled")}`}>
+                    onClick={undo} 
+                    className={`btn btn-square btn-ghost ${(hasUndos ? "" : "btn-disabled")}`}>
                     <UndoSvg />
                 </button>
                 <button 
-                    onClick={e => state.redo()}
-                    className={`btn btn-square btn-ghost ${(state.redos.length > 0 ? "" : "btn-disabled")}`}>
+                    onClick={redo}
+                    className={`btn btn-square btn-ghost ${(hasRedos ? "" : "btn-disabled")}`}>
                     <RedoSvg />
                 </button>
             </div>
 
             <div className="btn-group">
                 <button 
-                    className={`btn ${(state.mode === EditingModeType.Selection ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => state.setEditingMode(EditingModeType.Selection)}>
+                    className={`btn ${(mode !== Mode.Placement ? "btn-active btn-disabled" : "")}` }
+                    onClick={() => {}}>
                     Selection
                 </button>
                 <button
-                    className={`btn ${(state.mode === EditingModeType.Placement ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => state.setEditingMode(EditingModeType.Placement)}>
+                    className={`btn ${(mode === Mode.Placement ? "btn-active btn-disabled" : "")}` }
+                    onClick={() => setModeState(initialPlacementState)}>
                     Placement
                 </button>
                 <button
-                    className={`btn ${(state.mode === EditingModeType.Movement ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => state.setEditingMode(EditingModeType.Movement)}>
+                    className={`btn ${(mode !== Mode.Placement ? "btn-active btn-disabled" : "")}` }
+                    onClick={() => {}}>
                     Movement
                 </button>
             </div>
@@ -84,8 +83,8 @@ function EditorNavbar() {
             <button className="btn btn-square btn-ghost"
                     onClick={() => {
                         try {
-                            useGameStore.getState().prepare(state.world)
-                            state.setMode(EditorModeType.Playing)
+                            // useGameStore.getState().prepare(state.world)
+                            // state.setMode(EditorModeType.Playing)
                         }
                         catch (e) {
                             if (e instanceof Error) {
@@ -103,4 +102,3 @@ function EditorNavbar() {
 }
 
 export default EditorNavbar
-*/

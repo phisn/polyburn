@@ -1,4 +1,4 @@
-import { Point } from "../world/Point"
+import { Point } from "../../world/Point"
 
 export enum HintType {
     Space,

@@ -1,6 +1,6 @@
 import { Canvas, render, useFrame, useThree } from "@react-three/fiber"
 import { OrthographicCamera, Stats } from "@react-three/drei"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEditorStore } from "./editor-store/useEditorStore";
 import { insertShape } from "./world/World";
 import { findClosestEdge, findClosestVertex, Shape as WorldShape } from "./world/Shape";
@@ -9,6 +9,8 @@ import { Point } from "./world/Point"
 import { Camera } from "three";
 import { Mode } from "./editor-store/ModeStateBase";
 import PlacementMode from "./placement/PlacementMode";
+import EditorNavbar from "./EditorNavbar";
+import tunnel from "tunnel-rat";
 
 export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) => {
     if (!camera || !canvas) {
@@ -43,6 +45,9 @@ function EditorMode() {
     return <></>
 }
 
+// singleton tunnel
+export const editorModeTunnel = tunnel()
+
 function EditorControls() {
     const mutate = useEditorStore(state => state.mutate)
 
@@ -56,7 +61,6 @@ function EditorControls() {
 
     useEffect(() => {
         const onPointerDown = (e: PointerEvent) => {
-            
         }
 
         canvas.addEventListener("pointerdown", onPointerDown)
@@ -79,8 +83,12 @@ function Editor() {
                 <OrthographicCamera
                     makeDefault position={[0, 0, 10]} />
 
-                <Stats />
+                {/* <Stats /> */}
             </Canvas>
+            <div className="absolute top-0 left-0 p-4">
+                <EditorNavbar />
+            </div>
+            <editorModeTunnel.Out />
         </div>
     )
 }

@@ -1,5 +1,5 @@
-import { Point } from "../world/Point";
-import { Mode, ModeStateBase } from "../editor-store/ModeStateBase";
+import { Point } from "../../world/Point";
+import { Mode, ModeStateBase } from "../../editor-store/ModeStateBase";
 import { Action } from "./Action";
 import { PlacementHint } from "./Hint";
 

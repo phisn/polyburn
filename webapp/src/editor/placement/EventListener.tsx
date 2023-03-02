@@ -5,8 +5,8 @@ import { useEditorStore } from "../editor-store/useEditorStore"
 import { snapDistance } from "../Values"
 import { findClosestEdge, findClosestVertex } from "../world/Shape"
 import { insertShape, insertVertex, moveVertex } from "../world/World"
-import { ActionType } from "./Action"
-import { HintType } from "./Hint"
+import { ActionType } from "./state/Action"
+import { HintType } from "./state/Hint"
 
 function EventListener() {
     const canvas = useThree(state => state.gl.domElement)
@@ -27,11 +27,14 @@ function EventListener() {
 
             switch (action?.type) {
                 case ActionType.MoveVertex:
-                    mutate(moveVertex(
-                        action.shapeIndex,
-                        action.vertexIndex,
-                        point
-                    ))
+                    console.log(`Calling moveVertex`)
+                    setModeState({
+                        hint: null,
+                        action: {
+                            ...action,
+                            point
+                        }
+                    })
 
                     break
                 default:
@@ -158,12 +161,35 @@ function EventListener() {
             onPointerMove(e)
         }
 
+        const onPointerUp = (e: PointerEvent) => {
+            const action = useEditorStore.getState().modeState.action
+
+            switch (action?.type) {
+                case ActionType.MoveVertex:
+                    mutate(moveVertex(
+                        action.shapeIndex,
+                        action.vertexIndex,
+                        action.point
+                    ))
+
+                    setModeState({
+                        action: undefined
+                    })
+
+                    break
+            }
+
+            onPointerMove(e)
+        }
+
         canvas.addEventListener("pointermove", onPointerMove)
         canvas.addEventListener("pointerdown", onPointerDown)
+        canvas.addEventListener("pointerup", onPointerUp)
 
         return () => {
             canvas.removeEventListener("pointermove", onPointerMove)
             canvas.removeEventListener("pointerdown", onPointerDown)
+            canvas.removeEventListener("pointerup", onPointerUp)
         }
     })
 

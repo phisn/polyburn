@@ -1,7 +1,8 @@
 import { create } from "zustand"
 import { Mutation } from "../world/Mutation"
 import { World } from "../world/World"
-import { initialPlacementState, PlacementState } from "../placement/PlacementState"
+import { initialPlacementState, PlacementState } from "../placement/state/PlacementState"
+import { Mode } from "./ModeStateBase"
 
 interface EventHandlers {
     onKeyDown: (keyEvent: KeyboardEvent) => void

@@ -1,5 +1,5 @@
 import { Entity } from "./Entity";
-import { composeShapeAt, newMutationWithCompose } from "./Mutation";
+import { capture, composeShapeAt, newMutationWithCompose } from "./Mutation";
 import { Point } from "./Point";
 import { Shape } from "./Shape";
 
@@ -20,8 +20,55 @@ export const removeShape = (shape: Shape) => newMutationWithCompose(
     shapes => ({ shapes }),
 )
 
-export const changeVertices = (index: number, mutation: (vertices: Point[]) => Point[]) => newMutationWithCompose(
-    world => mutation(world.shapes[index].vertices),
-    world => world.shapes[index].vertices,
+export const changeVertices = (
+    index: number, 
+    undo: (vertices: Point[]) => Point[],
+    redo: (vertices: Point[]) => Point[],
+) => newMutationWithCompose(
+    world => undo(world.shapes[index].vertices),
+    world => redo(world.shapes[index].vertices),
     (vertices, world) => composeShapeAt(index)({ vertices }, world),
+)
+
+export const insertVertex = (shapeIndex: number, insertAfterVertex: number, vertex: Point) => changeVertices(
+    shapeIndex,
+    vertices => vertices.filter((_, i) => i !== insertAfterVertex),
+    vertices => [
+        ...vertices.slice(0, insertAfterVertex + 1),
+        vertex,
+        ...vertices.slice(insertAfterVertex + 1),
+    ]
+)
+
+export const removeVertex = (shapeIndex: number, vertexIndex: number) => capture(
+    world => world.shapes[shapeIndex].vertices[vertexIndex],
+    vertex => changeVertices(
+        shapeIndex,
+        vertices => [
+            ...vertices.slice(0, vertexIndex),
+            vertex,
+            ...vertices.slice(vertexIndex + 1),
+        ],
+        vertices => [
+            ...vertices.slice(0, vertexIndex),
+            ...vertices.slice(vertexIndex + 1),
+        ]
+    )
+)
+
+export const moveVertex = (shapeIndex: number, vertexIndex: number, to: Point) => capture(
+    world => world.shapes[shapeIndex].vertices[vertexIndex],
+    vertex => changeVertices(
+        shapeIndex,
+        vertices => [
+            ...vertices.slice(0, vertexIndex),
+            vertex,
+            ...vertices.slice(vertexIndex + 1),
+        ],
+        vertices => [
+            ...vertices.slice(0, vertexIndex),
+            to,
+            ...vertices.slice(vertexIndex + 1),
+        ]
+    )
 )

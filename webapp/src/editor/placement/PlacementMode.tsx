@@ -7,8 +7,10 @@ import { Point } from "../world/Point";
 import { findClosestEdge, findClosestVertex, Shape as WorldShape } from "../world/Shape";
 import { useEditorStore } from "../editor-store/useEditorStore";
 import { buildCanvasToWorld } from "../Editor";
-import { HintType } from "../editor-store/PlacementState";
 import { highlightColor, highlightDeleteColor, highlightVertexColor, snapDistance } from "../Values";
+import { insertShape, insertVertex } from "../world/World";
+import { HintType } from "./Hint";
+import EventListener from "./EventListener";
 
 function Vertex(props: { vertex: Point }) {
     return (
@@ -45,23 +47,32 @@ function Shape(props: { shape: WorldShape }) {
 function MousePointerHint() {
     const hint = useEditorStore(state => state.modeState.hint)
 
-    const color = useMemo(() => {
+    const hintPoint = useMemo(() => {
         switch (hint?.type) {
             case HintType.Vertex:
-                return hint.delete ? highlightDeleteColor : highlightVertexColor
+                return {
+                    color: hint.delete ? highlightDeleteColor : highlightVertexColor,
+                    point: hint.point
+                }
+
             case HintType.Edge:
-                return hint.delete ? highlightDeleteColor : highlightColor
+                return {
+                    color: highlightColor,
+                    point: hint.point
+                }
+
             default:
-                return ""
+                return null
         }
+
     }, [hint])
 
     return (
         <>
-            { hint && hint.type !== HintType.Space &&
-                <mesh position={[hint.point.x, hint.point.y, 0.5]}>
+            { hintPoint &&
+                <mesh position={[hintPoint.point.x, hintPoint.point.y, 0.5]}>
                     <circleGeometry args={[5.0]} />
-                    <meshBasicMaterial color={color} />
+                    <meshBasicMaterial color={hintPoint.color} />
                 </mesh>
             }
         </>
@@ -69,91 +80,13 @@ function MousePointerHint() {
 }
 
 function PlacementMode() {
-    const canvas = useThree(state => state.gl.domElement)
-    const camera = useThree(state => state.camera)
-
     const world = useEditorStore(state => state.world)
-    const setModeState = useEditorStore(state => state.setModeState)
-
-    const canvasToWorld = useMemo(() => buildCanvasToWorld(camera, canvas), [camera, canvas])
-
-    useEffect(() => {
-        const onPointerMove = (e: PointerEvent) => {
-            const point = canvasToWorld(e.clientX, e.clientY)
-
-            /*
-            for (let i = world.entities.length - 1; i >= 0; i--) {
-                const object = world.objects[i]
-                
-                if (isPointInsideObject(point, object)) {
-                    if (ctrl) {
-                        state.applyVisualMods({ 
-                            highlightObjects: [ { index: i, color: highlightDeleteColor } ]
-                        })
-                    }
-                    else {
-                        state.applyVisualMods({ 
-                            highlightObjects: [ { index: i, color: highlightObjectColor } ]
-                        })
-                    }
-        
-                    return
-                }
-            }
-            */
-        
-            const vertex = findClosestVertex(world.shapes, point, snapDistance)
-        
-            if (vertex) {
-                setModeState({
-                    hint: {
-                        type: HintType.Vertex,
-                        point: vertex.point,
-                        delete: e.ctrlKey
-                    }
-                })
-        
-                return
-            }
-        
-            const edge = findClosestEdge(world.shapes, point, snapDistance)
-        
-            if (edge) {
-                setModeState({
-                    hint: {
-                        type: HintType.Edge,
-                        point: edge.point,
-                        delete: e.ctrlKey
-                    }
-                })
-        
-                return
-            }
-
-            setModeState({
-                hint: {
-                    type: HintType.Space,
-                    point,
-                    delete: e.ctrlKey
-                }
-            })
-        }
-
-        const onPointerDown = (e: PointerEvent) => {
-            
-        }
-
-        canvas.addEventListener("pointermove", onPointerMove)
-
-        return () => {
-            canvas.removeEventListener("pointermove", onPointerMove)
-        }
-    })
 
     return (
         <>
             <MousePointerHint /> 
-   
+            <EventListener />
+
             { 
                 world.shapes.map((shape, i) => <Shape key={i} shape={shape} /> ) 
             }

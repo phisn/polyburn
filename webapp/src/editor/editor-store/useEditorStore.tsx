@@ -1,11 +1,17 @@
 import { create } from "zustand"
 import { Mutation } from "../world/Mutation"
+import { World } from "../world/World"
 import { EditorStore, initialState, ModeState } from "./EditorStore"
 
 export const useEditorStore = create<EditorStore>((set, get) => ({
     ...initialState,
-    mutate(mutation: Mutation) {
-        set(state => ({
+    mutate(mutation: Mutation | ((world: World) => Mutation)) {
+        if (typeof mutation === "function") {
+            this.mutate(mutation(get().world))
+            return
+        }
+
+        return set(state => ({
             ...state,
             world: mutation.redo(state.world),
             undos: [...state.undos, mutation],

@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { Mutation } from "../world/Mutation"
 import { World } from "../world/World"
-import { initialPlacementState, PlacementHint, PlacementState } from "./PlacementState"
+import { initialPlacementState, PlacementState } from "../placement/PlacementState"
 
 interface EventHandlers {
     onKeyDown: (keyEvent: KeyboardEvent) => void
@@ -12,14 +12,6 @@ interface EventHandlers {
     onMouseMove: (mouseEvent: MouseEvent) => void
     onMouseDown: (mouseEvent: MouseEvent) => void
     onMouseUp: (mouseEvent: MouseEvent) => void
-}
-
-export enum Mode {
-    Placement = "Placement",
-} 
-
-export interface ModeStateBase {
-    mode: Mode
 }
 
 export type ModeState = PlacementState
@@ -34,7 +26,7 @@ export interface EditorState {
 }
 
 export interface EditorStore extends EditorState {
-    mutate(mutation: Mutation): void
+    mutate(mutation: Mutation | ((world: World) => Mutation)): void
     undo(): void
     redo(): void
 

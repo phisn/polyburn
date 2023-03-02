@@ -38,3 +38,7 @@ export function composeShapeAt(index: number) {
         shapes: composeArrayAt<Shape>(index)(shape, world.shapes)
     })
 }
+
+export function capture<T>(captureFunc: (world: World) => T, f: (x: T) => Mutation) {
+    return (world: World) => f(captureFunc(world))
+}

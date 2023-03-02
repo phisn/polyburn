@@ -7,8 +7,8 @@ import { findClosestEdge, findClosestVertex, Shape as WorldShape } from "./world
 import * as THREE from "three"
 import { Point } from "./world/Point"
 import { Camera } from "three";
-import EditorMode from "./EditorMode";
-
+import { Mode } from "./editor-store/ModeStateBase";
+import PlacementMode from "./placement/PlacementMode";
 
 export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) => {
     if (!camera || !canvas) {
@@ -31,6 +31,18 @@ export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) 
     }
 }
 
+function EditorMode() {
+    const mode = useEditorStore(state => state.modeState.mode)
+
+    switch (mode) {
+        case Mode.Placement:
+            return <PlacementMode />
+
+    }
+
+    return <></>
+}
+
 function EditorControls() {
     const mutate = useEditorStore(state => state.mutate)
 
@@ -44,17 +56,7 @@ function EditorControls() {
 
     useEffect(() => {
         const onPointerDown = (e: PointerEvent) => {
-            if (raycaster.intersectObjects(scene.children).length === 0) {
-                const { x, y } = canvasToWorld(e.clientX, e.clientY)
-                
-                mutate(insertShape({
-                    vertices: [
-                        { x: x - 50, y: y + 50 },
-                        { x: x + 50, y: y + 50 },
-                        { x: x, y: y - 50 },
-                    ]
-                }))
-            }
+            
         }
 
         canvas.addEventListener("pointerdown", onPointerDown)
@@ -68,42 +70,15 @@ function EditorControls() {
 }
 
 function Editor() {
-    const [hintProps, setHintProps] = useState<MousePointerHintProps>()
-
-    const world = useEditorStore(state => state.world)
-    const mutate = useEditorStore(state => state.mutate)
-
-    const cameraRef = useRef<THREE.Camera>()
-    const canvasRef = useRef<HTMLCanvasElement>(null)
-    
-    const canvasToWorld = useMemo(() => (x: number, y: number) => {
-        if (cameraRef.current && canvasRef.current) {
-            return buildCanvasToWorld(cameraRef.current, canvasRef.current)(x, y)
-        }
-        else {
-            return { x: 0, y: 0 }
-        }
-    }, [])
-
-    const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-        setHintProps({
-            position: canvasToWorld(event.clientX, event.clientY),
-            event
-        })
-    }
-
     return (
         <div className="h-screen w-screen">
-            <Canvas
-                style={{ background: "#222228" }}
-                ref={canvasRef} >
-
-                <EditorMode />
+            <Canvas style={{ background: "#222228" }} >
                 <EditorControls />
+                <EditorMode />
                 
                 <OrthographicCamera
-                    ref={cameraRef}
                     makeDefault position={[0, 0, 10]} />
+
                 <Stats />
             </Canvas>
         </div>

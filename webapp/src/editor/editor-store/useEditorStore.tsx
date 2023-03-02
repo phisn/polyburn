@@ -1,38 +1,6 @@
 import { create } from "zustand"
-import { Mutation } from "./world/Mutation"
-import { World } from "./world/World"
-
-interface EventHandlers {
-    onKeyDown: (keyEvent: KeyboardEvent) => void
-    onKeyUp: (keyEvent: KeyboardEvent) => void
-
-    onClick: (mouseEvent: MouseEvent) => void
-
-    onMouseMove: (mouseEvent: MouseEvent) => void
-    onMouseDown: (mouseEvent: MouseEvent) => void
-    onMouseUp: (mouseEvent: MouseEvent) => void
-}
-
-interface EditorState {
-    world: World,
-
-    undos: Mutation[],
-    redos: Mutation[],
-}
-
-const initialState: EditorState = {
-    world: {
-        entities: [],
-        shapes: []
-    },
-
-    undos: [],
-    redos: []
-}
-
-interface EditorStore extends EditorState {
-    mutate(mutation: Mutation): void
-}
+import { Mutation } from "../world/Mutation"
+import { EditorStore, initialState, ModeState } from "./EditorStore"
 
 export const useEditorStore = create<EditorStore>((set, get) => ({
     ...initialState,
@@ -75,5 +43,14 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
                 redos: state.redos.slice(0, -1)
             }
         })
+    },
+    setModeState(modeState: Partial<ModeState>) {
+        set(state => ({
+            ...state,
+            modeState: {
+                ...state.modeState,
+                ...modeState
+            }
+        }))
     }
 }))

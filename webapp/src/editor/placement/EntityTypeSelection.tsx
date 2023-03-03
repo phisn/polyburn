@@ -9,8 +9,6 @@ interface EntityTypeDisplayProps {
 }
 
 const EntityTypeButton = (props: EntityTypeDisplayProps) => {
-    console.log(`Rendering entity type ${props.type}`)
-
     const entity = entities[props.type]
 
     const entityClassname = ({

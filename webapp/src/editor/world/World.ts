@@ -9,7 +9,7 @@ export interface World {
 }
 
 export const insertShape = (shape: Shape) => newMutationWithCompose(
-    world => world.shapes.filter(s => s !== shape),
+    world => world.shapes.slice(0, world.shapes.length - 1),
     world => [...world.shapes, shape],
     shapes => ({ shapes }),
 )
@@ -32,7 +32,7 @@ export const changeVertices = (
 
 export const insertVertex = (shapeIndex: number, insertAfterVertex: number, vertex: Point) => changeVertices(
     shapeIndex,
-    vertices => vertices.filter((_, i) => i !== insertAfterVertex),
+    vertices => vertices.filter((_, i) => i !== insertAfterVertex + 1),
     vertices => [
         ...vertices.slice(0, insertAfterVertex + 1),
         vertex,

@@ -10,7 +10,7 @@ import { buildCanvasToWorld, editorModeTunnel } from "../Editor";
 import { highlightColor, highlightDeleteColor, highlightVertexColor, snapDistance } from "../Values";
 import { insertShape, insertVertex } from "../world/World";
 import { HintType } from "./state/Hint";
-import EventListener from "./EventListener";
+import EventListener from "./event/EventListener";
 import { ActionType } from "./state/Action";
 import PlacableObjectSelector from "./EntityTypeSelection";
 import { EntityType } from "../world/Entity";
@@ -35,7 +35,26 @@ function Shape(props: { shape: WorldShape, shapeIndex: number }) {
 
     let vertices = props.shape.vertices
 
-    console.log(`Rendering shape ${props.shapeIndex}`)
+    switch (action?.type) {
+        case ActionType.MoveVertex:
+            if (action.shapeIndex === props.shapeIndex) {
+                vertices = vertices.map((vertex, i) =>
+                    i === action.vertexIndex ? action.point : vertex
+                )
+            }
+
+            break
+        case ActionType.InsertVertex:
+            if (action.shapeIndex === props.shapeIndex) {
+                vertices = [
+                    ...vertices.slice(0, action.vertexAfterIndex + 1),
+                    action.point,
+                    ...vertices.slice(action.vertexAfterIndex + 1)
+                ]
+            }
+
+            break
+    }
 
     if (action?.type === ActionType.MoveVertex && action.shapeIndex === props.shapeIndex) {
         console.log(`Action.point: ${action.point.x}, ${action.point.y}`)
@@ -100,17 +119,29 @@ function MousePointerHint() {
 function Entity() {
 }
 
-function PlacementMode() {
+function EntityPreview() {
+}
+
+function Shapes() {
     const world = useEditorStore(state => state.world)
+
+    return (
+        <>
+            {
+                world.shapes.map((shape, i) => <Shape key={i} shape={shape} shapeIndex={i} /> )
+            }
+        </>
+    )
+}
+
+function PlacementMode() {
 
     return (
         <>
             <EventListener />
             <MousePointerHint /> 
 
-            { 
-                world.shapes.map((shape, i) => <Shape key={i} shape={shape} shapeIndex={i} /> ) 
-            }
+            <Shapes />
 
             <editorModeTunnel.In>
                 <SideBar />

@@ -1,8 +1,7 @@
-import { Canvas, render, useFrame, useThree } from "@react-three/fiber"
-import { OrthographicCamera, Stats } from "@react-three/drei"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, render, useFrame, useLoader, useThree } from "@react-three/fiber"
+import { OrthographicCamera, Stats, Svg } from "@react-three/drei"
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three"
-import { Camera } from "three";
 import { Point } from "../world/Point";
 import { findClosestEdge, findClosestVertex, Shape as WorldShape } from "../world/Shape";
 import { useEditorStore } from "../editor-store/useEditorStore";
@@ -13,8 +12,10 @@ import { HintType } from "./state/Hint";
 import EventListener from "./event/EventListener";
 import { ActionType } from "./state/Action";
 import PlacableObjectSelector from "./EntityTypeSelection";
-import { EntityType } from "../world/Entity";
+import { Entity as EntityModel, EntityType } from "../world/Entity";
 import SideBar from "./SideBar";
+import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
+import { entities } from "../world/Entities";
 
 function Vertex(props: { vertex: Point }) {
     return (
@@ -116,10 +117,47 @@ function MousePointerHint() {
     )
 }
 
-function Entity() {
+function Entity(props: { entity: EntityModel }) {
+    const entry = entities[props.entity.type]
+
+    console.log(`entry: ${entry.src}`)
+
+    return (
+        <>
+            <Suspense fallback={null}>
+                <Svg 
+                    src={entry.src}
+                    scale={entry.scale} 
+                    position={[props.entity.position.x, props.entity.position.y, 0]} />
+            </Suspense>
+        </>
+    )
 }
 
 function EntityPreview() {
+    const action = useEditorStore(state => state.modeState.action)
+
+    console.log(`action: ${action?.type == ActionType.PlaceEntity && action.entity}`)
+
+    return (
+        <>
+            { action?.type == ActionType.PlaceEntity &&
+                <Entity entity={action.entity} />
+            }
+        </>
+    )
+}
+
+function Entities() {
+    const world = useEditorStore(state => state.world)
+
+    return (
+        <>
+            {
+                world.entities.map((entity, i) => <Entity key={i} entity={entity} /> )
+            }
+        </>
+    )
 }
 
 function Shapes() {
@@ -135,12 +173,13 @@ function Shapes() {
 }
 
 function PlacementMode() {
-
     return (
         <>
             <EventListener />
             <MousePointerHint /> 
 
+            <Entities />
+            <EntityPreview />
             <Shapes />
 
             <editorModeTunnel.In>

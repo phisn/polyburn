@@ -12,8 +12,11 @@ function SideBar() {
             setModeState({
                 action: {
                     type: ActionType.PlaceEntity,
-                    entityType: type,
-                    point: null
+                    entity: {
+                        type,
+                        position: { x: 0, y: 0 },
+                        rotation: 0,
+                    }
                 }
             })
         }
@@ -30,7 +33,7 @@ function SideBar() {
                 <EntityTypeSelection
                     selected={
                         action?.type === ActionType.PlaceEntity
-                            ? action.entityType
+                            ? action.entity.type
                             : undefined
                     }
                     onSelect={onSelectObject}

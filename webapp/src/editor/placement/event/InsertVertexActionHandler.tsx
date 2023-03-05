@@ -1,7 +1,7 @@
 import { useEditorStore } from "../../editor-store/useEditorStore"
 import { insertVertex } from "../../world/World"
 import { InsertVertexAction } from "../state/Action"
-import { isInsideCanvas, isLeftButton, PointerHandlerParams } from "./EventListener"
+import { isInsideCanvas, isLeftButton, PointerHandlerParams } from "./Definitions"
 
 export function insertActionHandler(params: PointerHandlerParams<InsertVertexAction>) {
     const state = useEditorStore.getState()

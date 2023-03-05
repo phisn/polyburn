@@ -5,7 +5,7 @@ import { findClosestEdge, findClosestVertex } from "../../world/Shape"
 import { insertShape } from "../../world/World"
 import { ActionType } from "../state/Action"
 import { HintType } from "../state/Hint"
-import { isInsideCanvas, isLeftButton, PointerHandlerParams } from "./EventListener"
+import { isInsideCanvas, isLeftButton, PointerHandlerParams } from "./Definitions"
 
 export function defaultActionHandler(params: PointerHandlerParams) {
     updateHint(params.point, params.event.ctrlKey)

@@ -1,12 +1,12 @@
 import { Canvas, render, useFrame, useThree } from "@react-three/fiber"
-import { OrthographicCamera, Stats } from "@react-three/drei"
+import { Grid, MapControls, OrbitControls, OrthographicCamera, PerspectiveCamera, Stats } from "@react-three/drei"
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEditorStore } from "./editor-store/useEditorStore";
 import { insertShape } from "./world/World";
 import { findClosestEdge, findClosestVertex, Shape as WorldShape } from "./world/Shape";
 import * as THREE from "three"
 import { Point } from "./world/Point"
-import { Camera } from "three";
+import { Camera, DoubleSide, MathUtils, PlaneGeometry } from "three";
 import { Mode } from "./editor-store/ModeStateBase";
 import PlacementMode from "./placement/PlacementMode";
 import EditorNavbar from "./EditorNavbar";
@@ -59,14 +59,53 @@ function EditorControls() {
     const raycaster = useThree(state => state.raycaster)
     const scene = useThree(state => state.scene)
 
+    interface FirstPosition {
+        mouse: Point
+        camera: Point
+    }
+
+    const firstPosition = useRef<FirstPosition | null>(null)
+
     useEffect(() => {
-        const onPointerDown = (e: PointerEvent) => {
+        const onPointerEvent = (event: PointerEvent) => {
+            const point = { x: event.clientX * 0.1, y: event.clientY * 0.1 }
+
+            if (event.buttons & 4) {
+                if (firstPosition.current === null) {
+                    console.log("yep")
+                    firstPosition.current = {
+                        mouse: point,
+                        camera: camera.position
+                    }
+                }
+                else {
+                    console.log(`fpccx: ${firstPosition.current.camera.x}, fpccy: ${firstPosition.current.camera.y}`)
+                    console.log(`fpmx: ${firstPosition.current.mouse.x}, fpmy: ${firstPosition.current.mouse.y}`)
+                    console.log(`pointx: ${point.x}, pointy: ${point.y}`)
+
+                    camera.position.set(
+                        firstPosition.current.camera.x + (firstPosition.current.mouse.x - point.x),
+                        firstPosition.current.camera.y + (firstPosition.current.mouse.y - point.y),
+                        10
+                    )
+                }
+            }
+            else {
+                console.log("nope")
+                if (firstPosition.current) {
+                    firstPosition.current = null
+                }
+            }
         }
 
-        canvas.addEventListener("pointerdown", onPointerDown)
+        canvas.addEventListener("pointerdown", onPointerEvent)
+        canvas.addEventListener("pointermove", onPointerEvent)
+        canvas.addEventListener("pointerup", onPointerEvent)
 
         return () => {
-            canvas.removeEventListener("pointerdown", onPointerDown)
+            canvas.removeEventListener("pointerdown", onPointerEvent)
+            canvas.removeEventListener("pointermove", onPointerEvent)
+            canvas.removeEventListener("pointerup", onPointerEvent)
         }
     })
 
@@ -76,12 +115,28 @@ function EditorControls() {
 function Editor() {
     return (
         <div className="h-screen w-screen">
-            <Canvas style={{ background: "#222228" }} >
+            <Canvas style={{ background: "#000000" }} >
+                {/*
+                <Grid
+                        infiniteGrid
+                        scale={200}
+                        sectionSize={0.5}
+                        rotation={[MathUtils.DEG2RAD * 90, 0, 0]}
+                        position={[0,0,-1]}
+                        fadeStrength={0}
+                        fadeDistance={1000000}
+                        sectionColor="#777777" />
+                */}
+
                 <EditorControls />
                 <EditorMode />
                 
                 <OrthographicCamera
-                    makeDefault position={[0, 0, 10]} />
+                    makeDefault
+                    position={[0, 0, 10]}
+                    rotation={[0, 0, 0]}
+                    far={10000}
+                />
 
                 {/* <Stats /> */}
             </Canvas>

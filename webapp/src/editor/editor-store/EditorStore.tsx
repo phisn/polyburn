@@ -17,9 +17,15 @@ interface EventHandlers {
 
 export type ModeState = PlacementState
 
+interface CameraState {
+    position: { x: number, y: number }
+    zoom: number
+}
+
 export interface EditorState {
     modeState: ModeState
 
+    cameraState: CameraState
     world: World,
 
     undos: Mutation[],
@@ -37,6 +43,10 @@ export interface EditorStore extends EditorState {
 export const initialState: EditorState = {
     modeState: initialPlacementState,
 
+    cameraState: {
+        position: { x: 0, y: 0 },
+        zoom: 1
+    },
     world: {
         entities: [],
         shapes: []

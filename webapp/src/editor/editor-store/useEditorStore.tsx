@@ -33,7 +33,10 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
             const lastMutation = state.undos[state.undos.length - 1]
             return {
                 ...state,
-                world: lastMutation.undo(state.world),
+                world: {
+                    ...state.world,
+                    ...lastMutation.undo(state.world)
+                },
                 undos: state.undos.slice(0, -1),
                 redos: [...state.redos, lastMutation]
             }
@@ -49,7 +52,10 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
             const lastMutation = state.redos[state.redos.length - 1]
             return {
                 ...state,
-                world: lastMutation.redo(state.world),
+                world: {
+                    ...state.world,
+                    ...lastMutation.redo(state.world)
+                },
                 undos: [...state.undos, lastMutation],
                 redos: state.redos.slice(0, -1)
             }

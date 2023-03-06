@@ -16,6 +16,8 @@ import { Entity as EntityModel, EntityType } from "../world/Entity";
 import SideBar from "./SideBar";
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import { entities } from "../world/Entities";
+import { changeAnchor } from "../../utility/math";
+import { Euler } from "three";
 
 function Vertex(props: { vertex: Point }) {
     return (
@@ -120,8 +122,6 @@ function MousePointerHint() {
 function Entity(props: { entity: EntityModel }) {
     const entry = entities[props.entity.type]
 
-    console.log(`entry: ${entry.src}`)
-
     return (
         <>
             <Suspense fallback={null}>
@@ -129,9 +129,11 @@ function Entity(props: { entity: EntityModel }) {
                     src={entry.src}
                     scale={entry.scale} 
                     position={[
-                        props.entity.position.x - entry.scale * entry.size.width  * (0.5 - entry.anchor.x),
-                        props.entity.position.y + entry.scale * entry.size.height * (0.5 - entry.anchor.y),
-                        0 ]} />
+                        props.entity.position.x,
+                        props.entity.position.y,
+                        0 ]} 
+                    rotation={new Euler(0, 0, props.entity.rotation)} 
+                />
             </Suspense>
         </>
     )

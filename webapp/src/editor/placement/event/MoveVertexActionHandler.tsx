@@ -6,7 +6,7 @@ import { isInsideCanvas, isLeftButton, PointerHandlerParams } from "./Definition
 export function moveVertexActionHandler(params: PointerHandlerParams<MoveVertexAction>) {
     const state = useEditorStore.getState()
 
-    if (isLeftButton(params.event)) {
+    if (isLeftButton(params)) {
         state.setModeState({ 
             hint: null,
             action: {

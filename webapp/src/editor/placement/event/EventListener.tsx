@@ -26,8 +26,6 @@ function EventListener() {
     
     useEffect(() => {
         const onPointerEvent = (event: PointerEvent) => {
-            lastPointerEventRef.current = event
-
             const point = canvasToWorld(event.clientX, event.clientY)
             const action = useEditorStore.getState().modeState.action
 
@@ -37,8 +35,11 @@ function EventListener() {
                 raycaster,
                 scene,
                 point,
-                event
+                event,
+                previousEvent: lastPointerEventRef.current ?? undefined
             }
+
+            lastPointerEventRef.current = event
 
             switch (action?.type) {
                 case ActionType.InsertVertex:

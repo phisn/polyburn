@@ -1,11 +1,117 @@
+import { changeAnchor } from "../../../utility/math"
 import { EditorStore } from "../../editor-store/EditorStore"
 import { useEditorStore } from "../../editor-store/useEditorStore"
 import { snapDistance } from "../../Values"
+import { entities } from "../../world/Entities"
 import { Point } from "../../world/Point"
 import { findClosestEdge } from "../../world/Shape"
+import { scale } from "../../world/Size"
 import { insertEntity, moveVertex } from "../../world/World"
 import { MoveVertexAction, PlaceEntityAction } from "../state/Action"
-import { isInsideCanvas, isLeftButton, PointerHandlerParams } from "./Definitions"
+import { isInsideCanvas, isLeftButton, isLeftButtonNew, PointerHandlerParams } from "./Definitions"
+
+export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntityAction>) {
+    const state = useEditorStore.getState()
+
+    if (isLeftButtonNew(params)) {
+        state.setModeState({
+            action: null
+        })
+        
+        state.mutate(insertEntity(
+            params.action.entity,
+        ))
+    }
+    else {
+        /*
+        state.setModeState({
+            action: {
+                ...params.action,
+                entity: {
+                    ...params.action.entity,
+                    position: params.point
+                }
+            }
+        })
+        */
+
+        const edge = findEdgeForObject(state, params.point, params.event.shiftKey)
+        const entry = entities[params.action.entity.type]
+
+        if (edge) {
+            const transposed = changeAnchor(
+                edge.point,
+                edge.rotation,
+                scale(entry.size, entry.scale),
+                entry.anchor,
+                { x: 0.5, y: 1 }
+            )
+
+            state.setModeState({
+                action: {
+                    ...params.action,
+                    entity: {
+                        ...params.action.entity,
+                        position: transposed,
+                        rotation: edge.rotation
+                    }
+                }
+            })
+            /*
+            state.applyVisualMods({
+                previewObject: {
+                    placeable: props.obj,
+                    position: edge.point,
+                    rotation: edge.rotation,
+                }
+            })
+            */
+        }
+        else {
+            const rounded: Point = params.event.shiftKey
+                ? {
+                    x: Math.round(params.point.x / snapDistance) * snapDistance,
+                    y: Math.round(params.point.y / snapDistance) * snapDistance
+                  }
+                : params.point
+
+            const transposed = changeAnchor(
+                rounded,
+                0,
+                scale(entry.size, entry.scale),
+                entry.anchor,
+                { x: 0.5, y: 0.5 }
+            )
+            
+            state.setModeState({
+                action: {
+                    ...params.action,
+                    entity: {
+                        ...params.action.entity,
+                        position: transposed,
+                        rotation: 0
+                    }
+                }
+            })
+
+            /*
+            if (snap) {
+                position.x = Math.round(position.x / snapDistance) * snapDistance
+                position.y = Math.round(position.y / snapDistance) * snapDistance
+            }
+
+            state.applyVisualMods({ 
+                previewObject: {
+                    placeable: props.obj,
+                    position,
+                    rotation: 0,
+                    customAnchor: { x: 0.5, y: 0.5 }
+                }
+            })
+            */
+        }
+    }
+}
 
 const findEdgeForObject = (state: EditorStore, position: Point, snap: Boolean) => {
     const edge = findClosestEdge(state.world.shapes, position, snapDistance)
@@ -49,90 +155,3 @@ const findEdgeForObject = (state: EditorStore, position: Point, snap: Boolean) =
     }
 }
 
-export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntityAction>) {
-    const state = useEditorStore.getState()
-
-    if (isLeftButton(params.event)) {
-        state.setModeState({
-            action: null
-        })
-        
-        state.mutate(insertEntity(
-            params.action.entity,
-        ))
-    }
-    else {
-        /*
-        state.setModeState({
-            action: {
-                ...params.action,
-                entity: {
-                    ...params.action.entity,
-                    position: params.point
-                }
-            }
-        })
-        */
-
-        const edge = findEdgeForObject(state, params.point, params.event.shiftKey)
-
-        if (edge) {
-            state.setModeState({
-                action: {
-                    ...params.action,
-                    entity: {
-                        ...params.action.entity,
-                        position: edge.point,
-                        rotation: edge.rotation
-                    }
-                }
-            })
-            /*
-            state.applyVisualMods({
-                previewObject: {
-                    placeable: props.obj,
-                    position: edge.point,
-                    rotation: edge.rotation,
-                }
-            })
-            */
-        }
-        else {
-            const pointCalculated: Point = params.event.ctrlKey
-                ? {
-                    x: Math.round(params.point.x / snapDistance) * snapDistance,
-                    y: Math.round(params.point.y / snapDistance) * snapDistance
-                  }
-                : params.point
-            
-            console.log(`px: ${params.point.x}, py: ${params.point.y}, cx: ${pointCalculated.x}, cy: ${pointCalculated.y}`)
-
-            state.setModeState({
-                action: {
-                    ...params.action,
-                    entity: {
-                        ...params.action.entity,
-                        position: pointCalculated,
-                        rotation: 0
-                    }
-                }
-            })
-
-            /*
-            if (snap) {
-                position.x = Math.round(position.x / snapDistance) * snapDistance
-                position.y = Math.round(position.y / snapDistance) * snapDistance
-            }
-
-            state.applyVisualMods({ 
-                previewObject: {
-                    placeable: props.obj,
-                    position,
-                    rotation: 0,
-                    customAnchor: { x: 0.5, y: 0.5 }
-                }
-            })
-            */
-        }
-    }
-}

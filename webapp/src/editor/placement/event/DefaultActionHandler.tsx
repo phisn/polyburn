@@ -5,12 +5,12 @@ import { findClosestEdge, findClosestVertex } from "../../world/Shape"
 import { insertShape } from "../../world/World"
 import { ActionType } from "../state/Action"
 import { HintType } from "../state/Hint"
-import { isInsideCanvas, isLeftButton, PointerHandlerParams } from "./Definitions"
+import { isInsideCanvas, isLeftButton, isLeftButtonNew, PointerHandlerParams } from "./Definitions"
 
 export function defaultActionHandler(params: PointerHandlerParams) {
     updateHint(params.point, params.event.ctrlKey)
 
-    if (isLeftButton(params.event) && isInsideCanvas(params.event, params.canvas)) {
+    if (isLeftButtonNew(params) && isInsideCanvas(params.event, params.canvas)) {
         const state = useEditorStore.getState()
 
         switch (state.modeState.hint?.type) {

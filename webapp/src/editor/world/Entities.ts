@@ -7,19 +7,19 @@ export const entities: EntityRegistry = {
     [EntityType.Rocket]: {
         scale: 0.15,
         size: { width: 300, height: 600 },
-        anchor: { x: 0.0, y: 0 },
+        anchor: { x: 1, y: 0 },
         src: rocket,
     },
     [EntityType.GreenFlag]: {
         scale: 0.15,
         size: { width: 275, height: 436 },
-        anchor: { x: 0.0, y: 0 },
+        anchor: { x: 1, y: 0 },
         src: greenFlag,
     },
     [EntityType.RedFlag]: {
         scale: 0.15,
         size: { width: 275, height: 436 },
-        anchor: { x: 0.0, y: 0 },
+        anchor: { x: 1, y: 0 },
         src: redFlag,
     },
 }

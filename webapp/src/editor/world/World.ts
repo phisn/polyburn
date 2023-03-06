@@ -72,3 +72,9 @@ export const moveVertex = (shapeIndex: number, vertexIndex: number, to: Point) =
         ]
     )
 )
+
+export const insertEntity = (entity: Entity) => newMutationWithCompose(
+    world => world.entities.slice(0, world.entities.length - 1),
+    world => [...world.entities, entity],
+    entities => ({ entities }),
+)

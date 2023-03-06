@@ -12,6 +12,7 @@ import { HintType } from "../state/Hint"
 import { defaultActionHandler } from "./DefaultActionHandler"
 import { insertActionHandler } from "./InsertVertexActionHandler"
 import { moveVertexActionHandler } from "./MoveVertexActionHandler"
+import { placeEntityActionHandler } from "./PlaceEntityActionHandler"
 
 function EventListener() {
     const lastPointerEventRef = useRef<PointerEvent | null>()
@@ -55,12 +56,10 @@ function EventListener() {
 
                     break
                 case ActionType.PlaceEntity:
-                    /*
-                    insertActionHandler({
+                    placeEntityActionHandler({
                         ...params,
                         action
                     })
-                    */
 
                     break
                 default:

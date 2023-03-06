@@ -128,7 +128,10 @@ function Entity(props: { entity: EntityModel }) {
                 <Svg 
                     src={entry.src}
                     scale={entry.scale} 
-                    position={[props.entity.position.x, props.entity.position.y, 0]} />
+                    position={[
+                        props.entity.position.x - entry.scale * entry.size.width  * (0.5 - entry.anchor.x),
+                        props.entity.position.y + entry.scale * entry.size.height * (0.5 - entry.anchor.y),
+                        0 ]} />
             </Suspense>
         </>
     )
@@ -150,6 +153,8 @@ function EntityPreview() {
 
 function Entities() {
     const world = useEditorStore(state => state.world)
+
+    console.log(`world.entities: ${world.entities.length}`)
 
     return (
         <>

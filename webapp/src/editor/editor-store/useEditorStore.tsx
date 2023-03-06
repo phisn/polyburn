@@ -15,7 +15,10 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
         return set(state => ({
             ...state,
-            world: mutation.redo(state.world),
+            world: {
+                ...state.world,
+                ...mutation.redo(state.world)
+            },
             undos: [...state.undos, mutation],
             redos: []
         }))

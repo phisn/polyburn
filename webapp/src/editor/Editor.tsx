@@ -123,7 +123,7 @@ function Editor() {
                     rotation={[MathUtils.DEG2RAD * 90, 0, 0]}
                     position={[0,0,-1]}
                     fadeStrength={0}
-                    sectionColor="#777777" />
+                    sectionColor="#aaaaaa" />
                 }
 
                 <EditorControls />

@@ -21,6 +21,8 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
         state.mutate(insertEntity(
             params.action.entity,
         ))
+
+        console.log(`middle anchor: ${params.action.entity.position.x}, ${params.action.entity.position.y}`)
     }
     else {
         /*
@@ -43,8 +45,8 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
                 edge.point,
                 edge.rotation,
                 scale(entry.size, entry.scale),
-                entry.anchor,
-                { x: 0.5, y: 1 }
+                { x: 0.5, y: 0 },
+                entry.anchor
             )
 
             state.setModeState({
@@ -79,9 +81,12 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
                 rounded,
                 0,
                 scale(entry.size, entry.scale),
+                { x: 0.5, y: 0.5 },
                 entry.anchor,
-                { x: 0.5, y: 0.5 }
             )
+
+            console.log(`from: ${rounded.x}, ${rounded.y}`)
+            console.log(`to: ${transposed.x}, ${transposed.y}`)
             
             state.setModeState({
                 action: {

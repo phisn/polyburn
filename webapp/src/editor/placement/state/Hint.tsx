@@ -4,7 +4,7 @@ export enum HintType {
     Space,
     Vertex,
     Edge,
-    Object
+    Entity
 }
 
 export interface SpaceHint {
@@ -28,8 +28,11 @@ export interface EdgeHint {
     edge: [number, number]
 }
 
-export interface ObjectHint {
-    type: HintType.Object
+export interface EntityHint {
+    type: HintType.Entity
+    delete: boolean
+
+    entityIndex: number
 }
 
-export type PlacementHint = SpaceHint | VertexHint | EdgeHint | ObjectHint
+export type PlacementHint = SpaceHint | VertexHint | EdgeHint | EntityHint

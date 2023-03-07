@@ -1,5 +1,6 @@
 import { useEditorStore } from "../../editor-store/useEditorStore"
 import { snapDistance } from "../../Values"
+import { isPointInsideEntity } from "../../world/Entities"
 import { Point } from "../../world/Point"
 import { findClosestEdge, findClosestVertex } from "../../world/Shape"
 import { insertShape } from "../../world/World"
@@ -61,26 +62,23 @@ export function defaultActionHandler(params: PointerHandlerParams) {
 const updateHint = (point: Point, ctrl: boolean) => {
     const state = useEditorStore.getState()
 
-    /*
-    for (let i = world.entities.length - 1; i >= 0; i--) {
-        const object = world.objects[i]
-        
-        if (isPointInsideObject(point, object)) {
-            if (ctrl) {
-                state.applyVisualMods({ 
-                    highlightObjects: [ { index: i, color: highlightDeleteColor } ]
-                })
-            }
-            else {
-                state.applyVisualMods({ 
-                    highlightObjects: [ { index: i, color: highlightObjectColor } ]
-                })
-            }
+    for (let i = state.world.entities.length - 1; i >= 0; i--) {
+        const entity = state.world.entities[i]
+
+        if (isPointInsideEntity(point, entity)) {
+            state.setModeState({
+                hint: {
+                    type: HintType.Entity,
+                    entityIndex: i,
+                    delete: ctrl,
+                }
+            })
+
+            console.log('entity')
 
             return
         }
     }
-    */
 
     const vertex = findClosestVertex(state.world.shapes, point, snapDistance)
 

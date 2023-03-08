@@ -32,8 +32,13 @@ export interface EditorState {
     redos: Mutation[],
 }
 
+// captures work by using a function that returns a mutation. Because after captures we maybe
+// want to delegate to another function wants to create a new capture we need to recursively
+// call the function until we get a mutation
+export type RecrusiveMutationWithCapture = (world: World) => RecrusiveMutationWithCapture | Mutation
+
 export interface EditorStore extends EditorState {
-    mutate(mutation: Mutation | ((world: World) => Mutation)): void
+    mutate(mutation: Mutation | RecrusiveMutationWithCapture): void
     undo(): void
     redo(): void
 

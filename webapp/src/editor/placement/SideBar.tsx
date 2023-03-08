@@ -11,12 +11,8 @@ function SideBar() {
         if (type) {
             setModeState({
                 action: {
-                    type: ActionType.PlaceEntity,
-                    entity: {
-                        type,
-                        position: { x: 0, y: 0 },
-                        rotation: 0,
-                    }
+                    type: ActionType.PlaceEntityInFuture,
+                    entityType: type
                 }
             })
         }
@@ -32,8 +28,8 @@ function SideBar() {
             <div className="flex p-4 flex-col items-center bg-base-100 rounded-lg h-full self-end">
                 <EntityTypeSelection
                     selected={
-                        action?.type === ActionType.PlaceEntity
-                            ? action.entity.type
+                        action?.type === ActionType.PlaceEntityInFuture
+                            ? action.entityType
                             : undefined
                     }
                     onSelect={onSelectObject}

@@ -3,15 +3,16 @@ import { snapDistance } from "../../Values"
 import { isPointInsideEntity } from "../../world/Entities"
 import { Point } from "../../world/Point"
 import { findClosestEdge, findClosestVertex } from "../../world/Shape"
-import { insertShape } from "../../world/World"
+import { insertShape, removeEntity, removeVertex } from "../../world/World"
 import { ActionType } from "../state/Action"
 import { HintType } from "../state/Hint"
-import { isInsideCanvas, isLeftButton, isLeftButtonNew, PointerHandlerParams } from "./Definitions"
+import { isInsideCanvas, PointerHandlerParams } from "./Definitions"
 
 export function defaultActionHandler(params: PointerHandlerParams) {
-    updateHint(params.point, params.event.ctrlKey)
+    updateHint(params.point, params.event.delete)
 
-    if (isLeftButtonNew(params) && isInsideCanvas(params.event, params.canvas)) {
+    if (params.event.leftButton && !params.previousEvent?.leftButton && 
+        isInsideCanvas(params.event, params.canvas)) {
         const state = useEditorStore.getState()
 
         switch (state.modeState.hint?.type) {
@@ -42,6 +43,14 @@ export function defaultActionHandler(params: PointerHandlerParams) {
 
                 break
             case HintType.Vertex:
+                if (params.event.delete) {
+                    state.mutate(
+                        removeVertex(state.modeState.hint.shapeIndex, state.modeState.hint.vertexIndex)
+                    )
+
+                    break
+                }
+
                 state.setModeState({
                     action: {
                         type: ActionType.MoveVertex,
@@ -55,11 +64,35 @@ export function defaultActionHandler(params: PointerHandlerParams) {
                 })
 
                 break
+            case HintType.Entity:
+                if (params.event.delete) {
+                    state.mutate(
+                        removeEntity(state.modeState.hint.entityIndex)
+                    )
+
+                    break
+                }
+
+                const entity = state.world.entities[state.modeState.hint.entityIndex]
+
+                state.setModeState({
+                    action: {
+                        type: ActionType.PlaceEntity,
+                        entity
+                    },
+                    hint: null
+                })
+
+                state.mutate(
+                    removeEntity(state.modeState.hint.entityIndex)
+                )
+
+                break
         }
     }
 }
 
-const updateHint = (point: Point, ctrl: boolean) => {
+const updateHint = (point: Point, delete_: boolean) => {
     const state = useEditorStore.getState()
 
     for (let i = state.world.entities.length - 1; i >= 0; i--) {
@@ -70,11 +103,9 @@ const updateHint = (point: Point, ctrl: boolean) => {
                 hint: {
                     type: HintType.Entity,
                     entityIndex: i,
-                    delete: ctrl,
+                    delete: delete_,
                 }
             })
-
-            console.log('entity')
 
             return
         }
@@ -87,7 +118,7 @@ const updateHint = (point: Point, ctrl: boolean) => {
             hint: {
                 type: HintType.Vertex,
                 point: vertex.point,
-                delete: ctrl,
+                delete: delete_,
 
                 shapeIndex: vertex.shapeIndex,
                 vertexIndex: vertex.vertexIndex,

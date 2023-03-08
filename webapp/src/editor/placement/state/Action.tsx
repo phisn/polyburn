@@ -4,6 +4,7 @@ import { Point } from "../../world/Point"
 export enum ActionType {
     MoveVertex,
     InsertVertex,
+    PlaceEntityInFuture,
     PlaceEntity
 }
 
@@ -30,4 +31,12 @@ export interface PlaceEntityAction {
     entity: Entity
 }
 
-export type Action = MoveVertexAction | PlaceEntityAction | InsertVertexAction
+export interface PlaceEntityInFutureAction {
+    type: ActionType.PlaceEntityInFuture
+    entityType: EntityType
+}
+
+export type Action = MoveVertexAction 
+    | InsertVertexAction 
+    | PlaceEntityAction 
+    | PlaceEntityInFutureAction

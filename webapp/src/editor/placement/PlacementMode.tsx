@@ -15,9 +15,10 @@ import PlacableObjectSelector from "./EntityTypeSelection";
 import { Entity as EntityModel, EntityType } from "../world/Entity";
 import SideBar from "./SideBar";
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
-import { entities } from "../world/Entities";
+import { entities, entityRect } from "../world/Entities";
 import { changeAnchor } from "../../utility/math";
 import { Euler } from "three";
+import { scale } from "../world/Size";
 
 function Vertex(props: { vertex: Point }) {
     return (
@@ -119,30 +120,78 @@ function MousePointerHint() {
     )
 }
 
-function Entity(props: { entity: EntityModel }) {
+function Entity(props: { entity: EntityModel, index?: number }) {
     const entry = entities[props.entity.type]
+
+    const { topLeft, topRight, bottomLeft, bottomRight } = useMemo(
+        () => entityRect(props.entity), 
+        [props.entity]
+    )
+
+    const hint = useEditorStore(state => state.modeState.hint)
+
+    const isHighlighted = props.index !== undefined
+        && hint?.type === HintType.Entity 
+        && hint.entityIndex === props.index
+
+    const isToDelete = isHighlighted && hint.delete
+
+    const strokeMaterial = useMemo(() => {
+        if (isToDelete) {
+            return new THREE.MeshBasicMaterial({
+                color: 0xff4444,
+            })
+        }
+
+        if (isHighlighted) {
+            return new THREE.MeshBasicMaterial({
+                color: 0xffff44,
+            })
+        }
+
+        return undefined
+
+    }, [isHighlighted, isToDelete])
 
     return (
         <>
             <Suspense fallback={null}>
-                <Svg 
-                    src={entry.src}
-                    scale={entry.scale} 
-                    position={[
-                        props.entity.position.x,
-                        props.entity.position.y,
-                        0 ]} 
-                    rotation={new Euler(0, 0, props.entity.rotation)} 
-                />
+                { props.entity.position &&
+                    <Svg
+                        fillMaterial={strokeMaterial}
+                        src={entry.src}
+                        scale={entry.scale} 
+                        position={[
+                            props.entity.position.x,
+                            props.entity.position.y,
+                            0 ]} 
+                        rotation={new Euler(0, 0, props.entity.rotation)} 
+                    />
+                }
             </Suspense>
+
+            <mesh position={[topLeft.x, topLeft.y, 0.5]}>
+                <circleGeometry args={[5.0]} />
+                <meshBasicMaterial color="#ff0000" />
+            </mesh>
+            <mesh position={[topRight.x, topRight.y, 0.5]}>
+                <circleGeometry args={[5.0]} />
+                <meshBasicMaterial color="#55ff55" />
+            </mesh>
+            <mesh position={[bottomLeft.x, bottomLeft.y, 0.5]}>
+                <circleGeometry args={[5.0]} />
+                <meshBasicMaterial color="#5555ff" />
+            </mesh>
+            <mesh position={[bottomRight.x, bottomRight.y, 0.5]}>
+                <circleGeometry args={[5.0]} />
+                <meshBasicMaterial color="#ffff55" />
+            </mesh>
         </>
     )
 }
 
 function EntityPreview() {
     const action = useEditorStore(state => state.modeState.action)
-
-    console.log(`action: ${action?.type == ActionType.PlaceEntity && action.entity}`)
 
     return (
         <>
@@ -156,12 +205,10 @@ function EntityPreview() {
 function Entities() {
     const world = useEditorStore(state => state.world)
 
-    console.log(`world.entities: ${world.entities.length}`)
-
     return (
         <>
             {
-                world.entities.map((entity, i) => <Entity key={i} entity={entity} /> )
+                world.entities.map((entity, i) => <Entity key={i} entity={entity} index={i} /> )
             }
         </>
     )

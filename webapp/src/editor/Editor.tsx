@@ -74,14 +74,12 @@ function EditorControls() {
 
             if (event.buttons & 4) {
                 if (firstPosition.current === null) {
-                    console.log("yep")
                     firstPosition.current = {
                         mouse: point,
                         camera: { x: camera.position.x, y: camera.position.y }
                     }
                 }
                 else if (event.type === "pointermove") {
-                    console.log("px", point.x, "py", point.y, event.type)
                     camera.position.set(
                         firstPosition.current.camera.x + (firstPosition.current.mouse.x - point.x),
                         firstPosition.current.camera.y + (firstPosition.current.mouse.y - point.y),
@@ -90,7 +88,6 @@ function EditorControls() {
                 }
             }
             else {
-                console.log("nope")
                 if (firstPosition.current) {
                     firstPosition.current = null
                 }
@@ -115,17 +112,6 @@ function Editor() {
     return (
         <div className="h-screen w-screen">
             <Canvas style={{ background: "#000000" }} >
-                {
-                <Grid
-                    infiniteGrid
-                    scale={200}
-                    sectionSize={0.5}
-                    rotation={[MathUtils.DEG2RAD * 90, 0, 0]}
-                    position={[0,0,-1]}
-                    fadeStrength={0}
-                    sectionColor="#aaaaaa" />
-                }
-
                 <EditorControls />
                 <EditorMode />
                 

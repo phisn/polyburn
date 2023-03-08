@@ -8,12 +8,12 @@ import { findClosestEdge } from "../../world/Shape"
 import { scale } from "../../world/Size"
 import { insertEntity, moveVertex } from "../../world/World"
 import { MoveVertexAction, PlaceEntityAction } from "../state/Action"
-import { isInsideCanvas, isLeftButton, isLeftButtonNew, PointerHandlerParams } from "./Definitions"
+import { isInsideCanvas, PointerHandlerParams } from "./Definitions"
 
 export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntityAction>) {
     const state = useEditorStore.getState()
 
-    if (isLeftButtonNew(params)) {
+    if (params.event.leftButton && !params.previousEvent?.leftButton) {
         state.setModeState({
             action: null
         })
@@ -21,8 +21,6 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
         state.mutate(insertEntity(
             params.action.entity,
         ))
-
-        console.log(`middle anchor: ${params.action.entity.position.x}, ${params.action.entity.position.y}`)
     }
     else {
         /*
@@ -37,7 +35,7 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
         })
         */
 
-        const edge = findEdgeForObject(state, params.point, params.event.shiftKey)
+        const edge = findEdgeForObject(state, params.point, params.event.snap)
         const entry = entities[params.action.entity.type]
 
         if (edge) {
@@ -70,7 +68,7 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
             */
         }
         else {
-            const rounded: Point = params.event.shiftKey
+            const rounded: Point = params.event.snap
                 ? {
                     x: Math.round(params.point.x / snapDistance) * snapDistance,
                     y: Math.round(params.point.y / snapDistance) * snapDistance
@@ -84,9 +82,6 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
                 { x: 0.5, y: 0.5 },
                 entry.anchor,
             )
-
-            console.log(`from: ${rounded.x}, ${rounded.y}`)
-            console.log(`to: ${transposed.x}, ${transposed.y}`)
             
             state.setModeState({
                 action: {

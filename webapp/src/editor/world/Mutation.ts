@@ -1,4 +1,5 @@
 
+import { RecrusiveMutationWithCapture } from "../editor-store/EditorStore"
 import { Shape } from "./Shape"
 import { World } from "./World"
 
@@ -39,6 +40,9 @@ export function composeShapeAt(index: number) {
     })
 }
 
-export function capture<T>(captureFunc: (world: World) => T, f: (x: T) => Mutation) {
+export function capture<T>(
+    captureFunc: (world: World) => T, 
+    f: (x: T) => RecrusiveMutationWithCapture | Mutation
+) {
     return (world: World) => f(captureFunc(world))
 }

@@ -1,12 +1,12 @@
 import { useEditorStore } from "../../editor-store/useEditorStore"
 import { moveVertex } from "../../world/World"
 import { MoveVertexAction } from "../state/Action"
-import { isInsideCanvas, isLeftButton, PointerHandlerParams } from "./Definitions"
+import { isInsideCanvas, PointerHandlerParams } from "./Definitions"
 
 export function moveVertexActionHandler(params: PointerHandlerParams<MoveVertexAction>) {
     const state = useEditorStore.getState()
 
-    if (isLeftButton(params)) {
+    if (params.event.leftButton) {
         state.setModeState({ 
             hint: null,
             action: {

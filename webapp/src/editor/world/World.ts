@@ -14,10 +14,13 @@ export const insertShape = (shape: Shape) => newMutationWithCompose(
     shapes => ({ shapes }),
 )
 
-export const removeShape = (shape: Shape) => newMutationWithCompose(
-    world => [...world.shapes, shape],
-    world => world.shapes.filter(s => s !== shape),
-    shapes => ({ shapes }),
+export const removeShape = (shapeIndex: number) => capture(
+    world => world.shapes[shapeIndex],
+    shape => newMutationWithCompose(
+        world => [...world.shapes, shape],
+        world => world.shapes.filter((_, i) => i !== shapeIndex),
+        shapes => ({ shapes }),
+    )
 )
 
 export const changeVertices = (
@@ -41,19 +44,24 @@ export const insertVertex = (shapeIndex: number, insertAfterVertex: number, vert
 )
 
 export const removeVertex = (shapeIndex: number, vertexIndex: number) => capture(
-    world => world.shapes[shapeIndex].vertices[vertexIndex],
-    vertex => changeVertices(
-        shapeIndex,
-        vertices => [
-            ...vertices.slice(0, vertexIndex),
-            vertex,
-            ...vertices.slice(vertexIndex + 1),
-        ],
-        vertices => [
-            ...vertices.slice(0, vertexIndex),
-            ...vertices.slice(vertexIndex + 1),
-        ]
-    )
+    world => ({
+        vertex: world.shapes[shapeIndex].vertices[vertexIndex],
+        vertexCount: world.shapes[shapeIndex].vertices.length
+    }),
+    params => params.vertexCount > 3
+        ? changeVertices(
+            shapeIndex,
+            vertices => [
+                ...vertices.slice(0, vertexIndex),
+                params.vertex,
+                ...vertices.slice(vertexIndex),
+            ],
+            vertices => [
+                ...vertices.slice(0, vertexIndex),
+                ...vertices.slice(vertexIndex + 1),
+            ]
+        )
+        : removeShape(shapeIndex)
 )
 
 export const moveVertex = (shapeIndex: number, vertexIndex: number, to: Point) => capture(
@@ -77,4 +85,13 @@ export const insertEntity = (entity: Entity) => newMutationWithCompose(
     world => world.entities.slice(0, world.entities.length - 1),
     world => [...world.entities, entity],
     entities => ({ entities }),
+)
+
+export const removeEntity = (entityIndex: number) => capture(
+    world => world.entities[entityIndex],
+    entity => newMutationWithCompose(
+        world => [...world.entities, entity],
+        world => world.entities.filter((_, i) => i !== entityIndex),
+        entities => ({ entities }),
+    )
 )

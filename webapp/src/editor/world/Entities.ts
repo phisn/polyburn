@@ -28,51 +28,64 @@ export const entities: EntityRegistry = {
     },
 }
 
-
-export function isPointInsideEntity({x, y}: Point, entity: Entity) {
+export function entityRect(entity: Entity) {
     const { position, rotation } = entity
     const entry = entities[entity.type]
+    const entitySize = scale(entry.size, entry.scale)
 
-    const triangleArea = (a: Point, b: Point, c: Point) => {
-        return Math.abs((a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2)
-    }
-  
     // Compute the position and size of the entity's bounding box
     const topLeft = changeAnchor(
-        position, 
-        rotation, 
-        scale(entry.size, entry.scale),
+        position,
+        rotation,
+        entitySize,
         entry.anchor,
         { x: 0, y: 0 })
 
     const bottomRight = changeAnchor(
         position, 
         rotation, 
-        scale(entry.size, entry.scale),
+        entitySize,
         entry.anchor,
         { x: 1, y: 1 })
 
-    
-    const topRight = {
-        x: bottomRight.x,
-        y: topLeft.y,
+    const topRight = changeAnchor(
+        position,
+        rotation,
+        entitySize,
+        entry.anchor,
+        { x: 1, y: 0 })
+
+    const bottomLeft = changeAnchor(
+        position,
+        rotation,
+        entitySize,
+        entry.anchor,
+        { x: 0, y: 1 })
+
+    return {
+        topLeft,
+        topRight,
+        bottomLeft,
+        bottomRight,
+    }
+}
+
+export function isPointInsideEntity(point: Point, entity: Entity) {
+    const entry = entities[entity.type]
+    const entitySize = scale(entry.size, entry.scale)
+
+    const triangleArea = (a: Point, b: Point, c: Point) => {
+        return Math.abs((b.x * a.y - a.x * b.y) + (c.x * b.y - b.x * c.y) + (a.x * c.y - c.x * a.y)) / 2
     }
 
-    const bottomLeft = {
-        x: topLeft.x,
-        y: bottomRight.y,
-    }
+    const { topLeft, topRight, bottomLeft, bottomRight } = entityRect(entity)
 
-    const apd = triangleArea(topLeft, 
+    const apd = triangleArea(topLeft, bottomLeft, point)
+    const dpc = triangleArea(bottomLeft, bottomRight, point)
+    const cpb = triangleArea(bottomRight, topRight, point)
+    const pba = triangleArea(topRight, topLeft, point)
 
-    const boundingBox = {
-      x: topLeft.x,
-      y: topLeft.y,
-      width: bottomRight.x - topLeft.x,
-      height: bottomRight.y - topLeft.y,
-    }
-  
-    // Check if the point is inside the bounding box
-    return x >= boundingBox.x && x < boundingBox.x + boundingBox.width &&
-           y >= boundingBox.y && y < boundingBox.y + boundingBox.height
-  }
+    const total = apd + dpc + cpb + pba
+
+    return Math.floor(total) <= Math.ceil(entitySize.width * entitySize.height)
+}

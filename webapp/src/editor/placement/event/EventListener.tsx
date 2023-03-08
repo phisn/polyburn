@@ -1,14 +1,9 @@
-import { World } from "@dimforge/rapier2d-compat"
 import { useThree } from "@react-three/fiber"
 import { useEffect, useMemo, useRef } from "react"
+
 import { buildCanvasToWorld } from "../../Editor"
 import { useEditorStore } from "../../editor-store/useEditorStore"
-import { snapDistance } from "../../Values"
-import { Point } from "../../world/Point"
-import { findClosestEdge, findClosestVertex } from "../../world/Shape"
-import { insertShape, insertVertex, moveVertex } from "../../world/World"
 import { ActionType } from "../state/Action"
-import { HintType } from "../state/Hint"
 import { defaultActionHandler } from "./DefaultActionHandler"
 import { EditorInputEvent } from "./Definitions"
 import { insertActionHandler } from "./InsertVertexActionHandler"
@@ -25,7 +20,7 @@ function EventListener() {
 
     const canvasToWorld = useMemo(() => buildCanvasToWorld(camera, canvas), [camera, canvas])
     
-    console.log('EventListener')
+    console.log("EventListener")
     useEffect(() => {
         const onPointerEvent = (event: PointerEvent) => {
             onEditorInputEvent({
@@ -56,50 +51,50 @@ function EventListener() {
             lastPointerEventRef.current = event
 
             switch (action?.type) {
-                case ActionType.InsertVertex:
-                    insertActionHandler({
-                        ...params,
-                        action
-                    })
+            case ActionType.InsertVertex:
+                insertActionHandler({
+                    ...params,
+                    action
+                })
 
-                    break
-                case ActionType.MoveVertex:
-                    moveVertexActionHandler({
-                        ...params,
-                        action
-                    })
+                break
+            case ActionType.MoveVertex:
+                moveVertexActionHandler({
+                    ...params,
+                    action
+                })
 
-                    break
+                break
                     
-                case ActionType.PlaceEntityInFuture:
-                    action = {
-                        type: ActionType.PlaceEntity,
-                        entity: {
-                            position: point,
-                            rotation: 0,
-                            type: action.entityType,
-                        }
-                    },
+            case ActionType.PlaceEntityInFuture:
+                action = {
+                    type: ActionType.PlaceEntity,
+                    entity: {
+                        position: point,
+                        rotation: 0,
+                        type: action.entityType,
+                    }
+                },
 
-                    state.setModeState({
-                        action,
-                    })
+                state.setModeState({
+                    action,
+                })
 
-                    // fallthrough
-                case ActionType.PlaceEntity:
-                    placeEntityActionHandler({
-                        ...params,
-                        action
-                    })
+                // fallthrough
+            case ActionType.PlaceEntity:
+                placeEntityActionHandler({
+                    ...params,
+                    action
+                })
 
-                    break
-                default:
-                    defaultActionHandler({
-                        ...params,
-                        action
-                    })
+                break
+            default:
+                defaultActionHandler({
+                    ...params,
+                    action: void 0
+                })
 
-                    break
+                break
 
             }
         }

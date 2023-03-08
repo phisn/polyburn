@@ -1,7 +1,7 @@
-import { useEditorStore } from "../editor-store/useEditorStore";
-import { EntityType } from "../world/Entity";
-import EntityTypeSelection from "./EntityTypeSelection";
-import { ActionType } from "./state/Action";
+import { useEditorStore } from "../editor-store/useEditorStore"
+import { EntityType } from "../world/Entity"
+import EntityTypeSelection from "./EntityTypeSelection"
+import { ActionType } from "./state/Action"
 
 function SideBar() {
     const action = useEditorStore(state => state.modeState.action)

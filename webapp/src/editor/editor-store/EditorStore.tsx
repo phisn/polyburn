@@ -1,19 +1,6 @@
-import { create } from "zustand"
+import { initialPlacementState, PlacementState } from "../placement/state/PlacementState"
 import { Mutation } from "../world/Mutation"
 import { World } from "../world/World"
-import { initialPlacementState, PlacementState } from "../placement/state/PlacementState"
-import { Mode } from "./ModeStateBase"
-
-interface EventHandlers {
-    onKeyDown: (keyEvent: KeyboardEvent) => void
-    onKeyUp: (keyEvent: KeyboardEvent) => void
-
-    onClick: (mouseEvent: MouseEvent) => void
-
-    onMouseMove: (mouseEvent: MouseEvent) => void
-    onMouseDown: (mouseEvent: MouseEvent) => void
-    onMouseUp: (mouseEvent: MouseEvent) => void
-}
 
 export type ModeState = PlacementState
 

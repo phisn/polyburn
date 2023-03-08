@@ -1,24 +1,19 @@
-import { Canvas, render, useFrame, useLoader, useThree } from "@react-three/fiber"
-import { OrthographicCamera, Stats, Svg } from "@react-three/drei"
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Svg } from "@react-three/drei"
+import { Suspense, useMemo } from "react"
 import * as THREE from "three"
-import { Point } from "../world/Point";
-import { findClosestEdge, findClosestVertex, Shape as WorldShape } from "../world/Shape";
-import { useEditorStore } from "../editor-store/useEditorStore";
-import { buildCanvasToWorld, editorModeTunnel } from "../Editor";
-import { highlightColor, highlightDeleteColor, highlightVertexColor, snapDistance } from "../Values";
-import { insertShape, insertVertex } from "../world/World";
-import { HintType } from "./state/Hint";
-import EventListener from "./event/EventListener";
-import { ActionType } from "./state/Action";
-import PlacableObjectSelector from "./EntityTypeSelection";
-import { Entity as EntityModel, EntityType } from "../world/Entity";
-import SideBar from "./SideBar";
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
-import { entities, entityRect } from "../world/Entities";
-import { changeAnchor } from "../../utility/math";
-import { Euler } from "three";
-import { scale } from "../world/Size";
+import { Euler } from "three"
+
+import { editorModeTunnel } from "../Editor"
+import { useEditorStore } from "../editor-store/useEditorStore"
+import { highlightColor, highlightDeleteColor, highlightVertexColor } from "../Values"
+import { entities, entityRect } from "../world/Entities"
+import { Entity as EntityModel } from "../world/Entity"
+import { Point } from "../world/Point"
+import { Shape as WorldShape } from "../world/Shape"
+import EventListener from "./event/EventListener"
+import SideBar from "./SideBar"
+import { ActionType } from "./state/Action"
+import { HintType } from "./state/Hint"
 
 function Vertex(props: { vertex: Point }) {
     return (
@@ -40,24 +35,24 @@ function Shape(props: { shape: WorldShape, shapeIndex: number }) {
     let vertices = props.shape.vertices
 
     switch (action?.type) {
-        case ActionType.MoveVertex:
-            if (action.shapeIndex === props.shapeIndex) {
-                vertices = vertices.map((vertex, i) =>
-                    i === action.vertexIndex ? action.point : vertex
-                )
-            }
+    case ActionType.MoveVertex:
+        if (action.shapeIndex === props.shapeIndex) {
+            vertices = vertices.map((vertex, i) =>
+                i === action.vertexIndex ? action.point : vertex
+            )
+        }
 
-            break
-        case ActionType.InsertVertex:
-            if (action.shapeIndex === props.shapeIndex) {
-                vertices = [
-                    ...vertices.slice(0, action.vertexAfterIndex + 1),
-                    action.point,
-                    ...vertices.slice(action.vertexAfterIndex + 1)
-                ]
-            }
+        break
+    case ActionType.InsertVertex:
+        if (action.shapeIndex === props.shapeIndex) {
+            vertices = [
+                ...vertices.slice(0, action.vertexAfterIndex + 1),
+                action.point,
+                ...vertices.slice(action.vertexAfterIndex + 1)
+            ]
+        }
 
-            break
+        break
     }
 
     if (action?.type === ActionType.MoveVertex && action.shapeIndex === props.shapeIndex) {
@@ -90,20 +85,20 @@ function MousePointerHint() {
 
     const hintPoint = useMemo(() => {
         switch (hint?.type) {
-            case HintType.Vertex:
-                return {
-                    color: hint.delete ? highlightDeleteColor : highlightVertexColor,
-                    point: hint.point
-                }
+        case HintType.Vertex:
+            return {
+                color: hint.delete ? highlightDeleteColor : highlightVertexColor,
+                point: hint.point
+            }
 
-            case HintType.Edge:
-                return {
-                    color: highlightColor,
-                    point: hint.point
-                }
+        case HintType.Edge:
+            return {
+                color: highlightColor,
+                point: hint.point
+            }
 
-            default:
-                return null
+        default:
+            return null
         }
 
     }, [hint])

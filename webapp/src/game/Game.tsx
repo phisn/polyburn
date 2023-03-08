@@ -1,7 +1,7 @@
-import { Stage, Graphics, useApp, useTick } from "@inlet/react-pixi"
+import { Stage } from "@inlet/react-pixi"
 import PIXI from "pixi.js"
-import { useCallback, useEffect, useState } from "react"
-import { useRef } from "react"
+import { useState } from "react"
+
 import useGameStore from "./GameStore"
 import { GameVisual } from "./GameVisual"
 

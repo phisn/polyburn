@@ -1,12 +1,12 @@
 export {}
 
-import { shallow } from 'zustand/shallow'
-import Navbar from "./Navbar"
-import useGameStore from "../game/GameStore"
+import { shallow } from "zustand/shallow"
+
 import useGlobalStore from "../global/GlobalStore"
-import { useEditorStore } from './editor-store/useEditorStore'
-import { Mode } from './editor-store/ModeStateBase'
-import { initialPlacementState } from './placement/state/PlacementState'
+import { Mode } from "./editor-store/ModeStateBase"
+import { useEditorStore } from "./editor-store/useEditorStore"
+import Navbar from "./Navbar"
+import { initialPlacementState } from "./placement/state/PlacementState"
 
 const MenuSvg = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -65,7 +65,7 @@ function EditorNavbar() {
             <div className="btn-group">
                 <button 
                     className={`btn ${(mode !== Mode.Placement ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => {}}>
+                    onClick={() => null}>
                     Selection
                 </button>
                 <button
@@ -75,24 +75,24 @@ function EditorNavbar() {
                 </button>
                 <button
                     className={`btn ${(mode !== Mode.Placement ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => {}}>
+                    onClick={() => null}>
                     Movement
                 </button>
             </div>
 
             <button className="btn btn-square btn-ghost"
-                    onClick={() => {
-                        try {
-                            // useGameStore.getState().prepare(state.world)
-                            // state.setMode(EditorModeType.Playing)
+                onClick={() => {
+                    try {
+                        // useGameStore.getState().prepare(state.world)
+                        // state.setMode(EditorModeType.Playing)
+                    }
+                    catch (e) {
+                        if (e instanceof Error) {
+                            newAlert({ message: e.message, type: "error" })
+                            console.error(e)
                         }
-                        catch (e) {
-                            if (e instanceof Error) {
-                                newAlert({ message: e.message, type: "error" })
-                                console.error(e)
-                            }
-                        }
-                    }}>
+                    }
+                }}>
                 <PlaySvg />
             </button>
 

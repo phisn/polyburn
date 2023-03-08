@@ -1,24 +1,23 @@
-import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
-import reactLogo from './assets/react.svg'
-import Alert from './global/Alert'
-import useGlobalStore from './global/GlobalStore'
+import { Outlet } from "react-router-dom"
+
+import Alert from "./global/Alert"
+import useGlobalStore from "./global/GlobalStore"
 
 function App() {
-  const alerts = useGlobalStore((state) => state.alerts)
+    const alerts = useGlobalStore((state) => state.alerts)
 
-  return (
-    <main>
-      <Outlet />
-      <div className="toast">
-        {
-          alerts.map(alertProps => ( 
-            <Alert {...alertProps} /> 
-          )) 
-        }
-      </div>
-    </main>
-  )
+    return (
+        <main>
+            <Outlet />
+            <div className="toast">
+                {
+                    alerts.map((alertProps, i) => ( 
+                        <Alert key={i} {...alertProps} /> 
+                    )) 
+                }
+            </div>
+        </main>
+    )
 }
 
 export default App

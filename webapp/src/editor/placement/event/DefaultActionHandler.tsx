@@ -16,78 +16,76 @@ export function defaultActionHandler(params: PointerHandlerParams) {
         const state = useEditorStore.getState()
 
         switch (state.modeState.hint?.type) {
-            case HintType.Space:
-                if (params.raycaster.intersectObjects(params.scene.children).length === 0) {
-                    state.mutate(insertShape({
-                        vertices: [
-                            { x: params.point.x - 50, y: params.point.y + 50 },
-                            { x: params.point.x + 50, y: params.point.y + 50 },
-                            { x: params.point.x, y: params.point.y - 50 },
-                        ]
-                    }))
-                }
+        case HintType.Space:
+            if (params.raycaster.intersectObjects(params.scene.children).length === 0) {
+                state.mutate(insertShape({
+                    vertices: [
+                        { x: params.point.x - 50, y: params.point.y + 50 },
+                        { x: params.point.x + 50, y: params.point.y + 50 },
+                        { x: params.point.x, y: params.point.y - 50 },
+                    ]
+                }))
+            }
+
+            break
+        case HintType.Edge:
+            state.setModeState({
+                action: {
+                    type: ActionType.InsertVertex,
+
+                    shapeIndex: state.modeState.hint.shapeIndex,
+                    vertexAfterIndex: state.modeState.hint.edge[0],
+
+                    point: params.point
+                },
+                hint: null
+            })
+
+            break
+        case HintType.Vertex:
+            if (params.event.delete) {
+                state.mutate(
+                    removeVertex(state.modeState.hint.shapeIndex, state.modeState.hint.vertexIndex)
+                )
 
                 break
-            case HintType.Edge:
-                state.setModeState({
-                    action: {
-                        type: ActionType.InsertVertex,
+            }
 
-                        shapeIndex: state.modeState.hint.shapeIndex,
-                        vertexAfterIndex: state.modeState.hint.edge[0],
+            state.setModeState({
+                action: {
+                    type: ActionType.MoveVertex,
 
-                        point: params.point
-                    },
-                    hint: null
-                })
+                    shapeIndex: state.modeState.hint.shapeIndex,
+                    vertexIndex: state.modeState.hint.vertexIndex,
 
-                break
-            case HintType.Vertex:
-                if (params.event.delete) {
-                    state.mutate(
-                        removeVertex(state.modeState.hint.shapeIndex, state.modeState.hint.vertexIndex)
-                    )
+                    point: params.point
+                },
+                hint: null
+            })
 
-                    break
-                }
-
-                state.setModeState({
-                    action: {
-                        type: ActionType.MoveVertex,
-
-                        shapeIndex: state.modeState.hint.shapeIndex,
-                        vertexIndex: state.modeState.hint.vertexIndex,
-
-                        point: params.point
-                    },
-                    hint: null
-                })
-
-                break
-            case HintType.Entity:
-                if (params.event.delete) {
-                    state.mutate(
-                        removeEntity(state.modeState.hint.entityIndex)
-                    )
-
-                    break
-                }
-
-                const entity = state.world.entities[state.modeState.hint.entityIndex]
-
-                state.setModeState({
-                    action: {
-                        type: ActionType.PlaceEntity,
-                        entity
-                    },
-                    hint: null
-                })
-
+            break
+        case HintType.Entity:
+            if (params.event.delete) {
                 state.mutate(
                     removeEntity(state.modeState.hint.entityIndex)
                 )
 
                 break
+            }
+
+            state.setModeState({
+                action: {
+                    type: ActionType.PlaceEntity,
+                    entity: state.world.entities[state.modeState.hint.entityIndex]
+                },
+                hint: null
+            })
+
+            state.mutate(
+                removeEntity(state.modeState.hint.entityIndex)
+            )
+
+            break
         }
     }
 }

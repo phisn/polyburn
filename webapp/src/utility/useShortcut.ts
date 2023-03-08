@@ -1,6 +1,6 @@
-import { useEffect } from "react"
+import { DependencyList, useEffect } from "react"
 
-export function useShortcut(key: string, callback: () => void, deps: any[] = []) {
+export function useShortcut(key: string, callback: () => void, deps: DependencyList = []) {
     useEffect(() => {
         const listener = (e: KeyboardEvent) => {
             if (e.ctrlKey && e.key === key) {

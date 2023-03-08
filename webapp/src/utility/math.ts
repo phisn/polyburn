@@ -1,5 +1,5 @@
-import sin from "@stdlib/math/base/special/sin"
 import cos from "@stdlib/math/base/special/cos"
+import sin from "@stdlib/math/base/special/sin"
 
 export const changeAnchor = (
     position: { x: number; y: number },

@@ -1,4 +1,5 @@
 import { useCallback } from "react"
+
 import { entities } from "../world/Entities"
 import { EntityType } from "../world/Entity"
 

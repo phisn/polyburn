@@ -1,16 +1,15 @@
-import { Canvas, render, useFrame, useThree } from "@react-three/fiber"
-import { Grid, MapControls, OrbitControls, OrthographicCamera, PerspectiveCamera, Stats } from "@react-three/drei"
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useEditorStore } from "./editor-store/useEditorStore";
-import { insertShape } from "./world/World";
-import { findClosestEdge, findClosestVertex, Shape as WorldShape } from "./world/Shape";
+import { OrthographicCamera } from "@react-three/drei"
+import { Canvas, useThree } from "@react-three/fiber"
+import { useEffect, useRef } from "react"
 import * as THREE from "three"
+import { Camera } from "three"
+import tunnel from "tunnel-rat"
+
+import { Mode } from "./editor-store/ModeStateBase"
+import { useEditorStore } from "./editor-store/useEditorStore"
+import EditorNavbar from "./EditorNavbar"
+import PlacementMode from "./placement/PlacementMode"
 import { Point } from "./world/Point"
-import { Camera, DoubleSide, MathUtils, PlaneGeometry } from "three";
-import { Mode } from "./editor-store/ModeStateBase";
-import PlacementMode from "./placement/PlacementMode";
-import EditorNavbar from "./EditorNavbar";
-import tunnel from "tunnel-rat";
 
 export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) => {
     if (!camera || !canvas) {
@@ -37,8 +36,8 @@ function EditorMode() {
     const mode = useEditorStore(state => state.modeState.mode)
 
     switch (mode) {
-        case Mode.Placement:
-            return <PlacementMode />
+    case Mode.Placement:
+        return <PlacementMode />
 
     }
 
@@ -49,15 +48,8 @@ function EditorMode() {
 export const editorModeTunnel = tunnel()
 
 function EditorControls() {
-    const mutate = useEditorStore(state => state.mutate)
-
     const canvas = useThree(state => state.gl.domElement)
     const camera = useThree(state => state.camera)
-
-    const canvasToWorld = useMemo(() => buildCanvasToWorld(camera, canvas), [camera, canvas])
-
-    const raycaster = useThree(state => state.raycaster)
-    const scene = useThree(state => state.scene)
 
     interface FirstPosition {
         mouse: Point

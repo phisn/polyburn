@@ -1,5 +1,5 @@
 import { Point } from "./Point"
-import { scale, Size } from "./Size"
+import { Size } from "./Size"
 
 export enum EntityType {
     Rocket = "Rocket",

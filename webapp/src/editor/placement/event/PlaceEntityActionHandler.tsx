@@ -6,9 +6,9 @@ import { entities } from "../../world/Entities"
 import { Point } from "../../world/Point"
 import { findClosestEdge } from "../../world/Shape"
 import { scale } from "../../world/Size"
-import { insertEntity, moveVertex } from "../../world/World"
-import { MoveVertexAction, PlaceEntityAction } from "../state/Action"
-import { isInsideCanvas, PointerHandlerParams } from "./Definitions"
+import { insertEntity } from "../../world/World"
+import { PlaceEntityAction } from "../state/Action"
+import { PointerHandlerParams } from "./Definitions"
 
 export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntityAction>) {
     const state = useEditorStore.getState()
@@ -72,7 +72,7 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
                 ? {
                     x: Math.round(params.point.x / snapDistance) * snapDistance,
                     y: Math.round(params.point.y / snapDistance) * snapDistance
-                  }
+                }
                 : params.point
 
             const transposed = changeAnchor(
@@ -113,7 +113,7 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
     }
 }
 
-const findEdgeForObject = (state: EditorStore, position: Point, snap: Boolean) => {
+const findEdgeForObject = (state: EditorStore, position: Point, snap: boolean) => {
     const edge = findClosestEdge(state.world.shapes, position, snapDistance)
 
     if (!edge) {

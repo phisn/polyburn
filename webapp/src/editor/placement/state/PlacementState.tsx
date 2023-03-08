@@ -1,7 +1,6 @@
-import { Point } from "../../world/Point";
-import { Mode, ModeStateBase } from "../../editor-store/ModeStateBase";
-import { Action } from "./Action";
-import { PlacementHint } from "./Hint";
+import { Mode, ModeStateBase } from "../../editor-store/ModeStateBase"
+import { Action } from "./Action"
+import { PlacementHint } from "./Hint"
 
 export interface PlacementState extends ModeStateBase {
     mode: Mode.Placement

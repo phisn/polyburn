@@ -1,7 +1,7 @@
-import { Entity } from "./Entity";
-import { capture, composeShapeAt, newMutationWithCompose } from "./Mutation";
-import { Point } from "./Point";
-import { Shape } from "./Shape";
+import { Entity } from "./Entity"
+import { capture, composeShapeAt, newMutationWithCompose } from "./Mutation"
+import { Point } from "./Point"
+import { Shape } from "./Shape"
 
 export interface World {
     shapes: Shape[]

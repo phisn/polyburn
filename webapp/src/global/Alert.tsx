@@ -34,14 +34,14 @@ function Alert(props: AlertProps) {
 
 function AlertSvg(props: { type: AlertType }) {
     switch (props.type) {
-        case "success":
-            return successSvg
-        case "error":
-            return errorSvg
-        case "info":
-            return infoSvg
-        case "warning":
-            return warningSvg
+    case "success":
+        return successSvg
+    case "error":
+        return errorSvg
+    case "info":
+        return infoSvg
+    case "warning":
+        return warningSvg
     }
 }
 

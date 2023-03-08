@@ -1,9 +1,7 @@
 import { create } from "zustand"
-import { initialPlacementState } from "../placement/state/PlacementState"
+
 import { Mutation } from "../world/Mutation"
-import { World } from "../world/World"
 import { EditorStore, initialState, ModeState, RecursiveMutationWithCapture } from "./EditorStore"
-import { Mode } from "./ModeStateBase"
 
 export const useEditorStore = create<EditorStore>((set, get) => ({
     ...initialState,

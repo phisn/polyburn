@@ -1,4 +1,5 @@
 import { create } from "zustand"
+
 import { AlertProps } from "./Alert"
 
 export interface GlobalStore {
@@ -6,7 +7,7 @@ export interface GlobalStore {
     newAlert: (alert: AlertProps) => void
 }
 
-const useGlobalStore = create<GlobalStore>((set, get) => ({
+const useGlobalStore = create<GlobalStore>((set) => ({
     alerts: [],
     newAlert: (alert: AlertProps) => {
         setTimeout(() => {

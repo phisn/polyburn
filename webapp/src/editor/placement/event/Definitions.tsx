@@ -13,7 +13,7 @@ export interface EditorInputEvent {
     rightButton: boolean
 }
 
-export interface PointerHandlerParams<T = any> {
+export interface PointerHandlerParams<T = void> {
     action: T
 
     canvas: HTMLCanvasElement

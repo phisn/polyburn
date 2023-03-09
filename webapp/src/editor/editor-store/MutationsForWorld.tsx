@@ -1,12 +1,8 @@
-import { Entity } from "./Entity"
-import { capture, composeShapeAt, newMutationWithCompose } from "./Mutation"
-import { Point } from "./Point"
-import { Shape } from "./Shape"
 
-export interface World {
-    shapes: Shape[]
-    entities: Entity[]
-}
+import { Entity } from "../../model/world/Entity"
+import { Point } from "../../model/world/Point"
+import { Shape } from "../../model/world/Shape"
+import { capture, composeShapeAt, newMutationWithCompose } from "./Mutation"
 
 export const insertShape = (shape: Shape) => newMutationWithCompose(
     world => world.shapes.slice(0, world.shapes.length - 1),

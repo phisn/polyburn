@@ -5,11 +5,11 @@ import * as THREE from "three"
 import { Camera } from "three"
 import tunnel from "tunnel-rat"
 
+import { Point } from "../model/world/Point"
 import { Mode } from "./editor-store/ModeStateBase"
 import { useEditorStore } from "./editor-store/useEditorStore"
 import EditorNavbar from "./EditorNavbar"
 import PlacementMode from "./placement/PlacementMode"
-import { Point } from "./world/Point"
 
 export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) => {
     if (!camera || !canvas) {
@@ -101,6 +101,12 @@ function EditorControls() {
 }
 
 function Editor() {
+    return (
+        <EditorInner />
+    )
+}
+
+function EditorInner() {
     return (
         <div className="h-screen w-screen">
             <Canvas style={{ background: "#000000" }} >

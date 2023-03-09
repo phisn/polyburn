@@ -1,5 +1,5 @@
+import { moveVertex } from "../../editor-store/MutationsForWorld"
 import { useEditorStore } from "../../editor-store/useEditorStore"
-import { moveVertex } from "../../world/World"
 import { MoveVertexAction } from "../state/Action"
 import { isInsideCanvas, PointerHandlerParams } from "./Definitions"
 

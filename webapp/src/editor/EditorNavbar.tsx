@@ -2,7 +2,7 @@ export {}
 
 import { shallow } from "zustand/shallow"
 
-import useGlobalStore from "../global/GlobalStore"
+import useGlobalStore from "../common/GlobalStore"
 import { Mode } from "./editor-store/ModeStateBase"
 import { useEditorStore } from "./editor-store/useEditorStore"
 import Navbar from "./Navbar"

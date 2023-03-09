@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom"
 
-import Alert from "./global/Alert"
-import useGlobalStore from "./global/GlobalStore"
+import Alert from "./common/Alert"
+import useGlobalStore from "./common/GlobalStore"
 
 function App() {
     const alerts = useGlobalStore((state) => state.alerts)

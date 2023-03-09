@@ -1,5 +1,5 @@
-import { Entity, EntityType } from "../../world/Entity"
-import { Point } from "../../world/Point"
+import { Entity, EntityType } from "../../../model/world/Entity"
+import { Point } from "../../../model/world/Point"
 
 export enum ActionType {
     MoveVertex,

@@ -1,5 +1,5 @@
+import { insertVertex } from "../../editor-store/MutationsForWorld"
 import { useEditorStore } from "../../editor-store/useEditorStore"
-import { insertVertex } from "../../world/World"
 import { InsertVertexAction } from "../state/Action"
 import { isInsideCanvas, PointerHandlerParams } from "./Definitions"
 

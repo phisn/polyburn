@@ -1,11 +1,12 @@
-import { useApp, useTick } from "@inlet/react-pixi"
-import { useCallback, useEffect, useRef, useState } from "react"
-import useGameStore, { GameState, GameStore } from "./GameStore"
-import * as PIXI from "pixi.js"
+export {}
+/*
 import RAPIER from "@dimforge/rapier2d-compat"
-import { changeAnchor } from "../utility/math"
-import sin from "@stdlib/math/base/special/sin"
+import { useApp } from "@inlet/react-pixi"
 import cos from "@stdlib/math/base/special/cos"
+import sin from "@stdlib/math/base/special/sin"
+import { useCallback, useEffect, useRef } from "react"
+
+import useGameStore, { GameStore } from "./GameStore"
 
 export function GameVisual() { 
     const app = useApp()
@@ -106,7 +107,7 @@ export function GameVisual() {
 
     useEffect(() => {
         if (state == null) {
-            return () => {}
+            return () => void 0
         }
 
         const queue = new RAPIER.EventQueue(true)
@@ -222,3 +223,4 @@ export function GameVisual() {
         </>
     )
 }
+*/

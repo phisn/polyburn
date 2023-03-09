@@ -1,27 +1,33 @@
-import { Stage } from "@inlet/react-pixi"
-import PIXI from "pixi.js"
-import { useState } from "react"
+import { OrthographicCamera } from "@react-three/drei"
+import { Canvas } from "@react-three/fiber"
 
-import useGameStore from "./GameStore"
-import { GameVisual } from "./GameVisual"
+import { World } from "../model/world/World"
+import { RuntimeGameWorld } from "./runtime/RuntimeGameWorld"
+import { StaticGameWorld } from "./static/StaticGameWorld"
 
-export function Game() {
-    const [app, setApp] = useState<PIXI.Application>()
+export interface GameProps {
+    world: World
+}
 
-    const state = useGameStore()
-
+export function Game(props: GameProps) {
     return (
-        <div className="overflow-hidden">
-            {/* Prevent transition artifacts between editor and game with static black backround */}
-            <div className="fixed top-0 left-0 right-0 bottom-0 bg-black -z-10" />
-            <Stage 
-                onMount={setApp}
-                width={window.innerWidth}
-                height={window.innerHeight} 
-                options={ { resizeTo: window, antialias: true } } >
+        <div className="h-screen w-screen">
+            <Canvas style={{ background: "#000000" }} >
 
-                <GameVisual />
-            </Stage>
+                <OrthographicCamera
+                    makeDefault
+                    position={[0, 0, 10]}
+                    rotation={[0, 0, 0]}
+                />
+
+                <StaticGameWorld world={props.world} />
+                <RuntimeGameWorld world={props.world} />
+
+                {/* <Stats /> */}
+            </Canvas>
+
+            <div className="absolute top-0 left-0 p-4">
+            </div>
         </div>
     )
 }

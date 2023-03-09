@@ -1,6 +1,6 @@
+import { World } from "../../model/world/World"
 import { initialPlacementState, PlacementState } from "../placement/state/PlacementState"
-import { Mutation } from "../world/Mutation"
-import { World } from "../world/World"
+import { Mutation } from "./Mutation"
 
 export type ModeState = PlacementState
 

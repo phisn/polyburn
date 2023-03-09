@@ -1,9 +1,10 @@
 
-import { RecursiveMutationWithCapture } from "../editor-store/EditorStore"
-import { Shape } from "./Shape"
-import { World } from "./World"
+import { Shape } from "../../model/world/Shape"
+import { World } from "../../model/world/World"
+import { RecursiveMutationWithCapture } from "./EditorStore"
 
 export interface Mutation {
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
     undo: (world: World) => any
     redo: (world: World) => any
 }

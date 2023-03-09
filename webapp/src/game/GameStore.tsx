@@ -1,3 +1,5 @@
+export {}
+/*
 import RAPIER, { ColliderDesc, RayColliderToi } from "@dimforge/rapier2d-compat"
 import { create } from "zustand"
 import { ObjectInWorld, Shape, World } from "../editor/legacy/World"
@@ -212,3 +214,4 @@ function verticesForShape(shape: Shape): [ Float32Array, number, number ] {
 }
 
 export default useGameStore
+*/

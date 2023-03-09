@@ -1,5 +1,5 @@
+import { EntityType } from "../../model/world/Entity"
 import { useEditorStore } from "../editor-store/useEditorStore"
-import { EntityType } from "../world/Entity"
 import EntityTypeSelection from "./EntityTypeSelection"
 import { ActionType } from "./state/Action"
 

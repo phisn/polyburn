@@ -2,11 +2,10 @@ export {}
 
 import { shallow } from "zustand/shallow"
 
-import useGlobalStore from "../common/GlobalStore"
 import { Mode } from "./editor-store/ModeStateBase"
 import { useEditorStore } from "./editor-store/useEditorStore"
 import Navbar from "./Navbar"
-import { initialPlacementState } from "./placement/state/PlacementState"
+import { initialPlacementState } from "./placement/state/PlacementModeState"
 
 const MenuSvg = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -37,11 +36,10 @@ function EditorNavbar() {
     const hasUndos = useEditorStore(state => state.undos.length > 0, shallow)
     const hasRedos = useEditorStore(state => state.redos.length > 0, shallow)
 
+    const run = useEditorStore(state => state.run)
     const undo = useEditorStore(state => state.undo)
     const redo = useEditorStore(state => state.redo)
     const setModeState = useEditorStore(state => state.setModeState)
-
-    const newAlert = useGlobalStore(state => state.newAlert)
 
     return (
         <Navbar>
@@ -82,16 +80,7 @@ function EditorNavbar() {
 
             <button className="btn btn-square btn-ghost"
                 onClick={() => {
-                    try {
-                        // useGameStore.getState().prepare(state.world)
-                        // state.setMode(EditorModeType.Playing)
-                    }
-                    catch (e) {
-                        if (e instanceof Error) {
-                            newAlert({ message: e.message, type: "error" })
-                            console.error(e)
-                        }
-                    }
+                    run()
                 }}>
                 <PlaySvg />
             </button>

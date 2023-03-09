@@ -1,8 +1,8 @@
 import { World } from "../../model/world/World"
-import { initialPlacementState, PlacementState } from "../placement/state/PlacementState"
+import { initialPlacementState, PlacementState as PlacementModeState } from "../placement/state/PlacementModeState"
 import { Mutation } from "./Mutation"
 
-export type ModeState = PlacementState
+export type ModeState = PlacementModeState
 
 interface CameraState {
     position: { x: number, y: number }
@@ -10,6 +10,8 @@ interface CameraState {
 }
 
 export interface EditorState {
+    running: boolean
+
     modeState: ModeState
 
     cameraState: CameraState
@@ -25,6 +27,9 @@ export interface EditorState {
 export type RecursiveMutationWithCapture = (world: World) => RecursiveMutationWithCapture | Mutation
 
 export interface EditorStore extends EditorState {
+    run(): void
+    stop(): void
+
     mutate(mutation: Mutation | RecursiveMutationWithCapture): void
     undo(): void
     redo(): void
@@ -33,6 +38,8 @@ export interface EditorStore extends EditorState {
 }
 
 export const initialState: EditorState = {
+    running: false,
+
     modeState: initialPlacementState,
 
     cameraState: {

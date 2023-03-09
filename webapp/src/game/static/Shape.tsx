@@ -7,6 +7,8 @@ export interface ShapeProps {
 }
 
 export function Shape(props: ShapeProps) {
+    console.log(`rendering shape with ${props.vertices.length} vertices`)
+
     const threeShape = new THREE.Shape(
         props.vertices.map(vertex => new THREE.Vector2(vertex.x, vertex.y))
     )

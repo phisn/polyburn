@@ -9,9 +9,9 @@ export function StaticGameWorld(props: StaticGameWorldProps) {
     return (
         <>
             {
-                props.world.shapes.map((shape, index) => {
+                props.world.shapes.map((shape, index) => 
                     <Shape key={index} vertices={shape.vertices} />
-                })
+                )
             }
         </>
     )

@@ -5,6 +5,12 @@ import { Mutation } from "./Mutation"
 
 export const useEditorStore = create<EditorStore>((set, get) => ({
     ...initialState,
+    run() {
+        set(state => ({ ...state, running: true }))
+    },
+    stop() {
+        set(state => ({ ...state, running: false }))
+    },
     mutate(mutation: Mutation | RecursiveMutationWithCapture) {
         if (typeof mutation === "function") {
             get().mutate(mutation(get().world))

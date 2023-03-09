@@ -5,10 +5,12 @@ import * as THREE from "three"
 import { Camera } from "three"
 import tunnel from "tunnel-rat"
 
+import Game from "../game/Game"
 import { Point } from "../model/world/Point"
 import { Mode } from "./editor-store/ModeStateBase"
 import { useEditorStore } from "./editor-store/useEditorStore"
 import EditorNavbar from "./EditorNavbar"
+import Navbar from "./Navbar"
 import PlacementMode from "./placement/PlacementMode"
 
 export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) => {
@@ -100,10 +102,37 @@ function EditorControls() {
     return <></>
 }
 
+const StopFillSvg = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#CD5C5C" viewBox="0 0 16 16">
+        <path d="M5 3.5h6A1.5 1.5 0 0 1 12.5 5v6a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 11V5A1.5 1.5 0 0 1 5 3.5z"/>
+    </svg>
+)
+
 function Editor() {
-    return (
-        <EditorInner />
-    )
+    const running = useEditorStore(state => state.running)
+    const stop = useEditorStore(state => state.stop)
+
+    if (running) {
+        return (
+            <>
+                <Game world={useEditorStore.getState().world} />
+                <div className="absolute top-0 left-0 p-4">
+                    <Navbar>
+                        <button className="btn btn-square btn-ghost"
+                            onClick={stop} >
+                                
+                            <StopFillSvg />
+                        </button>
+                    </Navbar>
+                </div>
+            </>
+        )
+    }
+    else {
+        return (
+            <EditorInner />
+        )
+    }
 }
 
 function EditorInner() {

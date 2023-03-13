@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "decompose-svg": "node scripts/decompose-svg.js"
   },
   "dependencies": {
     "@dimforge/rapier2d-compat": "^0.11.1",
@@ -25,6 +26,7 @@
     "react-hotkeys-hook": "^4.3.2",
     "react-router-dom": "^6.7.0",
     "sort-by": "^1.2.0",
+    "suspend-react": "^0.0.9",
     "three": "^0.150.1",
     "tunnel-rat": "^0.1.1",
     "zustand": "^4.3.2"
@@ -43,7 +45,9 @@
     "eslint-plugin-n": "^15.6.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-react": "^7.32.2",
+    "poly-decomp": "^0.3.0",
     "postcss": "^8.4.21",
+    "svg-parser": "^2.0.4",
     "tailwindcss": "^3.2.4",
     "typescript": "^4.9.5",
     "vite": "^4.0.0"

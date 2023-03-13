@@ -1,6 +1,6 @@
 import { DependencyList, useEffect } from "react"
 
-export const useGameLoop = (update: () => void, deps: DependencyList = [], customTimePerFrame?: number) => useEffect(() => {
+export const useGameLoop = (update: () => void, updateGraphics: () => void, deps: DependencyList = [], customTimePerFrame?: number) => useEffect(() => {
     const timePerFrame = customTimePerFrame ?? 1000 / 60
 
     let lastTime = performance.now()
@@ -13,9 +13,13 @@ export const useGameLoop = (update: () => void, deps: DependencyList = [], custo
 
         const now = performance.now()
         
-        while (now - lastTime >= timePerFrame) {
-            lastTime += timePerFrame
-            update()
+        if (now - lastTime >= timePerFrame) {
+            do {  
+                lastTime += timePerFrame
+                update()
+            } while (now - lastTime >= timePerFrame)
+            
+            updateGraphics()
         }
 
         requestAnimationFrame(gameLoop)

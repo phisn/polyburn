@@ -64,6 +64,7 @@ export class GameState {
             rayTarget
         }
     }
+    
     rocketGroundRay() {
         return this.rocketGroundRayRaw()?.cast
     }

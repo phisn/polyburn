@@ -46,7 +46,9 @@ export function Entity(props: { entity: EntityModel, index?: number }) {
                             props.entity.position.y,
                             0 
                         ]} 
-                        rotation={new Euler(0, 0, props.entity.rotation)} />                }
+                        rotation={new Euler(0, 0, props.entity.rotation)} 
+                    />                
+                }
             </Suspense>
 
             {/*

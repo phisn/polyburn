@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber"
 
 export const useGameLoop = (update: () => void, customTimePerFrame?: number) => {
-    const timePerFrame = customTimePerFrame ?? 1000 / 144
+    const timePerFrame = customTimePerFrame ?? 1000 / 200
     let lastTime = performance.now()
 
     useFrame(() => {

@@ -38,7 +38,7 @@ const rawRocketColliders = [
 
 const entry = entities[EntityType.Rocket]
 
-const rocketColliders = rawRocketColliders.map(s => s.map((v, i) => {
+export const rocketColliders = rawRocketColliders.map(s => s.map((v, i) => {
     const moved = i % 2 === 0 
         ? v - entry.size.width / 2 
         : v - entry.size.height / 2
@@ -62,23 +62,25 @@ export function createRocketBody(rapier: RAPIER.World, rocket: Entity): RAPIER.R
     const body = rapier.createRigidBody(
         RAPIER.RigidBodyDesc.dynamic()
             .setTranslation(positionAtCenter.x, positionAtCenter.y)
-            .setRotation(rocket.rotation + Math.PI)
+            .setRotation(rocket.rotation)
             .setCcdEnabled(true)
             .setAngularDamping(0.05)
     )
 
-    rocketColliders.forEach(vertices => {
+    rocketColliders.forEach((vertices, i) => {
         const collider = RAPIER.ColliderDesc.convexHull(new Float32Array(vertices))
 
         if (collider == null) {
             throw new Error("Failed to create collider")
         }
 
-        collider.setMass(4)
         collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
+            .setMass(4 / 3)
 
         rapier.createCollider(collider, body)
     })
+
+    console.log("Body mass: " + body.mass())
 
     return body
 }

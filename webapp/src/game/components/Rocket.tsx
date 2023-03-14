@@ -18,8 +18,7 @@ export function Rocket(props: { body: RAPIER.RigidBody }) {
     useFrame(() => {
         if (props.body.isSleeping() === false) {
             const position = props.body.translation()
-
-            const newRotation = props.body.rotation() + Math.PI
+            const newRotation = props.body.rotation()
 
             const newPosition = changeAnchor(
                 position,

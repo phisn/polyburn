@@ -50,5 +50,9 @@ module.exports = {
         
         // seems to not work correctly with threejs
         "react/no-unknown-property": "off",
+        
+        // react three fiber refs as seen here
+        // https://docs.pmnd.rs/react-three-fiber/tutorials/typescript
+        "@typescript-eslint/no-non-null-assertion": "off"
     }
 }

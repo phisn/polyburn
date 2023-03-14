@@ -11,6 +11,8 @@ export function Shape(props: ShapeProps) {
         props.vertices.map(vertex => new THREE.Vector2(vertex.x, vertex.y))
     )
 
+    console.log("renderasdf")
+
     return (
         <>
             <mesh>

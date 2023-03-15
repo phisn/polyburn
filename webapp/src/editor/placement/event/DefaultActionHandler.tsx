@@ -20,9 +20,9 @@ export function defaultActionHandler(params: PointerHandlerParams) {
             if (params.raycaster.intersectObjects(params.scene.children).length === 0) {
                 state.mutate(insertShape({
                     vertices: [
-                        { x: params.point.x - 50, y: params.point.y + 50 },
-                        { x: params.point.x + 50, y: params.point.y + 50 },
-                        { x: params.point.x, y: params.point.y - 50 },
+                        { x: params.point.x - 2, y: params.point.y + 2 },
+                        { x: params.point.x + 2, y: params.point.y + 2 },
+                        { x: params.point.x, y: params.point.y - 2 },
                     ]
                 }))
             }

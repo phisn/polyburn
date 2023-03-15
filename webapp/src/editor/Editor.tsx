@@ -60,8 +60,6 @@ function EditorControls() {
 
     const firstPosition = useRef<FirstPosition | null>(null)
 
-    console.log("render")
-
     useEffect(() => {
         const onPointerEvent = (event: PointerEvent) => {
             const point = { x: event.clientX, y: -event.clientY }
@@ -147,6 +145,7 @@ function EditorInner() {
                     position={[0, 0, 10]}
                     rotation={[0, 0, 0]}
                     far={10000}
+                    zoom={50}
                 />
 
                 {/* <Stats /> */}

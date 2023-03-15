@@ -1,5 +1,5 @@
 
-export const snapDistance = 20
+export const snapDistance = 0.5
 
 export const highlightColor = "#aaffff"
 export const highlightVertexColor = "#ffffff"

@@ -10,11 +10,11 @@ import { MutatableShapeGeometry } from "./MutatableShapeGeometry"
 
 const Vertex = forwardRef<Mesh>((_, ref) => (
     <mesh ref={ref}>
-        <circleGeometry args={[5.0]} />
+        <circleGeometry args={[0.2]} />
         <meshBasicMaterial color="#222228" />
         
         <mesh>
-            <circleGeometry args={[4.0]} />
+            <circleGeometry args={[0.15]} />
             <meshBasicMaterial color="#C8DB35" />
         </mesh>
     </mesh>

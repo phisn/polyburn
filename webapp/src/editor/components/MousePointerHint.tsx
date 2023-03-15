@@ -47,7 +47,7 @@ export function MousePointerHint() {
     return (
         <>
             <mesh ref={meshRef}>
-                <circleGeometry args={[5.0]} />
+                <circleGeometry args={[0.2]} />
                 <meshBasicMaterial ref={materialRef} />
             </mesh>
         </>

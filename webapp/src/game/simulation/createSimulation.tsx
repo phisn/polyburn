@@ -7,27 +7,27 @@ import { EntityType } from "../../model/world/Entity"
 import { scale } from "../../model/world/Size"
 import { World } from "../../model/world/World"
 import { changeAnchor } from "../../utility/math"
-import { createRocketBody } from "./createRocketBody"
-import { createShapeBody } from "./createShapeBody"
+import { createRocket, SimulationRocket } from "./createRocket"
+import { createShape } from "./createShape"
 import { UpdateContext as StepContext } from "./StepContext"
 
 export interface Simulation {
     rapier: RAPIER.World
 
-    rockets: RAPIER.RigidBody[]
+    rockets: SimulationRocket[]
 
     step(context: StepContext): void
 }
 
 export function createSimulation(world: World): Simulation {
-    const rapier = new RAPIER.World({ x: 0.0, y: -9.81 * 4 })
+    const rapier = new RAPIER.World({ x: 0.0, y: -9.81 * 5 * 8 })
 
     const rockets = world.entities
         .filter(entity => entity.type === EntityType.Rocket)
-        .map(entity => createRocketBody(rapier, entity))
+        .map(entity => createRocket(rapier, entity))
 
     world.shapes.forEach(shape => 
-        createShapeBody(shape, rapier)
+        createShape(shape, rapier)
     )
 
     const rocketGroundRayRaw = (rocket: RAPIER.RigidBody) => {
@@ -79,6 +79,12 @@ export function createSimulation(world: World): Simulation {
     const rocketGroundRay = (rocket: RAPIER.RigidBody) => 
         rocketGroundRayRaw(rocket)?.cast
 
+    const queue = new RAPIER.EventQueue(true)
+
+    const bodyHandleToRocket = new Map<RAPIER.RigidBodyHandle, SimulationRocket>(
+        rockets.map(rocket => [rocket.body.handle, rocket])
+    )
+
     return {
         rapier,
         rockets,
@@ -86,35 +92,59 @@ export function createSimulation(world: World): Simulation {
         step: (context: StepContext) => { 
             if (context.thrust) {
                 rockets.forEach(rocket => {
-                    const force = {
-                        x: 0,
-                        y: 2.675
+                    if (rocket.collisionCount === 0 && context.rotation) {
+                        rocket.body.setRotation(
+                            rocket.rotation + context.rotation,
+                            true
+                        )
                     }
                     
-                    if (rocketGroundRay(rocket)) {
+                    const force = {
+                        x: 0,
+                        y: 2.675 * 8
+                    }
+                    
+                    if (rocketGroundRay(rocket.body)) {
                         force.x *= 1.3
                         force.y *= 1.3
                     }
 
-                    const rotation = rocket.rotation()
+                    const rotation = rocket.body.rotation()
                     
                     const rotatedForce = {
                         x: force.x * cos(rotation) - force.y * sin(rotation),
                         y: force.x * sin(rotation) + force.y * cos(rotation)
                     }
  
-                    rocket.applyImpulse(rotatedForce, true)
+                    rocket.body.applyImpulse(rotatedForce, true)
                 })
-
-            }
-            else {
-                console.log(`Applying thrust: ${context.thrust}`)
-
             }
 
-            console.log("steps:" + 1 / rapier.timestep)
-            
-            rapier.step()
+            rapier.step(queue)
+
+            queue.drainCollisionEvents((h1, h2, started) => {
+                const parent1 = rapier.getCollider(h1).parent()
+                const parent2 = rapier.getCollider(h2).parent()
+
+                const rocket1 = parent1 && bodyHandleToRocket.get(parent1.handle)
+                const rocket2 = parent2 && bodyHandleToRocket.get(parent2.handle)
+
+                if (rocket1) {
+                    rocket1.collisionCount += started ? 1 : -1
+                    
+                    if (rocket1.collisionCount === 0) {
+                        rocket1.rotation = rocket1.body.rotation()
+                    }
+                }
+
+                if (rocket2) {
+                    rocket2.collisionCount += started ? 1 : -1
+
+                    if (rocket2.collisionCount === 0) {
+                        rocket2.rotation = rocket2.body.rotation()
+                    }
+                }
+            })
         },
     }
 }

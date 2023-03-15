@@ -1,48 +1,17 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { OrthographicCamera } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
-import { Suspense, useEffect, useRef } from "react"
+import { Suspense, useRef } from "react"
 
 import { World } from "../model/world/World"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
 import { createSimulation, Simulation } from "./simulation/createSimulation"
+import { useControlsRef } from "./useControlsRef"
 import { useGameLoop } from "./useGameLoop"
 
 export interface GameProps {
     world: World
-}
-
-interface ControlsRef {
-    thrust: boolean
-    rotation: number
-}
-
-function useControlsRef() {
-    const controlsRef = useRef<ControlsRef>({
-        thrust: false,
-        rotation: 0,
-    })
-
-    useEffect(() => {
-        // TODO: Capture events in future
-
-        const pointerEvent = (event: PointerEvent) => {
-            controlsRef.current.thrust = ((event.buttons & 1) === 1)
-        }
-
-        window.addEventListener("pointerdown", pointerEvent)
-        window.addEventListener("pointerup", pointerEvent)
-        window.addEventListener("pointermove", pointerEvent)
-
-        return () => {
-            window.removeEventListener("pointerdown", pointerEvent)
-            window.removeEventListener("pointerup", pointerEvent)
-            window.removeEventListener("pointermove", pointerEvent)
-        }
-    })
-
-    return controlsRef
 }
 
 const rapierInit = RAPIER.init()
@@ -92,7 +61,7 @@ function InnerGame(props: GameProps) {
 
             {
                 simulationRef.current.rockets.map((rocket, index) =>
-                    <Rocket key={index} body={rocket} />
+                    <Rocket key={index} rocket={rocket} />
                 )
             }
 

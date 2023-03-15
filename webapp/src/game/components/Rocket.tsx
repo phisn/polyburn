@@ -1,4 +1,3 @@
-import RAPIER from "@dimforge/rapier2d-compat"
 import { Svg } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { Suspense, useRef } from "react"
@@ -8,17 +7,18 @@ import { entities } from "../../model/world/Entities"
 import { EntityType } from "../../model/world/Entity"
 import { scale } from "../../model/world/Size"
 import { changeAnchor } from "../../utility/math"
+import { SimulationRocket } from "../simulation/createRocket"
 
-export function Rocket(props: { body: RAPIER.RigidBody }) {
+export function Rocket(props: { rocket: SimulationRocket }) {
     const svgRef = useRef<Object3D>(null!)
     
     const entry = entities[EntityType.Rocket]
     const size = scale(entry.size, entry.scale)
 
     useFrame(() => {
-        if (props.body.isSleeping() === false) {
-            const position = props.body.translation()
-            const newRotation = props.body.rotation()
+        if (props.rocket.body.isSleeping() === false) {
+            const position = props.rocket.body.translation()
+            const newRotation = props.rocket.body.rotation()
 
             const newPosition = changeAnchor(
                 position,

@@ -2,7 +2,7 @@ import RAPIER from "@dimforge/rapier2d-compat"
 
 import { Shape } from "../../model/world/Shape"
 
-export function createShapeBody(shape: Shape, rapierWorld: RAPIER.World) {
+export function createShape(shape: Shape, rapierWorld: RAPIER.World) {
     const [vertices, top, left] = verticesForShape(shape)
 
     const body = rapierWorld.createRigidBody(

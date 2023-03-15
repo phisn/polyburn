@@ -41,14 +41,20 @@ const entry = entities[EntityType.Rocket]
 export const rocketColliders = rawRocketColliders.map(s => s.map((v, i) => {
     const moved = i % 2 === 0 
         ? v - entry.size.width / 2 
-        : v - entry.size.height / 2
+        : entry.size.height / 2 - v
 
     const scaled = moved * entry.scale
 
     return Math.round(scaled * 1000) / 1000
 }))
 
-export function createRocketBody(rapier: RAPIER.World, rocket: Entity): RAPIER.RigidBody {
+export interface SimulationRocket {
+    body: RAPIER.RigidBody
+    rotation: number
+    collisionCount: number
+}
+
+export function createRocket(rapier: RAPIER.World, rocket: Entity) {
     const entry = entities[rocket.type]
     
     const positionAtCenter = changeAnchor(
@@ -67,7 +73,7 @@ export function createRocketBody(rapier: RAPIER.World, rocket: Entity): RAPIER.R
             .setAngularDamping(0.05)
     )
 
-    rocketColliders.forEach((vertices, i) => {
+    rocketColliders.forEach((vertices) => {
         const collider = RAPIER.ColliderDesc.convexHull(new Float32Array(vertices))
 
         if (collider == null) {
@@ -82,5 +88,9 @@ export function createRocketBody(rapier: RAPIER.World, rocket: Entity): RAPIER.R
 
     console.log("Body mass: " + body.mass())
 
-    return body
+    return {
+        body,
+        rotation: rocket.rotation,
+        collisionCount: 0
+    }
 }

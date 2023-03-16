@@ -20,7 +20,7 @@ export interface Simulation {
 }
 
 export function createSimulation(world: World): Simulation {
-    const rapier = new RAPIER.World({ x: 0.0, y: -12 })
+    const rapier = new RAPIER.World({ x: 0.0, y: -20 })
 
     const rockets = world.entities
         .filter(entity => entity.type === EntityType.Rocket)
@@ -90,6 +90,10 @@ export function createSimulation(world: World): Simulation {
         rockets,
 
         step: (context: StepContext) => {
+            if (context.pause) {
+                return
+            }
+
             rockets.forEach(rocket => {
                 if (rocket.collisionCount === 0) {
                     rocket.body.setRotation(
@@ -101,7 +105,7 @@ export function createSimulation(world: World): Simulation {
                 if (context.thrust) {
                     const force = {
                         x: 0,
-                        y: 0.825
+                        y: 7.3
                     }
                 
                     if (rocketGroundRay(rocket.body)) {

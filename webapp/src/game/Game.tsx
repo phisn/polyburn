@@ -43,6 +43,7 @@ function InnerGame(props: GameProps) {
         simulationRef.current.step({
             thrust: controls.current.thrust,
             rotation: controls.current.rotation,
+            pause: controls.current.pause
         })
     })
 

@@ -3,12 +3,14 @@ import { useEffect, useRef } from "react"
 interface ControlsRef {
     thrust: boolean
     rotation: number
+    pause: boolean
 }
 
 export function useControlsRef() {
     const controlsRef = useRef<ControlsRef>({
         thrust: false,
         rotation: 0,
+        pause: false,
     })
 
     useEffect(() => {
@@ -45,6 +47,10 @@ export function useControlsRef() {
             if (event.key === " ") {
                 controlsRef.current.thrust = true
             }
+
+            if (event.key == "p") {
+                controlsRef.current.pause = !controlsRef.current.pause
+            }
         }
 
         const onKeyUp = (event: KeyboardEvent) => {
@@ -52,6 +58,12 @@ export function useControlsRef() {
                 controlsRef.current.thrust = false
             }
         }
+
+        
+        setTimeout(() => {
+            controlsRef.current.thrust = true
+        }, 2000)
+        
 
         window.addEventListener("pointerdown", onPointerEvent)
         window.addEventListener("pointerup", onPointerEvent)

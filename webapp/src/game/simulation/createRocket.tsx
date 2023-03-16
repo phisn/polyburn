@@ -73,7 +73,7 @@ export function createRocket(rapier: RAPIER.World, rocket: Entity) {
             .setAngularDamping(0.05)
     )
 
-    rocketColliders.forEach((vertices) => {
+    rocketColliders.forEach((vertices, i) => {
         const collider = RAPIER.ColliderDesc.convexHull(new Float32Array(vertices))
 
         if (collider == null) {
@@ -81,7 +81,7 @@ export function createRocket(rapier: RAPIER.World, rocket: Entity) {
         }
 
         collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
-            .setMass(4 / 3)
+            .setMass(i === 0 ? 20 : 0.5)
 
         rapier.createCollider(collider, body)
     })

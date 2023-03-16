@@ -1,5 +1,5 @@
 
-export const baseZoom = 50
+export const baseZoom = 25
 export const baseZoomFactor = 1 / baseZoom
 
 export const snapDistance = 20 * baseZoomFactor

@@ -6,15 +6,16 @@ import * as THREE from "three"
 
 import { useEditorStore } from "../editor-store/useEditorStore"
 import { ActionType } from "../placement/state/Action"
+import { baseZoomFactor } from "../Values"
 import { MutatableShapeGeometry } from "./MutatableShapeGeometry"
 
 const Vertex = forwardRef<Mesh>((_, ref) => (
     <mesh ref={ref}>
-        <circleGeometry args={[0.2]} />
+        <circleGeometry args={[5 * baseZoomFactor]} />
         <meshBasicMaterial color="#222228" />
         
         <mesh>
-            <circleGeometry args={[0.15]} />
+            <circleGeometry args={[4 * baseZoomFactor]} />
             <meshBasicMaterial color="#C8DB35" />
         </mesh>
     </mesh>

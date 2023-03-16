@@ -20,7 +20,7 @@ export interface Simulation {
 }
 
 export function createSimulation(world: World): Simulation {
-    const rapier = new RAPIER.World({ x: 0.0, y: -9.81 * 5 * 8 })
+    const rapier = new RAPIER.World({ x: 0.0, y: -12 })
 
     const rockets = world.entities
         .filter(entity => entity.type === EntityType.Rocket)
@@ -89,36 +89,36 @@ export function createSimulation(world: World): Simulation {
         rapier,
         rockets,
 
-        step: (context: StepContext) => { 
-            if (context.thrust) {
-                rockets.forEach(rocket => {
-                    if (rocket.collisionCount === 0 && context.rotation) {
-                        rocket.body.setRotation(
-                            rocket.rotation + context.rotation,
-                            true
-                        )
-                    }
-                    
+        step: (context: StepContext) => {
+            rockets.forEach(rocket => {
+                if (rocket.collisionCount === 0) {
+                    rocket.body.setRotation(
+                        rocket.rotation + context.rotation,
+                        true
+                    )
+                }
+                
+                if (context.thrust) {
                     const force = {
                         x: 0,
-                        y: 2.675 * 8
+                        y: 0.825
                     }
-                    
+                
                     if (rocketGroundRay(rocket.body)) {
                         force.x *= 1.3
                         force.y *= 1.3
                     }
 
                     const rotation = rocket.body.rotation()
-                    
+                
                     const rotatedForce = {
                         x: force.x * cos(rotation) - force.y * sin(rotation),
                         y: force.x * sin(rotation) + force.y * cos(rotation)
                     }
- 
+
                     rocket.body.applyImpulse(rotatedForce, true)
-                })
-            }
+                }
+            })
 
             rapier.step(queue)
 
@@ -133,7 +133,7 @@ export function createSimulation(world: World): Simulation {
                     rocket1.collisionCount += started ? 1 : -1
                     
                     if (rocket1.collisionCount === 0) {
-                        rocket1.rotation = rocket1.body.rotation()
+                        rocket1.rotation = rocket1.body.rotation() - context.rotation
                     }
                 }
 
@@ -141,7 +141,7 @@ export function createSimulation(world: World): Simulation {
                     rocket2.collisionCount += started ? 1 : -1
 
                     if (rocket2.collisionCount === 0) {
-                        rocket2.rotation = rocket2.body.rotation()
+                        rocket2.rotation = rocket2.body.rotation() - context.rotation
                     }
                 }
             })

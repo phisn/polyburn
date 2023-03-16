@@ -1,5 +1,5 @@
 
 export interface UpdateContext {
-    rotation?: number
+    rotation: number
     thrust: boolean
 }

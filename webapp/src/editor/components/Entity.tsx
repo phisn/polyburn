@@ -1,6 +1,6 @@
 import { Svg } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
-import { Suspense, useState } from "react"
+import { Suspense, useRef, useState } from "react"
 import { Euler, MeshBasicMaterial } from "three"
 
 import { entities } from "../../model/world/Entities"
@@ -11,9 +11,8 @@ import { HintType, PlacementHint } from "../placement/state/Hint"
 export function Entity(props: { entity: EntityModel, index?: number }) {
     const entry = entities[props.entity.type]
 
-    const [material, setMaterial] = useState<MeshBasicMaterial>(
-        new MeshBasicMaterial({ color: 0x000000 })
-    )
+    const [material, setMaterial] = useState<MeshBasicMaterial | undefined>()
+    const previousStrokeColor = useRef<number | undefined>(undefined)
 
     /*
     const { topLeft, topRight, bottomLeft, bottomRight } = useMemo(
@@ -26,10 +25,17 @@ export function Entity(props: { entity: EntityModel, index?: number }) {
         const hint = useEditorStore.getState().modeState.hint
         const newStrokeColor = getStrokeColor(props.index, hint)
 
-        if (newStrokeColor !== material.color.getHex()) {
-            setMaterial(
-                new MeshBasicMaterial({ color: newStrokeColor })
-            )
+        if (newStrokeColor !== previousStrokeColor.current) {
+            if (newStrokeColor) {
+                setMaterial(
+                    new MeshBasicMaterial({ color: newStrokeColor })
+                )
+            }
+            else {
+                setMaterial(undefined)
+            }
+
+            previousStrokeColor.current = newStrokeColor
         }
     })
 
@@ -87,6 +93,6 @@ function getStrokeColor(index: number | undefined, hint: PlacementHint | null) {
         return 0xffff44
     }
 
-    return 0xffffff
+    return undefined
 }
 

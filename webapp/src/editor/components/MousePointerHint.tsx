@@ -4,7 +4,7 @@ import { Mesh, MeshBasicMaterial } from "three"
 
 import { useEditorStore } from "../editor-store/useEditorStore"
 import { HintType, PlacementHint } from "../placement/state/Hint"
-import { highlightColor, highlightDeleteColor, highlightVertexColor } from "../Values"
+import { baseZoomFactor, highlightColor, highlightDeleteColor, highlightVertexColor, mousePointerhintLayer } from "../Values"
 
 function GetVisualHintParams(hint: PlacementHint) {
     switch (hint.type) {
@@ -37,7 +37,7 @@ export function MousePointerHint() {
         if (params) {
             materialRef.current.color.set(params.color)
             meshRef.current.visible = true
-            meshRef.current.position.set(params.point.x, params.point.y, 0)
+            meshRef.current.position.set(params.point.x, params.point.y, mousePointerhintLayer)
         }
         else {
             meshRef.current.visible = false
@@ -47,7 +47,7 @@ export function MousePointerHint() {
     return (
         <>
             <mesh ref={meshRef}>
-                <circleGeometry args={[0.2]} />
+                <circleGeometry args={[5.0 * baseZoomFactor]} />
                 <meshBasicMaterial ref={materialRef} />
             </mesh>
         </>

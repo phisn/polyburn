@@ -14,18 +14,29 @@ export function useControlsRef() {
     useEffect(() => {
         let wasPointerDown = false
         let startPointerX = 0
+        let startRotation = 0
 
         const onPointerEvent = (event: PointerEvent) => {
             if ((event.buttons & 1) === 1) {
                 if (wasPointerDown) {
-                    controlsRef.current.rotation = -(event.clientX - startPointerX) / 100
+                    controlsRef.current.rotation =
+                        startRotation - (event.clientX - startPointerX) * 0.005
+
+                    console.log(`cx: ${event.clientX}, sx: ${startPointerX}, r: ${controlsRef.current.rotation}`)
                 }
                 else {
+                    console.log("pointer down")
+
                     startPointerX = event.clientX
                     wasPointerDown = true
+                    startRotation = controlsRef.current.rotation
                 }
             }
             else {
+                if (wasPointerDown) {
+                    console.log("pointer up")
+                }
+
                 wasPointerDown = false
             }
         }

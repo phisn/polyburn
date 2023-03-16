@@ -12,6 +12,7 @@ import { useEditorStore } from "./editor-store/useEditorStore"
 import EditorNavbar from "./EditorNavbar"
 import Navbar from "./Navbar"
 import PlacementMode from "./placement/PlacementMode"
+import { baseZoom, baseZoomFactor } from "./Values"
 
 export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) => {
     if (!camera || !canvas) {
@@ -73,8 +74,8 @@ function EditorControls() {
                 }
                 else if (event.type === "pointermove") {
                     camera.position.set(
-                        firstPosition.current.camera.x + (firstPosition.current.mouse.x - point.x),
-                        firstPosition.current.camera.y + (firstPosition.current.mouse.y - point.y),
+                        firstPosition.current.camera.x + (firstPosition.current.mouse.x - point.x) * baseZoomFactor,
+                        firstPosition.current.camera.y + (firstPosition.current.mouse.y - point.y) * baseZoomFactor,
                         10
                     )
                 }
@@ -145,7 +146,7 @@ function EditorInner() {
                     position={[0, 0, 10]}
                     rotation={[0, 0, 0]}
                     far={10000}
-                    zoom={50}
+                    zoom={baseZoom}
                 />
 
                 {/* <Stats /> */}

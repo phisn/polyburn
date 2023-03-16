@@ -3,6 +3,7 @@ import { OrthographicCamera } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { Suspense, useRef } from "react"
 
+import { baseZoom } from "../editor/Values"
 import { World } from "../model/world/World"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
@@ -51,6 +52,7 @@ function InnerGame(props: GameProps) {
                 makeDefault
                 position={[0, 0, 10]}
                 rotation={[0, 0, 0]}
+                zoom={baseZoom}
             />
 
             {

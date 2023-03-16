@@ -3,7 +3,7 @@ import { Point } from "../../../model/world/Point"
 import { findClosestEdge, findClosestVertex } from "../../../model/world/Shape"
 import { insertShape, removeEntity, removeVertex } from "../../editor-store/MutationsForWorld"
 import { useEditorStore } from "../../editor-store/useEditorStore"
-import { snapDistance } from "../../Values"
+import { baseZoomFactor, snapDistance } from "../../Values"
 import { ActionType } from "../state/Action"
 import { HintType } from "../state/Hint"
 import { isInsideCanvas, PointerHandlerParams } from "./Definitions"
@@ -18,11 +18,13 @@ export function defaultActionHandler(params: PointerHandlerParams) {
         switch (state.modeState.hint?.type) {
         case HintType.Space:
             if (params.raycaster.intersectObjects(params.scene.children).length === 0) {
+                const offsets = 50 * baseZoomFactor
+
                 state.mutate(insertShape({
                     vertices: [
-                        { x: params.point.x - 2, y: params.point.y + 2 },
-                        { x: params.point.x + 2, y: params.point.y + 2 },
-                        { x: params.point.x, y: params.point.y - 2 },
+                        { x: params.point.x - offsets, y: params.point.y + offsets },
+                        { x: params.point.x + offsets, y: params.point.y + offsets },
+                        { x: params.point.x, y: params.point.y - offsets },
                     ]
                 }))
             }

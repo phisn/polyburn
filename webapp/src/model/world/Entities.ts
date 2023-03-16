@@ -1,6 +1,7 @@
 import greenFlag from "../../assets/flag-green.svg"
 import redFlag from "../../assets/flag-red.svg"
 import rocket from "../../assets/rocket.svg"
+import { baseZoomFactor } from "../../editor/Values"
 import { changeAnchor } from "../../utility/math"
 import { Entity, EntityRegistry, EntityType } from "./Entity"
 import { Point } from "./Point"
@@ -8,19 +9,19 @@ import { scale } from "./Size"
 
 export const entities: EntityRegistry = {
     [EntityType.Rocket]: {
-        scale: 0.15,
+        scale: 0.15 * baseZoomFactor,
         size: { width: 300, height: 600 },
         anchor: { x: 0, y: 1 },
         src: rocket,
     },
     [EntityType.GreenFlag]: {
-        scale: 0.15,
+        scale: 0.15 * baseZoomFactor,
         size: { width: 275, height: 436 },
         anchor: { x: 0, y: 1 },
         src: greenFlag,
     },
     [EntityType.RedFlag]: {
-        scale: 0.15,
+        scale: 0.15 * baseZoomFactor,
         size: { width: 275, height: 436 },
         anchor: { x: 0, y: 1 },
         src: redFlag,

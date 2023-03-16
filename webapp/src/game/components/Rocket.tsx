@@ -1,104 +1,56 @@
 import { Svg } from "@react-three/drei"
-import { useFrame } from "@react-three/fiber"
-import { Suspense, useContext, useRef } from "react"
-import { MathUtils, Object3D, Vector3 } from "three"
+import { Suspense, useRef } from "react"
+import { Object3D } from "three"
 
 import { entities } from "../../model/world/Entities"
 import { EntityType } from "../../model/world/Entity"
+import { Point } from "../../model/world/Point"
 import { scale } from "../../model/world/Size"
 import { changeAnchor } from "../../utility/math"
-import { GameLoopContext } from "../GameLoopContext"
 import { SimulationRocket } from "../simulation/createRocket"
+import { useInterpolation } from "./useInterpolation"
 
 export function Rocket(props: { rocket: SimulationRocket }) {
     const svgRef = useRef<Object3D>(null!)
+    // const lineRef = useRef<any>(null!)
 
-    const gameLoopContext = useContext(GameLoopContext)
-    
     const entry = entities[EntityType.Rocket]
     const size = scale(entry.size, entry.scale)
 
-    let previousTime = 0
-    
-    let previousRotation = 0
-    let newRotation = props.rocket.body.rotation()
+    useInterpolation(props.rocket.body, (point: Point, rotation: number) => {
+        const positionAnchored = changeAnchor(
+            point,
+            rotation,
+            size,
+            { x: 0.5, y: 0.5 },
+            entry.anchor
+        )
 
-    const lerpVector = new Vector3()
+        svgRef.current.position.set(positionAnchored.x, positionAnchored.y, 0)
+        svgRef.current.rotation.set(0, 0, rotation)
 
-    const previousPosition = new Vector3()
-    const newPosition = new Vector3(
-        props.rocket.body.translation().x,
-        props.rocket.body.translation().y,
-        0
-    )
+        /*
+        const positionMidAnchored = changeAnchor(
+            point,
+            rotation,
+            size,
+            { x: 0.5, y: 0.5 },
+            { x: 0.5, y: 0.2 }
+        )
 
-    useFrame(() => {
-        if (props.rocket.body.isSleeping() === false) {
-            if (previousTime !== gameLoopContext.timeAtLastFrame) {
-                previousTime = gameLoopContext.timeAtLastFrame
-                
-                const position = props.rocket.body.translation()
-                const rotation = props.rocket.body.rotation()
+        const positionBelowAnchored = changeAnchor(
+            point,
+            rotation,
+            size,
+            { x: 0.5, y: 0.5 },
+            { x: 0.5, y: -1 }
+        )
 
-                previousRotation = newRotation
-                newRotation = rotation
-
-                previousPosition.set(
-                    newPosition.x,
-                    newPosition.y,
-                    0
-                )
-
-                newPosition.set(
-                    position.x,
-                    position.y,
-                    0
-                )
-            }
-
-            const newTime = performance.now()
-            const delta = (newTime - previousTime) / gameLoopContext.timePerFrame
-
-            lerpVector.set(
-                MathUtils.lerp(
-                    previousPosition.x, 
-                    newPosition.x,
-                    delta
-                ),
-                MathUtils.lerp(
-                    previousPosition.y,
-                    newPosition.y,
-                    delta
-                ),
-                0
-            )
-
-            const lerpRotation = MathUtils.lerp(
-                previousRotation,
-                newRotation,
-                delta
-            )
-
-            const positionRotated = changeAnchor(
-                lerpVector,
-                lerpRotation,
-                size,
-                { x: 0.5, y: 0.5 },
-                entry.anchor
-            )
-            
-            svgRef.current.position.set(
-                positionRotated.x,
-                positionRotated.y,
-                0
-            )
-            
-            svgRef.current.rotation.set(
-                0, 
-                0, 
-                lerpRotation
-            )
-        }
+        lineRef.current.geometry.setFromPoints([
+            new Vector3(positionMidAnchored.x, positionMidAnchored.y, 0),
+            new Vector3(positionBelowAnchored.x, positionBelowAnchored.y, 0),
+        ])
+        */
     })
 
     return (
@@ -107,6 +59,12 @@ export function Rocket(props: { rocket: SimulationRocket }) {
                 ref={svgRef}
                 src={entry.src}
                 scale={entry.scale} />
+            {/*
+            <line ref={lineRef}>
+                <bufferGeometry />
+                <lineBasicMaterial color={"#00ff00"} linewidth={10} />
+            </line>
+            */}
         </Suspense>
     )
 }

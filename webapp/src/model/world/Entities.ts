@@ -1,7 +1,7 @@
 import greenFlag from "../../assets/flag-green.svg"
 import redFlag from "../../assets/flag-red.svg"
 import rocket from "../../assets/rocket.svg"
-import { baseZoomFactor } from "../../editor/Values"
+import { baseZoomFactor } from "../../common/Values"
 import { changeAnchor } from "../../utility/math"
 import { Entity, EntityRegistry, EntityType } from "./Entity"
 import { Point } from "./Point"

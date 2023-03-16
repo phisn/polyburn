@@ -5,14 +5,15 @@ import * as THREE from "three"
 import { Camera } from "three"
 import tunnel from "tunnel-rat"
 
+import Navbar from "../common/Navbar"
+import { baseZoom, baseZoomFactor } from "../common/Values"
 import Game from "../game/Game"
 import { Point } from "../model/world/Point"
+import { ConfigureMode } from "./configure/ConfigureMode"
 import { Mode } from "./editor-store/ModeStateBase"
 import { useEditorStore } from "./editor-store/useEditorStore"
 import EditorNavbar from "./EditorNavbar"
-import Navbar from "./Navbar"
 import PlacementMode from "./placement/PlacementMode"
-import { baseZoom, baseZoomFactor } from "./Values"
 
 export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) => {
     if (!camera || !canvas) {
@@ -41,6 +42,9 @@ function EditorMode() {
     switch (mode) {
     case Mode.Placement:
         return <PlacementMode />
+
+    case Mode.Configure:
+        return <ConfigureMode />
 
     }
 

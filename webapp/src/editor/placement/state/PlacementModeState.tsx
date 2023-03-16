@@ -1,11 +1,11 @@
 import { Mode, ModeStateBase } from "../../editor-store/ModeStateBase"
-import { Action } from "./Action"
+import { PlacementAction } from "./Action"
 import { PlacementHint } from "./Hint"
 
 export interface PlacementState extends ModeStateBase {
-    mode: Mode.Placement
+    mode: Mode
     hint: PlacementHint | null
-    action: Action | null
+    action: PlacementAction | null
 }
 
 export const initialPlacementState: PlacementState = {

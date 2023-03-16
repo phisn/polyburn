@@ -8,7 +8,7 @@ export interface ShapeProps {
 
 export function Shape(props: ShapeProps) {
     const threeShape = new THREE.Shape(
-        props.vertices.map(vertex => new THREE.Vector2(vertex!.x, vertex!.y))
+        props.vertices.map(vertex => new THREE.Vector2(vertex.x, vertex.y))
     )
 
     return (

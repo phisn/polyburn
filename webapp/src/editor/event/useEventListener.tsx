@@ -1,16 +1,11 @@
 import { useThree } from "@react-three/fiber"
 import { useEffect, useMemo, useRef } from "react"
 
-import { buildCanvasToWorld } from "../../Editor"
-import { useEditorStore } from "../../editor-store/useEditorStore"
-import { ActionType } from "../state/Action"
-import { defaultActionHandler } from "./DefaultActionHandler"
-import { EditorInputEvent } from "./Definitions"
-import { insertActionHandler } from "./InsertVertexActionHandler"
-import { moveVertexActionHandler } from "./MoveVertexActionHandler"
-import { placeEntityActionHandler } from "./PlaceEntityActionHandler"
+import { buildCanvasToWorld } from "../Editor"
+import { useEditorStore } from "../editor-store/useEditorStore"
+import { EditorInputEvent, PointerHandlerParams } from "./EventDefinitions"
 
-function EventListener() {
+function useEventListener(f: (params: PointerHandlerParams) => void) {
     const lastPointerEventRef = useRef<EditorInputEvent | null>()
 
     const canvas = useThree(state => state.gl.domElement)
@@ -20,7 +15,6 @@ function EventListener() {
 
     const canvasToWorld = useMemo(() => buildCanvasToWorld(camera, canvas), [camera, canvas])
     
-    console.log("EventListener")
     useEffect(() => {
         const onPointerEvent = (event: PointerEvent) => {
             onEditorInputEvent({
@@ -34,9 +28,7 @@ function EventListener() {
         }
 
         const onEditorInputEvent = (event: EditorInputEvent) => {
-            const state = useEditorStore.getState()
             const point = canvasToWorld(event.windowPoint.x, event.windowPoint.y)
-            let action = state.modeState.action
 
             const params = {
                 canvas,
@@ -45,58 +37,13 @@ function EventListener() {
                 scene,
                 point,
                 event,
-                previousEvent: lastPointerEventRef.current ?? undefined
+                previousEvent: lastPointerEventRef.current ?? undefined,
+                action: void 0
             }
 
             lastPointerEventRef.current = event
 
-            switch (action?.type) {
-            case ActionType.InsertVertex:
-                insertActionHandler({
-                    ...params,
-                    action
-                })
-
-                break
-            case ActionType.MoveVertex:
-                moveVertexActionHandler({
-                    ...params,
-                    action
-                })
-
-                break
-                    
-            case ActionType.PlaceEntityInFuture:
-                action = {
-                    type: ActionType.PlaceEntity,
-                    entity: {
-                        position: point,
-                        rotation: 0,
-                        type: action.entityType,
-                    }
-                },
-
-                state.setModeState({
-                    action,
-                })
-
-                // fallthrough
-            case ActionType.PlaceEntity:
-                placeEntityActionHandler({
-                    ...params,
-                    action
-                })
-
-                break
-            default:
-                defaultActionHandler({
-                    ...params,
-                    action: void 0
-                })
-
-                break
-
-            }
+            f(params)
         }
 
         const onKeyDown = (e: KeyboardEvent) => {
@@ -132,7 +79,6 @@ function EventListener() {
 
         const onKeyUp = (e: KeyboardEvent) => {
             if (!lastPointerEventRef.current) {
-                console.log("no last pointer event")
                 return
             }
 
@@ -167,11 +113,6 @@ function EventListener() {
             window.removeEventListener("keyup", onKeyUp)
         }
     })
-
-    return (
-        <>
-        </>
-    )
 }
 
-export default EventListener
+export default useEventListener

@@ -1,8 +1,7 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
 import { entities } from "../../model/world/Entities"
-import { EntityType } from "../../model/world/Entity"
-import { Entity } from "../../model/world/Entity"
+import { Entity,EntityType  } from "../../model/world/Entity"
 import { scale } from "../../model/world/Size"
 import { changeAnchor } from "../../utility/math"
 

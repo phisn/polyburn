@@ -6,7 +6,10 @@ module.exports = {
     },
     "extends": [
         "eslint:recommended",
+        "plugin:import/recommended",
+        "plugin:import/typescript",
         "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
         "plugin:@typescript-eslint/recommended"
     ],
     "overrides": [
@@ -53,6 +56,8 @@ module.exports = {
         
         // react three fiber refs as seen here
         // https://docs.pmnd.rs/react-three-fiber/tutorials/typescript
-        "@typescript-eslint/no-non-null-assertion": "off"
+        "@typescript-eslint/no-non-null-assertion": "off",
+
+        "import/no-named-as-default-member": "off",
     }
 }

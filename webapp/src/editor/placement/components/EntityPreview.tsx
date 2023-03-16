@@ -3,10 +3,11 @@ import { useFrame } from "@react-three/fiber"
 import { Suspense, useRef, useState } from "react"
 import { Object3D } from "three"
 
-import { entities } from "../../model/world/Entities"
-import { EntityType } from "../../model/world/Entity"
-import { useEditorStore } from "../editor-store/useEditorStore"
-import { ActionType } from "../placement/state/Action"
+import { entities } from "../../../model/world/Entities"
+import { EntityType } from "../../../model/world/Entity"
+import { useEditorStore } from "../../editor-store/useEditorStore"
+import { ActionType } from "../state/Action"
+import { PlacementState } from "../state/PlacementModeState"
 
 export function EntityPreview() {
     const [entityType, setEntityType] = useState<EntityType | null>(null)
@@ -15,7 +16,7 @@ export function EntityPreview() {
     const svgRef = useRef<Object3D>(null)
 
     useFrame(() => {
-        const action = useEditorStore.getState().modeState.action
+        const action = useEditorStore.getState().getModeStateAs<PlacementState>().action
 
         if (action?.type == ActionType.PlaceEntity) {
             if (action.entity.type != entityType) {

@@ -1,12 +1,13 @@
+import { baseZoomFactor, snapDistance } from "../../../common/Values"
 import { isPointInsideEntity } from "../../../model/world/Entities"
 import { Point } from "../../../model/world/Point"
 import { findClosestEdge, findClosestVertex } from "../../../model/world/Shape"
 import { insertShape, removeEntity, removeVertex } from "../../editor-store/MutationsForWorld"
 import { useEditorStore } from "../../editor-store/useEditorStore"
-import { baseZoomFactor, snapDistance } from "../../Values"
+import { isInsideCanvas, PointerHandlerParams } from "../../event/EventDefinitions"
 import { ActionType } from "../state/Action"
 import { HintType } from "../state/Hint"
-import { isInsideCanvas, PointerHandlerParams } from "./Definitions"
+import { PlacementState } from "../state/PlacementModeState"
 
 export function defaultActionHandler(params: PointerHandlerParams) {
     updateHint(params.point, params.event.delete)
@@ -14,8 +15,9 @@ export function defaultActionHandler(params: PointerHandlerParams) {
     if (params.event.leftButton && !params.previousEvent?.leftButton && 
         isInsideCanvas(params.event, params.canvas)) {
         const state = useEditorStore.getState()
+        const modeState = state.getModeStateAs<PlacementState>()
 
-        switch (state.modeState.hint?.type) {
+        switch (modeState.hint?.type) {
         case HintType.Space:
             if (params.raycaster.intersectObjects(params.scene.children).length === 0) {
                 const offsets = 50 * baseZoomFactor
@@ -35,8 +37,8 @@ export function defaultActionHandler(params: PointerHandlerParams) {
                 action: {
                     type: ActionType.InsertVertex,
 
-                    shapeIndex: state.modeState.hint.shapeIndex,
-                    vertexAfterIndex: state.modeState.hint.edge[0],
+                    shapeIndex: modeState.hint.shapeIndex,
+                    vertexAfterIndex: modeState.hint.edge[0],
 
                     point: params.point
                 },
@@ -47,7 +49,7 @@ export function defaultActionHandler(params: PointerHandlerParams) {
         case HintType.Vertex:
             if (params.event.delete) {
                 state.mutate(
-                    removeVertex(state.modeState.hint.shapeIndex, state.modeState.hint.vertexIndex)
+                    removeVertex(modeState.hint.shapeIndex, modeState.hint.vertexIndex)
                 )
 
                 break
@@ -57,8 +59,8 @@ export function defaultActionHandler(params: PointerHandlerParams) {
                 action: {
                     type: ActionType.MoveVertex,
 
-                    shapeIndex: state.modeState.hint.shapeIndex,
-                    vertexIndex: state.modeState.hint.vertexIndex,
+                    shapeIndex: modeState.hint.shapeIndex,
+                    vertexIndex: modeState.hint.vertexIndex,
 
                     point: params.point
                 },
@@ -69,7 +71,7 @@ export function defaultActionHandler(params: PointerHandlerParams) {
         case HintType.Entity:
             if (params.event.delete) {
                 state.mutate(
-                    removeEntity(state.modeState.hint.entityIndex)
+                    removeEntity(modeState.hint.entityIndex)
                 )
 
                 break
@@ -78,13 +80,13 @@ export function defaultActionHandler(params: PointerHandlerParams) {
             state.setModeState({
                 action: {
                     type: ActionType.PlaceEntity,
-                    entity: state.world.entities[state.modeState.hint.entityIndex]
+                    entity: state.world.entities[modeState.hint.entityIndex]
                 },
                 hint: null
             })
 
             state.mutate(
-                removeEntity(state.modeState.hint.entityIndex)
+                removeEntity(modeState.hint.entityIndex)
             )
 
             break

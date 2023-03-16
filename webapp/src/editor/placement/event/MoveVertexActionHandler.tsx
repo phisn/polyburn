@@ -1,7 +1,7 @@
 import { moveVertex } from "../../editor-store/MutationsForWorld"
 import { useEditorStore } from "../../editor-store/useEditorStore"
+import { isInsideCanvas, PointerHandlerParams } from "../../event/EventDefinitions"
 import { MoveVertexAction } from "../state/Action"
-import { isInsideCanvas, PointerHandlerParams } from "./Definitions"
 
 export function moveVertexActionHandler(params: PointerHandlerParams<MoveVertexAction>) {
     const state = useEditorStore.getState()

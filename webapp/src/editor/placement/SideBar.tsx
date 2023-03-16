@@ -2,9 +2,10 @@ import { EntityType } from "../../model/world/Entity"
 import { useEditorStore } from "../editor-store/useEditorStore"
 import EntityTypeSelection from "./EntityTypeSelection"
 import { ActionType } from "./state/Action"
+import { PlacementState } from "./state/PlacementModeState"
 
 function SideBar() {
-    const action = useEditorStore(state => state.modeState.action)
+    const action = useEditorStore(state => state.getModeStateAs<PlacementState>().action)
     const setModeState = useEditorStore(state => state.setModeState)
 
     const onSelectObject = (type: EntityType | undefined) => {

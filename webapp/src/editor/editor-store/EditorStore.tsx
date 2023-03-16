@@ -1,8 +1,9 @@
 import { World } from "../../model/world/World"
+import { ConfigureState } from "../configure/state/ConfigureModeState"
 import { initialPlacementState, PlacementState as PlacementModeState } from "../placement/state/PlacementModeState"
 import { Mutation } from "./Mutation"
 
-export type ModeState = PlacementModeState
+export type ModeState = PlacementModeState | ConfigureState
 
 interface CameraState {
     position: { x: number, y: number }
@@ -34,6 +35,7 @@ export interface EditorStore extends EditorState {
     undo(): void
     redo(): void
 
+    getModeStateAs<T extends ModeState>(): T
     setModeState(modeState: Partial<ModeState>): void
 }
 

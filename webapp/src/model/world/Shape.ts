@@ -1,7 +1,32 @@
-import { getClosestPointOnLine, getDistance, Point } from "./Point"
+import { getClosestPointOnLine, getDistance } from "./Point"
+
+export interface Point {
+    x: number
+    y: number
+}
 
 export interface Shape {
     vertices: Point[]
+}
+
+export function isPointInsideShape(point: Point, shape: Shape): boolean {
+    let isInside = false
+    const numVertices = shape.vertices.length
+    let j = numVertices - 1
+  
+    for (let i = 0; i < numVertices; i++) {
+        if ((shape.vertices[i].y > point.y) !== (shape.vertices[j].y > point.y) 
+          && point.x < (
+              (shape.vertices[j].x - shape.vertices[i].x) * (point.y - shape.vertices[i].y)
+          ) / (shape.vertices[j].y - shape.vertices[i].y) + shape.vertices[i].x
+        ) {
+            isInside = !isInside
+        }
+
+        j = i
+    }
+  
+    return isInside
 }
 
 export function findClosestEdge(shapes: Shape[], point: Point, snapDistance: number) {

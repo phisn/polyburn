@@ -3,7 +3,7 @@ import { OrthographicCamera } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { Suspense, useRef } from "react"
 
-import { baseZoom } from "../editor/Values"
+import { baseZoom } from "../common/Values"
 import { World } from "../model/world/World"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
@@ -16,9 +16,10 @@ export interface GameProps {
     world: World
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const rapierInit = RAPIER.init()
 
-export function Game(props: GameProps) {
+function Game(props: GameProps) {
     return (
         <div className="h-screen w-screen">
             <Canvas style={{ background: "#000000" }} >

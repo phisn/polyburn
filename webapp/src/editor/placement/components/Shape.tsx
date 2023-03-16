@@ -1,12 +1,12 @@
 import { useFrame } from "@react-three/fiber"
-import { forwardRef } from "react"
-import { useRef } from "react"
+import { forwardRef , useRef } from "react"
 import { Mesh } from "three"
 import * as THREE from "three"
 
-import { useEditorStore } from "../editor-store/useEditorStore"
-import { ActionType } from "../placement/state/Action"
-import { baseZoomFactor } from "../Values"
+import { baseZoomFactor, shapeColor } from "../../../common/Values"
+import { useEditorStore } from "../../editor-store/useEditorStore"
+import { ActionType } from "../state/Action"
+import { PlacementState } from "../state/PlacementModeState"
 import { MutatableShapeGeometry } from "./MutatableShapeGeometry"
 
 const Vertex = forwardRef<Mesh>((_, ref) => (
@@ -37,7 +37,7 @@ export function Shape(props: { shapeIndex: number }) {
     mutated.current = true
 
     useFrame(() => {
-        const action = useEditorStore.getState().modeState.action
+        const action = useEditorStore.getState().getModeStateAs<PlacementState>().action
 
         if (action) {
             if (action.type === ActionType.InsertVertex ||
@@ -76,7 +76,6 @@ export function Shape(props: { shapeIndex: number }) {
                 }
     
                 if (action?.type === ActionType.MoveVertex && action.shapeIndex === props.shapeIndex) {
-                    console.log(`Action.point: ${action.point.x}, ${action.point.y}`)
                     vertices = vertices.map((vertex, i) => 
                         i === action.vertexIndex ? action.point : vertex
                     )
@@ -132,7 +131,7 @@ export function Shape(props: { shapeIndex: number }) {
     return (
         <>
             <mesh ref={meshRef} geometry={geometryRef.current}>
-                <meshBasicMaterial color={"#DC5249"} />
+                <meshBasicMaterial color={shapeColor} />
             </mesh>
             
             {

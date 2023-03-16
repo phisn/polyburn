@@ -2,9 +2,10 @@ export {}
 
 import { shallow } from "zustand/shallow"
 
+import Navbar from "../common/Navbar"
+import { initialConfigureState } from "./configure/state/ConfigureModeState"
 import { Mode } from "./editor-store/ModeStateBase"
 import { useEditorStore } from "./editor-store/useEditorStore"
-import Navbar from "./Navbar"
 import { initialPlacementState } from "./placement/state/PlacementModeState"
 
 const MenuSvg = () => (
@@ -62,9 +63,9 @@ function EditorNavbar() {
 
             <div className="btn-group">
                 <button 
-                    className={`btn ${(mode !== Mode.Placement ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => null}>
-                    Selection
+                    className={`btn ${(mode === Mode.Configure ? "btn-active btn-disabled" : "")}` }
+                    onClick={() => setModeState(initialConfigureState)}>
+                    Configure
                 </button>
                 <button
                     className={`btn ${(mode === Mode.Placement ? "btn-active btn-disabled" : "")}` }
@@ -72,7 +73,7 @@ function EditorNavbar() {
                     Placement
                 </button>
                 <button
-                    className={`btn ${(mode !== Mode.Placement ? "btn-active btn-disabled" : "")}` }
+                    className={`btn ${(false! ? "btn-active btn-disabled" : "")}` }
                     onClick={() => null}>
                     Movement
                 </button>

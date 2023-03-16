@@ -36,7 +36,7 @@ export interface PlaceEntityInFutureAction {
     entityType: EntityType
 }
 
-export type Action = MoveVertexAction 
+export type PlacementAction = MoveVertexAction 
     | InsertVertexAction 
     | PlaceEntityAction 
     | PlaceEntityInFutureAction

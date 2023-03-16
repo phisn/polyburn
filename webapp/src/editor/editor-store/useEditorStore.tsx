@@ -65,7 +65,10 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
             }
         })
     },
-    setModeState(modeState: Partial<ModeState>) {
+    getModeStateAs<T extends ModeState>(): T {
+        return get().modeState as T
+    },
+    setModeState<T extends ModeState>(modeState: Partial<T>) {
         set(state => ({
             ...state,
             modeState: {

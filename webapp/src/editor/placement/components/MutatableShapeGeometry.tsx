@@ -1,6 +1,6 @@
 import { BufferGeometry, Float32BufferAttribute, ShapeUtils } from "three"
 
-import { Point } from "../../model/world/Point"
+import { Point } from "../../../model/world/Point"
 
 export class MutatableShapeGeometry extends BufferGeometry {
     update(vertices: Point[]) {

@@ -2,9 +2,10 @@ import { useFrame } from "@react-three/fiber"
 import { useRef } from "react"
 import { Mesh, MeshBasicMaterial } from "three"
 
-import { useEditorStore } from "../editor-store/useEditorStore"
-import { HintType, PlacementHint } from "../placement/state/Hint"
-import { baseZoomFactor, highlightColor, highlightDeleteColor, highlightVertexColor, mousePointerhintLayer } from "../Values"
+import { baseZoomFactor, highlightColor, highlightDeleteColor, highlightVertexColor, mousePointerhintLayer } from "../../../common/Values"
+import { useEditorStore } from "../../editor-store/useEditorStore"
+import { HintType, PlacementHint } from "../state/Hint"
+import { PlacementState } from "../state/PlacementModeState"
 
 function GetVisualHintParams(hint: PlacementHint) {
     switch (hint.type) {
@@ -30,7 +31,7 @@ export function MousePointerHint() {
     const meshRef = useRef<Mesh>(null!)
 
     useFrame(() => {
-        const hint = useEditorStore.getState().modeState.hint
+        const hint = useEditorStore.getState().getModeStateAs<PlacementState>().hint
         
         const params = hint && GetVisualHintParams(hint)
 

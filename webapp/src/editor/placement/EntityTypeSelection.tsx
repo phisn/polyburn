@@ -46,7 +46,7 @@ function EntityTypeSelection(props: EntityTypeSelectionProps) {
             props.onSelect(type)
         }
 
-    }, [ props.onSelect, props.selected ])
+    }, [ props ])
 
     return (
         <div className="btn-group btn-group-vertical">

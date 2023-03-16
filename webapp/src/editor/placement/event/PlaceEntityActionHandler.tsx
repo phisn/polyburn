@@ -1,3 +1,4 @@
+import { snapDistance } from "../../../common/Values"
 import { entities } from "../../../model/world/Entities"
 import { Point } from "../../../model/world/Point"
 import { findClosestEdge } from "../../../model/world/Shape"
@@ -6,9 +7,8 @@ import { changeAnchor } from "../../../utility/math"
 import { EditorStore } from "../../editor-store/EditorStore"
 import { insertEntity } from "../../editor-store/MutationsForWorld"
 import { useEditorStore } from "../../editor-store/useEditorStore"
-import { snapDistance } from "../../Values"
+import { PointerHandlerParams } from "../../event/EventDefinitions"
 import { PlaceEntityAction } from "../state/Action"
-import { PointerHandlerParams } from "./Definitions"
 
 export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntityAction>) {
     const state = useEditorStore.getState()

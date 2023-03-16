@@ -7,6 +7,7 @@ import { baseZoom } from "../editor/Values"
 import { World } from "../model/world/World"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
+import { GameLoopContextProvider } from "./GameLoopContext"
 import { createSimulation, Simulation } from "./simulation/createSimulation"
 import { useControlsRef } from "./useControlsRef"
 import { useGameLoop } from "./useGameLoop"
@@ -39,7 +40,7 @@ function InnerGame(props: GameProps) {
 
     const controls = useControlsRef()
 
-    useGameLoop(() => {
+    const gameLoopContext = useGameLoop(() => {
         simulationRef.current.step({
             thrust: controls.current.thrust,
             rotation: controls.current.rotation,
@@ -48,7 +49,7 @@ function InnerGame(props: GameProps) {
     })
 
     return (
-        <>
+        <GameLoopContextProvider value={gameLoopContext.current}>
             <OrthographicCamera
                 makeDefault
                 position={[0, 0, 10]}
@@ -69,7 +70,7 @@ function InnerGame(props: GameProps) {
             }
 
             {/* <Stats /> */}
-        </>
+        </GameLoopContextProvider>
     )
 }
 

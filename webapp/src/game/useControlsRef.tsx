@@ -23,22 +23,14 @@ export function useControlsRef() {
                 if (wasPointerDown) {
                     controlsRef.current.rotation =
                         startRotation - (event.clientX - startPointerX) * 0.005
-
-                    console.log(`cx: ${event.clientX}, sx: ${startPointerX}, r: ${controlsRef.current.rotation}`)
                 }
                 else {
-                    console.log("pointer down")
-
                     startPointerX = event.clientX
                     wasPointerDown = true
                     startRotation = controlsRef.current.rotation
                 }
             }
             else {
-                if (wasPointerDown) {
-                    console.log("pointer up")
-                }
-
                 wasPointerDown = false
             }
         }
@@ -59,11 +51,11 @@ export function useControlsRef() {
             }
         }
 
-        
+        /*
         setTimeout(() => {
             controlsRef.current.thrust = true
         }, 2000)
-        
+        */
 
         window.addEventListener("pointerdown", onPointerEvent)
         window.addEventListener("pointerup", onPointerEvent)

@@ -55,7 +55,6 @@ export function createSimulation(world: World): Simulation {
             rayTarget.y - rayStart.y
         )
 
-        const length = Math.sqrt(rayDir.x * rayDir.x + rayDir.y * rayDir.y)
         const ray = new RAPIER.Ray(rayStart, rayDir)
 
         const cast = rapier.castRay(

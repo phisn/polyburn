@@ -23,15 +23,17 @@ function SideBar() {
         }
     }
 
+    const selected = action?.type === ActionType.PlaceEntityInFuture
+        ? action.entityType
+        : action?.type === ActionType.PlaceEntity
+            ? action.entity.type
+            : undefined
+
     return (
         <div className="absolute top-0 right-0 p-4">
             <div className="flex p-4 flex-col items-center bg-base-100 rounded-lg h-full self-end">
                 <EntityTypeSelection
-                    selected={
-                        action?.type === ActionType.PlaceEntityInFuture
-                            ? action.entityType
-                            : undefined
-                    }
+                    selected={selected}
                     onSelect={onSelectObject}
                 />
 

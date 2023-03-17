@@ -6,9 +6,11 @@ import { Mutation } from "./Mutation"
 export const useEditorStore = create<EditorStore>((set, get) => ({
     ...initialState,
     run() {
+        console.log("run")
         set(state => ({ ...state, running: true }))
     },
     stop() {
+        console.log("stop")
         set(state => ({ ...state, running: false }))
     },
     mutate(mutation: Mutation | RecursiveMutationWithCapture) {

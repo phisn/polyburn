@@ -113,7 +113,8 @@ const StopFillSvg = () => (
 
 function Editor() {
     const running = useEditorStore(state => state.running)
-    const stop = useEditorStore(state => state.stop)
+    
+    console.log("running: ", running)
 
     if (running) {
         return (
@@ -122,7 +123,7 @@ function Editor() {
                 <div className="absolute top-0 left-0 p-4">
                     <Navbar>
                         <button className="btn btn-square btn-ghost"
-                            onClick={stop} >
+                            onClick={useEditorStore.getState().stop} >
                                 
                             <StopFillSvg />
                         </button>

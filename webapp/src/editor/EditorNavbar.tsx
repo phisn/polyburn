@@ -44,7 +44,9 @@ function EditorNavbar() {
 
     return (
         <Navbar>
-            <button className="btn btn-square btn-ghost">
+            <button 
+                onClick={run}
+                className="btn btn-square btn-ghost">
                 <MenuSvg />
             </button>
             
@@ -75,9 +77,7 @@ function EditorNavbar() {
             </div>
 
             <button className="btn btn-square btn-ghost"
-                onClick={() => {
-                    run()
-                }}>
+                onClick={run}>
                 <PlaySvg />
             </button>
 

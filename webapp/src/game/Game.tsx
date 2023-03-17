@@ -11,6 +11,7 @@ import { GameLoopContextProvider } from "./GameLoopContext"
 import { createSimulation, Simulation } from "./simulation/createSimulation"
 import { useControlsRef } from "./useControlsRef"
 import { useGameLoop } from "./useGameLoop"
+import { useLandscape } from "./useLandscape"
 
 export interface GameProps {
     world: World
@@ -20,9 +21,11 @@ export interface GameProps {
 const rapierInit = RAPIER.init()
 
 function Game(props: GameProps) {
+    console.trace("Game")
+
     return (
         <div className="h-screen w-screen">
-            <Canvas style={{ background: "#000000" }} >
+            <Canvas style={{ background: "#000000", touchAction: "none" }} >
                 <Suspense>
                     <InnerGame {...props} />
                 </Suspense>
@@ -38,6 +41,8 @@ function InnerGame(props: GameProps) {
     const simulationRef = useRef<Simulation>(
         createSimulation(props.world)
     )
+
+    useLandscape()
 
     const controls = useControlsRef()
 

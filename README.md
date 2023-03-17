@@ -1,5 +1,8 @@
 # Rocket Game
-A rocket game for web. Including an editor, replays, leaderboards and more. Currently in development and not feature complete.
+A rocket game for web. Including an editor, replays, leaderboards and more. Currently in development.
 
 # Tech
-Written with Typescript, React, PixiJS and Rapier. Using serverless AWS Lambda with Rust.
+- Typescript react
+- three.js with react-three-fiber and drei
+- rapier.rs for deterministic physics
+- serverless rust on AWS

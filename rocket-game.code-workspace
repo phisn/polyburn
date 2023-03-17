@@ -15,5 +15,11 @@
         },
         "typescript.tsdk": "webapp\\node_modules\\typescript\\lib",
         "svg.preview.background": "black"
+    },
+    "extensions": {
+        "recommendations": [
+            "dbaeumer.vscode-eslint",
+            "usernamehw.errorlens",
+        ]
     }
 }

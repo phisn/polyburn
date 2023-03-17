@@ -1,30 +1,108 @@
-import { Stage, Graphics } from "@inlet/react-pixi"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import useEditorStore, { EditingModeType, EditorModeType, EditorStore } from "./EditorStore"
-import useSelectionMode from "./editing-mode/placement-mode/PlacementMode"
-import { World, Vertex, Shape } from "./World"
-import WorldGraphics from "./WorldCanvas"
-import PIXI from "pixi.js"
-import EditorNavbar from "./EditorNavbar"
-import SelectionMode from "./editing-mode/placement-mode/PlacementMode"
-import EditingMode from "./editing-mode/EditingMode"
-import { shallow } from 'zustand/shallow'
-import Game from "../game/Game"
-import Navbar from "./Navbar"
+import { OrthographicCamera } from "@react-three/drei"
+import { Canvas, useThree } from "@react-three/fiber"
+import { useEffect, useRef } from "react"
+import * as THREE from "three"
+import { Camera } from "three"
+import tunnel from "tunnel-rat"
 
-function Editor() {
-    const mode = useEditorStore(state => state.mode, shallow)
+import Navbar from "../common/Navbar"
+import { baseZoom, baseZoomFactor } from "../common/Values"
+import Game from "../game/Game"
+import { Point } from "../model/world/Point"
+import { ConfigureMode } from "./configure/ConfigureMode"
+import { Mode } from "./editor-store/ModeStateBase"
+import { useEditorStore } from "./editor-store/useEditorStore"
+import EditorNavbar from "./EditorNavbar"
+import PlacementMode from "./placement/PlacementMode"
+
+export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) => {
+    if (!camera || !canvas) {
+        return () => ({ x: 0, y: 0 })
+    }
+
+    return (x: number, y: number) => {
+        const vector = new THREE.Vector3(
+            (x / canvas.clientWidth) * 2 - 1,
+            -(y / canvas.clientHeight) * 2 + 1,
+            0.5
+        )
+    
+        vector.unproject(camera)
+    
+        return {
+            x: vector.x,
+            y: vector.y
+        }
+    }
+}
+
+function EditorMode() {
+    const mode = useEditorStore(state => state.modeState.mode)
 
     switch (mode) {
-        case EditorModeType.Playing:
-            return <PlayingComponent />
+    case Mode.Placement:
+        return <PlacementMode />
 
-        case EditorModeType.Editing:
-            return <EditingComponent />
+    case Mode.Configure:
+        return <ConfigureMode />
 
-        default:
-            return <></>
     }
+
+    return <></>
+}
+
+// singleton tunnel
+export const editorModeTunnel = tunnel()
+
+function EditorControls() {
+    const canvas = useThree(state => state.gl.domElement)
+    const camera = useThree(state => state.camera)
+
+    interface FirstPosition {
+        mouse: Point
+        camera: Point
+    }
+
+    const firstPosition = useRef<FirstPosition | null>(null)
+
+    useEffect(() => {
+        const onPointerEvent = (event: PointerEvent) => {
+            const point = { x: event.clientX, y: -event.clientY }
+
+            if (event.buttons & 4) {
+                if (firstPosition.current === null) {
+                    firstPosition.current = {
+                        mouse: point,
+                        camera: { x: camera.position.x, y: camera.position.y }
+                    }
+                }
+                else if (event.type === "pointermove") {
+                    camera.position.set(
+                        firstPosition.current.camera.x + (firstPosition.current.mouse.x - point.x) * baseZoomFactor,
+                        firstPosition.current.camera.y + (firstPosition.current.mouse.y - point.y) * baseZoomFactor,
+                        10
+                    )
+                }
+            }
+            else {
+                if (firstPosition.current) {
+                    firstPosition.current = null
+                }
+            }
+        }
+
+        canvas.addEventListener("pointerdown", onPointerEvent)
+        canvas.addEventListener("pointermove", onPointerEvent)
+        canvas.addEventListener("pointerup", onPointerEvent)
+
+        return () => {
+            canvas.removeEventListener("pointerdown", onPointerEvent)
+            canvas.removeEventListener("pointermove", onPointerEvent)
+            canvas.removeEventListener("pointerup", onPointerEvent)
+        }
+    })
+
+    return <></>
 }
 
 const StopFillSvg = () => (
@@ -33,62 +111,54 @@ const StopFillSvg = () => (
     </svg>
 )
 
-function PlayingComponent() {
-    const state = useEditorStore(state => ({ 
-        setMode: state.setMode
-    }))
+function Editor() {
+    const running = useEditorStore(state => state.running)
+    const stop = useEditorStore(state => state.stop)
 
-    return (
-        <>
-            <Game />
-            <div className="absolute top-0 right-0 p-4">
-                {/*notification*/}
-                Previewing Map
-            </div>
-            <div className="absolute top-0 left-0 p-4">
-                <Navbar>
-                    <button className="btn btn-square btn-ghost"
-                            onClick={() => {
-                                state.setMode(EditorModeType.Editing)
-                            }}>
-                        <StopFillSvg />
-                    </button>
-                </Navbar>
-            </div>
-        </>
-    )
+    if (running) {
+        return (
+            <>
+                <Game world={useEditorStore.getState().world} />
+                <div className="absolute top-0 left-0 p-4">
+                    <Navbar>
+                        <button className="btn btn-square btn-ghost"
+                            onClick={stop} >
+                                
+                            <StopFillSvg />
+                        </button>
+                    </Navbar>
+                </div>
+            </>
+        )
+    }
+    else {
+        return (
+            <EditorInner />
+        )
+    }
 }
 
-function EditingComponent() {
-    const [app, setApp] = useState<PIXI.Application>()
-
-    useEffect(() => {
-        if (app) {
-            app.stage.interactive = true
-        }
-    }, [ app ])
-
+function EditorInner() {
     return (
-        <div className="overflow-hidden">
-            {/* Prevent transition artifacts between editor and game with static black backround */}
-            <div className="fixed top-0 left-0 right-0 bottom-0 bg-black -z-10" />
-            
+        <div className="h-screen w-screen">
+            <Canvas style={{ background: "#000000" }} >
+                <EditorControls />
+                <EditorMode />
+                
+                <OrthographicCamera
+                    makeDefault
+                    position={[0, 0, 10]}
+                    rotation={[0, 0, 0]}
+                    far={10000}
+                    zoom={baseZoom}
+                />
+
+                {/* <Stats /> */}
+            </Canvas>
             <div className="absolute top-0 left-0 p-4">
                 <EditorNavbar />
             </div>
-
-            <div className="absolute top-0 right-0 p-4">
-                <EditingMode app={app} />
-            </div>
-
-            <Stage 
-                onMount={setApp}
-                width={window.innerWidth}
-                height={window.innerHeight} 
-                options={ { resizeTo: window, antialias: true } } >
-
-                <WorldGraphics />
-            </Stage>
+            <editorModeTunnel.Out />
         </div>
     )
 }

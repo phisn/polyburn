@@ -1,8 +1,12 @@
-import useEditorStore, { EditingModeType, EditorModeType } from "./EditorStore"
-import { shallow } from 'zustand/shallow'
-import Navbar from "./Navbar"
-import useGameStore from "../game/GameStore"
-import useGlobalStore from "../global/GlobalStore"
+export {}
+
+import { shallow } from "zustand/shallow"
+
+import Navbar from "../common/Navbar"
+import { initialConfigureState } from "./configure/state/ConfigureModeState"
+import { Mode } from "./editor-store/ModeStateBase"
+import { useEditorStore } from "./editor-store/useEditorStore"
+import { initialPlacementState } from "./placement/state/PlacementModeState"
 
 const MenuSvg = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -29,18 +33,14 @@ const PlaySvg = () => (
 )
 
 function EditorNavbar() {
-    const state = useEditorStore((state) => ({
-        world: state.world,
-        undos: state.undos,
-        redos: state.redos, 
-        undo: state.undo, 
-        redo: state.redo, 
-        mode: state.editingMode, 
-        setMode: state.setMode,
-        setEditingMode: state.setEditingMode
-    }), shallow)
+    const mode = useEditorStore(state => state.modeState.mode)
+    const hasUndos = useEditorStore(state => state.undos.length > 0, shallow)
+    const hasRedos = useEditorStore(state => state.redos.length > 0, shallow)
 
-    const newAlert = useGlobalStore(state => state.newAlert)
+    const run = useEditorStore(state => state.run)
+    const undo = useEditorStore(state => state.undo)
+    const redo = useEditorStore(state => state.redo)
+    const setModeState = useEditorStore(state => state.setModeState)
 
     return (
         <Navbar>
@@ -50,48 +50,34 @@ function EditorNavbar() {
             
             <div className="btn-group">
                 <button
-                    onClick={() => state.undo()} 
-                    className={`btn btn-square btn-ghost ${(state.undos.length > 0 ? "" : "btn-disabled")}`}>
+                    onClick={undo} 
+                    className={`btn btn-square btn-ghost ${(hasUndos ? "" : "btn-disabled")}`}>
                     <UndoSvg />
                 </button>
                 <button 
-                    onClick={e => state.redo()}
-                    className={`btn btn-square btn-ghost ${(state.redos.length > 0 ? "" : "btn-disabled")}`}>
+                    onClick={redo}
+                    className={`btn btn-square btn-ghost ${(hasRedos ? "" : "btn-disabled")}`}>
                     <RedoSvg />
                 </button>
             </div>
 
             <div className="btn-group">
                 <button 
-                    className={`btn ${(state.mode === EditingModeType.Selection ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => state.setEditingMode(EditingModeType.Selection)}>
-                    Selection
+                    className={`btn ${(mode === Mode.Configure ? "btn-active btn-disabled" : "")}` }
+                    onClick={() => setModeState(initialConfigureState)}>
+                    Configure
                 </button>
                 <button
-                    className={`btn ${(state.mode === EditingModeType.Placement ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => state.setEditingMode(EditingModeType.Placement)}>
+                    className={`btn ${(mode === Mode.Placement ? "btn-active btn-disabled" : "")}` }
+                    onClick={() => setModeState(initialPlacementState)}>
                     Placement
-                </button>
-                <button
-                    className={`btn ${(state.mode === EditingModeType.Movement ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => state.setEditingMode(EditingModeType.Movement)}>
-                    Movement
                 </button>
             </div>
 
             <button className="btn btn-square btn-ghost"
-                    onClick={() => {
-                        try {
-                            useGameStore.getState().prepare(state.world)
-                            state.setMode(EditorModeType.Playing)
-                        }
-                        catch (e) {
-                            if (e instanceof Error) {
-                                newAlert({ message: e.message, type: "error" })
-                                console.error(e)
-                            }
-                        }
-                    }}>
+                onClick={() => {
+                    run()
+                }}>
                 <PlaySvg />
             </button>
 

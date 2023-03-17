@@ -72,11 +72,6 @@ function EditorNavbar() {
                     onClick={() => setModeState(initialPlacementState)}>
                     Placement
                 </button>
-                <button
-                    className={`btn ${(false! ? "btn-active btn-disabled" : "")}` }
-                    onClick={() => null}>
-                    Movement
-                </button>
             </div>
 
             <button className="btn btn-square btn-ghost"

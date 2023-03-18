@@ -60,7 +60,8 @@ function InnerGame(props: GameProps) {
                 makeDefault
                 position={[0, 0, 10]}
                 rotation={[0, 0, 0]}
-                zoom={baseZoom}
+                
+                zoom={baseZoom / 2}
             />
 
             {

@@ -64,7 +64,7 @@ export function useControlsRef() {
 
                 switch (event.type) {
                 case "pointerdown":
-                    if (event.clientX < window.innerWidth / 2) {
+                    if (event.clientX > window.innerWidth / 2) {
                         state.thrustPointer = {
                             pointerId: event.pointerId,
                         }

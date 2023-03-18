@@ -1,3 +1,4 @@
+import { EntityType } from "../../model/world/Entity"
 import { World } from "../../model/world/World"
 import { ConfigureState } from "../configure/state/ConfigureModeState"
 import { initialPlacementState, PlacementState as PlacementModeState } from "../placement/state/PlacementModeState"
@@ -49,8 +50,22 @@ export const initialState: EditorState = {
         zoom: 1
     },
     world: {
-        entities: [],
-        shapes: []
+        entities: [
+            {
+                position: { x: -1, y: 6 },
+                rotation: 0,
+                type: EntityType.Rocket
+            }
+        ],
+        shapes: [
+            {
+                vertices: [
+                    { x: -2, y: 2 },
+                    { x: 2, y: 2 },
+                    { x: 0, y: -2 },
+                ]
+            }
+        ]
     },
 
     undos: [],

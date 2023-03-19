@@ -50,13 +50,6 @@ export const initialState: EditorState = {
         zoom: 1
     },
     world: {
-        entities: [
-            {
-                position: { x: -1, y: 6 },
-                rotation: 0,
-                type: EntityType.Rocket
-            }
-        ],
         shapes: [
             {
                 vertices: [
@@ -65,7 +58,18 @@ export const initialState: EditorState = {
                     { x: 0, y: -2 },
                 ]
             }
-        ]
+        ],
+        rockets: [
+        ],
+        levels: [
+        ],
+        entities: [
+            {
+                position: { x: -1, y: 6 },
+                rotation: 0,
+                type: EntityType.Rocket
+            }
+        ],
     },
 
     undos: [],

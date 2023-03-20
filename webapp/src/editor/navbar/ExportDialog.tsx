@@ -1,23 +1,21 @@
 import { Dialog } from "@headlessui/react"
+import LZString from "lz-string"
 import { useMemo } from "react"
 
 import useGlobalStore from "../../common/GlobalStore"
 import { useEditorStore } from "../editor-store/useEditorStore"
-import { DialogType } from "./DialogType"
 
-function ExportDialog() {
-    const currentDialog = useEditorStore(state => state.dialogQueue.at(0))
-    const closeDialog = useEditorStore(state => state.closeDialog)
-
-    const isOpen = currentDialog === DialogType.Export
+function ExportDialog(props: { isOpen: boolean, closeDialog: () => void }) {
 
     const base64 = useMemo(() => {
-        if (isOpen === false) {
+        if (props.isOpen === false) {
             return
         }
 
-        return btoa(JSON.stringify(useEditorStore.getState().world))
-    }, [isOpen])
+        const toExport = "rw|" + JSON.stringify(useEditorStore.getState().world)
+        
+        return LZString.compressToBase64(toExport)
+    }, [props.isOpen])
 
     const onCopy = () => {
         if (base64) {
@@ -28,14 +26,14 @@ function ExportDialog() {
                 message: "Copied to clipboard"
             })
 
-            closeDialog()
+            props.closeDialog()
         }
     }
 
     return (
         <Dialog
-            open={isOpen} 
-            onClose={() => closeDialog()}
+            open={props.isOpen} 
+            onClose={() => props.closeDialog()}
             as="div"
             className="relative z-10">
 
@@ -48,15 +46,14 @@ function ExportDialog() {
                             Export world as base64
                         </Dialog.Title>
 
-                        <textarea readOnly spellCheck="false" rows={4} className="textarea textarea-bordered w-full h-auto resize-none scrollbar-none">
-                            {base64}
+                        <textarea readOnly value={base64} spellCheck="false" rows={4} className="textarea textarea-bordered w-full h-auto resize-none scrollbar-none">
                         </textarea>
 
                         <div className="space-x-4">
                             <button className="btn" onClick={onCopy}>
                                 Copy
                             </button>
-                            <button className="btn btn-ghost" onClick={closeDialog}>
+                            <button className="btn btn-ghost" onClick={props.closeDialog}>
                                 Cancel
                             </button>
                         </div>

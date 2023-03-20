@@ -1,16 +1,13 @@
 import { Dialog } from "@headlessui/react"
+import LZUtils from "lz-string"
 import { useRef } from "react"
 
 import useGlobalStore from "../../common/GlobalStore"
 import { replaceWorld } from "../editor-store/MutationsForWorld"
 import { useEditorStore } from "../editor-store/useEditorStore"
-import { DialogType } from "./DialogType"
 
-function ImportModal() {
-    const currentDialog = useEditorStore(state => state.dialogQueue.at(0))
+function ImportDialog(props: { isOpen: boolean, closeDialog: () => void }) {
     const mutate = useEditorStore(state => state.mutate)
-    const closeDialog = useEditorStore(state => state.closeDialog)
-
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
     const onImport = () => {
@@ -18,8 +15,17 @@ function ImportModal() {
             return
 
         try {
-            const worldJson = atob(textareaRef.current.value)
-            const world = JSON.parse(worldJson)
+            const worldJson = LZUtils.decompressFromBase64(textareaRef.current.value)
+
+            if (!worldJson) {
+                throw new Error("Emtpy world code")
+            }
+
+            if (worldJson.startsWith("rw|") === false) {
+                throw new Error("Invalid world signature")
+            }
+
+            const world = JSON.parse(worldJson.substring(3))
 
             mutate(replaceWorld(world))
 
@@ -27,7 +33,7 @@ function ImportModal() {
                 world: world
             })
 
-            closeDialog()
+            props.closeDialog()
         }
         catch (e) {
             useGlobalStore.getState().newAlert({
@@ -41,8 +47,8 @@ function ImportModal() {
 
     return (
         <Dialog
-            open={currentDialog === DialogType.Import} 
-            onClose={() => closeDialog()}
+            open={props.isOpen} 
+            onClose={() => props.closeDialog()}
             as="div"
             className="relative z-10">
 
@@ -62,7 +68,7 @@ function ImportModal() {
                             <button className="btn" onClick={onImport}>
                                 Import
                             </button>
-                            <button className="btn btn-ghost" onClick={() => closeDialog()}>
+                            <button className="btn btn-ghost" onClick={props.closeDialog}>
                                 Cancel
                             </button>
                         </div>
@@ -73,4 +79,4 @@ function ImportModal() {
     )
 }
 
-export default ImportModal
+export default ImportDialog

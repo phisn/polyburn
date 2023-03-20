@@ -10,10 +10,9 @@ import { baseZoom, baseZoomFactor } from "../common/Values"
 import Game from "../game/Game"
 import { Point } from "../model/world/Point"
 import { ConfigureMode } from "./configure/ConfigureMode"
-import DialogDispatcher from "./dialogs/DialogDispatcher"
 import { Mode } from "./editor-store/ModeStateBase"
 import { useEditorStore } from "./editor-store/useEditorStore"
-import EditorNavbar from "./EditorNavbar"
+import EditorNavbar from "./navbar/EditorNavbar"
 import PlacementMode from "./placement/PlacementMode"
 
 export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) => {
@@ -161,8 +160,6 @@ function EditorInner() {
                 <EditorNavbar />
             </div>
             <editorModeTunnel.Out />
-
-            <DialogDispatcher />
         </div>
     )
 }

@@ -14,7 +14,7 @@ const useGlobalStore = create<GlobalStore>((set) => ({
             set(state => ({
                 alerts: state.alerts.filter(a => a !== alert)
             }))
-        }, 2000)
+        }, 3000)
 
         set(state => ({
             alerts: [...state.alerts, alert]

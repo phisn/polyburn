@@ -33,6 +33,11 @@ function ImportDialog(props: { open: boolean, closeDialog: () => void }) {
                 world: world
             })
 
+            useGlobalStore.getState().newAlert({
+                type: "success",
+                message: "Successfully imported world"
+            })
+
             props.closeDialog()
         }
         catch (e) {

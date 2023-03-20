@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@dimforge/rapier2d-compat": "^0.11.1",
+    "@headlessui/react": "^1.7.13",
     "@pixi/filter-outline": "^4.2.0",
     "@pixi/interaction": "^6.5.8",
     "@react-three/drei": "^9.56.28",
@@ -28,6 +29,7 @@
     "react-router-dom": "^6.7.0",
     "sort-by": "^1.2.0",
     "suspend-react": "^0.0.9",
+    "tailwind-scrollbar": "^3.0.0",
     "three": "^0.150.1",
     "tunnel-rat": "^0.1.1",
     "zustand": "^4.3.2"

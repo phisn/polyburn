@@ -9,7 +9,7 @@ function App() {
     return (
         <main>
             <Outlet />
-            <div className="toast">
+            <div className="toast z-50">
                 {
                     alerts.map((alertProps, i) => ( 
                         <Alert key={i} {...alertProps} /> 

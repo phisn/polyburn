@@ -2,7 +2,8 @@
 import { Entity } from "../../model/world/Entity"
 import { Point } from "../../model/world/Point"
 import { Shape } from "../../model/world/Shape"
-import { capture, composeShapeAt, newMutationWithCompose } from "./Mutation"
+import { World } from "../../model/world/World"
+import { capture, composeShapeAt, newMutation, newMutationWithCompose } from "./Mutation"
 
 export const insertShape = (shape: Shape) => newMutationWithCompose(
     world => world.shapes.slice(0, world.shapes.length - 1),
@@ -89,5 +90,13 @@ export const removeEntity = (entityIndex: number) => capture(
         world => [...world.entities, entity],
         world => world.entities.filter((_, i) => i !== entityIndex),
         entities => ({ entities }),
+    )
+)
+
+export const replaceWorld = (world: World) => capture(
+    world => world,
+    captured => newMutation(
+        () => captured,
+        () => world,
     )
 )

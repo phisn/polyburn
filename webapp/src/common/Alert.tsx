@@ -27,6 +27,9 @@ function Alert(props: AlertProps) {
     to the right. After the animation is done, remove the alert from the
     DOM.
     */
+
+    console.log(alertClassName(props.type))
+
     return (
         <div className={`alert ${alertClassName(props.type)}`}>
             <AlertSvg type={props.type} />
@@ -51,7 +54,16 @@ function AlertSvg(props: { type: AlertType }) {
 }
 
 function alertClassName(type: AlertType) {
-    return `alert-${type}`
+    switch (type) {
+    case "success":
+        return "alert-success"
+    case "error":
+        return "alert-error"
+    case "info":
+        return "alert-info"
+    case "warning":
+        return "alert-warning"
+    }
 }
 
 export default Alert

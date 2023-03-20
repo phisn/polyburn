@@ -1,8 +1,8 @@
-import LZString from "lz-string"
 import { useMemo } from "react"
 
 import Dialog from "../../common/components/Dialog"
 import useGlobalStore from "../../common/GlobalStore"
+import { exportWorld } from "../../model/world/World"
 import { useEditorStore } from "../editor-store/useEditorStore"
 
 function ExportDialog(props: { open: boolean, closeDialog: () => void }) {
@@ -12,9 +12,7 @@ function ExportDialog(props: { open: boolean, closeDialog: () => void }) {
             return
         }
 
-        const toExport = "rw|" + JSON.stringify(useEditorStore.getState().world)
-
-        return LZString.compressToBase64(toExport)
+        return exportWorld(useEditorStore.getState().world) 
     }, [props.open])
 
     const onCopy = () => {

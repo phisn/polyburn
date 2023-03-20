@@ -1,16 +1,20 @@
 import { OrthographicCamera } from "@react-three/drei"
 import { Canvas, useThree } from "@react-three/fiber"
 import { useEffect, useRef } from "react"
+import { BrowserView, MobileView } from "react-device-detect"
 import * as THREE from "three"
 import { Camera } from "three"
 import tunnel from "tunnel-rat"
 
 import Navbar from "../common/components/Navbar"
+import useGlobalStore from "../common/GlobalStore"
 import { baseZoom, baseZoomFactor } from "../common/Values"
 import Game from "../game/Game"
 import { Point } from "../model/world/Point"
+import { importWorld } from "../model/world/World"
 import { ConfigureMode } from "./configure/ConfigureMode"
 import { Mode } from "./editor-store/ModeStateBase"
+import { replaceWorld } from "./editor-store/MutationsForWorld"
 import { useEditorStore } from "./editor-store/useEditorStore"
 import EditorNavbar from "./navbar/EditorNavbar"
 import PlacementMode from "./placement/PlacementMode"
@@ -134,7 +138,14 @@ function Editor() {
     }
     else {
         return (
-            <EditorInner />
+            <>
+                <BrowserView>
+                    <EditorInner />
+                </BrowserView>
+                <MobileView>
+                    <EditorInnerMobile />
+                </MobileView>
+            </>
         )
     }
 }
@@ -160,6 +171,59 @@ function EditorInner() {
                 <EditorNavbar />
             </div>
             <editorModeTunnel.Out />
+        </div>
+    )
+}
+
+function EditorInnerMobile() {
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const mutate = useEditorStore(state => state.mutate)
+    const run = useEditorStore(state => state.run)
+
+    const onImport = () => {
+        if (!textareaRef.current) 
+            return
+
+        try {
+            const world = importWorld(textareaRef.current.value.trim())
+
+            mutate(replaceWorld(world))
+
+            useEditorStore.setState({
+                world: world
+            })
+
+            run()
+        }
+        catch (e) {
+            useGlobalStore.getState().newAlert({
+                type: "error",
+                message: "Failed to import world"
+            })
+
+            console.error(e)
+        }
+    }
+
+    return (
+        <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+                <div className="w-full max-w-lg bg-base-300 p-6 rounded-xl space-y-4">
+                    <div className="text-white text-xl text-center">
+                        Play world from base64
+                    </div>
+
+                    <textarea ref={textareaRef} spellCheck="false" placeholder="base64 world code" className="textarea textarea-bordered w-full h-32 resize-none scrollbar-none" />
+
+                    <div className="space-x-4">
+                        <button 
+                            className="btn btn-primary btn-block"
+                            onClick={onImport}>
+                            Play
+                        </button>
+                    </div>
+                </div>
+            </div> 
         </div>
     )
 }

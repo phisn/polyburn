@@ -1,5 +1,3 @@
-import { Transition } from "@headlessui/react"
-import { Fragment } from "react"
 
 type AlertType = "warning" | "error" | "info" | "success"
 
@@ -34,6 +32,7 @@ function Alert(props: AlertProps) {
     return (
         <div className="relative">
             <div className={`alert ${alertClassName(props.type)} bg-clip-border`}>
+                {/*
                 <Transition
                     appear={true} show={true}
                     as={Fragment}
@@ -43,6 +42,7 @@ function Alert(props: AlertProps) {
                 
                     <div className="absolute right-0 h-full bg-black opacity-10" />
                 </Transition>
+                */}
 
                 <AlertSvg type={props.type} />
             

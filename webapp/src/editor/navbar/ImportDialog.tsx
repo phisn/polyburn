@@ -1,8 +1,8 @@
-import LZUtils from "lz-string"
 import { useRef } from "react"
 
 import Dialog from "../../common/components/Dialog"
 import useGlobalStore from "../../common/GlobalStore"
+import { importWorld } from "../../model/world/World"
 import { replaceWorld } from "../editor-store/MutationsForWorld"
 import { useEditorStore } from "../editor-store/useEditorStore"
 
@@ -15,17 +15,7 @@ function ImportDialog(props: { open: boolean, closeDialog: () => void }) {
             return
 
         try {
-            const worldJson = LZUtils.decompressFromBase64(textareaRef.current.value)
-
-            if (!worldJson) {
-                throw new Error("Emtpy world code")
-            }
-
-            if (worldJson.startsWith("rw|") === false) {
-                throw new Error("Invalid world signature")
-            }
-
-            const world = JSON.parse(worldJson.substring(3))
+            const world = importWorld(textareaRef.current.value)
 
             mutate(replaceWorld(world))
 

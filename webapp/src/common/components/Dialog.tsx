@@ -38,7 +38,7 @@ function Dialog(props: DialogProps) {
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <NativeDialog.Panel className="w-full max-w-lg bg-base-100 p-6 rounded-xl space-y-4">
+                            <NativeDialog.Panel className="w-full max-w-lg bg-base-200 p-6 rounded-xl space-y-4">
                                 { props.children }
                             </NativeDialog.Panel>
                         </Transition.Child>

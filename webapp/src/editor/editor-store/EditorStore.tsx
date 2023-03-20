@@ -1,6 +1,7 @@
 import { EntityType } from "../../model/world/Entity"
 import { World } from "../../model/world/World"
 import { ConfigureState } from "../configure/state/ConfigureModeState"
+import { DialogType } from "../dialogs/DialogType"
 import { initialPlacementState, PlacementState as PlacementModeState } from "../placement/state/PlacementModeState"
 import { Mutation } from "./Mutation"
 
@@ -21,6 +22,8 @@ export interface EditorState {
 
     undos: Mutation[],
     redos: Mutation[],
+    
+    dialogQueue: DialogType[]
 }
 
 // captures work by using a function that returns a mutation. Because after captures we maybe
@@ -38,6 +41,9 @@ export interface EditorStore extends EditorState {
 
     getModeStateAs<T extends ModeState>(): T
     setModeState(modeState: Partial<ModeState>): void
+
+    openDialog(dialog: DialogType): void
+    closeDialog(): void
 }
 
 export const initialState: EditorState = {
@@ -73,5 +79,7 @@ export const initialState: EditorState = {
     },
 
     undos: [],
-    redos: []
+    redos: [],
+
+    dialogQueue: []
 }

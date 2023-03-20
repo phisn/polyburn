@@ -1,5 +1,12 @@
 # Rocket Game
-A rocket game for web. Including an editor, replays, leaderboards and more. Currently in development.
+A rocket game for the web. Including an editor, replays, leaderboards and more. Currently in development.
+
+Run
+```
+cd webapp/
+npm i
+npm run dev
+```
 
 # Tech
 - typescript react

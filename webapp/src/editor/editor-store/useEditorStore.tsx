@@ -1,5 +1,6 @@
 import { create } from "zustand"
 
+import { DialogType } from "../dialogs/DialogType"
 import { EditorStore, initialState, ModeState, RecursiveMutationWithCapture } from "./EditorStore"
 import { Mutation } from "./Mutation"
 
@@ -77,6 +78,18 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
                 ...state.modeState,
                 ...modeState
             }
+        }))
+    },
+    openDialog(dialog: DialogType) {
+        set(state => ({
+            ...state,
+            dialogQueue: [...state.dialogQueue, dialog]
+        }))
+    },
+    closeDialog() {
+        set(state => ({
+            ...state,
+            dialogQueue: state.dialogQueue.slice(1)
         }))
     }
 }))

@@ -1,9 +1,9 @@
-export {}
-
+import { Menu } from "@headlessui/react"
 import { shallow } from "zustand/shallow"
 
 import Navbar from "../common/Navbar"
 import { initialConfigureState } from "./configure/state/ConfigureModeState"
+import { DialogType } from "./dialogs/DialogType"
 import { Mode } from "./editor-store/ModeStateBase"
 import { useEditorStore } from "./editor-store/useEditorStore"
 import { initialPlacementState } from "./placement/state/PlacementModeState"
@@ -41,15 +41,28 @@ function EditorNavbar() {
     const undo = useEditorStore(state => state.undo)
     const redo = useEditorStore(state => state.redo)
     const setModeState = useEditorStore(state => state.setModeState)
+    const openDialog = useEditorStore(state => state.openDialog)
 
     return (
         <Navbar>
-            <button 
-                onClick={run}
-                className="btn btn-square btn-ghost">
-                <MenuSvg />
-            </button>
-            
+            <Menu as="div">
+                <Menu.Button className="btn btn-square btn-ghost">
+                    <MenuSvg />
+                </Menu.Button>
+                <Menu.Items as="ul" className="absolute mt-2 menu bg-base-100 w-56 rounded-box dropdown-content">
+                    <Menu.Item as="li">
+                        <button onClick={() => openDialog(DialogType.Import)}>
+                            Import
+                        </button>
+                    </Menu.Item>
+                    <Menu.Item as="li">
+                        <button onClick={() => openDialog(DialogType.Export)}>
+                            Export
+                        </button>
+                    </Menu.Item>
+                </Menu.Items>
+            </Menu>
+
             <div className="btn-group">
                 <button
                     onClick={undo} 

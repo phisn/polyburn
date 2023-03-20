@@ -5,7 +5,7 @@ import * as THREE from "three"
 import { Camera } from "three"
 import tunnel from "tunnel-rat"
 
-import Navbar from "../common/Navbar"
+import Navbar from "../common/components/Navbar"
 import { baseZoom, baseZoomFactor } from "../common/Values"
 import Game from "../game/Game"
 import { Point } from "../model/world/Point"

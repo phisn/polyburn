@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom"
 
-import Alert from "./common/Alert"
+import Alert from "./common/components/Alert"
 import useGlobalStore from "./common/GlobalStore"
 
 function App() {

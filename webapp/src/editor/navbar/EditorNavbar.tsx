@@ -2,7 +2,7 @@ import { Menu } from "@headlessui/react"
 import { useState } from "react"
 import { shallow } from "zustand/shallow"
 
-import Navbar from "../../common/Navbar"
+import Navbar from "../../common/components/Navbar"
 import { initialConfigureState } from "../configure/state/ConfigureModeState"
 import { Mode } from "../editor-store/ModeStateBase"
 import { useEditorStore } from "../editor-store/useEditorStore"
@@ -49,8 +49,8 @@ function EditorNavbar() {
 
     return (
         <>
-            <ExportDialog isOpen={exportOpen} closeDialog={() => setExportOpen(false)} />
-            <ImportDialog isOpen={importOpen} closeDialog={() => setImportOpen(false)} />
+            <ExportDialog open={exportOpen} closeDialog={() => setExportOpen(false)} />
+            <ImportDialog open={importOpen} closeDialog={() => setImportOpen(false)} />
 
             <Navbar>
                 <Menu as="div">

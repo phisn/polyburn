@@ -1,18 +1,11 @@
-import { Menu } from "@headlessui/react"
-import { useState } from "react"
 import { shallow } from "zustand/shallow"
 
-import Navbar from "../../common/Navbar"
+import Navbar from "../../common/components/Navbar"
 import { initialConfigureState } from "../configure/state/ConfigureModeState"
 import { Mode } from "../editor-store/ModeStateBase"
 import { useEditorStore } from "../editor-store/useEditorStore"
 import { initialPlacementState } from "../placement/state/PlacementModeState"
-import ExportDialog from "./ExportDialog"
-import ImportDialog from "./ImportDialog"
-
-const MenuSvg = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-5 h-5 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-)
+import EditorNavbarMenu from "./EditorNavbarMenu"
 
 const UndoSvg = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
@@ -44,33 +37,11 @@ function EditorNavbar() {
     const redo = useEditorStore(state => state.redo)
     const setModeState = useEditorStore(state => state.setModeState)
 
-    const [exportOpen, setExportOpen] = useState(false)
-    const [importOpen, setImportOpen] = useState(false)
-
     return (
         <>
-            <ExportDialog isOpen={exportOpen} closeDialog={() => setExportOpen(false)} />
-            <ImportDialog isOpen={importOpen} closeDialog={() => setImportOpen(false)} />
-
             <Navbar>
-                <Menu as="div">
-                    <Menu.Button className="btn btn-square btn-ghost">
-                        <MenuSvg />
-                    </Menu.Button>
-                    <Menu.Items as="ul" className="absolute mt-2 menu bg-base-100 w-56 rounded-box dropdown-content">
-                        <Menu.Item as="li">
-                            <button onClick={() => setImportOpen(true)}>
-                            Import
-                            </button>
-                        </Menu.Item>
-                        <Menu.Item as="li">
-                            <button onClick={() => setExportOpen(true)}>
-                            Export
-                            </button>
-                        </Menu.Item>
-                    </Menu.Items>
-                </Menu>
-
+                <EditorNavbarMenu />
+                
                 <div className="btn-group">
                     <button
                         onClick={undo} 

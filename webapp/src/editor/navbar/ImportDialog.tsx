@@ -16,7 +16,16 @@ function ImportDialog(props: { isOpen: boolean, closeDialog: () => void }) {
 
         try {
             const worldJson = LZUtils.decompressFromBase64(textareaRef.current.value)
-            const world = JSON.parse(worldJson)
+
+            if (!worldJson) {
+                throw new Error("Emtpy world code")
+            }
+
+            if (worldJson.startsWith("rw|") === false) {
+                throw new Error("Invalid world signature")
+            }
+
+            const world = JSON.parse(worldJson.substring(3))
 
             mutate(replaceWorld(world))
 

@@ -12,7 +12,9 @@ function ExportDialog(props: { isOpen: boolean, closeDialog: () => void }) {
             return
         }
 
-        return LZString.compressToBase64(JSON.stringify(useEditorStore.getState().world))
+        const toExport = "rw|" + JSON.stringify(useEditorStore.getState().world)
+        
+        return LZString.compressToBase64(toExport)
     }, [props.isOpen])
 
     const onCopy = () => {
@@ -44,8 +46,7 @@ function ExportDialog(props: { isOpen: boolean, closeDialog: () => void }) {
                             Export world as base64
                         </Dialog.Title>
 
-                        <textarea readOnly spellCheck="false" rows={4} className="textarea textarea-bordered w-full h-auto resize-none scrollbar-none">
-                            {base64}
+                        <textarea readOnly value={base64} spellCheck="false" rows={4} className="textarea textarea-bordered w-full h-auto resize-none scrollbar-none">
                         </textarea>
 
                         <div className="space-x-4">

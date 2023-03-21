@@ -1,5 +1,6 @@
-import { Entity, EntityType } from "../../../model/world/Entity"
+import { EntityType } from "../../../model/world/Entity"
 import { Point } from "../../../model/world/Point"
+import { EntityInPlacing } from "./EntityInPlacing"
 
 export enum ActionType {
     MoveVertex,
@@ -28,7 +29,7 @@ export interface InsertVertexAction {
 
 export interface PlaceEntityAction {
     type: ActionType.PlaceEntity
-    entity: Entity
+    entity: EntityInPlacing
 }
 
 export interface PlaceEntityInFutureAction {

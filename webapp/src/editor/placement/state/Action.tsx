@@ -1,4 +1,4 @@
-import { EntityType } from "../../../model/world/Entity"
+import { EntityType } from "../../../model/world/EntityType"
 import { Point } from "../../../model/world/Point"
 import { EntityInPlacing } from "./EntityInPlacing"
 

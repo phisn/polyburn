@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 
 import { entities } from "../../model/world/Entities"
-import { EntityType } from "../../model/world/Entity"
+import { EntityType } from "../../model/world/EntityType"
 
 interface EntityTypeDisplayProps {
     type: EntityType

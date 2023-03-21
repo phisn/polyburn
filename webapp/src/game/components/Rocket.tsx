@@ -3,7 +3,7 @@ import { Suspense, useRef } from "react"
 import { Object3D } from "three"
 
 import { entities } from "../../model/world/Entities"
-import { EntityType } from "../../model/world/Entity"
+import { EntityType } from "../../model/world/EntityType"
 import { Point } from "../../model/world/Point"
 import { scale } from "../../model/world/Size"
 import { changeAnchor } from "../../utility/math"

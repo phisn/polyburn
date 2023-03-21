@@ -1,7 +1,8 @@
 export enum HintType {
     Space = "Space",
     Shape = "Shape",
-    Entity = "Entity"
+    Entity = "Entity",
+    FlagCamera = "FlagCamera"
 }
 
 export interface SpaceHint {
@@ -18,4 +19,13 @@ export interface EntityHint {
     entityIndex: number
 }
 
-export type ConfigureHint = SpaceHint | ShapeHint | EntityHint
+export interface FlagCameraHint {
+    type: HintType.FlagCamera
+    side: "left" | "right" | "top" | "bottom"
+    entityIndex: number
+}
+
+export type ConfigureHint = SpaceHint 
+    | ShapeHint 
+    | EntityHint
+    | FlagCameraHint

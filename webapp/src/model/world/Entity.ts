@@ -1,11 +1,6 @@
+import { EntityType } from "./EntityType"
 import { Point } from "./Point"
 import { Size } from "./Size"
-
-export enum EntityType {
-    Rocket = "Rocket",
-    GreenFlag = "Green Flag",
-    RedFlag = "Red Flag",
-}
 
 export interface RocketEntity {
     type: EntityType.Rocket

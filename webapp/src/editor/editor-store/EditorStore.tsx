@@ -1,4 +1,4 @@
-import { EntityType } from "../../model/world/Entity"
+import { EntityType } from "../../model/world/EntityType"
 import { World } from "../../model/world/World"
 import { ConfigureState } from "../configure/state/ConfigureModeState"
 import { initialPlacementState, PlacementState as PlacementModeState } from "../placement/state/PlacementModeState"

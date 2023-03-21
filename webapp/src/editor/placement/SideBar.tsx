@@ -1,4 +1,4 @@
-import { EntityType } from "../../model/world/Entity"
+import { EntityType } from "../../model/world/EntityType"
 import { useEditorStore } from "../editor-store/useEditorStore"
 import EntityTypeSelection from "./EntityTypeSelection"
 import { ActionType } from "./state/Action"

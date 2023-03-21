@@ -1,4 +1,5 @@
 
+import { Entity } from "../../model/world/Entity"
 import { Shape } from "../../model/world/Shape"
 import { World } from "../../model/world/World"
 import { RecursiveMutationWithCapture } from "./EditorStore"
@@ -38,6 +39,12 @@ export function composeArrayAt<T>(index: number) {
 export function composeShapeAt(index: number) {
     return (shape: Partial<Shape>, world: World) => ({
         shapes: composeArrayAt<Shape>(index)(shape, world.shapes)
+    })
+}
+
+export function composeEntityAt(index: number) {
+    return (entity: Partial<Entity>, world: World) => ({
+        entities: composeArrayAt<Entity>(index)(entity, world.entities)
     })
 }
 

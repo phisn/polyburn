@@ -3,7 +3,8 @@ import redFlag from "../../assets/flag-red.svg"
 import rocket from "../../assets/rocket.svg"
 import { baseZoomFactor } from "../../common/Values"
 import { changeAnchor } from "../../utility/math"
-import { Entity, EntityRegistry, EntityType, RocketEntity } from "./Entity"
+import { Entity, EntityRegistry, RocketEntity } from "./Entity"
+import { EntityType } from "./EntityType"
 import { Point } from "./Point"
 import { scale } from "./Size"
 
@@ -39,20 +40,32 @@ export const entities: EntityRegistry = {
         size: { width: 275, height: 436 },
         anchor: { x: 0, y: 1 },
         src: redFlag,
-        transformOrCreate: (position: Point, rotation: number, entity: Entity | null): Entity => ({
-            type: EntityType.RedFlag,
+        transformOrCreate: (position: Point, rotation: number, entity: Entity | null): Entity => {
+            const entry = entities[EntityType.RedFlag]
+            
+            const center = changeAnchor(
+                position,
+                rotation,
+                scale(entry.size, entry.scale),
+                entry.anchor,
+                { x: 0.5, y: 0.5 }
+            )
 
-            cameraTopLeft: { x: position.x - 5, y: position.y + 5 },
-            cameraBottomRight: { x: position.x + 5, y: position.y - 5 },
+            return {
+                type: EntityType.RedFlag,
 
-            captureLeft: 0,
-            captureRight: 0,
+                cameraTopLeft: { x: center.x - 15, y: center.y + 15 },
+                cameraBottomRight: { x: center.x + 15, y: center.y - 15 },
 
-            ...(entity as RocketEntity | null),
+                captureLeft: 0,
+                captureRight: 0,
 
-            position,
-            rotation,
-        })
+                ...(entity as RocketEntity | null),
+
+                position,
+                rotation,
+            }
+        }
     },
 }
 

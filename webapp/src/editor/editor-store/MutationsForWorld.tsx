@@ -1,9 +1,10 @@
 
 import { Entity } from "../../model/world/Entity"
+import { FlagEntity } from "../../model/world/Flag"
 import { Point } from "../../model/world/Point"
 import { Shape } from "../../model/world/Shape"
 import { World } from "../../model/world/World"
-import { capture, composeShapeAt, newMutation, newMutationWithCompose } from "./Mutation"
+import { capture, composeEntityAt, composeShapeAt, newMutation, newMutationWithCompose } from "./Mutation"
 
 export const insertShape = (shape: Shape) => newMutationWithCompose(
     world => world.shapes.slice(0, world.shapes.length - 1),
@@ -98,5 +99,23 @@ export const replaceWorld = (world: World) => capture(
     captured => newMutation(
         () => captured,
         () => world,
+    )
+)
+
+export const moveCamera = (entityIndex: number, cameraTopLeft: Point, cameraBottomRight: Point) => capture(
+    world => ({ 
+        cameraTopLeft: (world.entities[entityIndex] as FlagEntity).cameraTopLeft,
+        cameraBottomRight: (world.entities[entityIndex] as FlagEntity).cameraBottomRight,
+    }),
+    captured => newMutationWithCompose(
+        () => ({
+            cameraTopLeft: captured.cameraTopLeft,
+            cameraBottomRight: captured.cameraBottomRight,
+        }),
+        () => ({
+            cameraTopLeft,
+            cameraBottomRight,
+        }),
+        (camera, world) => composeEntityAt(entityIndex)({ ...camera }, world),
     )
 )

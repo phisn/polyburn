@@ -3,7 +3,7 @@ import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 
 import { entities } from "../../model/world/Entities"
-import { EntityType } from "../../model/world/Entity"
+import { EntityType } from "../../model/world/EntityType"
 import { scale } from "../../model/world/Size"
 import { World } from "../../model/world/World"
 import { changeAnchor } from "../../utility/math"

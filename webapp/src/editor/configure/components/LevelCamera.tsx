@@ -88,7 +88,7 @@ function LevelCamera(props: { entity: FlagEntity }) {
                     ...lines.bottom,
                     ...lines.left,
                 ]}
-                color="yellow"
+                color="orange"
                 lineWidth={3}
             />
 

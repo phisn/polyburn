@@ -1,4 +1,5 @@
-import { Entity, EntityType } from "../../../model/world/Entity"
+import { Entity } from "../../../model/world/Entity"
+import { EntityType } from "../../../model/world/EntityType"
 import { Point } from "../../../model/world/Point"
 
 // the reason why we do not use the entity directly is because we only want to create

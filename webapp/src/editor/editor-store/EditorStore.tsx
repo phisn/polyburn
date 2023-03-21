@@ -59,10 +59,6 @@ export const initialState: EditorState = {
                 ]
             }
         ],
-        rockets: [
-        ],
-        levels: [
-        ],
         entities: [
             {
                 position: { x: -1, y: 6 },

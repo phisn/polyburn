@@ -4,7 +4,7 @@ import { Suspense, useRef, useState } from "react"
 import { Object3D } from "three"
 
 import { entities } from "../../../model/world/Entities"
-import { EntityType } from "../../../model/world/Entity"
+import { EntityType } from "../../../model/world/EntityType"
 import { useEditorStore } from "../../editor-store/useEditorStore"
 import { ActionType } from "../state/Action"
 import { PlacementState } from "../state/PlacementModeState"

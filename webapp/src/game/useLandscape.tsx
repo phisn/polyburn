@@ -10,7 +10,7 @@ export function useLandscape() {
             }
 
             if (screen.orientation.type !== "landscape-primary" &&
-            screen.orientation.type !== "landscape-secondary") {
+                screen.orientation.type !== "landscape-secondary") {
                 await screen.orientation.lock("landscape")
             }
         }

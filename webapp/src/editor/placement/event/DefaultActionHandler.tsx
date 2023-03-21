@@ -69,6 +69,7 @@ export function defaultActionHandler(params: PointerHandlerParams) {
 
             break
         case HintType.Entity:
+        {
             if (params.event.delete) {
                 state.mutate(
                     removeEntity(modeState.hint.entityIndex)
@@ -77,10 +78,18 @@ export function defaultActionHandler(params: PointerHandlerParams) {
                 break
             }
 
+            const entity = state.world.entities[modeState.hint.entityIndex]
+
             state.setModeState({
                 action: {
                     type: ActionType.PlaceEntity,
-                    entity: state.world.entities[modeState.hint.entityIndex]
+                    entity: {
+                        type: entity.type,
+                        position: params.point,
+                        rotation: entity.rotation,
+
+                        buffered: entity
+                    }
                 },
                 hint: null
             })
@@ -90,6 +99,7 @@ export function defaultActionHandler(params: PointerHandlerParams) {
             )
 
             break
+        }
         }
     }
 }

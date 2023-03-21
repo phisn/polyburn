@@ -28,6 +28,7 @@
     "react-dom": "^18.2.0",
     "react-hotkeys-hook": "^4.3.2",
     "react-router-dom": "^6.7.0",
+    "react-use": "^17.4.0",
     "sort-by": "^1.2.0",
     "suspend-react": "^0.0.9",
     "tailwind-scrollbar": "^3.0.0",

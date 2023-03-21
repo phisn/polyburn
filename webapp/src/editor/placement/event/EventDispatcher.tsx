@@ -36,6 +36,8 @@ function EventDispatcher() {
                     position: params.point,
                     rotation: 0,
                     type: action.entityType,
+
+                    buffered: null
                 }
             },
 

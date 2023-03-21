@@ -12,5 +12,5 @@ export interface EntityInPlacing {
     // when placing an entity for the first time
     // we do not have a entity yet. so this is only non-null
     // when we are moving an existing entity
-    entity?: Entity
+    buffered: Entity | null
 }

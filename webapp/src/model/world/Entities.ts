@@ -3,9 +3,21 @@ import redFlag from "../../assets/flag-red.svg"
 import rocket from "../../assets/rocket.svg"
 import { baseZoomFactor } from "../../common/Values"
 import { changeAnchor } from "../../utility/math"
-import { Entity, EntityRegistry, EntityType } from "./Entity"
+import { Entity, EntityRegistry, EntityType, RocketEntity } from "./Entity"
 import { Point } from "./Point"
 import { scale } from "./Size"
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DistributiveOmit<T, K extends keyof any> = T extends any
+  ? Omit<T, K>
+  : never;
+
+const common = (def: DistributiveOmit<Entity, "position" | "rotation">) => (position: Point, rotation: number, entity: Entity | null): Entity => ({
+    ...def,
+    ...entity,
+    position,
+    rotation,
+})
 
 export const entities: EntityRegistry = {
     [EntityType.Rocket]: {
@@ -13,18 +25,34 @@ export const entities: EntityRegistry = {
         size: { width: 300, height: 600 },
         anchor: { x: 0, y: 1 },
         src: rocket,
+        transformOrCreate: common({ type: EntityType.Rocket })
     },
     [EntityType.GreenFlag]: {
         scale: 0.15 * baseZoomFactor,
         size: { width: 275, height: 436 },
         anchor: { x: 0, y: 1 },
         src: greenFlag,
+        transformOrCreate: common({ type: EntityType.GreenFlag })
     },
     [EntityType.RedFlag]: {
         scale: 0.15 * baseZoomFactor,
         size: { width: 275, height: 436 },
         anchor: { x: 0, y: 1 },
         src: redFlag,
+        transformOrCreate: (position: Point, rotation: number, entity: Entity | null): Entity => ({
+            type: EntityType.RedFlag,
+
+            cameraTopLeft: { x: position.x - 5, y: position.y + 5 },
+            cameraBottomRight: { x: position.x + 5, y: position.y - 5 },
+
+            captureLeft: 0,
+            captureRight: 0,
+
+            ...(entity as RocketEntity | null),
+
+            position,
+            rotation,
+        })
     },
 }
 

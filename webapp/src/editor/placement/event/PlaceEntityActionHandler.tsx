@@ -17,9 +17,15 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
         state.setModeState({
             action: null
         })
+
+        const entry = entities[params.action.entity.type]
         
         state.mutate(insertEntity(
-            params.action.entity,
+            entry.transformOrCreate(
+                params.action.entity.position,
+                params.action.entity.rotation,
+                params.action.entity.buffered
+            )
         ))
     }
     else {

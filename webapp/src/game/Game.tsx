@@ -25,7 +25,17 @@ function Game(props: GameProps) {
 
     return (
         <div className="h-screen w-screen">
-            <Canvas style={{ background: "#000000", touchAction: "none" }} >
+            <Canvas style={{ 
+                background: "#000000", 
+                touchAction: "none", 
+                userSelect: "none",
+
+                // Prevent canvas selection on ios
+                // https://github.com/playcanvas/editor/issues/160
+                WebkitTouchCallout: "none",
+                WebkitUserSelect: "none",
+                WebkitTapHighlightColor: "rgba(255,255,255,0)",
+            }} >
                 <Suspense>
                     <InnerGame {...props} />
                 </Suspense>

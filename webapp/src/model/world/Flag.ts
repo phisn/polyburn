@@ -1,6 +1,9 @@
 import { snapDistance } from "../../common/Values"
+import { changeAnchor } from "../../utility/math"
+import { entities } from "./Entities"
 import { EntityType } from "./EntityType"
 import { Point } from "./Point"
+import { scale } from "./Size"
 
 export interface FlagEntity {
     type: EntityType.RedFlag,
@@ -13,6 +16,27 @@ export interface FlagEntity {
 
     captureLeft: number
     captureRight: number
+}
+
+export const flagCaptureHeight = 0.5
+
+export function captureBox(entity: FlagEntity) {
+    const entry = entities[EntityType.RedFlag]
+
+    const transformed = changeAnchor(
+        entity.position,
+        entity.rotation,
+        scale(entry.size, entry.scale),
+        entry.anchor,
+        { x: 0.2, y: 0 }
+    )
+
+    const size = {
+        width: entity.captureLeft + entity.captureRight,
+        height: flagCaptureHeight,
+    }
+
+    return { size, transformed }
 }
 
 export function moveCameraSideTo(

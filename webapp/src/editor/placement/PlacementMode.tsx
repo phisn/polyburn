@@ -1,5 +1,5 @@
-import { FlagEntity } from "../../model/world/Entity"
 import { EntityType } from "../../model/world/EntityType"
+import { FlagEntity } from "../../model/world/Flag"
 import { editorModeTunnel } from "../Editor"
 import { useEditorStore } from "../editor-store/useEditorStore"
 import { Entity } from "./components/Entity"
@@ -12,7 +12,6 @@ import SideBar from "./SideBar"
 
 function Entities() {
     const world = useEditorStore(state => state.world)
-
 
     return (
         <>

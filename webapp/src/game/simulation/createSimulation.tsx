@@ -65,7 +65,7 @@ export function createSimulation(world: World): Simulation {
         rapier,
         rocket,
 
-        step: (context: StepContext) => {
+        step: function(context: StepContext) {
             if (context.pause) {
                 return
             }
@@ -101,17 +101,40 @@ export function createSimulation(world: World): Simulation {
             rapier.step(queue)
 
             queue.drainCollisionEvents((h1, h2, started) => {
-                const parent1 = rapier.getCollider(h1).parent()
-                const parent2 = rapier.getCollider(h2).parent()
+                const handleCollision = (other: RAPIER.Collider) => {
+                    if (other.isSensor()) {
+                        console.log("sensor")
 
-                if (parent1?.handle === rocket.body.handle ||
-                    parent2?.handle === rocket.body.handle) 
-                {
-                    rocket.collisionCount += started ? 1 : -1
-                    
-                    if (rocket.collisionCount === 0) {
-                        rocket.rotation = rocket.body.rotation() - context.rotation
+                        const level = levels.find(
+                            level => level.captureCollider.handle === other.handle
+                        )
+
+                        if (level && level.unlocked === false) {
+                            this.currentLevel.collider.setEnabled(false)
+
+                            level.unlocked = true
+                            level.collider.setEnabled(true)
+
+                            this.currentLevel = level
+                        }
                     }
+                    else {
+                        rocket.collisionCount += started ? 1 : -1
+                        
+                        if (rocket.collisionCount === 0) {
+                            rocket.rotation = rocket.body.rotation() - context.rotation
+                        }
+                    }
+                }
+
+                const collider1 = rapier.getCollider(h1)
+                const collider2 = rapier.getCollider(h2)
+
+                if (collider1.parent()?.handle === rocket.body.handle) {
+                    handleCollision(collider2)
+                }
+                else if (collider2.parent()?.handle === rocket.body.handle) {
+                    handleCollision(collider1)
                 }
             })
         },

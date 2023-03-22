@@ -1,4 +1,5 @@
 import { EntityType } from "./EntityType"
+import { FlagEntity } from "./Flag"
 import { Point } from "./Point"
 import { Size } from "./Size"
 
@@ -7,19 +8,6 @@ export interface RocketEntity {
 
     position: Point
     rotation: number
-}
-
-export interface FlagEntity {
-    type: EntityType.RedFlag,
-
-    position: Point
-    rotation: number
-
-    cameraTopLeft: Point
-    cameraBottomRight: Point
-
-    captureLeft: number
-    captureRight: number
 }
 
 export interface GreenFlagEntity {

@@ -8,7 +8,7 @@ import { useEditorStore } from "../../editor-store/useEditorStore"
 import { ActionType } from "../state/Action"
 import { ConfigureHint, HintType } from "../state/Hint"
 
-function LevelCamera(props: { entity: FlagEntity }) {
+function LevelCamera(props: { entity: FlagEntity, index: number }) {
     const corners = {
         topLeft: [
             props.entity.cameraTopLeft.x,
@@ -46,7 +46,8 @@ function LevelCamera(props: { entity: FlagEntity }) {
     useFrame(() => {
         const action = useEditorStore.getState().modeState.action
 
-        if (action?.type === ActionType.MoveCamera) {
+        if (action?.type === ActionType.MoveCamera && 
+            action.entityIndex == props.index) {
             const line = lines[action.side].flat()
 
             if (action.side === "top" || action.side === "bottom") {

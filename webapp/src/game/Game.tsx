@@ -67,7 +67,7 @@ function InnerGame(props: GameProps) {
     return (
         <GameLoopContextProvider value={gameLoopContext.current}>
             <GameCamera 
-                currentLevel={simulationRef.current.currentLevel}
+                simulation={simulationRef.current}
                 rocket={simulationRef.current.rocket} />
 
             {

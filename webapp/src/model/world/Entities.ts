@@ -57,8 +57,8 @@ export const entities: EntityRegistry = {
                 cameraTopLeft: { x: center.x - 15, y: center.y + 15 },
                 cameraBottomRight: { x: center.x + 15, y: center.y - 15 },
 
-                captureLeft: 0,
-                captureRight: 0,
+                captureLeft: 2,
+                captureRight: 2,
 
                 ...(entity as RocketEntity | null),
 

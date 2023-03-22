@@ -1,8 +1,9 @@
-import { FlagEntity } from "../../model/world/Entity"
 import { EntityType } from "../../model/world/EntityType"
+import { FlagEntity } from "../../model/world/Flag"
 import { useEditorStore } from "../editor-store/useEditorStore"
 import { Entity } from "./components/Entity"
 import LevelCamera from "./components/LevelCamera"
+import LevelCapture from "./components/LevelCapture"
 import { Shape } from "./components/Shape"
 import EventDispatcher from "./event/EventDispatcher"
 
@@ -31,16 +32,27 @@ function Shapes() {
     )
 }
 
-function LevelCameras() {
+function Levels() {
     const entities = useEditorStore(state => state.world.entities)
 
-    const cameras = entities.filter(
-        entity => entity.type === EntityType.RedFlag) as FlagEntity[]
+    const cameras = entities
+        .map((entity, index) => ({ entity, index }))
+        .filter(
+            ({ entity }) => entity.type === EntityType.RedFlag
+        ) as { entity: FlagEntity, index: number }[]
 
     return (
         <>
             {
-                cameras.map((camera, i) => <LevelCamera key={i} entity={camera} />)
+                cameras.map(({ entity, index }) => 
+                    <LevelCamera key={index} entity={entity} index={index} />
+                )
+            }
+
+            {
+                cameras.map(({ entity, index }) =>
+                    <LevelCapture key={index} entity={entity} index={index} />
+                )
             }
         </>
     )
@@ -54,7 +66,7 @@ export function ConfigureMode() {
             <Entities />
             <Shapes />
 
-            <LevelCameras />
+            <Levels />
         </>
     )
 }

@@ -10,8 +10,6 @@ function EventDispatcher() {
         const state = useEditorStore.getState()
         const action = state.getModeStateAs<ConfigureState>().action
 
-        console.log(`action type: ${action?.type}, hint type: ${state.getModeStateAs<ConfigureState>().hint?.type}`)
-
         switch (action?.type) {
         case ActionType.MoveCamera:
             moveCameraActionHandler({

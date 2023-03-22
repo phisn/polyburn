@@ -1,6 +1,6 @@
 import { Line } from "@react-three/drei"
 
-import { FlagEntity } from "../../../model/world/Entity"
+import { FlagEntity } from "../../../model/world/Flag"
 
 export function LevelCamera(props: { entity: FlagEntity }) {
     // stroke only rectangle defined by

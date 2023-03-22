@@ -50,6 +50,7 @@ export function createSimulation(world: World): Simulation {
     )[0]
 
     firstLevel.unlocked = true
+    firstLevel.collider.setEnabled(true)
 
     world.shapes.forEach(shape => 
         createShape(shape, rapier)

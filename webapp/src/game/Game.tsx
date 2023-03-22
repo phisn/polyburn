@@ -66,7 +66,9 @@ function InnerGame(props: GameProps) {
 
     return (
         <GameLoopContextProvider value={gameLoopContext.current}>
-            <GameCamera rocket={simulationRef.current.rocket} />
+            <GameCamera 
+                currentLevel={simulationRef.current.currentLevel}
+                rocket={simulationRef.current.rocket} />
 
             {
                 props.world.shapes.map((shape, index) =>

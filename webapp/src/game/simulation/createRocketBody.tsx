@@ -48,12 +48,6 @@ export const rocketColliders = rawRocketColliders.map(s => s.map((v, i) => {
     return Math.round(scaled * 1000) / 1000
 }))
 
-export interface SimulationRocket {
-    body: RAPIER.RigidBody
-    rotation: number
-    collisionCount: number
-}
-
 export function createRocketBody(rapier: RAPIER.World, rocket: Entity) {
     const entry = entities[rocket.type]
     

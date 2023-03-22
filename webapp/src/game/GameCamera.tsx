@@ -4,8 +4,11 @@ import { useLayoutEffect, useRef } from "react"
 import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 
 import { baseZoom } from "../common/Values"
+import { Point } from "../model/world/Point"
+import { useInterpolation } from "./components/useInterpolation"
+import { SimulationRocket } from "./simulation/createRocket"
 
-function GameCamera() {
+function GameCamera(props: { rocket: SimulationRocket }) {
     const size = useThree(({ size }) => size)
     const cameraRef = useRef<ThreeOrthographicCamera>(null!)
  
@@ -13,7 +16,9 @@ function GameCamera() {
         cameraRef.current.updateProjectionMatrix()
     }, [size])
 
-
+    useInterpolation(props.rocket.body, (point: Point) => {
+        cameraRef.current.position.set(point.x, point.y, 10)
+    })
 
     return (
         <OrthographicCamera 

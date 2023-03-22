@@ -7,8 +7,7 @@ import { FlagEntity } from "../../model/world/Flag"
 import { Point } from "../../model/world/Point"
 import { World } from "../../model/world/World"
 import { createLevel, LevelModel } from "./createLevel"
-import { createRocket } from "./createRocket"
-import { SimulationRocket } from "./createRocketBody"
+import { createRocket , SimulationRocket } from "./createRocket"
 import { createShape } from "./createShape"
 import { rocketGroundRay } from "./rocketGroundRay"
 import { UpdateContext as StepContext } from "./StepContext"
@@ -104,7 +103,7 @@ export function createSimulation(world: World): Simulation {
                 const parent1 = rapier.getCollider(h1).parent()
                 const parent2 = rapier.getCollider(h2).parent()
 
-                if (parent1?.handle === rocket.body.handle && 
+                if (parent1?.handle === rocket.body.handle ||
                     parent2?.handle === rocket.body.handle) 
                 {
                     rocket.collisionCount += started ? 1 : -1

@@ -1,13 +1,12 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { OrthographicCamera } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { Suspense, useRef } from "react"
 
-import { baseZoom } from "../common/Values"
 import { World } from "../model/world/World"
 import Level from "./components/Level"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
+import GameCamera from "./GameCamera"
 import { GameLoopContextProvider } from "./GameLoopContext"
 import { createSimulation, Simulation } from "./simulation/createSimulation"
 import { useControlsRef } from "./useControlsRef"
@@ -67,13 +66,7 @@ function InnerGame(props: GameProps) {
 
     return (
         <GameLoopContextProvider value={gameLoopContext.current}>
-            <OrthographicCamera
-                makeDefault
-                position={[0, 0, 10]}
-                rotation={[0, 0, 0]}
-                
-                zoom={baseZoom / 2}
-            />
+            <GameCamera rocket={simulationRef.current.rocket} />
 
             {
                 props.world.shapes.map((shape, index) =>

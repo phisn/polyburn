@@ -7,7 +7,7 @@ import { EntityType } from "../../model/world/EntityType"
 import { Point } from "../../model/world/Point"
 import { scale } from "../../model/world/Size"
 import { changeAnchor } from "../../utility/math"
-import { SimulationRocket } from "../simulation/createRocketBody"
+import { SimulationRocket } from "../simulation/createRocket"
 import { useInterpolation } from "./useInterpolation"
 
 export function Rocket(props: { rocket: SimulationRocket }) {

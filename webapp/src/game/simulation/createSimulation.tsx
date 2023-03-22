@@ -2,126 +2,101 @@ import RAPIER from "@dimforge/rapier2d-compat"
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 
-import { entities } from "../../model/world/Entities"
 import { EntityType } from "../../model/world/EntityType"
-import { scale } from "../../model/world/Size"
+import { FlagEntity } from "../../model/world/Flag"
+import { Point } from "../../model/world/Point"
 import { World } from "../../model/world/World"
-import { changeAnchor } from "../../utility/math"
-import { createRocket, SimulationRocket } from "./createRocket"
+import { createLevel, LevelModel } from "./createLevel"
+import { createRocket } from "./createRocket"
+import { SimulationRocket } from "./createRocketBody"
 import { createShape } from "./createShape"
+import { rocketGroundRay } from "./rocketGroundRay"
 import { UpdateContext as StepContext } from "./StepContext"
 
 export interface Simulation {
+    levels: LevelModel[],
+    currentLevel: LevelModel,
+
     rapier: RAPIER.World
 
-    rockets: SimulationRocket[]
+    rocket: SimulationRocket
 
     step(context: StepContext): void
 }
 
 export function createSimulation(world: World): Simulation {
     const rapier = new RAPIER.World({ x: 0.0, y: -20 })
+    
+    const flags = world.entities
+        .filter(
+            entity => entity.type === EntityType.RedFlag
+        ) as FlagEntity[]
 
-    const rockets = world.entities
-        .filter(entity => entity.type === EntityType.Rocket)
-        .map(entity => createRocket(rapier, entity))
+    const levels = flags.map(
+        flag => createLevel(rapier, flag)
+    )
+
+    const rocket = createRocket(rapier, world)
+
+    const firstLevel = levels.sort(
+        (l1, l2) => {
+            const distanceToRocket = (l: Point) =>
+                Math.sqrt(
+                    Math.pow(l.x - rocket.body.translation().x, 2) +
+                    Math.pow(l.y - rocket.body.translation().y, 2)
+                )
+
+            return distanceToRocket(l1.flag) - distanceToRocket(l2.flag)
+        }
+    )[0]
+
+    firstLevel.unlocked = true
 
     world.shapes.forEach(shape => 
         createShape(shape, rapier)
     )
 
-    const rocketGroundRayRaw = (rocket: RAPIER.RigidBody) => {
-        const entry = entities[EntityType.Rocket]
-        const size = scale(entry.size, entry.scale)
-
-        const rayStart = changeAnchor(
-            rocket.translation(),
-            rocket.rotation(),
-            size,
-            { x: 0.5, y: 0.5 },
-            { x: 0.5, y: 0.2 }
-        )
-
-        const rayTarget = changeAnchor(
-            rocket.translation(),
-            rocket.rotation(),
-            size,
-            { x: 0.5, y: 0.5 },
-            { x: 0.5, y: -1 }
-        )
-
-        const rayDir = new RAPIER.Vector2(
-            rayTarget.x - rayStart.x,
-            rayTarget.y - rayStart.y
-        )
-
-        const ray = new RAPIER.Ray(rayStart, rayDir)
-
-        const cast = rapier.castRay(
-            ray,
-            1,
-            false,
-            undefined,
-            undefined,
-            undefined,
-            rocket
-        )
-
-        return {
-            cast,
-            ray,
-            rayStart,
-            rayTarget
-        }
-    }
-
-    const rocketGroundRay = (rocket: RAPIER.RigidBody) => 
-        rocketGroundRayRaw(rocket)?.cast
-
     const queue = new RAPIER.EventQueue(true)
 
-    const bodyHandleToRocket = new Map<RAPIER.RigidBodyHandle, SimulationRocket>(
-        rockets.map(rocket => [rocket.body.handle, rocket])
-    )
-
     return {
+        levels,
+        currentLevel: firstLevel,
+
         rapier,
-        rockets,
+        rocket,
 
         step: (context: StepContext) => {
             if (context.pause) {
                 return
             }
 
-            rockets.forEach(rocket => {
-                if (rocket.collisionCount === 0) {
-                    rocket.body.setRotation(
-                        rocket.rotation + context.rotation,
-                        true
-                    )
+            if (rocket.collisionCount === 0) {
+                rocket.body.setRotation(
+                    rocket.rotation + context.rotation,
+                    true
+                )
+            }
+            
+            if (context.thrust) {
+                const force = {
+                    x: 0,
+                    y: 7.3
                 }
-                
-                if (context.thrust) {
-                    const force = {
-                        x: 0,
-                        y: 7.3
-                    }
-                
-                    if (rocketGroundRay(rocket.body)) {
-                        force.x *= 1.3
-                        force.y *= 1.3
-                    }
-
-                    const rotation = rocket.body.rotation()
-                
-                    const rotatedForce = {
-                        x: force.x * cos(rotation) - force.y * sin(rotation),
-                        y: force.x * sin(rotation) + force.y * cos(rotation)
-                    }
-
-                    rocket.body.applyImpulse(rotatedForce, true)
+            
+                if (rocketGroundRay(rapier, rocket.body)) {
+                    force.x *= 1.3
+                    force.y *= 1.3
                 }
-            })
+
+                const rotation = rocket.body.rotation()
+            
+                const rotatedForce = {
+                    x: force.x * cos(rotation) - force.y * sin(rotation),
+                    y: force.x * sin(rotation) + force.y * cos(rotation)
+                }
+
+                rocket.body.applyImpulse(rotatedForce, true)
+            }
 
             rapier.step(queue)
 
@@ -129,22 +104,13 @@ export function createSimulation(world: World): Simulation {
                 const parent1 = rapier.getCollider(h1).parent()
                 const parent2 = rapier.getCollider(h2).parent()
 
-                const rocket1 = parent1 && bodyHandleToRocket.get(parent1.handle)
-                const rocket2 = parent2 && bodyHandleToRocket.get(parent2.handle)
-
-                if (rocket1) {
-                    rocket1.collisionCount += started ? 1 : -1
+                if (parent1?.handle === rocket.body.handle && 
+                    parent2?.handle === rocket.body.handle) 
+                {
+                    rocket.collisionCount += started ? 1 : -1
                     
-                    if (rocket1.collisionCount === 0) {
-                        rocket1.rotation = rocket1.body.rotation() - context.rotation
-                    }
-                }
-
-                if (rocket2) {
-                    rocket2.collisionCount += started ? 1 : -1
-
-                    if (rocket2.collisionCount === 0) {
-                        rocket2.rotation = rocket2.body.rotation() - context.rotation
+                    if (rocket.collisionCount === 0) {
+                        rocket.rotation = rocket.body.rotation() - context.rotation
                     }
                 }
             })

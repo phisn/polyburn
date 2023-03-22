@@ -5,6 +5,7 @@ import { Suspense, useRef } from "react"
 
 import { baseZoom } from "../common/Values"
 import { World } from "../model/world/World"
+import Level from "./components/Level"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
 import { GameLoopContextProvider } from "./GameLoopContext"
@@ -81,8 +82,12 @@ function InnerGame(props: GameProps) {
             }
 
             {
-                simulationRef.current.rockets.map((rocket, index) =>
-                    <Rocket key={index} rocket={rocket} />
+                <Rocket rocket={simulationRef.current.rocket} />
+            }
+
+            {
+                simulationRef.current.levels.map((level, index) =>
+                    <Level key={index} level={level} />
                 )
             }
 

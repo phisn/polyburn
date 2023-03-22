@@ -54,7 +54,7 @@ export function Entity(props: { entity: EntityModel, index?: number }) {
                             0 
                         ]} 
                         rotation={new Euler(0, 0, props.entity.rotation)} 
-                    />                
+                    />
                 }
             </Suspense>
 

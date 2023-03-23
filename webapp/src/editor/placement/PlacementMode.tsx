@@ -35,16 +35,21 @@ function Shapes() {
 }
 
 
-function LevelCameras() {
+function Levels() {
     const entities = useEditorStore(state => state.world.entities)
 
-    const cameras = entities.filter(
-        entity => entity.type === EntityType.RedFlag) as FlagEntity[]
+    const cameras = entities
+        .map((entity, index) => ({ entity, index }))
+        .filter(
+            ({ entity }) => entity.type === EntityType.RedFlag
+        ) as { entity: FlagEntity, index: number }[]
 
     return (
         <>
             {
-                cameras.map((camera, i) => <LevelCamera key={i} entity={camera} />)
+                cameras.map((camera, i) => 
+                    <LevelCamera key={i} entity={camera.entity} index={camera.index} />
+                )
             }
         </>
     )
@@ -60,7 +65,7 @@ function PlacementMode() {
             <EntityPreview />
             <Shapes />
 
-            <LevelCameras />
+            <Levels />
 
             <editorModeTunnel.In>
                 <SideBar />

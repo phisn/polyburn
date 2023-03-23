@@ -103,8 +103,6 @@ export function createSimulation(world: World): Simulation {
             queue.drainCollisionEvents((h1, h2, started) => {
                 const handleCollision = (other: RAPIER.Collider) => {
                     if (other.isSensor()) {
-                        console.log("sensor")
-
                         const level = levels.find(
                             level => level.captureCollider.handle === other.handle
                         )

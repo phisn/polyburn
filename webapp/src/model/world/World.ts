@@ -2,6 +2,7 @@
 import LZString from "lz-string"
 
 import { Entity } from "./Entity"
+import { EntityType } from "./EntityType"
 import { Shape } from "./Shape"
 
 export interface World {
@@ -25,4 +26,20 @@ export function importWorld(world: string): World {
     }
     
     return JSON.parse(data.substring(3))
+}
+
+export interface ValidationError {
+    message: string
+}
+
+export function validate(world: World): ValidationError | null {
+    if (world.entities.filter(entity => entity.type == EntityType.RedFlag).length == 0) {
+        return { message: "Can not run world without a red flag" }
+    }
+
+    if (world.entities.filter(entity => entity.type == EntityType.Rocket).length == 0) {
+        return { message: "Can not run world without a rocket" }
+    }
+
+    return null
 }

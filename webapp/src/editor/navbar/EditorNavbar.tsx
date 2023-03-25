@@ -1,6 +1,8 @@
 import { shallow } from "zustand/shallow"
 
 import Navbar from "../../common/components/Navbar"
+import useGlobalStore from "../../common/GlobalStore"
+import { validate } from "../../model/world/World"
 import { initialConfigureState } from "../configure/state/ConfigureModeState"
 import { Mode } from "../editor-store/ModeStateBase"
 import { useEditorStore } from "../editor-store/useEditorStore"
@@ -37,6 +39,20 @@ function EditorNavbar() {
     const redo = useEditorStore(state => state.redo)
     const setModeState = useEditorStore(state => state.setModeState)
 
+    const onRun = () => {
+        const validationError = validate(useEditorStore.getState().world)
+
+        if (validationError) {
+            useGlobalStore.getState().newAlert({
+                type: "error",
+                message: validationError.message
+            })
+        }
+        else {
+            run()
+        }
+    }
+
     return (
         <>
             <Navbar>
@@ -59,17 +75,17 @@ function EditorNavbar() {
                     <button 
                         className={`btn ${(mode === Mode.Configure ? "btn-active btn-disabled" : "")}` }
                         onClick={() => setModeState(initialConfigureState)}>
-                    Configure
+                        Configure
                     </button>
                     <button
                         className={`btn ${(mode === Mode.Placement ? "btn-active btn-disabled" : "")}` }
                         onClick={() => setModeState(initialPlacementState)}>
-                    Placement
+                        Placement
                     </button>
                 </div>
 
                 <button className="btn btn-square btn-ghost"
-                    onClick={run}>
+                    onClick={onRun}>
                     <PlaySvg />
                 </button>
 

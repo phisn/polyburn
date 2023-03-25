@@ -14,6 +14,7 @@
     "@headlessui/react": "^1.7.13",
     "@pixi/filter-outline": "^4.2.0",
     "@pixi/interaction": "^6.5.8",
+    "@react-hook/resize-observer": "^1.2.6",
     "@react-three/drei": "^9.56.28",
     "@react-three/fiber": "^8.11.5",
     "@stdlib/math": "^0.0.11",

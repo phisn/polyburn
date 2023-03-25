@@ -1,31 +1,63 @@
 import { OrthographicCamera } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
-import { useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 
 import { Point } from "../model/world/Point"
 import { useInterpolation } from "./components/useInterpolation"
-import { SimulationRocket } from "./simulation/createRocket"
 import { Simulation } from "./simulation/createSimulation"
 
 function GameCamera(props: { 
-    rocket: SimulationRocket, 
     simulation: Simulation 
 }) {
-    const size = useThree(({ size }) => size)
     const cameraRef = useRef<ThreeOrthographicCamera>(null!)
- 
-    const previousTargetSize = useRef<{ x: number, y: number } | null>(null)
 
-    useInterpolation(props.rocket.body, (point: Point) => {
+    const previousTargetSize = useRef<{ x: number, y: number } | null>(null)
+    const previousPoint = useRef<Point | null>(null)
+
+    const updateCameraPosition = useCallback(() => {
+        const targetSize = previousTargetSize.current ?? { x: 0, y: 0 }
+
+        let targetPositionX = previousPoint.current?.x ?? 0
+        let targetPositionY = previousPoint.current?.y ?? 0
+
+        if (targetPositionX < props.simulation.currentLevel.camera.topLeft.x + targetSize.x / 2) {
+            targetPositionX = props.simulation.currentLevel.camera.topLeft.x + targetSize.x / 2
+        }
+
+        if (targetPositionX > props.simulation.currentLevel.camera.bottomRight.x - targetSize.x / 2) {
+            targetPositionX = props.simulation.currentLevel.camera.bottomRight.x - targetSize.x / 2
+        }
+
+        if (targetPositionY > props.simulation.currentLevel.camera.topLeft.y - targetSize.y / 2) {
+            targetPositionY = props.simulation.currentLevel.camera.topLeft.y - targetSize.y / 2
+        }
+
+        if (targetPositionY < props.simulation.currentLevel.camera.bottomRight.y + targetSize.y / 2) {
+            targetPositionY = props.simulation.currentLevel.camera.bottomRight.y + targetSize.y / 2
+        }
+
+        cameraRef.current.position.set(
+            targetPositionX,
+            targetPositionY,
+            10
+        )
+
+    }, [ props.simulation.currentLevel.camera ])
+
+    const size = useThree(state => state.size)
+
+    useEffect(() => {
+        const aspect = size.width / size.height
+    
         const cameraBounds = {
             x: props.simulation.currentLevel.camera.bottomRight.x - props.simulation.currentLevel.camera.topLeft.x,
             y: props.simulation.currentLevel.camera.topLeft.y - props.simulation.currentLevel.camera.bottomRight.y
         }
-
+    
         let targetSize
-
-        if (size.width / size.height > cameraBounds.x / cameraBounds.y) {
+    
+        if (aspect > cameraBounds.x / cameraBounds.y) {
             targetSize = {
                 x: cameraBounds.x,
                 y: cameraBounds.x / size.width * size.height
@@ -37,51 +69,31 @@ function GameCamera(props: {
                 y: cameraBounds.y
             }
         }
-
-        const targetPosition = point
-
-        if (targetPosition.x < props.simulation.currentLevel.camera.topLeft.x + targetSize.x / 2) {
-            targetPosition.x = props.simulation.currentLevel.camera.topLeft.x + targetSize.x / 2
-        }
-
-        if (targetPosition.x > props.simulation.currentLevel.camera.bottomRight.x - targetSize.x / 2) {
-            targetPosition.x = props.simulation.currentLevel.camera.bottomRight.x - targetSize.x / 2
-        }
-
-        if (targetPosition.y > props.simulation.currentLevel.camera.topLeft.y - targetSize.y / 2) {
-            targetPosition.y = props.simulation.currentLevel.camera.topLeft.y - targetSize.y / 2
-        }
-
-        if (targetPosition.y < props.simulation.currentLevel.camera.bottomRight.y + targetSize.y / 2) {
-            targetPosition.y = props.simulation.currentLevel.camera.bottomRight.y + targetSize.y / 2
-        }
-
-        cameraRef.current.position.set(
-            targetPosition.x,
-            targetPosition.y,
-            10
-        )
-
-        if (previousTargetSize.current === null ||
-            previousTargetSize.current.x !== targetSize.x ||
-            previousTargetSize.current.y !== targetSize.y) 
-        {
-            console.log("update camera size")
-            previousTargetSize.current = targetSize
             
-            cameraRef.current.top = targetSize.y / 2
-            cameraRef.current.bottom = -targetSize.y / 2
-            cameraRef.current.left = -targetSize.x / 2 
-            cameraRef.current.right = targetSize.x / 2
+        cameraRef.current.top = targetSize.y / 2
+        cameraRef.current.bottom = -targetSize.y / 2
+        cameraRef.current.left = -targetSize.x / 2 
+        cameraRef.current.right = targetSize.x / 2
         
-            cameraRef.current.updateProjectionMatrix()
-        }
+        cameraRef.current.updateProjectionMatrix()
+    
+        previousTargetSize.current = targetSize
+
+        updateCameraPosition()
+    }, [ 
+        size, 
+        props.simulation.currentLevel.camera ,
+        updateCameraPosition
+    ])
+
+    useInterpolation(props.simulation.rocket.body, (point: Point) => {
+        previousPoint.current = point
+        updateCameraPosition()
     })
 
     return (
         <OrthographicCamera 
             makeDefault manual
-
             ref={cameraRef}
         />
     )

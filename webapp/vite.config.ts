@@ -16,6 +16,7 @@ export default defineConfig({
             manifest: {
                 name: "Rocket Game",
                 theme_color: "#000000",
+                display: "fullscreen",
                 icons: [
                     {
                         src: "icon.png",
@@ -23,6 +24,10 @@ export default defineConfig({
                         type: "image/png",
                     }
                 ]
+            },
+            workbox: {
+                globPatterns: ["**/*.{js,css,html,png,svg}"],
+                maximumFileSizeToCacheInBytes: 1024 * 1024 * 16,
             }
         })
     ]

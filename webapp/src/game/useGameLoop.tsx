@@ -1,13 +1,30 @@
 import { useFrame } from "@react-three/fiber"
-import { useRef } from "react"
+import { createContext, useRef } from "react"
 
-import { GameLoopContext } from "./GameLoopContext"
+export interface GameLoopContext {
+    subscribe: (callback: () => void) => () => void,
+    timePerFrame: number,
+    timeAtLastFrame: number,
+}
+
+export const GameLoopContext = createContext<GameLoopContext>(null!)
+export const GameLoopContextProvider = GameLoopContext.Provider
 
 export const useGameLoop = (update: () => void, customTimePerFrame?: number) => {
     const timePerFrame = customTimePerFrame ?? 1000 / 60
     let lastTime = performance.now()
 
+    const subscribers = useRef<(() => void)[]>([])
+
     const gameLoopContextRef = useRef<GameLoopContext>({
+        subscribe: (callback: () => void) => {
+            console.log("Subscribed to game loop")
+            subscribers.current.push(callback)
+
+            return () => {
+                subscribers.current = subscribers.current.filter(subscriber => subscriber !== callback)
+            }
+        },
         timePerFrame,
         timeAtLastFrame: lastTime,
     })
@@ -30,6 +47,8 @@ export const useGameLoop = (update: () => void, customTimePerFrame?: number) => 
             }
 
             gameLoopContextRef.current.timeAtLastFrame = lastTime
+
+            subscribers.current.forEach(subscriber => subscriber())
         }
     })
 

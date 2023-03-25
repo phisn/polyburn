@@ -4,7 +4,7 @@ import { useContext } from "react"
 import { MathUtils, Vector3 } from "three"
 
 import { Point } from "../../model/world/Point"
-import { GameLoopContext } from "../GameLoopContext"
+import { GameLoopContext } from "../useGameLoop"
 
 export function useInterpolation(
     body: RAPIER.RigidBody, 

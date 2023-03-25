@@ -10,6 +10,9 @@ export default defineConfig({
             devOptions: {
                 enabled: true,
             },
+            includeAssets: [
+                "/src/assets/icon.png",
+            ],
             manifest: {
                 name: "Rocket Game",
                 theme_color: "#000000",

@@ -11,14 +11,14 @@ export default defineConfig({
                 enabled: true,
             },
             includeAssets: [
-                "/src/assets/icon.png",
+                "icon.png",
             ],
             manifest: {
                 name: "Rocket Game",
                 theme_color: "#000000",
                 icons: [
                     {
-                        src: "/src/assets/icon.png",
+                        src: "icon.png",
                         sizes: "512x512",
                         type: "image/png",
                     }

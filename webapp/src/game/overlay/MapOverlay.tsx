@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react"
+import { useContext, useEffect, useRef  } from "react"
 import { OrthographicCamera } from "three"
 
 import { Simulation } from "../simulation/createSimulation"
@@ -6,8 +6,6 @@ import { GameLoopContext } from "../useGameLoop"
 
 function MapOverlay(props: { simulation: Simulation, camera: OrthographicCamera }) {
     const gameLoopContext = useContext(GameLoopContext)
-
-    console.log("MapOverlay")
 
     const containerDivRef = useRef<HTMLDivElement>(null!)
     const backgroundDivRef = useRef<HTMLDivElement>(null!)
@@ -41,7 +39,7 @@ function MapOverlay(props: { simulation: Simulation, camera: OrthographicCamera 
         const bottom = (props.camera.position.y + props.camera.bottom)
             - props.simulation.currentLevel.camera.bottomRight.y
 
-        const bottomPercent = bottom / levelSize.y - 1
+        const bottomPercent = bottom / levelSize.y
 
         const left = props.simulation.currentLevel.camera.topLeft.x
             - (props.camera.position.x + props.camera.left)

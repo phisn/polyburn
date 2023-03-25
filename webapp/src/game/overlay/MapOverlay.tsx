@@ -41,7 +41,7 @@ function MapOverlay(props: { simulation: Simulation, camera: OrthographicCamera 
         const bottom = (props.camera.position.y + props.camera.bottom)
             - props.simulation.currentLevel.camera.bottomRight.y
 
-        const bottomPercent = bottom / levelSize.y
+        const bottomPercent = bottom / levelSize.y - 1
 
         const left = props.simulation.currentLevel.camera.topLeft.x
             - (props.camera.position.x + props.camera.left)
@@ -63,11 +63,11 @@ function MapOverlay(props: { simulation: Simulation, camera: OrthographicCamera 
 
     return (
         <>
-            <div ref={containerDivRef} className="relative m-2">
+            <div ref={containerDivRef} className="relative m-2 overflow-hidden">
                 <div ref={backgroundDivRef} className="absolute bg-white opacity-20">
                 </div>
 
-                <div ref={cameraDivRef} className="absolute bg-white opacity-70 ">
+                <div ref={cameraDivRef} className="absolute bg-white opacity-70">
                 </div>
             </div>
         </>

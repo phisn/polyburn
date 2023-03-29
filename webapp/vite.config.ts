@@ -15,8 +15,14 @@ export default defineConfig({
             ],
             manifest: {
                 name: "Rocket Game",
+                short_name: "Rocket Game",
+
+                background_color: "#000000",
                 theme_color: "#000000",
+
+                orientation: "landscape",
                 display: "fullscreen",
+
                 icons: [
                     {
                         src: "icon.png",

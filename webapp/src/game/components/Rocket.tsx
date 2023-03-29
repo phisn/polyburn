@@ -6,7 +6,7 @@ import { entities } from "../../model/world/Entities"
 import { EntityType } from "../../model/world/EntityType"
 import { Point } from "../../model/world/Point"
 import { scale } from "../../model/world/Size"
-import { changeAnchor } from "../../utility/math"
+import { changeAnchor } from "../../common/math"
 import { SimulationRocket } from "../simulation/createRocket"
 import { useInterpolation } from "./useInterpolation"
 

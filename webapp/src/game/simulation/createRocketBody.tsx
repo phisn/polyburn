@@ -4,7 +4,7 @@ import { entities } from "../../model/world/Entities"
 import { Entity  } from "../../model/world/Entity"
 import { EntityType } from "../../model/world/EntityType"
 import { scale } from "../../model/world/Size"
-import { changeAnchor } from "../../utility/math"
+import { changeAnchor } from "../../common/math"
 
 const rawRocketColliders = [
     [

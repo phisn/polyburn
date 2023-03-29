@@ -1,5 +1,5 @@
 import { snapDistance } from "../../common/Values"
-import { changeAnchor } from "../../utility/math"
+import { changeAnchor } from "../../common/math"
 import { entities } from "./Entities"
 import { EntityType } from "./EntityType"
 import { Point } from "./Point"

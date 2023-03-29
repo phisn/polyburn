@@ -5,6 +5,10 @@ import { Euler, MeshBasicMaterial } from "three"
 
 import { entities } from "../../../model/world/Entities"
 import { Entity as EntityModel } from "../../../model/world/Entity"
+import { useEditorStore } from "../../editor-store/useEditorStore"
+import { ConfigureState } from "../state/ConfigureModeState"
+import { ConfigureHint, HintType } from "../state/Hint"
+import { SelectableType } from "../state/Selectable"
 
 export function Entity(props: { entity: EntityModel, index?: number }) {
     const entry = entities[props.entity.type]
@@ -20,8 +24,7 @@ export function Entity(props: { entity: EntityModel, index?: number }) {
     */
 
     useFrame(() => {
-        /*
-        const hint = useEditorStore.getState().getModeStateAs<PlacementState>().hint
+        const hint = useEditorStore.getState().getModeStateAs<ConfigureState>().hint
         const newStrokeColor = getStrokeColor(props.index, hint)
 
         if (newStrokeColor !== previousStrokeColor.current) {
@@ -36,7 +39,6 @@ export function Entity(props: { entity: EntityModel, index?: number }) {
 
             previousStrokeColor.current = newStrokeColor
         }
-        */
     })
 
     return (
@@ -79,17 +81,11 @@ export function Entity(props: { entity: EntityModel, index?: number }) {
     )
 }
 
-/*
-function getStrokeColor(index: number | undefined, hint: PlacementHint | null) {
+function getStrokeColor(index: number | undefined, hint: ConfigureHint | null) {
     const isHighlighted = index !== undefined
-        && hint?.type === HintType.Entity
-        && hint.entityIndex === index
-
-    const isToDelete = isHighlighted && hint.delete
-
-    if (isToDelete) {
-        return 0xff4444
-    }
+        && hint?.type === HintType.Selectable
+        && hint.selectable.type === SelectableType.Entity
+        && hint.selectable.entityIndex === index
 
     if (isHighlighted) {
         return 0xffff44
@@ -97,4 +93,3 @@ function getStrokeColor(index: number | undefined, hint: PlacementHint | null) {
 
     return undefined
 }
-*/

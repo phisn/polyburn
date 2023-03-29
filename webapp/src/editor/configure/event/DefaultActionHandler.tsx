@@ -1,3 +1,4 @@
+import { isPointInsideEntity } from "../../../model/world/Entities"
 import { EntityType } from "../../../model/world/EntityType"
 import { pointCloseToCameraSide } from "../../../model/world/Flag"
 import { Point } from "../../../model/world/Point"
@@ -8,6 +9,7 @@ import { isInsideCanvas, PointerHandlerParams } from "../../event/EventDefinitio
 import { ActionType } from "../state/Action"
 import { ConfigureState } from "../state/ConfigureModeState"
 import { HintType } from "../state/Hint"
+import { SelectableType } from "../state/Selectable"
 
 function defaultActionHandler(params: PointerHandlerParams) {
     const state = useEditorStore.getState()
@@ -31,6 +33,20 @@ function defaultActionHandler(params: PointerHandlerParams) {
                     point: params.point
                 },
                 hint: null
+            })
+
+            break
+        case HintType.Selectable:
+            state.setModeState({
+                selected: modeState.hint.selectable
+            })
+
+            break
+        case HintType.Space:
+            console.log("space")
+
+            state.setModeState({
+                selected: null
             })
 
             break
@@ -61,14 +77,35 @@ function updateHint(point: Point, state: EditorStore) {
         }
     }
 
+    for (let i = state.world.entities.length - 1; i >= 0; i--) {
+        const entity = state.world.entities[i]
+
+        if (isPointInsideEntity(point, entity)) {
+            state.setModeState({
+                hint: {
+                    type: HintType.Selectable,
+                    selectable: {
+                        type: SelectableType.Entity,
+                        entityIndex: i
+                    }
+                }
+            })
+
+            return
+        }
+    }
+
     for (let i = 0; i < state.world.shapes.length; i++) {
         const shape = state.world.shapes[i]
 
         if (isPointInsideShape(point, shape)) {
             state.setModeState({
                 hint: {
-                    type: HintType.Shape,
-                    shapeIndex: i,
+                    type: HintType.Selectable,
+                    selectable: {
+                        type: SelectableType.Shape,
+                        shapeIndex: i
+                    }
                 }
             })
 
@@ -77,7 +114,9 @@ function updateHint(point: Point, state: EditorStore) {
     }
 
     state.setModeState({
-        hint: null
+        hint: {
+            type: HintType.Space
+        }
     })
 }
 

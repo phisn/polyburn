@@ -3,10 +3,11 @@ import { useRef } from "react"
 import * as THREE from "three"
 import { MeshBasicMaterial } from "three"
 
-import { shapeColor, shapeColorSelected } from "../../../common/Values"
+import { shapeColor, shapeColorHighlighted } from "../../../common/Values"
 import { useEditorStore } from "../../editor-store/useEditorStore"
 import { ConfigureState } from "../state/ConfigureModeState"
 import { ConfigureHint, HintType } from "../state/Hint"
+import { Selectable, SelectableType } from "../state/Selectable"
 
 export function Shape(props: { shapeIndex: number }) {
     const shape = useEditorStore(state => state.world.shapes[props.shapeIndex])
@@ -19,8 +20,13 @@ export function Shape(props: { shapeIndex: number }) {
     const previousStrokeColor = useRef<string>()
 
     useFrame(() => {
-        const hint = useEditorStore.getState().getModeStateAs<ConfigureState>().hint
-        const newStrokeColor = getStrokeColor(props.shapeIndex, hint)
+        const state = useEditorStore.getState().getModeStateAs<ConfigureState>()
+        
+        const newStrokeColor = getStrokeColor(
+            props.shapeIndex, 
+            state.selected, 
+            state.hint
+        )
 
         if (newStrokeColor !== previousStrokeColor.current) {
             materialRef.current.color.set(newStrokeColor)
@@ -38,10 +44,23 @@ export function Shape(props: { shapeIndex: number }) {
     )
 }
 
-function getStrokeColor(index: number, hint: ConfigureHint | null) {
-    if (hint && hint.type === HintType.Shape) {
-        if (hint.shapeIndex === index) {
-            return shapeColorSelected
+function getStrokeColor(
+    index: number, 
+    selectable: Selectable | null, 
+    hint: ConfigureHint | null
+) {
+    if (selectable &&
+        selectable.type === SelectableType.Shape &&
+        selectable.shapeIndex === index) {
+        return shapeColorHighlighted
+    }
+    
+    if (hint && 
+        hint.type === HintType.Selectable && 
+        hint.selectable.type === SelectableType.Shape) {
+
+        if (hint.selectable.shapeIndex === index) {
+            return shapeColorHighlighted
         }
     }
 

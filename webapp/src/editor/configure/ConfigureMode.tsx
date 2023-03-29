@@ -1,3 +1,4 @@
+import { filterEntitiesType as filterEntitiesTypeWithIndex } from "../../model/world/Entity"
 import { EntityType } from "../../model/world/EntityType"
 import { FlagEntity } from "../../model/world/Flag"
 import { useEditorStore } from "../editor-store/useEditorStore"
@@ -34,13 +35,8 @@ function Shapes() {
 
 function Levels() {
     const entities = useEditorStore(state => state.world.entities)
-
-    const cameras = entities
-        .map((entity, index) => ({ entity, index }))
-        .filter(
-            ({ entity }) => entity.type === EntityType.RedFlag
-        ) as { entity: FlagEntity, index: number }[]
-
+    const cameras = filterEntitiesTypeWithIndex<FlagEntity>(entities, EntityType.RedFlag)
+ 
     return (
         <>
             {

@@ -1,8 +1,8 @@
 import { Box } from "@react-three/drei"
 import { Euler } from "three"
 
-import { captureBox, flagCaptureHeight, FlagEntity } from "../../../model/world/Flag"
 import { changeAnchor } from "../../../common/math"
+import { captureBox, flagCaptureHeight, FlagEntity } from "../../../model/world/Flag"
 
 function LevelCapture(props: { entity: FlagEntity, index: number }) {
     const { size, transformed } = captureBox(props.entity)

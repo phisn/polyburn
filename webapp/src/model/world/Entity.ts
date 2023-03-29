@@ -38,3 +38,11 @@ export interface EntityRegisterEntry {
 export interface EntityRegistry {
     [key: string]: EntityRegisterEntry
 }
+
+export function filterEntitiesType<T>(entities: Entity[], type: EntityType) {
+    return entities
+        .map((entity, index) => ({ entity, index }))
+        .filter(
+            ({ entity }) => entity.type === type
+        ) as { entity: T, index: number }[]
+}

@@ -1,7 +1,8 @@
+import { Selectable } from "./Selectable"
+
 export enum HintType {
     Space = "Space",
-    Shape = "Shape",
-    Entity = "Entity",
+    Selectable = "Selectable",
     FlagCamera = "FlagCamera"
 }
 
@@ -9,14 +10,9 @@ export interface SpaceHint {
     type: HintType.Space
 }
 
-export interface ShapeHint {
-    type: HintType.Shape
-    shapeIndex: number
-}
-
-export interface EntityHint {
-    type: HintType.Entity
-    entityIndex: number
+export interface SelectableHint {
+    type: HintType.Selectable
+    selectable: Selectable
 }
 
 export interface FlagCameraHint {
@@ -26,6 +22,5 @@ export interface FlagCameraHint {
 }
 
 export type ConfigureHint = SpaceHint 
-    | ShapeHint 
-    | EntityHint
+    | SelectableHint
     | FlagCameraHint

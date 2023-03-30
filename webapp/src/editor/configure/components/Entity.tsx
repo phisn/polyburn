@@ -3,12 +3,13 @@ import { useFrame } from "@react-three/fiber"
 import { Suspense, useRef, useState } from "react"
 import { Euler, MeshBasicMaterial } from "three"
 
+import { selectHightlightColor, selectObjectColor } from "../../../common/Values"
 import { entities } from "../../../model/world/Entities"
 import { Entity as EntityModel } from "../../../model/world/Entity"
 import { useEditorStore } from "../../store/useEditorStore"
 import { ConfigureState } from "../state/ConfigureModeState"
 import { ConfigureHint, HintType } from "../state/Hint"
-import { SelectableType } from "../state/Selectable"
+import { Selectable, SelectableType } from "../state/Selectable"
 
 export function Entity(props: { entity: EntityModel, index?: number }) {
     const entry = entities[props.entity.type]
@@ -24,8 +25,8 @@ export function Entity(props: { entity: EntityModel, index?: number }) {
     */
 
     useFrame(() => {
-        const hint = useEditorStore.getState().getModeStateAs<ConfigureState>().hint
-        const newStrokeColor = getStrokeColor(props.index, hint)
+        const state = useEditorStore.getState().getModeStateAs<ConfigureState>()
+        const newStrokeColor = getStrokeColor(props.index, state.selected, state.hint)
 
         if (newStrokeColor !== previousStrokeColor.current) {
             if (newStrokeColor) {
@@ -81,11 +82,24 @@ export function Entity(props: { entity: EntityModel, index?: number }) {
     )
 }
 
-function getStrokeColor(index: number | undefined, hint: ConfigureHint | null) {
+function getStrokeColor(
+    index: number | undefined, 
+    selectable: Selectable | null,
+    hint: ConfigureHint | null
+) {
     const isHighlighted = index !== undefined
         && hint?.type === HintType.Selectable
         && hint.selectable.type === SelectableType.Entity
         && hint.selectable.entityIndex === index
+
+    if (selectable &&
+            selectable.type === SelectableType.Entity &&
+            selectable.entityIndex === index) {
+    
+        return isHighlighted
+            ? selectHightlightColor
+            : selectObjectColor
+    }
 
     if (isHighlighted) {
         return 0xffff44

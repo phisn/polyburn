@@ -54,34 +54,36 @@ function defaultActionHandler(params: PointerHandlerParams) {
     }
 }
 
-function updateHint(point: Point, state: EditorStore) {
-    for (let i = 0; i < state.world.entities.length; i++) {
-        const entity = state.world.entities[i]
+function updateEntityHint(point: Point, store: EditorStore, i: number) {
+    const entity = store.world.entities[i]
 
-        if (entity.type !== EntityType.RedFlag) {
-            continue
-        }
-
-        const side = pointCloseToCameraSide(point, entity)
-
-        if (side) {
-            state.setModeState({
-                hint: {
-                    type: HintType.FlagCamera,
-                    side,
-                    entityIndex: i
-                }
-            })
-
-            return
-        }
+    if (entity.type !== EntityType.RedFlag) {
+        return false
     }
 
-    for (let i = state.world.entities.length - 1; i >= 0; i--) {
-        const entity = state.world.entities[i]
+    const side = pointCloseToCameraSide(point, entity)
+
+    if (side) {
+        store.setModeState({
+            hint: {
+                type: HintType.FlagCamera,
+                side,
+                entityIndex: i
+            }
+        })
+
+        return true
+    }   
+
+    return false
+}
+
+function updateHint(point: Point, store: EditorStore) {
+    for (let i = store.world.entities.length - 1; i >= 0; i--) {
+        const entity = store.world.entities[i]
 
         if (isPointInsideEntity(point, entity)) {
-            state.setModeState({
+            store.setModeState({
                 hint: {
                     type: HintType.Selectable,
                     selectable: {
@@ -95,11 +97,28 @@ function updateHint(point: Point, state: EditorStore) {
         }
     }
 
-    for (let i = 0; i < state.world.shapes.length; i++) {
-        const shape = state.world.shapes[i]
+    const state = store.getModeStateAs<ConfigureState>()
+
+    if (state.selected?.type === SelectableType.Entity &&
+        store.world.entities[state.selected.entityIndex].type === EntityType.RedFlag) {
+
+        if (updateEntityHint(point, store, state.selected.entityIndex)) {
+            return
+        }
+    }
+    else {
+        for (let i = 0; i < store.world.entities.length; i++) {
+            if (updateEntityHint(point, store, i)) {
+                return
+            }
+        }
+    }
+
+    for (let i = 0; i < store.world.shapes.length; i++) {
+        const shape = store.world.shapes[i]
 
         if (isPointInsideShape(point, shape)) {
-            state.setModeState({
+            store.setModeState({
                 hint: {
                     type: HintType.Selectable,
                     selectable: {
@@ -113,7 +132,7 @@ function updateHint(point: Point, state: EditorStore) {
         }
     }
 
-    state.setModeState({
+    store.setModeState({
         hint: {
             type: HintType.Space
         }

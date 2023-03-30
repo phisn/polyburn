@@ -3,7 +3,7 @@ import { useRef } from "react"
 import * as THREE from "three"
 import { MeshBasicMaterial } from "three"
 
-import { shapeColor, shapeColorHighlighted } from "../../../common/Values"
+import { shapeColor, shapeColorHighlighted, shapeColorSelected, shapeColorSelectedHighlighted } from "../../../common/Values"
 import { useEditorStore } from "../../store/useEditorStore"
 import { ConfigureState } from "../state/ConfigureModeState"
 import { ConfigureHint, HintType } from "../state/Hint"
@@ -45,23 +45,26 @@ export function Shape(props: { shapeIndex: number }) {
 }
 
 function getStrokeColor(
-    index: number, 
+    index: number,
     selectable: Selectable | null, 
     hint: ConfigureHint | null
 ) {
+    const isHighlighted = hint && 
+        hint.type === HintType.Selectable && 
+        hint.selectable.type === SelectableType.Shape &&
+        hint.selectable.shapeIndex === index
+
     if (selectable &&
         selectable.type === SelectableType.Shape &&
         selectable.shapeIndex === index) {
-        return shapeColorHighlighted
+
+        return isHighlighted
+            ? shapeColorSelectedHighlighted
+            : shapeColorSelected
     }
     
-    if (hint && 
-        hint.type === HintType.Selectable && 
-        hint.selectable.type === SelectableType.Shape) {
-
-        if (hint.selectable.shapeIndex === index) {
-            return shapeColorHighlighted
-        }
+    if (isHighlighted) {
+        return shapeColorHighlighted
     }
 
     return shapeColor

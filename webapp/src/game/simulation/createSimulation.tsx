@@ -10,7 +10,7 @@ import { createLevel, LevelModel } from "./createLevel"
 import { createRocket , SimulationRocket } from "./createRocket"
 import { createShape } from "./createShape"
 import { rocketGroundRay } from "./rocketGroundRay"
-import { UpdateContext as StepContext } from "./StepContext"
+import { UpdateContext as StepContext } from "./UpdateContext"
 
 export interface Simulation {
     levels: LevelModel[],
@@ -50,7 +50,7 @@ export function createSimulation(world: World): Simulation {
     )[0]
 
     firstLevel.unlocked = true
-    firstLevel.collider.setEnabled(true)
+    firstLevel.collider.setSensor(false)
 
     world.shapes.forEach(shape => 
         createShape(shape, rapier)
@@ -108,10 +108,10 @@ export function createSimulation(world: World): Simulation {
                         )
 
                         if (level && level.unlocked === false) {
-                            this.currentLevel.collider.setEnabled(false)
+                            this.currentLevel.collider.setSensor(true)
 
                             level.unlocked = true
-                            level.collider.setEnabled(true)
+                            level.collider.setSensor(false)
 
                             this.currentLevel = level
                         }

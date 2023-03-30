@@ -24,27 +24,29 @@ export function createLevel(
         bottomRight: flag.cameraBottomRight
     }
 
-    const width = camera.bottomRight.x - camera.topLeft.x
-    const height = camera.bottomRight.y - camera.topLeft.y
+    const body = rapier.createRigidBody(
+        RAPIER.RigidBodyDesc.fixed()
+    )
 
     const colliderDesc = RAPIER.ColliderDesc
         .polyline(new Float32Array([
-            0, 0,
-            width, 0,
-            width, height,
-            0, height,
-            0, 0
+            camera.topLeft.x, camera.topLeft.y,
+            camera.topLeft.x, camera.bottomRight.y,
+            camera.bottomRight.x, camera.bottomRight.y,
+            camera.bottomRight.x, camera.topLeft.y,
+            camera.topLeft.x, camera.topLeft.y
         ]))
-        .setTranslation(camera.topLeft.x, camera.topLeft.y)
 
     if (colliderDesc == null) {
         throw new Error("Failed to create collider")
     }
 
-    const collider = rapier
-        .createCollider(colliderDesc)
+    const collider = rapier.createCollider(
+        colliderDesc,
+        body
+    )
 
-    collider.setEnabled(false)
+    collider.setSensor(true)
 
     const { size, transformed } = captureBox(flag)
 

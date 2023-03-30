@@ -1,9 +1,9 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
+import { changeAnchor } from "../../common/math"
 import { entities } from "../../model/world/Entities"
 import { EntityType } from "../../model/world/EntityType"
 import { scale } from "../../model/world/Size"
-import { changeAnchor } from "../../common/math"
 
 export const rocketGroundRayRaw = (rapier: RAPIER.World, rocket: RAPIER.RigidBody) => {
     const entry = entities[EntityType.Rocket]

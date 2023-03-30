@@ -1,7 +1,7 @@
 import { filterEntitiesType as filterEntitiesTypeWithIndex } from "../../model/world/Entity"
 import { EntityType } from "../../model/world/EntityType"
 import { FlagEntity } from "../../model/world/Flag"
-import { useEditorStore } from "../editor-store/useEditorStore"
+import { useEditorStore } from "../store/useEditorStore"
 import { Entity } from "./components/Entity"
 import LevelCamera from "./components/LevelCamera"
 import LevelCapture from "./components/LevelCapture"

@@ -3,7 +3,7 @@ import { useRef } from "react"
 import { Mesh, MeshBasicMaterial } from "three"
 
 import { baseZoomFactor, highlightColor, highlightDeleteColor, highlightVertexColor, mousePointerhintLayer } from "../../../common/Values"
-import { useEditorStore } from "../../editor-store/useEditorStore"
+import { useEditorStore } from "../../store/useEditorStore"
 import { HintType, PlacementHint } from "../state/Hint"
 import { PlacementState } from "../state/PlacementModeState"
 

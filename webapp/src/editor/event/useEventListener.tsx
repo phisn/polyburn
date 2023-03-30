@@ -2,7 +2,7 @@ import { useThree } from "@react-three/fiber"
 import { useEffect, useMemo, useRef } from "react"
 
 import { buildCanvasToWorld } from "../Editor"
-import { useEditorStore } from "../editor-store/useEditorStore"
+import { useEditorStore } from "../store/useEditorStore"
 import { EditorInputEvent, PointerHandlerParams } from "./EventDefinitions"
 
 function useEventListener(f: (params: PointerHandlerParams) => void) {

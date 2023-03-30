@@ -3,8 +3,8 @@ import { useRef } from "react"
 import Dialog from "../../common/components/Dialog"
 import useGlobalStore from "../../common/GlobalStore"
 import { importWorld } from "../../model/world/World"
-import { replaceWorld } from "../editor-store/MutationsForWorld"
-import { useEditorStore } from "../editor-store/useEditorStore"
+import { replaceWorld } from "../store/MutationsForWorld"
+import { useEditorStore } from "../store/useEditorStore"
 
 function ImportDialog(props: { open: boolean, closeDialog: () => void }) {
     const mutate = useEditorStore(state => state.mutate)

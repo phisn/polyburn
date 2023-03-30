@@ -1,7 +1,7 @@
 import { EntityType } from "../../model/world/EntityType"
 import { FlagEntity } from "../../model/world/Flag"
 import { editorModeTunnel } from "../Editor"
-import { useEditorStore } from "../editor-store/useEditorStore"
+import { useEditorStore } from "../store/useEditorStore"
 import { Entity } from "./components/Entity"
 import { EntityPreview } from "./components/EntityPreview"
 import { LevelCamera } from "./components/LevelCamera"

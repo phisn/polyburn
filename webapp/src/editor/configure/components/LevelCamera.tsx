@@ -4,7 +4,7 @@ import { useRef } from "react"
 import { Line2 } from "three-stdlib"
 
 import { FlagEntity } from "../../../model/world/Flag"
-import { useEditorStore } from "../../editor-store/useEditorStore"
+import { useEditorStore } from "../../store/useEditorStore"
 import { ActionType } from "../state/Action"
 import { ConfigureHint, HintType } from "../state/Hint"
 

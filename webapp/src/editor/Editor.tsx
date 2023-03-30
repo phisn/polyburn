@@ -13,11 +13,11 @@ import Game from "../game/Game"
 import { Point } from "../model/world/Point"
 import { importWorld } from "../model/world/World"
 import { ConfigureMode } from "./configure/ConfigureMode"
-import { Mode } from "./editor-store/ModeStateBase"
-import { replaceWorld } from "./editor-store/MutationsForWorld"
-import { useEditorStore } from "./editor-store/useEditorStore"
 import EditorNavbar from "./navbar/EditorNavbar"
 import PlacementMode from "./placement/PlacementMode"
+import { Mode } from "./store/ModeStateBase"
+import { replaceWorld } from "./store/MutationsForWorld"
+import { useEditorStore } from "./store/useEditorStore"
 
 export const buildCanvasToWorld = (camera?: Camera, canvas?: HTMLCanvasElement) => {
     if (!camera || !canvas) {

@@ -3,7 +3,7 @@ import { useMemo } from "react"
 import Dialog from "../../common/components/Dialog"
 import useGlobalStore from "../../common/GlobalStore"
 import { exportWorld } from "../../model/world/World"
-import { useEditorStore } from "../editor-store/useEditorStore"
+import { useEditorStore } from "../store/useEditorStore"
 
 function ExportDialog(props: { open: boolean, closeDialog: () => void }) {
 
@@ -12,7 +12,7 @@ function ExportDialog(props: { open: boolean, closeDialog: () => void }) {
             return
         }
 
-        return exportWorld(useEditorStore.getState().world) 
+        return exportWorld(useEditorStore.getState().world)
     }, [props.open])
 
     const onCopy = () => {

@@ -4,7 +4,7 @@ import * as THREE from "three"
 import { MeshBasicMaterial } from "three"
 
 import { shapeColor, shapeColorHighlighted } from "../../../common/Values"
-import { useEditorStore } from "../../editor-store/useEditorStore"
+import { useEditorStore } from "../../store/useEditorStore"
 import { ConfigureState } from "../state/ConfigureModeState"
 import { ConfigureHint, HintType } from "../state/Hint"
 import { Selectable, SelectableType } from "../state/Selectable"

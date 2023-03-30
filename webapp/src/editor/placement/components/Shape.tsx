@@ -4,7 +4,7 @@ import { Mesh } from "three"
 import * as THREE from "three"
 
 import { baseZoomFactor, shapeColor } from "../../../common/Values"
-import { useEditorStore } from "../../editor-store/useEditorStore"
+import { useEditorStore } from "../../store/useEditorStore"
 import { ActionType } from "../state/Action"
 import { PlacementState } from "../state/PlacementModeState"
 import { MutatableShapeGeometry } from "./MutatableShapeGeometry"

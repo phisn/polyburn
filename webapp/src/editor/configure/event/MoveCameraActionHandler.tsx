@@ -1,8 +1,8 @@
 import { EntityType } from "../../../model/world/EntityType"
 import { moveCameraSideTo } from "../../../model/world/Flag"
-import { moveCamera } from "../../editor-store/MutationsForWorld"
-import { useEditorStore } from "../../editor-store/useEditorStore"
 import { isInsideCanvas, PointerHandlerParams } from "../../event/EventDefinitions"
+import { moveCamera } from "../../store/MutationsForWorld"
+import { useEditorStore } from "../../store/useEditorStore"
 import { MoveCameraAction } from "../state/Action"
 
 function moveCameraActionHandler(params: PointerHandlerParams<MoveCameraAction>) {

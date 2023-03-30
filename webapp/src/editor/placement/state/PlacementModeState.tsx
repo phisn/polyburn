@@ -1,4 +1,4 @@
-import { Mode, ModeStateBase } from "../../editor-store/ModeStateBase"
+import { Mode, ModeStateBase } from "../../store/ModeStateBase"
 import { PlacementAction } from "./Action"
 import { PlacementHint } from "./Hint"
 

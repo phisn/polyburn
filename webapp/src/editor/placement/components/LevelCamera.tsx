@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber"
 import { useState } from "react"
 
 import { FlagEntity } from "../../../model/world/Flag"
-import { useEditorStore } from "../../editor-store/useEditorStore"
+import { useEditorStore } from "../../store/useEditorStore"
 import { HintType } from "../state/Hint"
 import { PlacementState } from "../state/PlacementModeState"
 

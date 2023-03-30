@@ -4,9 +4,9 @@ import Navbar from "../../common/components/Navbar"
 import useGlobalStore from "../../common/GlobalStore"
 import { validate } from "../../model/world/World"
 import { initialConfigureState } from "../configure/state/ConfigureModeState"
-import { Mode } from "../editor-store/ModeStateBase"
-import { useEditorStore } from "../editor-store/useEditorStore"
 import { initialPlacementState } from "../placement/state/PlacementModeState"
+import { Mode } from "../store/ModeStateBase"
+import { useEditorStore } from "../store/useEditorStore"
 import EditorNavbarMenu from "./EditorNavbarMenu"
 
 const UndoSvg = () => (

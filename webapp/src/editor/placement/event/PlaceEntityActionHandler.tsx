@@ -1,13 +1,13 @@
+import { changeAnchor } from "../../../common/math"
 import { snapDistance } from "../../../common/Values"
 import { entities } from "../../../model/world/Entities"
 import { Point } from "../../../model/world/Point"
 import { findClosestEdge } from "../../../model/world/Shape"
 import { scale } from "../../../model/world/Size"
-import { changeAnchor } from "../../../common/math"
-import { EditorStore } from "../../editor-store/EditorStore"
-import { insertEntity } from "../../editor-store/MutationsForWorld"
-import { useEditorStore } from "../../editor-store/useEditorStore"
 import { PointerHandlerParams } from "../../event/EventDefinitions"
+import { EditorStore } from "../../store/EditorStore"
+import { insertEntity } from "../../store/MutationsForWorld"
+import { useEditorStore } from "../../store/useEditorStore"
 import { PlaceEntityAction } from "../state/Action"
 
 export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntityAction>) {

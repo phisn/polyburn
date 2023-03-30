@@ -1,6 +1,6 @@
-import { insertVertex } from "../../editor-store/MutationsForWorld"
-import { useEditorStore } from "../../editor-store/useEditorStore"
 import { isInsideCanvas, PointerHandlerParams } from "../../event/EventDefinitions"
+import { insertVertex } from "../../store/MutationsForWorld"
+import { useEditorStore } from "../../store/useEditorStore"
 import { InsertVertexAction } from "../state/Action"
 
 export function insertActionHandler(params: PointerHandlerParams<InsertVertexAction>) {

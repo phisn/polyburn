@@ -1,5 +1,5 @@
-import { useEditorStore } from "../../editor-store/useEditorStore"
 import useEventListener from "../../event/useEventListener"
+import { useEditorStore } from "../../store/useEditorStore"
 import { ActionType } from "../state/Action"
 import { ConfigureState } from "../state/ConfigureModeState"
 import defaultActionHandler from "./DefaultActionHandler"

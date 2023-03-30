@@ -5,7 +5,7 @@ import { Euler, MeshBasicMaterial } from "three"
 
 import { entities } from "../../../model/world/Entities"
 import { Entity as EntityModel } from "../../../model/world/Entity"
-import { useEditorStore } from "../../editor-store/useEditorStore"
+import { useEditorStore } from "../../store/useEditorStore"
 import { ConfigureState } from "../state/ConfigureModeState"
 import { ConfigureHint, HintType } from "../state/Hint"
 import { SelectableType } from "../state/Selectable"

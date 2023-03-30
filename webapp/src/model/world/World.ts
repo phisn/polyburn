@@ -10,8 +10,18 @@ export interface World {
     entities: Entity[]
 }
 
+function customStringify(world: World) { 
+    return JSON.stringify(world, (_, value) => {
+        if (typeof value === "number") {
+            return Math.round(value * 100) / 100
+        }
+
+        return value
+    })
+}
+
 export function exportWorld(world: World): string {
-    return LZString.compressToBase64("rw|" + JSON.stringify(world))
+    return LZString.compressToBase64("rw|" + customStringify(world))
 }
 
 export function importWorld(world: string): World {

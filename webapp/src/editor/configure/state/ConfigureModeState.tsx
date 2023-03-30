@@ -1,4 +1,4 @@
-import { Mode, ModeStateBase } from "../../editor-store/ModeStateBase"
+import { Mode, ModeStateBase } from "../../store/ModeStateBase"
 import { MoveCameraAction } from "./Action"
 import { ConfigureHint } from "./Hint"
 import { Selectable } from "./Selectable"

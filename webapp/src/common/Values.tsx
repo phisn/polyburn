@@ -16,3 +16,5 @@ export const shapeColorHighlighted = "#eb9a94"
 export const shapeColorSelected = "#bd5d56"
 
 export const mousePointerhintLayer = 1
+
+export const gameCameraTransitionSpeed = 30

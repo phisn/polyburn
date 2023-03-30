@@ -3,6 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber"
 import { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 
+import { gameCameraTransitionSpeed } from "../common/Values"
 import { Point } from "../model/world/Point"
 import { useInterpolation } from "./components/useInterpolation"
 import { Simulation } from "./simulation/createSimulation"
@@ -75,52 +76,25 @@ function GameCameraAnimated(props: {
         }
     })
 
-    const moveTo = (distance: number, source: number, target: number) => {
-        if (source < target) {
-            const newSource = source + distance
-
-            if (newSource > target) {
-                return { result: target, overflow: true }
-            }
-
-            return { result: newSource, overflow: false }
-        }
-        else {
-            const newSource = source - distance
-
-            if (newSource < target) {
-                return { result: target, overflow: true }
-            }
-
-            return { result: newSource, overflow: false }
-        }
-    }
-
     useFrame((_, delta) => {
         if (animating.current) {
-            const sizeDistance = delta * 25
-            const positionDistance = delta * 25
+            const distance = delta * gameCameraTransitionSpeed
 
-            const top = moveTo(sizeDistance, cameraRef.current.top, cameraTargetSize.current!.y / 2)
-            cameraRef.current.top = top.result
+            const { newWidth, newHeight, overflow } = moveCameraTo(distance)
 
-            const bottom = moveTo(sizeDistance, cameraRef.current.bottom, -cameraTargetSize.current!.y / 2)
-            cameraRef.current.bottom = bottom.result
-
-            const left = moveTo(sizeDistance, cameraRef.current.left, -cameraTargetSize.current!.x / 2)
-            cameraRef.current.left = left.result
-
-            const right = moveTo(sizeDistance, cameraRef.current.right, cameraTargetSize.current!.x / 2)
-            cameraRef.current.right = right.result
+            cameraRef.current.top = newHeight / 2
+            cameraRef.current.bottom = -newHeight / 2
+            cameraRef.current.left = -newWidth / 2
+            cameraRef.current.right = newWidth / 2
             
             cameraRef.current.updateProjectionMatrix()
             
-            const x = moveTo(positionDistance, cameraRef.current.position.x, cameraTargetPosition.current!.x)
-            const y = moveTo(positionDistance, cameraRef.current.position.y, cameraTargetPosition.current!.y)
+            const x = moveTo(distance, cameraRef.current.position.x, cameraTargetPosition.current!.x)
+            const y = moveTo(distance, cameraRef.current.position.y, cameraTargetPosition.current!.y)
             
             cameraRef.current.position.set(x.result, y.result, 10)
 
-            if (top.overflow && bottom.overflow && left.overflow && right.overflow && x.overflow && y.overflow) {
+            if (overflow && x.overflow && y.overflow) {
                 animating.current = false
             }
         }
@@ -165,12 +139,60 @@ function GameCameraAnimated(props: {
         updateCameraPosition()
     }, [ size, cameraBounds, updateCameraPosition ])
 
+    function moveCameraTo(distance: number) {
+        const currentWidth = cameraRef.current.right - cameraRef.current.left
+        const currentHeight = cameraRef.current.top - cameraRef.current.bottom
+
+        const widthDiff = Math.abs(cameraTargetSize.current!.x - currentWidth)
+        const heightDiff = Math.abs(cameraTargetSize.current!.y - currentHeight)
+
+        if (widthDiff > heightDiff) {
+            const approx = moveTo(distance, currentWidth, cameraTargetSize.current!.x)
+
+            return {
+                newWidth: approx.result,
+                newHeight: approx.result / currentWidth * currentHeight,
+                overflow: approx.overflow,
+            }
+        }
+        else {
+            const approx = moveTo(distance, currentHeight, cameraTargetSize.current!.y)
+
+            return {
+                newWidth: approx.result / currentHeight * currentWidth,
+                newHeight: approx.result,
+                overflow: approx.overflow,
+            }
+        }
+    }
+
     return (
         <OrthographicCamera 
             makeDefault manual
             ref={cameraRef}
         />
     )
+}
+
+function moveTo(distance: number, source: number, target: number) {
+    if (source < target) {
+        const newSource = source + distance
+
+        if (newSource > target) {
+            return { result: target, overflow: true }
+        }
+
+        return { result: newSource, overflow: false }
+    }
+    else {
+        const newSource = source - distance
+
+        if (newSource < target) {
+            return { result: target, overflow: true }
+        }
+
+        return { result: newSource, overflow: false }
+    }
 }
 
 export default GameCameraAnimated

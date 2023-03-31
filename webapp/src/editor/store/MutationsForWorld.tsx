@@ -1,7 +1,7 @@
 
 import { Entity } from "../../model/world/Entity"
 import { FlagEntity } from "../../model/world/Flag"
-import { Point } from "../../model/world/Point"
+import { areVerticesClockwise, hasAnyEdgeIntersections, Point } from "../../model/world/Point"
 import { Shape } from "../../model/world/Shape"
 import { World } from "../../model/world/World"
 import { capture, composeEntityAt, composeShapeAt, newMutation, newMutationWithCompose } from "./Mutation"
@@ -23,17 +23,34 @@ export const removeShape = (shapeIndex: number) => capture(
 
 export const changeVertices = (
     index: number, 
-    undo: (vertices: Point[]) => Point[],
-    redo: (vertices: Point[]) => Point[],
-) => newMutationWithCompose(
-    world => undo(world.shapes[index].vertices),
-    world => redo(world.shapes[index].vertices),
-    (vertices, world) => composeShapeAt(index)({ vertices }, world),
+    change: (vertices: Point[]) => Point[],
+) => capture(
+    world => world.shapes[index].vertices,
+    vertices => {
+        let newVertices = change(vertices)
+
+        if (newVertices.length < 3) {
+            throw new Error("Shape must have at least 3 vertices")
+        }
+
+        if (hasAnyEdgeIntersections(newVertices)) {
+            throw new Error("Shape must not have any edge intersections")
+        }
+
+        if (!areVerticesClockwise(newVertices)) {
+            newVertices = newVertices.reverse()
+        }
+
+        return newMutationWithCompose(
+            () => vertices,
+            () => newVertices,
+            (vertices, world) => composeShapeAt(index)({ vertices }, world),
+        )
+    }
 )
 
 export const insertVertex = (shapeIndex: number, insertAfterVertex: number, vertex: Point) => changeVertices(
     shapeIndex,
-    vertices => vertices.filter((_, i) => i !== insertAfterVertex + 1),
     vertices => [
         ...vertices.slice(0, insertAfterVertex + 1),
         vertex,
@@ -42,18 +59,10 @@ export const insertVertex = (shapeIndex: number, insertAfterVertex: number, vert
 )
 
 export const removeVertex = (shapeIndex: number, vertexIndex: number) => capture(
-    world => ({
-        vertex: world.shapes[shapeIndex].vertices[vertexIndex],
-        vertexCount: world.shapes[shapeIndex].vertices.length
-    }),
-    params => params.vertexCount > 3
+    world => world.shapes[shapeIndex].vertices.length,
+    vertexCount => vertexCount > 3
         ? changeVertices(
             shapeIndex,
-            vertices => [
-                ...vertices.slice(0, vertexIndex),
-                params.vertex,
-                ...vertices.slice(vertexIndex),
-            ],
             vertices => [
                 ...vertices.slice(0, vertexIndex),
                 ...vertices.slice(vertexIndex + 1),
@@ -62,21 +71,13 @@ export const removeVertex = (shapeIndex: number, vertexIndex: number) => capture
         : removeShape(shapeIndex)
 )
 
-export const moveVertex = (shapeIndex: number, vertexIndex: number, to: Point) => capture(
-    world => world.shapes[shapeIndex].vertices[vertexIndex],
-    vertex => changeVertices(
-        shapeIndex,
-        vertices => [
-            ...vertices.slice(0, vertexIndex),
-            vertex,
-            ...vertices.slice(vertexIndex + 1),
-        ],
-        vertices => [
-            ...vertices.slice(0, vertexIndex),
-            to,
-            ...vertices.slice(vertexIndex + 1),
-        ]
-    )
+export const moveVertex = (shapeIndex: number, vertexIndex: number, to: Point) => changeVertices(
+    shapeIndex,
+    vertices => [
+        ...vertices.slice(0, vertexIndex),
+        to,
+        ...vertices.slice(vertexIndex + 1),
+    ]
 )
 
 export const insertEntity = (entity: Entity) => newMutationWithCompose(

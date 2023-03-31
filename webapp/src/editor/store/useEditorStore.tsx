@@ -1,5 +1,6 @@
 import { create } from "zustand"
 
+import useGlobalStore from "../../common/GlobalStore"
 import { EditorStore, initialState, ModeState, RecursiveMutationWithCapture } from "./EditorStore"
 import { Mutation } from "./Mutation"
 
@@ -14,20 +15,37 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
         set(state => ({ ...state, running: false }))
     },
     mutate(mutation: Mutation | RecursiveMutationWithCapture) {
-        if (typeof mutation === "function") {
-            get().mutate(mutation(get().world))
-            return
-        }
+        try {
+            if (typeof mutation === "function") {
+                get().mutate(mutation(get().world))
+                return
+            }
 
-        return set(state => ({
-            ...state,
-            world: {
-                ...state.world,
-                ...mutation.redo(state.world)
-            },
-            undos: [...state.undos, mutation],
-            redos: []
-        }))
+            return set(state => ({
+                ...state,
+                world: {
+                    ...state.world,
+                    ...mutation.redo(state.world)
+                },
+                undos: [...state.undos, mutation],
+                redos: []
+            }))
+        }
+        // mutation is allowed to throw an error to indicate failure
+        catch (e) {
+            console.error(e)
+
+            let errorMessage = "Failed to mutate world"
+
+            if (e instanceof Error) {
+                errorMessage = e.message
+            }
+
+            useGlobalStore.getState().newAlert({
+                type: "error",
+                message: errorMessage
+            })
+        }
     },
     undo() {
         set(state => {

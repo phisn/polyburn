@@ -31,3 +31,54 @@ export function getDistance(a: Point, b: Point) {
     const dy = a.y - b.y
     return Math.sqrt(dx * dx + dy * dy)
 }
+
+function doEdgesIntersect(p1: Point, p2: Point, q1: Point, q2: Point): boolean {
+    // Calculate the direction vectors of the edges
+    const v1 = { x: p2.x - p1.x, y: p2.y - p1.y }
+    const v2 = { x: q2.x - q1.x, y: q2.y - q1.y }
+    
+    // Calculate the cross products of the direction vectors
+    const cross1 = v1.x * (q1.y - p1.y) - v1.y * (q1.x - p1.x)
+    const cross2 = v1.x * (q2.y - p1.y) - v1.y * (q2.x - p1.x)
+    const cross3 = v2.x * (p1.y - q1.y) - v2.y * (p1.x - q1.x)
+    const cross4 = v2.x * (p2.y - q1.y) - v2.y * (p2.x - q1.x)
+    
+    // Check if the edges intersect
+    if (cross1 * cross2 >= 0 || cross3 * cross4 >= 0) {
+        return false
+    }
+    
+    return true
+}
+  
+export function hasAnyEdgeIntersections(vertices: Point[]): boolean {
+    for (let i = 0; i < vertices.length; i++) {
+        const p1 = vertices[i]
+        const p2 = vertices[(i + 1) % vertices.length]
+  
+        for (let j = i + 1; j < vertices.length; j++) {
+            const q1 = vertices[j]
+            const q2 = vertices[(j + 1) % vertices.length]
+  
+            if (doEdgesIntersect(p1, p2, q1, q2)) {
+                return true
+            }
+        }
+    }
+  
+    return false
+}
+
+export function areVerticesClockwise(vertices: Point[]): boolean {
+    const n = vertices.length
+    let sum = 0
+    
+    for (let i = 0; i < n; i++) {
+        const p1 = vertices[i]
+        const p2 = vertices[(i + 1) % n]
+      
+        sum += (p2.x - p1.x) * (p2.y + p1.y)
+    }
+    
+    return sum > 0
+}

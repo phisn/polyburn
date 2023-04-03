@@ -6,6 +6,7 @@ export const isInsideCanvas = (e: EditorInputEvent, canvas: HTMLCanvasElement) =
     
 export interface EditorInputEvent {
     windowPoint: Point
+    
     delete: boolean
     snap: boolean
 

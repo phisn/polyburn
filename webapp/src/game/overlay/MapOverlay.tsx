@@ -55,8 +55,6 @@ function MapOverlay(props: { simulation: Simulation, camera: OrthographicCamera 
         cameraDivRef.current.style.bottom = `${bottomPercent * 100}%`
         cameraDivRef.current.style.left = `${leftPercent * 100}%`
         cameraDivRef.current.style.right = `${rightPercent * 100}%` 
-
-        console.log(`camera left: ${props.camera.left}, right: ${props.camera.right}, top: ${props.camera.top}, bottom: ${props.camera.bottom}`)
     }))
 
     return (

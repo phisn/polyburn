@@ -95,7 +95,7 @@ function InnerGame(props: GameProps) {
 
                 {
                     simulationRef.current.levels.map((level, index) =>
-                        <Level key={index} level={level} />
+                        <Level key={index} level={level} rocket={simulationRef.current.rocket} />
                     )
                 }
 

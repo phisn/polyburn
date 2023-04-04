@@ -2,11 +2,11 @@ import { Svg } from "@react-three/drei"
 import { Suspense, useRef } from "react"
 import { Object3D } from "three"
 
+import { changeAnchor } from "../../common/math"
 import { entities } from "../../model/world/Entities"
 import { EntityType } from "../../model/world/EntityType"
 import { Point } from "../../model/world/Point"
 import { scale } from "../../model/world/Size"
-import { changeAnchor } from "../../common/math"
 import { SimulationRocket } from "../simulation/createRocket"
 import { useInterpolation } from "./useInterpolation"
 

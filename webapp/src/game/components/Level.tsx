@@ -6,8 +6,9 @@ import { Euler } from "three"
 import { entities } from "../../model/world/Entities"
 import { EntityType } from "../../model/world/EntityType"
 import { LevelModel } from "../simulation/createLevel"
+import { SimulationRocket } from "../simulation/createRocket"
 
-function Level(props: { level: LevelModel }) {
+function Level(props: { rocket: SimulationRocket, level: LevelModel }) {
     const [unlocked, setUnlocked] = useState(false)
 
     const entry = unlocked
@@ -15,8 +16,11 @@ function Level(props: { level: LevelModel }) {
         : entities[EntityType.RedFlag]
 
     useFrame(() => {
-        if (props.level.unlocked !== unlocked) {
-            setUnlocked(props.level.unlocked)
+        const showUnlocked = props.level.unlocked || 
+            props.rocket.currentLevelCapture === props.level
+
+        if (showUnlocked !== unlocked) {
+            setUnlocked(showUnlocked)
         }
     })
 

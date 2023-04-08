@@ -6,13 +6,15 @@ import { MathUtils, Vector3 } from "three"
 import { Point } from "../../model/world/Point"
 import { GameLoopContext } from "../useGameLoop"
 
+const interpolationDeltaThreshold = 1
+
 export function useInterpolation(
     body: RAPIER.RigidBody, 
     callback: (point: Point, rotation: number) => void,
     disable?: boolean
 ) {
     const gameLoopContext = useContext(GameLoopContext)
-    
+     
     let previousTime = 0
     
     let previousRotation = 0
@@ -44,20 +46,38 @@ export function useInterpolation(
                 const position = body.translation()
                 const rotation = body.rotation()
 
+                const positionDelta = Math.sqrt(
+                    Math.pow(position.x - previousPosition.x, 2) +
+                    Math.pow(position.y - previousPosition.y, 2)
+                )
+                
                 previousRotation = newRotation
                 newRotation = rotation
 
                 previousPosition.set(
                     newPosition.x,
-                    newPosition.y,
-                    0
-                )
+                    newPosition.y, 0)
 
                 newPosition.set(
                     position.x,
-                    position.y,
-                    0
-                )
+                    position.y, 0)
+
+                if (positionDelta > interpolationDeltaThreshold) {
+                    previousRotation = rotation
+
+                    previousPosition.set(
+                        position.x,
+                        position.y, 0)
+
+                    callback(
+                        position,
+                        rotation
+                    )
+
+                    console.log("Interpolation disabled") 
+
+                    return   
+                }
             }
 
             const newTime = performance.now()

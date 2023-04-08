@@ -2,9 +2,15 @@ import RAPIER from "@dimforge/rapier2d-compat"
 
 import { RocketEntity } from "../../model/world/Entity"
 import { EntityType } from "../../model/world/EntityType"
+import { Point } from "../../model/world/Point"
 import { World } from "../../model/world/World"
 import { LevelModel } from "./createLevel"
 import { createRocketBody } from "./createRocketBody"
+
+export interface RocketSpawn {
+    point: Point
+    rotation: number
+}
 
 export class SimulationRocket {
     currentLevelCapture: LevelModel | null = null
@@ -26,6 +32,8 @@ export class SimulationRocket {
 
         this._body = createRocketBody(rapier, rocket)
         this._rotationNoInput = rocket.rotation
+
+        this.setSpawn()
     }
 
     resetInputRotation(inputRotation: number) {
@@ -51,8 +59,23 @@ export class SimulationRocket {
         }
     }
 
+    respawn() {
+        this._body.setTranslation(this._spawn.point, true)
+        this._body.setRotation(this._spawn.rotation, true)
+        this._body.setLinvel({ x: 0, y: 0 }, true)
+        this._body.setAngvel(0, true)
+    }
+
+    setSpawn() {
+        this._spawn = {
+            point: this._body.translation(),
+            rotation: this._body.rotation()
+        }
+    }
+
     private _body: RAPIER.RigidBody
     private _collisionCount = 0
+    private _spawn: RocketSpawn = null!
 
     // rotation does is not exactly the same as the rocket's body rotation
     // this rotation is before the player input is applied as an offset

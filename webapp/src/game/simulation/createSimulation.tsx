@@ -70,55 +70,7 @@ export class Simulation {
         this._futures.step()
 
         this.handleCollisionEvents(context)
-
-        if (this._rocket.collisionCount > 0) {
-            for (let i = 0; i < this._rocket.body.numColliders(); i++) {
-                this._rapier.contactsWith(
-                    this._rocket.body.collider(i),
-                    (collider) => {
-                        if (collider.isSensor()) {
-                            return
-                        }
-
-                        this._rapier.contactPair(
-                            this._rocket.body.collider(i),
-                            collider,
-                            (contact) => {
-                                const rocketDirVector = {
-                                    x: cos(this._rocket.body.rotation()),
-                                    y: sin(this._rocket.body.rotation())
-                                }
-        
-                                const contactVector = contact.localNormal2()
-
-                                const length = sqrt(
-                                    contactVector.x * contactVector.x +
-                                    contactVector.y * contactVector.y
-                                )
-
-                                const unitContactVector = {
-                                    x: contactVector.x / length,
-                                    y: contactVector.y / length
-                                }
-                                
-                                const angle = Math.acos(
-                                    rocketDirVector.x * unitContactVector.x +
-                                    rocketDirVector.y * unitContactVector.y
-                                ) - Math.PI / 2
-
-                                /*
-                                console.log("contactVector " + unitContactVector.x.toFixed(2) + " " + unitContactVector.y.toFixed(2) + " i" + i + ": ")
-
-                                if (Math.abs(angle) > 0.5) {
-                                    console.log("Dead angle: " + angle)
-                                }
-                                */
-                            }
-                        )
-                    }
-                )
-            }
-        }
+        this.handleRocketCollisions()
     }
 
     private handleRocketRotation(context: StepContext) {
@@ -158,16 +110,16 @@ export class Simulation {
             const collider2 = this._rapier.getCollider(h2)
 
             if (collider1.parent()?.handle === this._rocket.body.handle) {
-                this.handleCollision(context, collider1, collider2, started)
+                this.handleCollisionEvent(context, collider1, collider2, started)
             }
 
             else if (collider2.parent()?.handle === this._rocket.body.handle) {
-                this.handleCollision(context, collider2, collider1, started)
+                this.handleCollisionEvent(context, collider2, collider1, started)
             }
         })
     }
 
-    private handleCollision(
+    private handleCollisionEvent(
         context: StepContext, 
         rocket: RAPIER.Collider,
         other: RAPIER.Collider,
@@ -179,7 +131,7 @@ export class Simulation {
             )
 
             if (level) {
-                this.handleLevelCollision(context, level, started)
+                this.handleLevelCollisionEvent(context, level, started)
             }
         }
         else {
@@ -196,7 +148,7 @@ export class Simulation {
         }
     }
 
-    private handleLevelCollision(context: StepContext, level: SimulationLevel, started: boolean) {
+    private handleLevelCollisionEvent(context: StepContext, level: SimulationLevel, started: boolean) {
         if (level.unlocked) {
             return
         }
@@ -234,13 +186,67 @@ export class Simulation {
         this._rocket.currentLevelCapture = level
     }
 
-    completeLevel(level: SimulationLevel) {
+    private completeLevel(level: SimulationLevel) {
         this._currentLevel.collider.setSensor(true)
 
         level.unlocked = true
         level.collider.setSensor(false)
 
         this._currentLevel = level
+        this._rocket.setSpawn()
+    }
+
+    private handleRocketCollisions() {
+        if (this._rocket.collisionCount > 0) {
+            for (let i = 0; i < this._rocket.body.numColliders(); i++) {
+                this._rapier.contactsWith(
+                    this._rocket.body.collider(i),
+                    (collider) => {
+                        if (collider.isSensor()) {
+                            return
+                        }
+
+                        this._rapier.contactPair(
+                            this._rocket.body.collider(i),
+                            collider,
+                            (contact, flipped) => {
+                                this.handleRocketContact(contact, flipped)
+                            }
+                        )
+                    }
+                )
+            }
+        }
+    }
+
+    private handleRocketContact(contact: RAPIER.TempContactManifold, flipped: boolean) {
+        const upVector = {
+            x: -sin(this._rocket.body.rotation()),
+            y: cos(this._rocket.body.rotation())
+        }
+
+        const otherNormal = flipped
+            ? contact.localNormal1()
+            : contact.localNormal2()
+
+        const otherNormalLength = sqrt(
+            otherNormal.x * otherNormal.x + 
+            otherNormal.y * otherNormal.y
+        )
+
+        const otherNormalNormalized = {
+            x: otherNormal.x / otherNormalLength,
+            y: otherNormal.y / otherNormalLength
+        }
+
+        const dx = otherNormalNormalized.x - upVector.x
+        const dy = otherNormalNormalized.y - upVector.y
+
+        const distance = sqrt(dx * dx + dy * dy)
+
+        if (distance > 0.3) {
+            this._rocket.respawn()
+        }
     }
 
     private readonly gravityVertical = -20

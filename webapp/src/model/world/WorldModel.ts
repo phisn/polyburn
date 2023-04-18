@@ -1,16 +1,16 @@
 
 import LZString from "lz-string"
 
-import { Entity } from "./Entity"
+import { EntityModel } from "./EntityModel"
 import { EntityType } from "./EntityType"
-import { Shape } from "./Shape"
+import { ShapeModel as ShapeModel } from "./ShapeModel"
 
-export interface World {
-    shapes: Shape[]
-    entities: Entity[]
+export interface WorldModel {
+    shapes: ShapeModel[]
+    entities: EntityModel[]
 }
 
-function customStringify(world: World) { 
+function customStringify(world: WorldModel) { 
     return JSON.stringify(world, (_, value) => {
         if (typeof value === "number") {
             return Math.round(value * 100) / 100
@@ -20,11 +20,11 @@ function customStringify(world: World) {
     })
 }
 
-export function exportWorld(world: World): string {
+export function exportWorld(world: WorldModel): string {
     return LZString.compressToBase64("rw|" + customStringify(world))
 }
 
-export function importWorld(world: string): World {
+export function importWorld(world: string): WorldModel {
     const data = LZString.decompressFromBase64(world)
 
     if (!data) {
@@ -42,7 +42,7 @@ export interface ValidationError {
     message: string
 }
 
-export function validate(world: World): ValidationError | null {
+export function validate(world: WorldModel): ValidationError | null {
     if (world.entities.filter(entity => entity.type == EntityType.RedFlag).length == 0) {
         return { message: "Can not run world without a red flag" }
     }

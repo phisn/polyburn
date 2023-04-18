@@ -1,10 +1,10 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { changeAnchor } from "../../common/math"
-import { entities } from "../../model/world/Entities"
-import { Entity  } from "../../model/world/Entity"
-import { EntityType } from "../../model/world/EntityType"
-import { scale } from "../../model/world/Size"
+import { changeAnchor } from "../../../common/math"
+import { RocketEntityModel } from "../../../model/world/EntityModel"
+import { entityModels } from "../../../model/world/EntityModels"
+import { EntityType } from "../../../model/world/EntityType"
+import { scale } from "../../../model/world/Size"
 
 const rawRocketColliders = [
     [
@@ -36,7 +36,7 @@ const rawRocketColliders = [
     ]
 ]
 
-const entry = entities[EntityType.Rocket]
+const entry = entityModels[EntityType.Rocket]
 
 export const rocketColliders = rawRocketColliders.map(s => s.map((v, i) => {
     const moved = i % 2 === 0 
@@ -48,9 +48,9 @@ export const rocketColliders = rawRocketColliders.map(s => s.map((v, i) => {
     return Math.round(scaled * 1000) / 1000
 }))
 
-export function createRocketBody(rapier: RAPIER.World, rocket: Entity) {
-    const entry = entities[rocket.type]
-    
+console.log(JSON.stringify(rocketColliders))
+
+export function createRocketEntityBody(rapier: RAPIER.World, rocket: RocketEntityModel) {    
     const positionAtCenter = changeAnchor(
         rocket.position,
         rocket.rotation,
@@ -79,8 +79,6 @@ export function createRocketBody(rapier: RAPIER.World, rocket: Entity) {
 
         rapier.createCollider(collider, body)
     })
-
-    console.log("Body mass: " + body.mass())
 
     return body
 }

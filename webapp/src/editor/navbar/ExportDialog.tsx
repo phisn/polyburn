@@ -2,7 +2,7 @@ import { useMemo } from "react"
 
 import Dialog from "../../common/components/Dialog"
 import useGlobalStore from "../../common/GlobalStore"
-import { exportWorld } from "../../model/world/World"
+import { exportWorld } from "../../model/world/WorldModel"
 import { useEditorStore } from "../store/useEditorStore"
 
 function ExportDialog(props: { open: boolean, closeDialog: () => void }) {

@@ -2,7 +2,7 @@ import { useRef } from "react"
 
 import Dialog from "../../common/components/Dialog"
 import useGlobalStore from "../../common/GlobalStore"
-import { importWorld } from "../../model/world/World"
+import { importWorld } from "../../model/world/WorldModel"
 import { replaceWorld } from "../store/MutationsForWorld"
 import { useEditorStore } from "../store/useEditorStore"
 

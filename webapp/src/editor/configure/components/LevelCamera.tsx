@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber"
 import { useRef , useState } from "react"
 import { Line2 } from "three-stdlib"
 
-import { FlagEntity } from "../../../model/world/Flag"
+import { FlagEntity } from "../../../model/world/FlagModel"
 import { useEditorStore } from "../../store/useEditorStore"
 import { ActionType } from "../state/Action"
 import { ConfigureState } from "../state/ConfigureModeState"

@@ -1,25 +1,25 @@
 import { EntityType } from "./EntityType"
-import { FlagEntity } from "./Flag"
+import { FlagEntity } from "./FlagModel"
 import { Point } from "./Point"
 import { Size } from "./Size"
 
-export interface RocketEntity {
+export interface RocketEntityModel {
     type: EntityType.Rocket
 
     position: Point
     rotation: number
 }
 
-export interface GreenFlagEntity {
+export interface GreenFlagEntityModel {
     type: EntityType.GreenFlag
 
     position: Point
     rotation: number
 }
 
-export type Entity = RocketEntity | FlagEntity | GreenFlagEntity
+export type EntityModel = RocketEntityModel | FlagEntity | GreenFlagEntityModel
 
-export interface EntityRegisterEntry {
+export interface EntityModelRegisterEntry {
     scale: number
     size: Size
     anchor: Point
@@ -32,14 +32,14 @@ export interface EntityRegisterEntry {
     // Addtionally, we dont want the camera position to be nullable so we need to 
     // create it now and not change after moving it later (small flag adjustments
     // should not change the camera position).  
-    transformOrCreate: (position: Point, rotation: number, entity: Entity | null) => Entity
+    transformOrCreate: (position: Point, rotation: number, entity: EntityModel | null) => EntityModel
 }
 
-export interface EntityRegistry {
-    [key: string]: EntityRegisterEntry
+export interface EntityModelRegistry {
+    [key: string]: EntityModelRegisterEntry
 }
 
-export function filterEntitiesType<T>(entities: Entity[], type: EntityType) {
+export function filterEntityModelsType<T>(entities: EntityModel[], type: EntityType) {
     return entities
         .map((entity, index) => ({ entity, index }))
         .filter(

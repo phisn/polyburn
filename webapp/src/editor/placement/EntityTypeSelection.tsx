@@ -1,6 +1,6 @@
 import { useCallback } from "react"
 
-import { entities } from "../../model/world/Entities"
+import { entityModels } from "../../model/world/EntityModels"
 import { EntityType } from "../../model/world/EntityType"
 
 interface EntityTypeDisplayProps {
@@ -10,7 +10,7 @@ interface EntityTypeDisplayProps {
 }
 
 const EntityTypeButton = (props: EntityTypeDisplayProps) => {
-    const entity = entities[props.type]
+    const entity = entityModels[props.type]
 
     const entityClassname = ({
         [EntityType.Rocket]:    "h-12",
@@ -51,7 +51,7 @@ function EntityTypeSelection(props: EntityTypeSelectionProps) {
     return (
         <div className="btn-group btn-group-vertical">
             {
-                Object.keys(entities)
+                Object.keys(entityModels)
                     .map(type => type as EntityType)
                     .map(type => (
                         <EntityTypeButton

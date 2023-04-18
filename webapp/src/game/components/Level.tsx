@@ -3,20 +3,20 @@ import { useFrame } from "@react-three/fiber"
 import { Suspense, useState } from "react"
 import { Euler } from "three"
 
-import { entities } from "../../model/world/Entities"
+import { entityModels } from "../../model/world/EntityModels"
 import { EntityType } from "../../model/world/EntityType"
-import { LevelModel } from "../simulation/createLevel"
-import { SimulationRocket } from "../simulation/createRocket"
+import { RuntimeLevel } from "../runtime/entity/RuntimeLevel"
+import { RuntimeRocket } from "../runtime/entity/RuntimeRocket"
 
-function Level(props: { rocket: SimulationRocket, level: LevelModel }) {
+function Level(props: { rocket: RuntimeRocket, level: RuntimeLevel }) {
     const [unlocked, setUnlocked] = useState(false)
 
     const entry = unlocked
-        ? entities[EntityType.GreenFlag]
-        : entities[EntityType.RedFlag]
+        ? entityModels[EntityType.GreenFlag]
+        : entityModels[EntityType.RedFlag]
 
     useFrame(() => {
-        const showUnlocked = props.level.unlocked || 
+        const showUnlocked = props.level.captured || 
             props.rocket.currentLevelCapture === props.level
 
         if (showUnlocked !== unlocked) {

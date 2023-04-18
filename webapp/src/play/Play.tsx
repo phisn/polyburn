@@ -5,10 +5,10 @@ import Navbar from "../common/components/Navbar"
 import useGlobalStore from "../common/GlobalStore"
 import { StopFillSvg } from "../editor/Editor"
 import Game from "../game/Game"
-import { importWorld, World } from "../model/world/World"
+import { importWorld, WorldModel } from "../model/world/WorldModel"
 
 function Play() {
-    const [playingWorld, setPlayingWorld] = useState<World | null>(null)
+    const [playingWorld, setPlayingWorld] = useState<WorldModel | null>(null)
 
     const onLevelSelect = (rawWorld: string) => {
         try {
@@ -29,6 +29,7 @@ function Play() {
     if (playingWorld) {
         return (
             <>
+                <Game world={playingWorld} />
                 <div className="absolute top-0 left-0 p-4">
                     <Navbar>
                         <button className="btn btn-square btn-ghost"
@@ -38,7 +39,6 @@ function Play() {
                         </button>
                     </Navbar>
                 </div>
-                <Game world={playingWorld} />
             </>
         )
     }

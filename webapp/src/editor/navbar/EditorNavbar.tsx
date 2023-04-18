@@ -2,7 +2,7 @@ import { shallow } from "zustand/shallow"
 
 import Navbar from "../../common/components/Navbar"
 import useGlobalStore from "../../common/GlobalStore"
-import { validate } from "../../model/world/World"
+import { validate } from "../../model/world/WorldModel"
 import { initialConfigureState } from "../configure/state/ConfigureModeState"
 import { initialPlacementState } from "../placement/state/PlacementModeState"
 import { Mode } from "../store/ModeStateBase"

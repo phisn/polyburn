@@ -3,7 +3,7 @@ import redFlag from "../../assets/flag-red.svg"
 import rocket from "../../assets/rocket.svg"
 import { changeAnchor } from "../../common/math"
 import { baseZoomFactor } from "../../common/Values"
-import { Entity, EntityRegistry, RocketEntity } from "./Entity"
+import { EntityModel, EntityModelRegistry, RocketEntityModel } from "./EntityModel"
 import { EntityType } from "./EntityType"
 import { Point } from "./Point"
 import { scale } from "./Size"
@@ -13,14 +13,14 @@ type DistributiveOmit<T, K extends keyof any> = T extends any
   ? Omit<T, K>
   : never;
 
-const common = (def: DistributiveOmit<Entity, "position" | "rotation">) => (position: Point, rotation: number, entity: Entity | null): Entity => ({
+const common = (def: DistributiveOmit<EntityModel, "position" | "rotation">) => (position: Point, rotation: number, entity: EntityModel | null): EntityModel => ({
     ...def,
     ...entity,
     position,
     rotation,
 })
 
-export const entities: EntityRegistry = {
+export const entityModels: EntityModelRegistry = {
     [EntityType.Rocket]: {
         scale: 0.15 * baseZoomFactor,
         size: { width: 300, height: 600 },
@@ -40,8 +40,8 @@ export const entities: EntityRegistry = {
         size: { width: 275, height: 436 },
         anchor: { x: 0, y: 1 },
         src: redFlag,
-        transformOrCreate: (position: Point, rotation: number, entity: Entity | null): Entity => {
-            const entry = entities[EntityType.RedFlag]
+        transformOrCreate: (position: Point, rotation: number, entity: EntityModel | null): EntityModel => {
+            const entry = entityModels[EntityType.RedFlag]
             
             const center = changeAnchor(
                 position,
@@ -60,7 +60,7 @@ export const entities: EntityRegistry = {
                 captureLeft: 2,
                 captureRight: 2,
 
-                ...(entity as RocketEntity | null),
+                ...(entity as RocketEntityModel | null),
 
                 position,
                 rotation,
@@ -69,9 +69,9 @@ export const entities: EntityRegistry = {
     },
 }
 
-export function entityRect(entity: Entity) {
+export function entityRect(entity: EntityModel) {
     const { position, rotation } = entity
-    const entry = entities[entity.type]
+    const entry = entityModels[entity.type]
     const entitySize = scale(entry.size, entry.scale)
 
     // Compute the position and size of the entity's bounding box
@@ -111,8 +111,8 @@ export function entityRect(entity: Entity) {
     }
 }
 
-export function isPointInsideEntity(point: Point, entity: Entity) {
-    const entry = entities[entity.type]
+export function isPointInsideEntity(point: Point, entity: EntityModel) {
+    const entry = entityModels[entity.type]
     const entitySize = scale(entry.size, entry.scale)
 
     const triangleArea = (a: Point, b: Point, c: Point) => {

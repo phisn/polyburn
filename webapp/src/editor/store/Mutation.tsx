@@ -1,26 +1,26 @@
 
-import { Entity } from "../../model/world/Entity"
-import { Shape } from "../../model/world/Shape"
-import { World } from "../../model/world/World"
+import { EntityModel } from "../../model/world/EntityModel"
+import { ShapeModel } from "../../model/world/ShapeModel"
+import { WorldModel } from "../../model/world/WorldModel"
 import { RecursiveMutationWithCapture } from "./EditorStore"
 
 export interface Mutation {
     /* eslint-disable  @typescript-eslint/no-explicit-any */
-    undo: (world: World) => any
-    redo: (world: World) => any
+    undo: (world: WorldModel) => any
+    redo: (world: WorldModel) => any
 }
 
 export function newMutation(
-    undo: (world: World) => Partial<World>, 
-    redo: (world: World) => Partial<World>
+    undo: (world: WorldModel) => Partial<WorldModel>, 
+    redo: (world: WorldModel) => Partial<WorldModel>
 ): Mutation {
     return { undo, redo }
 }
 
 export function newMutationWithCompose<T>(
-    undo: (world: World) => T,
-    redo: (world: World) => T, 
-    compose: (x: T, world: World) => Partial<World>
+    undo: (world: WorldModel) => T,
+    redo: (world: WorldModel) => T, 
+    compose: (x: T, world: WorldModel) => Partial<WorldModel>
 ): Mutation {
     return {
         undo: world => compose(undo(world), world),
@@ -37,20 +37,20 @@ export function composeArrayAt<T>(index: number) {
 }
 
 export function composeShapeAt(index: number) {
-    return (shape: Partial<Shape>, world: World) => ({
-        shapes: composeArrayAt<Shape>(index)(shape, world.shapes)
+    return (shape: Partial<ShapeModel>, world: WorldModel) => ({
+        shapes: composeArrayAt<ShapeModel>(index)(shape, world.shapes)
     })
 }
 
 export function composeEntityAt(index: number) {
-    return (entity: Partial<Entity>, world: World) => ({
-        entities: composeArrayAt<Entity>(index)(entity, world.entities)
+    return (entity: Partial<EntityModel>, world: WorldModel) => ({
+        entities: composeArrayAt<EntityModel>(index)(entity, world.entities)
     })
 }
 
 export function capture<T>(
-    captureFunc: (world: World) => T, 
+    captureFunc: (world: WorldModel) => T, 
     f: (x: T) => RecursiveMutationWithCapture | Mutation
 ) {
-    return (world: World) => f(captureFunc(world))
+    return (world: WorldModel) => f(captureFunc(world))
 }

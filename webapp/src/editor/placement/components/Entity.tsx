@@ -3,14 +3,14 @@ import { useFrame } from "@react-three/fiber"
 import { Suspense, useRef, useState } from "react"
 import { Euler, MeshBasicMaterial } from "three"
 
-import { entities } from "../../../model/world/Entities"
-import { Entity as EntityModel } from "../../../model/world/Entity"
+import { EntityModel as EntityModel } from "../../../model/world/EntityModel"
+import { entityModels } from "../../../model/world/EntityModels"
 import { useEditorStore } from "../../store/useEditorStore"
 import { HintType, PlacementHint } from "../state/Hint"
 import { PlacementState } from "../state/PlacementModeState"
 
 export function Entity(props: { entity: EntityModel, index?: number }) {
-    const entry = entities[props.entity.type]
+    const entry = entityModels[props.entity.type]
 
     const [material, setMaterial] = useState<MeshBasicMaterial | undefined>()
     const previousStrokeColor = useRef<number | undefined>(undefined)

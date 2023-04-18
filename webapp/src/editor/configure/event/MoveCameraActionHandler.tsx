@@ -1,5 +1,5 @@
 import { EntityType } from "../../../model/world/EntityType"
-import { moveCameraSideTo } from "../../../model/world/Flag"
+import { moveCameraSideTo } from "../../../model/world/FlagModel"
 import { isInsideCanvas, PointerHandlerParams } from "../../event/EventDefinitions"
 import { moveCamera } from "../../store/MutationsForWorld"
 import { useEditorStore } from "../../store/useEditorStore"

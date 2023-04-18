@@ -1,3 +1,5 @@
+export { }
+/*
 import RAPIER from "@dimforge/rapier2d-compat"
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
@@ -6,12 +8,12 @@ import sqrt from "@stdlib/math/base/special/sqrt"
 import { EntityType } from "../../model/world/EntityType"
 import { FlagEntity } from "../../model/world/Flag"
 import { Point } from "../../model/world/Point"
-import { World } from "../../model/world/World"
+import { WorldModel } from "../../model/world/World"
 import { createLevel, LevelModel as SimulationLevel } from "./createLevel"
 import { createRocket , SimulationRocket } from "./createRocket"
 import { createShape } from "./createShape"
-import { rocketGroundRay } from "./rocketGroundRay"
-import { UpdateContext as StepContext } from "./UpdateContext"
+import { rocketGroundRay } from "./handler/rocketGroundRay"
+import { StepContext as StepContext } from "./StepContext"
 
 export class Simulation {
     get levels() { return this._levels }
@@ -19,7 +21,7 @@ export class Simulation {
     get rapier() { return this._rapier }
     get rocket() { return this._rocket }
 
-    constructor(world: World) {
+    constructor(world: WorldModel) {
         this._rapier = new RAPIER.World({ 
             x: this.gravityHorizontal,
             y: this.gravityVertical
@@ -251,9 +253,6 @@ export class Simulation {
 
     private readonly gravityVertical = -20
     private readonly gravityHorizontal = 0
-    
-    private readonly thrust = 7.3
-    private readonly thrustGroundMultiplier = 1.3
 
     private readonly levelCompletionDelay = 30
     private readonly levelCompletionVelocityThreshold = 0.01
@@ -295,6 +294,8 @@ class SimulationFutures {
     }[] = []
 }
 
-export function createSimulation(world: World): Simulation {
+export function createSimulation(world: WorldModel): Simulation {
     return new Simulation(world)
 }
+
+*/

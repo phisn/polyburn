@@ -1,12 +1,12 @@
 
-import { Entity } from "../../model/world/Entity"
-import { FlagEntity } from "../../model/world/Flag"
+import { EntityModel } from "../../model/world/EntityModel"
+import { FlagEntity } from "../../model/world/FlagModel"
 import { areVerticesClockwise, hasAnyEdgeIntersections, Point } from "../../model/world/Point"
-import { Shape } from "../../model/world/Shape"
-import { World } from "../../model/world/World"
+import { ShapeModel } from "../../model/world/ShapeModel"
+import { WorldModel } from "../../model/world/WorldModel"
 import { capture, composeEntityAt, composeShapeAt, newMutation, newMutationWithCompose } from "./Mutation"
 
-export const insertShape = (shape: Shape) => newMutationWithCompose(
+export const insertShape = (shape: ShapeModel) => newMutationWithCompose(
     world => world.shapes.slice(0, world.shapes.length - 1),
     world => [...world.shapes, shape],
     shapes => ({ shapes }),
@@ -80,7 +80,7 @@ export const moveVertex = (shapeIndex: number, vertexIndex: number, to: Point) =
     ]
 )
 
-export const insertEntity = (entity: Entity) => newMutationWithCompose(
+export const insertEntity = (entity: EntityModel) => newMutationWithCompose(
     world => world.entities.slice(0, world.entities.length - 1),
     world => [...world.entities, entity],
     entities => ({ entities }),
@@ -95,7 +95,7 @@ export const removeEntity = (entityIndex: number) => capture(
     )
 )
 
-export const replaceWorld = (world: World) => capture(
+export const replaceWorld = (world: WorldModel) => capture(
     world => world,
     captured => newMutation(
         () => captured,

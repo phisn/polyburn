@@ -5,11 +5,11 @@ export interface Point {
     y: number
 }
 
-export interface Shape {
+export interface ShapeModel {
     vertices: Point[]
 }
 
-export function isPointInsideShape(point: Point, shape: Shape): boolean {
+export function isPointInsideShape(point: Point, shape: ShapeModel): boolean {
     let isInside = false
     const numVertices = shape.vertices.length
     let j = numVertices - 1
@@ -29,7 +29,7 @@ export function isPointInsideShape(point: Point, shape: Shape): boolean {
     return isInside
 }
 
-export function findClosestEdge(shapes: Shape[], point: Point, snapDistance: number) {
+export function findClosestEdge(shapes: ShapeModel[], point: Point, snapDistance: number) {
     let minDistance = Number.MAX_VALUE
     let closestPoint: Point = { x: 0, y: 0 }
     let shapeIndex = 0
@@ -60,7 +60,7 @@ export function findClosestEdge(shapes: Shape[], point: Point, snapDistance: num
     return { point: closestPoint, shapeIndex: shapeIndex, edge: edgeIndices }
 }
         
-export function findClosestVertex(shapes: Shape[], point: Point, snapDistance: number) {
+export function findClosestVertex(shapes: ShapeModel[], point: Point, snapDistance: number) {
     let minDistance = Number.MAX_VALUE
     let closestPoint: Point = { x: 0, y: 0 }
     let shapeIndex = 0

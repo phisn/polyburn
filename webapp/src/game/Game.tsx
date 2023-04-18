@@ -3,19 +3,19 @@ import { Canvas, useThree } from "@react-three/fiber"
 import { Suspense, useRef } from "react"
 import tunnel from "tunnel-rat"
 
-import { World } from "../model/world/World"
+import { WorldModel } from "../model/world/WorldModel"
 import Level from "./components/Level"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
 import GameCameraAnimated from "./GameCamera"
 import MapOverlay from "./overlay/MapOverlay"
-import { createSimulation, Simulation } from "./simulation/createSimulation"
+import { Runtime } from "./runtime/Runtime"
 import { useControlsRef } from "./useControlsRef"
 import { GameLoopContextProvider, useGameLoop } from "./useGameLoop"
 import { useLandscape } from "./useLandscape"
 
 export interface GameProps {
-    world: World
+    world: WorldModel
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -52,8 +52,8 @@ function Game(props: GameProps) {
 }
 
 function InnerGame(props: GameProps) {
-    const simulationRef = useRef<Simulation>(
-        createSimulation(props.world)
+    const runtimeRef = useRef<Runtime>(
+        new Runtime(props.world)
     )
 
     useLandscape()
@@ -61,7 +61,7 @@ function InnerGame(props: GameProps) {
     const controls = useControlsRef()
 
     const gameLoopContext = useGameLoop(() => {
-        simulationRef.current.step({
+        runtimeRef.current.step({
             thrust: controls.current.thrust,
             rotation: controls.current.rotation,
             pause: controls.current.pause
@@ -75,13 +75,13 @@ function InnerGame(props: GameProps) {
             <overlay.In>
                 <GameLoopContextProvider value={gameLoopContext.current}>
                     <div className="absolute bottom-0 left-1/2 p-4 transform -translate-x-1/2">
-                        <MapOverlay simulation={simulationRef.current} camera={camera} />
+                        <MapOverlay runtime={runtimeRef.current} camera={camera} />
                     </div>
                 </GameLoopContextProvider>
             </overlay.In>
             
             <GameLoopContextProvider value={gameLoopContext.current}>
-                <GameCameraAnimated simulation={simulationRef.current} />
+                <GameCameraAnimated runtime={runtimeRef.current} />
 
                 {
                     props.world.shapes.map((shape, index) =>
@@ -90,12 +90,12 @@ function InnerGame(props: GameProps) {
                 }
 
                 {
-                    <Rocket rocket={simulationRef.current.rocket} />
+                    <Rocket rocket={runtimeRef.current.state.rocket} />
                 }
 
                 {
-                    simulationRef.current.levels.map((level, index) =>
-                        <Level key={index} level={level} rocket={simulationRef.current.rocket} />
+                    runtimeRef.current.state.levels.map((level, index) =>
+                        <Level key={index} level={level} rocket={runtimeRef.current.state.rocket} />
                     )
                 }
 

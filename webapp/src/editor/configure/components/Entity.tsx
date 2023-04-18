@@ -4,15 +4,15 @@ import { Suspense, useRef, useState } from "react"
 import { Euler, MeshBasicMaterial } from "three"
 
 import { selectHightlightColor, selectObjectColor } from "../../../common/Values"
-import { entities } from "../../../model/world/Entities"
-import { Entity as EntityModel } from "../../../model/world/Entity"
+import { EntityModel as EntityModel } from "../../../model/world/EntityModel"
+import { entityModels } from "../../../model/world/EntityModels"
 import { useEditorStore } from "../../store/useEditorStore"
 import { ConfigureState } from "../state/ConfigureModeState"
 import { ConfigureHint, HintType } from "../state/Hint"
 import { Selectable, SelectableType } from "../state/Selectable"
 
 export function Entity(props: { entity: EntityModel, index?: number }) {
-    const entry = entities[props.entity.type]
+    const entry = entityModels[props.entity.type]
 
     const [material, setMaterial] = useState<MeshBasicMaterial | undefined>()
     const previousStrokeColor = useRef<number | undefined>(undefined)

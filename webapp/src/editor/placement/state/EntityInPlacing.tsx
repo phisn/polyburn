@@ -1,4 +1,4 @@
-import { Entity } from "../../../model/world/Entity"
+import { EntityModel } from "../../../model/world/EntityModel"
 import { EntityType } from "../../../model/world/EntityType"
 import { Point } from "../../../model/world/Point"
 
@@ -13,5 +13,5 @@ export interface EntityInPlacing {
     // when placing an entity for the first time
     // we do not have a entity yet. so this is only non-null
     // when we are moving an existing entity
-    buffered: Entity | null
+    buffered: EntityModel | null
 }

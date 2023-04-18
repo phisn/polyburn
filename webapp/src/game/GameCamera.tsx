@@ -6,25 +6,25 @@ import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 import { gameCameraTransitionSpeed } from "../common/Values"
 import { Point } from "../model/world/Point"
 import { useInterpolation } from "./components/useInterpolation"
-import { Simulation } from "./simulation/createSimulation"
+import { Runtime } from "./runtime/Runtime"
 import { GameLoopContext } from "./useGameLoop"
 
 function GameCameraAnimated(props: { 
-    simulation: Simulation 
+    runtime: Runtime
 }) {
     const cameraRef = useRef<ThreeOrthographicCamera>(null!)
     const gameLoopContext = useContext(GameLoopContext)
 
     const [cameraBounds, setCameraBounds] = useState<{ topLeft: Point, bottomRight: Point }>(
-        props.simulation.currentLevel.camera
+        props.runtime.state.currentLevel.camera
     )
 
     const animating = useRef(false)
 
     useEffect(() => gameLoopContext.subscribe(() => {
-        if (props.simulation.currentLevel.camera !== cameraBounds) {
+        if (props.runtime.state.currentLevel.camera !== cameraBounds) {
             animating.current = true
-            setCameraBounds(props.simulation.currentLevel.camera)
+            setCameraBounds(props.runtime.state.currentLevel.camera)
         }
     }))
     
@@ -65,7 +65,7 @@ function GameCameraAnimated(props: {
         cameraTargetPosition.current = { x: targetPositionX, y: targetPositionY }
     }, [ cameraBounds ])
 
-    useInterpolation(props.simulation.rocket.body, (point: Point) => {
+    useInterpolation(props.runtime.state.rocket.body, (point: Point) => {
         previousRocketPosition.current = point
 
         if (animating.current) {

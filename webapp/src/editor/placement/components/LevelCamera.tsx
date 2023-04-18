@@ -2,7 +2,7 @@ import { Line } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { useState } from "react"
 
-import { FlagEntity } from "../../../model/world/Flag"
+import { FlagEntity } from "../../../model/world/FlagModel"
 import { useEditorStore } from "../../store/useEditorStore"
 import { HintType } from "../state/Hint"
 import { PlacementState } from "../state/PlacementModeState"

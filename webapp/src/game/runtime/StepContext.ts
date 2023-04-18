@@ -1,5 +1,5 @@
 
-export interface UpdateContext {
+export interface StepContext {
     rotation: number
     thrust: boolean
     pause: boolean

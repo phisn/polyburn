@@ -1,11 +1,16 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { Shape } from "../../model/world/Shape"
+import { ShapeModel } from "../../../model/world/ShapeModel"
+import { ColliderType } from "../ColliderType"
+import { RuntimeMetaState } from "../RuntimeState"
 
-export function createShape(shape: Shape, rapierWorld: RAPIER.World) {
+export function createShape(
+    state: RuntimeMetaState,
+    shape: ShapeModel
+) {
     const [vertices, top, left] = verticesForShape(shape)
 
-    const body = rapierWorld.createRigidBody(
+    const body = state.rapier.createRigidBody(
         RAPIER.RigidBodyDesc.fixed()
             .setTranslation(left, top)
     )
@@ -16,13 +21,15 @@ export function createShape(shape: Shape, rapierWorld: RAPIER.World) {
         throw new Error("Failed to create collider")
     }
 
-    rapierWorld.createCollider(
+    state.handleToEntityType.set(body.handle, ColliderType.Shape)
+
+    state.rapier.createCollider(
         colliderDesc,
         body
     )
 }
 
-function verticesForShape(shape: Shape): [ Float32Array, number, number ] {
+function verticesForShape(shape: ShapeModel): [ Float32Array, number, number ] {
     const left = shape.vertices.reduce((acc, vertex) => Math.min(acc, vertex.x), Infinity)
     const top  = shape.vertices.reduce((acc, vertex) => Math.min(acc, vertex.y), Infinity)
 

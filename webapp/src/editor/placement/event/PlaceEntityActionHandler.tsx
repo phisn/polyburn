@@ -1,8 +1,8 @@
 import { changeAnchor } from "../../../common/math"
 import { snapDistance } from "../../../common/Values"
-import { entities } from "../../../model/world/Entities"
+import { entityModels } from "../../../model/world/EntityModels"
 import { Point } from "../../../model/world/Point"
-import { findClosestEdge } from "../../../model/world/Shape"
+import { findClosestEdge } from "../../../model/world/ShapeModel"
 import { scale } from "../../../model/world/Size"
 import { PointerHandlerParams } from "../../event/EventDefinitions"
 import { EditorStore } from "../../store/EditorStore"
@@ -18,7 +18,7 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
             action: null
         })
 
-        const entry = entities[params.action.entity.type]
+        const entry = entityModels[params.action.entity.type]
         
         state.mutate(insertEntity(
             entry.transformOrCreate(
@@ -42,7 +42,7 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
         */
 
         const edge = findEdgeForObject(state, params.point, params.event.snap)
-        const entry = entities[params.action.entity.type]
+        const entry = entityModels[params.action.entity.type]
 
         if (edge) {
             const transposed = changeAnchor(

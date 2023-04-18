@@ -1,5 +1,5 @@
 import { EntityType } from "../../model/world/EntityType"
-import { World } from "../../model/world/World"
+import { WorldModel } from "../../model/world/WorldModel"
 import { ConfigureState } from "../configure/state/ConfigureModeState"
 import { initialPlacementState, PlacementState as PlacementModeState } from "../placement/state/PlacementModeState"
 import { Mutation } from "./Mutation"
@@ -17,7 +17,7 @@ export interface EditorState {
     modeState: ModeState
 
     cameraState: CameraState
-    world: World,
+    world: WorldModel,
 
     undos: Mutation[],
     redos: Mutation[]
@@ -26,7 +26,7 @@ export interface EditorState {
 // captures work by using a function that returns a mutation. Because after captures we maybe
 // want to delegate to another function wants to create a new capture we need to recursively
 // call the function until we get a mutation
-export type RecursiveMutationWithCapture = (world: World) => RecursiveMutationWithCapture | Mutation
+export type RecursiveMutationWithCapture = (world: WorldModel) => RecursiveMutationWithCapture | Mutation
 
 export interface EditorStore extends EditorState {
     run(): void

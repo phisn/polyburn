@@ -1,6 +1,6 @@
 import { changeAnchor } from "../../common/math"
 import { snapDistance } from "../../common/Values"
-import { entities } from "./Entities"
+import { entityModels } from "./EntityModels"
 import { EntityType } from "./EntityType"
 import { Point } from "./Point"
 import { scale } from "./Size"
@@ -21,7 +21,7 @@ export interface FlagEntity {
 export const flagCaptureHeight = 0.5
 
 export function captureBox(entity: FlagEntity) {
-    const entry = entities[EntityType.RedFlag]
+    const entry = entityModels[EntityType.RedFlag]
 
     const transformed = changeAnchor(
         entity.position,

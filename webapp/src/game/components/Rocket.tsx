@@ -3,18 +3,18 @@ import { Suspense, useRef } from "react"
 import { Object3D } from "three"
 
 import { changeAnchor } from "../../common/math"
-import { entities } from "../../model/world/Entities"
+import { entityModels } from "../../model/world/EntityModels"
 import { EntityType } from "../../model/world/EntityType"
 import { Point } from "../../model/world/Point"
 import { scale } from "../../model/world/Size"
-import { SimulationRocket } from "../simulation/createRocket"
+import { RuntimeRocket } from "../runtime/entity/RuntimeRocket"
 import { useInterpolation } from "./useInterpolation"
 
-export function Rocket(props: { rocket: SimulationRocket }) {
+export function Rocket(props: { rocket: RuntimeRocket }) {
     const svgRef = useRef<Object3D>(null!)
     // const lineRef = useRef<any>(null!)
 
-    const entry = entities[EntityType.Rocket]
+    const entry = entityModels[EntityType.Rocket]
     const size = scale(entry.size, entry.scale)
 
     useInterpolation(props.rocket.body, (point: Point, rotation: number) => {

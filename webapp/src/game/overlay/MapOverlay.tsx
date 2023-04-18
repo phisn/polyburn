@@ -1,10 +1,10 @@
 import { useContext, useEffect, useRef  } from "react"
 import { OrthographicCamera } from "three"
 
-import { Simulation } from "../simulation/createSimulation"
+import { Runtime } from "../runtime/Runtime"
 import { GameLoopContext } from "../useGameLoop"
 
-function MapOverlay(props: { simulation: Simulation, camera: OrthographicCamera }) {
+function MapOverlay(props: { runtime: Runtime, camera: OrthographicCamera }) {
     const gameLoopContext = useContext(GameLoopContext)
 
     const containerDivRef = useRef<HTMLDivElement>(null!)
@@ -27,27 +27,27 @@ function MapOverlay(props: { simulation: Simulation, camera: OrthographicCamera 
         backgroundDivRef.current.style.height = `${divSize.height}px`
 
         const levelSize = {
-            x: props.simulation.currentLevel.camera.topLeft.x - props.simulation.currentLevel.camera.bottomRight.x,
-            y: props.simulation.currentLevel.camera.topLeft.y - props.simulation.currentLevel.camera.bottomRight.y
+            x: props.runtime.state.currentLevel.camera.topLeft.x - props.runtime.state.currentLevel.camera.bottomRight.x,
+            y: props.runtime.state.currentLevel.camera.topLeft.y - props.runtime.state.currentLevel.camera.bottomRight.y
         }
 
-        const top = props.simulation.currentLevel.camera.topLeft.y 
+        const top = props.runtime.state.currentLevel.camera.topLeft.y 
             - (props.camera.position.y + props.camera.top)
 
         const topPercent = top / levelSize.y
 
         const bottom = (props.camera.position.y + props.camera.bottom)
-            - props.simulation.currentLevel.camera.bottomRight.y
+            - props.runtime.state.currentLevel.camera.bottomRight.y
 
         const bottomPercent = bottom / levelSize.y
 
-        const left = props.simulation.currentLevel.camera.topLeft.x
+        const left = props.runtime.state.currentLevel.camera.topLeft.x
             - (props.camera.position.x + props.camera.left)
 
         const leftPercent = left / levelSize.x
 
         const right = (props.camera.position.x + props.camera.right)
-            - props.simulation.currentLevel.camera.bottomRight.x
+            - props.runtime.state.currentLevel.camera.bottomRight.x
         
         const rightPercent = right / levelSize.x
 

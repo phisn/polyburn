@@ -30,7 +30,16 @@ function Play() {
         return (
             <>
                 <Game world={playingWorld} />
-                <div className="select-none absolute top-0 left-0 p-4">
+                <div className="absolute top-0 left-0 p-4" style={{
+                    touchAction: "none", 
+                    userSelect: "none",
+
+                    // Prevent canvas selection on ios
+                    // https://github.com/playcanvas/editor/issues/160
+                    WebkitTouchCallout: "none",
+                    WebkitUserSelect: "none",
+                    WebkitTapHighlightColor: "rgba(255,255,255,0)",
+                }}>
                     <Navbar>
                         <button className="btn btn-square btn-ghost"
                             onClick={onLevelCancel} >

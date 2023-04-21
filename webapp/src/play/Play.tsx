@@ -30,7 +30,7 @@ function Play() {
         return (
             <>
                 <Game world={playingWorld} />
-                <div className="absolute top-0 left-0 p-4">
+                <div className="select-none absolute top-0 left-0 p-4">
                     <Navbar>
                         <button className="btn btn-square btn-ghost"
                             onClick={onLevelCancel} >

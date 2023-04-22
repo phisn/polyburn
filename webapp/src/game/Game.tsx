@@ -42,10 +42,7 @@ function Game(props: GameProps) {
                     <InnerGame {...props} />
                 </Suspense>
             </Canvas>
-        
-            <div className="absolute top-0 left-0 p-4">
-            </div>
-
+            
             <overlay.Out />
         </div>
     )

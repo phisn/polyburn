@@ -59,7 +59,8 @@ function MapOverlay(props: { runtime: Runtime, camera: OrthographicCamera }) {
 
     return (
         <>
-            <div ref={containerDivRef} className="select-none relative m-2 overflow-hidden">
+        
+            <div ref={containerDivRef} className="relative m-2 overflow-hidden">
                 <div ref={backgroundDivRef} className="absolute bg-white opacity-20">
                 </div>
 

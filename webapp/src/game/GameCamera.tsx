@@ -8,6 +8,7 @@ import { Point } from "../model/world/Point"
 import { useInterpolation } from "./components/useInterpolation"
 import { Runtime } from "./runtime/Runtime"
 import { GameLoopContext } from "./useGameLoop"
+import { useGameStore } from "./useGameStore"
 
 function GameCameraAnimated(props: { 
     runtime: Runtime
@@ -68,12 +69,16 @@ function GameCameraAnimated(props: {
     useInterpolation(props.runtime.state.rocket.body, (point: Point) => {
         previousRocketPosition.current = point
 
+        /*
         if (animating.current) {
             void 0
         }
         else {
             updateCameraPosition()
         }
+        */
+
+        updateCameraPosition()
     })
 
     useFrame((_, delta) => {
@@ -101,13 +106,15 @@ function GameCameraAnimated(props: {
     })
 
     const size = useThree(state => state.size)
+    const zoom = useGameStore(state => state.zoom)
 
     useEffect(() => {
         const aspect = size.width / size.height
     
+        
         const cameraSize = {
-            x: cameraBounds.bottomRight.x - cameraBounds.topLeft.x,
-            y: cameraBounds.topLeft.y - cameraBounds.bottomRight.y
+            x: (cameraBounds.bottomRight.x - cameraBounds.topLeft.x) / zoom,
+            y: (cameraBounds.topLeft.y - cameraBounds.bottomRight.y) / zoom
         }
     
         let targetSize
@@ -137,7 +144,7 @@ function GameCameraAnimated(props: {
         cameraTargetSize.current = targetSize
 
         updateCameraPosition()
-    }, [ size, cameraBounds, updateCameraPosition ])
+    }, [ size, cameraBounds, zoom, updateCameraPosition ])
 
     function moveCameraTo(distance: number) {
         const currentWidth = cameraRef.current.right - cameraRef.current.left

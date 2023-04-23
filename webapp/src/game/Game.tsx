@@ -8,10 +8,11 @@ import Level from "./components/Level"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
 import GameCameraAnimated from "./GameCamera"
-import MapOverlay from "./overlay/MapOverlay"
+import Overlay from "./overlay/Overlay"
 import { Runtime } from "./runtime/Runtime"
-import { useControlsRef } from "./useControlsRef"
+import { useControls } from "./useControls"
 import { GameLoopContextProvider, useGameLoop } from "./useGameLoop"
+import { ProvideGameStore } from "./useGameStore"
 import { useLandscape } from "./useLandscape"
 
 export interface GameProps {
@@ -26,25 +27,27 @@ function Game(props: GameProps) {
     console.trace("Game")
 
     return (
-        <div className="h-screen w-screen">
-            <Canvas style={{ 
-                background: "#000000", 
-                touchAction: "none", 
-                userSelect: "none",
+        <ProvideGameStore>
+            <div className="h-screen w-screen select-none">
+                <Canvas style={{ 
+                    background: "#000000", 
+                    touchAction: "none", 
+                    userSelect: "none",
 
-                // Prevent canvas selection on ios
-                // https://github.com/playcanvas/editor/issues/160
-                WebkitTouchCallout: "none",
-                WebkitUserSelect: "none",
-                WebkitTapHighlightColor: "rgba(255,255,255,0)",
-            }} >
-                <Suspense>
-                    <InnerGame {...props} />
-                </Suspense>
-            </Canvas>
+                    // Prevent canvas selection on ios
+                    // https://github.com/playcanvas/editor/issues/160
+                    WebkitTouchCallout: "none",
+                    WebkitUserSelect: "none",
+                    WebkitTapHighlightColor: "rgba(255,255,255,0)",
+                }} >
+                    <Suspense>
+                        <InnerGame {...props} />
+                    </Suspense>
+                </Canvas>
             
-            <overlay.Out />
-        </div>
+                <overlay.Out />
+            </div>
+        </ProvideGameStore>
     )
 }
 
@@ -55,7 +58,7 @@ function InnerGame(props: GameProps) {
 
     useLandscape()
 
-    const controls = useControlsRef()
+    const controls = useControls()
 
     const gameLoopContext = useGameLoop(() => {
         runtimeRef.current.step({
@@ -71,9 +74,7 @@ function InnerGame(props: GameProps) {
         <>
             <overlay.In>
                 <GameLoopContextProvider value={gameLoopContext.current}>
-                    <div className="absolute bottom-0 left-1/2 p-4 transform -translate-x-1/2">
-                        <MapOverlay runtime={runtimeRef.current} camera={camera} />
-                    </div>
+                    <Overlay runtime={runtimeRef.current} camera={camera} />
                 </GameLoopContextProvider>
             </overlay.In>
             

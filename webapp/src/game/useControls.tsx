@@ -38,7 +38,7 @@ interface MousePointerState {
     startRotation: number
 }
 
-export function useControlsRef() {
+export function useControls() {
     const controlsRef = useRef<ControlsRef>({
         thrust: false,
         rotation: 0,

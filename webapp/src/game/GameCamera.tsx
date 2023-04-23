@@ -5,27 +5,26 @@ import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 
 import { gameCameraTransitionSpeed } from "../common/Values"
 import { Point } from "../model/world/Point"
-import { useInterpolation } from "./components/useInterpolation"
-import { Runtime } from "./runtime/Runtime"
 import { GameLoopContext } from "./useGameLoop"
 import { useGameStore } from "./useGameStore"
+import { useInterpolation } from "./useInterpolation"
 
-function GameCameraAnimated(props: { 
-    runtime: Runtime
-}) {
+function GameCameraAnimated() {
+    const runtime = useGameStore(state => state.runtime)
+
     const cameraRef = useRef<ThreeOrthographicCamera>(null!)
     const gameLoopContext = useContext(GameLoopContext)
 
     const [cameraBounds, setCameraBounds] = useState<{ topLeft: Point, bottomRight: Point }>(
-        props.runtime.state.currentLevel.camera
+        runtime.state.currentLevel.camera
     )
 
     const animating = useRef(false)
 
     useEffect(() => gameLoopContext.subscribe(() => {
-        if (props.runtime.state.currentLevel.camera !== cameraBounds) {
+        if (runtime.state.currentLevel.camera !== cameraBounds) {
             animating.current = true
-            setCameraBounds(props.runtime.state.currentLevel.camera)
+            setCameraBounds(runtime.state.currentLevel.camera)
         }
     }))
     
@@ -66,7 +65,7 @@ function GameCameraAnimated(props: {
         cameraTargetPosition.current = { x: targetPositionX, y: targetPositionY }
     }, [ cameraBounds ])
 
-    useInterpolation(props.runtime.state.rocket.body, (point: Point) => {
+    useInterpolation(runtime.state.rocket.body, (point: Point) => {
         previousRocketPosition.current = point
 
         /*
@@ -111,7 +110,7 @@ function GameCameraAnimated(props: {
     useEffect(() => {
         const aspect = size.width / size.height
     
-        
+
         const cameraSize = {
             x: (cameraBounds.bottomRight.x - cameraBounds.topLeft.x) / zoom,
             y: (cameraBounds.topLeft.y - cameraBounds.bottomRight.y) / zoom

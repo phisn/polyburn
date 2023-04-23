@@ -1,6 +1,10 @@
 import { createStore } from "zustand"
 
+import { Runtime } from "./runtime/Runtime"
+
 export interface GameStore {
+    get runtime(): Runtime
+
     zoom: number,
     zoomIndex: number,
 
@@ -24,8 +28,10 @@ export function canZoomOut(index: number) {
     return index > 0
 }
 
-export const createGameStore = () => 
+export const createGameStore = (runtime: Runtime) => 
     createStore<GameStore>((set, get) => ({
+        runtime,
+
         zoom: 1,
         zoomIndex: 1,
 

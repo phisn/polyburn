@@ -2,15 +2,16 @@ import { createContext, useContext } from "react"
 import { useStore } from "zustand"
 
 import { createGameStore, GameStore } from "./GameStore"
+import { Runtime } from "./runtime/Runtime"
 
 const GameStoreContext = createContext<ReturnType<typeof createGameStore>>(null!)
 
-export const ProvideGameStore = ({ children }: { children: React.ReactNode }) => {
-    const store = createGameStore()
+export const ProvideGameStore = (props: { children: React.ReactNode, runtime: Runtime }) => {
+    const store = createGameStore(props.runtime)
 
     return (
         <GameStoreContext.Provider value={store}>
-            {children}
+            {props.children}
         </GameStoreContext.Provider>
     )
 }

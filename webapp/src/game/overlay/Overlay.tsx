@@ -4,12 +4,10 @@ import { shallow } from "zustand/shallow"
 import { ZoomInSvg } from "../../common/svg/ZoomInSvg"
 import { ZoomOutSvg } from "../../common/svg/ZoomOutSvg"
 import { canZoomIn, canZoomOut } from "../GameStore"
-import { Runtime } from "../runtime/Runtime"
 import { useGameStore } from "../useGameStore"
 import MapOverlay from "./MapOverlay"
 
 export default function Overlay(props: { 
-    runtime: Runtime, 
     camera: OrthographicCamera,
 }) {
     const [zoomIndex, zoomIn, zoomOut] = useGameStore(state => [ 
@@ -26,7 +24,7 @@ export default function Overlay(props: {
                     <ZoomInSvg className="w-6 h-6" />
                 </button>
 
-                <MapOverlay runtime={props.runtime} camera={props.camera} />
+                <MapOverlay camera={props.camera} />
                             
                 <button className={`btn btn-square btn-ghost ${!canZoomOut(zoomIndex) && "invisible"}`}
                     onClick={zoomOut}>

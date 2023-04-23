@@ -12,7 +12,7 @@ import Overlay from "./overlay/Overlay"
 import { Runtime } from "./runtime/Runtime"
 import { useControls } from "./useControls"
 import { GameLoopContextProvider, useGameLoop } from "./useGameLoop"
-import { ProvideGameStore } from "./useGameStore"
+import { ProvideGameStore, useGameStore } from "./useGameStore"
 import { useLandscape } from "./useLandscape"
 
 export interface GameProps {
@@ -24,10 +24,10 @@ const rapierInit = RAPIER.init()
 const overlay = tunnel()
 
 function Game(props: GameProps) {
-    console.trace("Game")
+    const runtimeRef = useRef<Runtime>(new Runtime(props.world))
 
     return (
-        <ProvideGameStore>
+        <ProvideGameStore runtime={runtimeRef.current}>
             <div className="h-screen w-screen select-none" style={{
                 touchAction: "none", 
                 userSelect: "none",
@@ -38,17 +38,7 @@ function Game(props: GameProps) {
                 WebkitUserSelect: "none",
                 WebkitTapHighlightColor: "rgba(255,255,255,0)",
             }}>
-                <Canvas style={{ 
-                    background: "#000000", 
-                    touchAction: "none", 
-                    userSelect: "none",
-
-                    // Prevent canvas selection on ios
-                    // https://github.com/playcanvas/editor/issues/160
-                    WebkitTouchCallout: "none",
-                    WebkitUserSelect: "none",
-                    WebkitTapHighlightColor: "rgba(255,255,255,0)",
-                }} >
+                <Canvas style={{ background: "#000000" }} >
                     <Suspense>
                         <InnerGame {...props} />
                     </Suspense>
@@ -61,16 +51,13 @@ function Game(props: GameProps) {
 }
 
 function InnerGame(props: GameProps) {
-    const runtimeRef = useRef<Runtime>(
-        new Runtime(props.world)
-    )
-
     useLandscape()
 
+    const runtime = useGameStore(state => state.runtime)
     const controls = useControls()
 
     const gameLoopContext = useGameLoop(() => {
-        runtimeRef.current.step({
+        runtime.step({
             thrust: controls.current.thrust,
             rotation: controls.current.rotation,
             pause: controls.current.pause
@@ -83,12 +70,12 @@ function InnerGame(props: GameProps) {
         <>
             <overlay.In>
                 <GameLoopContextProvider value={gameLoopContext.current}>
-                    <Overlay runtime={runtimeRef.current} camera={camera} />
+                    <Overlay camera={camera} />
                 </GameLoopContextProvider>
             </overlay.In>
             
             <GameLoopContextProvider value={gameLoopContext.current}>
-                <GameCameraAnimated runtime={runtimeRef.current} />
+                <GameCameraAnimated />
 
                 {
                     props.world.shapes.map((shape, index) =>
@@ -97,12 +84,12 @@ function InnerGame(props: GameProps) {
                 }
 
                 {
-                    <Rocket rocket={runtimeRef.current.state.rocket} />
+                    <Rocket rocket={runtime.state.rocket} />
                 }
 
                 {
-                    runtimeRef.current.state.levels.map((level, index) =>
-                        <Level key={index} level={level} rocket={runtimeRef.current.state.rocket} />
+                    runtime.state.levels.map((level, index) =>
+                        <Level key={index} level={level} rocket={runtime.state.rocket} />
                     )
                 }
 

@@ -28,7 +28,16 @@ function Game(props: GameProps) {
 
     return (
         <ProvideGameStore>
-            <div className="h-screen w-screen select-none">
+            <div className="h-screen w-screen select-none" style={{
+                touchAction: "none", 
+                userSelect: "none",
+
+                // Prevent canvas selection on ios
+                // https://github.com/playcanvas/editor/issues/160
+                WebkitTouchCallout: "none",
+                WebkitUserSelect: "none",
+                WebkitTapHighlightColor: "rgba(255,255,255,0)",
+            }}>
                 <Canvas style={{ 
                     background: "#000000", 
                     touchAction: "none", 

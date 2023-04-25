@@ -11,8 +11,9 @@ import Overlay from "./components/overlay/Overlay"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
 import { useControls } from "./hooks/useControls"
-import { GameLoopContextProvider, useGameLoop } from "./hooks/useGameLoop"
+import { useGameLoop } from "./hooks/useGameLoop"
 import { Runtime } from "./runtime/Runtime"
+import { ProvideGameStore, useGameStore } from "./store/useGameStore"
 
 export interface GameProps {
     world: WorldModel
@@ -20,6 +21,7 @@ export interface GameProps {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const rapierInit = RAPIER.init()
+
 const overlay = tunnel()
 
 function Game(props: GameProps) {
@@ -37,7 +39,17 @@ function Game(props: GameProps) {
                 WebkitUserSelect: "none",
                 WebkitTapHighlightColor: "rgba(255,255,255,0)",
             }}>
-                <Canvas style={{ background: "#000000" }} >
+                <Canvas style={{ 
+                    background: "#000000",
+                    touchAction: "none", 
+                    userSelect: "none",
+        
+                    // Prevent canvas selection on ios
+                    // https://github.com/playcanvas/editor/issues/160
+                    WebkitTouchCallout: "none",
+                    WebkitUserSelect: "none",
+                    WebkitTapHighlightColor: "rgba(255,255,255,0)",
+                }} >
                     <Suspense>
                         <InnerGame {...props} />
                     </Suspense>
@@ -55,8 +67,7 @@ function InnerGame(props: GameProps) {
     const runtime = useGameStore(state => state.runtime)
     const controls = useControls()
 
-
-    const gameLoopContext = useGameLoop(() => {
+    useGameLoop(() => {
         runtime.step({
             thrust: controls.current.thrust,
             rotation: controls.current.rotation,
@@ -69,32 +80,28 @@ function InnerGame(props: GameProps) {
     return (
         <>
             <overlay.In>
-                <GameLoopContextProvider value={gameLoopContext.current}>
-                    <Overlay camera={camera} />
-                </GameLoopContextProvider>
+                <Overlay camera={camera} />
             </overlay.In>
             
-            <GameLoopContextProvider value={gameLoopContext.current}>
-                <Camera />
+            <Camera />
 
-                {
-                    props.world.shapes.map((shape, index) =>
-                        <Shape key={index} vertices={shape.vertices} />
-                    )
-                }
+            {
+                props.world.shapes.map((shape, index) =>
+                    <Shape key={index} vertices={shape.vertices} />
+                )
+            }
 
-                {
-                    <Rocket rocket={runtime.state.rocket} />
-                }
+            {
+                <Rocket rocket={runtime.state.rocket} />
+            }
 
-                {
-                    runtime.state.levels.map((level, index) =>
-                        <Level key={index} level={level} rocket={runtime.state.rocket} />
-                    )
-                }
+            {
+                runtime.state.levels.map((level, index) =>
+                    <Level key={index} level={level} rocket={runtime.state.rocket} />
+                )
+            }
 
-                {/* <Stats /> */}
-            </GameLoopContextProvider>
+            {/* <Stats /> */}
         </>
     )
 }

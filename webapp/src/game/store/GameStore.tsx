@@ -1,15 +1,20 @@
 
-import { createContext, useContext } from "react"
-import { createStore, useStore } from "zustand"
+import { createStore } from "zustand"
 
+import { Point } from "../../model/world/Point"
 import { Runtime } from "../runtime/Runtime"
-import { RuntimeInterpolated } from "./RuntimeInterpolated"
-import { Zoom } from "./Zoom"
+import { canZoomIn, canZoomOut } from "./Zoom"
+
+export interface InterpolateUpdate {
+    rocketPosition: Point
+    rocketRotation: number
+}
 
 interface GameState {
-    interpolated: RuntimeInterpolated
-    zoom: Zoom
-} 
+    interpolateSubscribers: ((update: InterpolateUpdate) => void)[]
+
+    zoomIndex: number
+}
 
 export interface GameStore extends GameState {
     get runtime(): Runtime
@@ -17,59 +22,44 @@ export interface GameStore extends GameState {
     zoomIn(): void
     zoomOut(): void
 
-
+    interpolateSubscribe(callback: (update: InterpolateUpdate) => void): () => void
 }
 
 export const createGameStore = (runtime: Runtime) => 
     createStore<GameStore>((set, get) => ({
         runtime,
 
-        zoom: 1,
+        interpolateSubscribers: [],
         zoomIndex: 1,
 
         zoomIn: () => {
             const zoomIndex = get().zoomIndex
-
             if (canZoomIn(zoomIndex)) {
                 set({
-                    zoom: ZoomsIndexed[zoomIndex + 1],
                     zoomIndex: zoomIndex + 1
                 })
             }
         },
         zoomOut: () => {
-            const nextZoomIndex = get().zoomIndex
-
-            if (canZoomOut(nextZoomIndex)) {
+            const zoomIndex = get().zoomIndex
+            if (canZoomOut(zoomIndex)) {
                 set({
-                    zoom: ZoomsIndexed[nextZoomIndex - 1],
-                    zoomIndex: nextZoomIndex - 1
+                    zoomIndex: zoomIndex - 1
                 })
             }
         },
+
+        interpolateSubscribe: (callback) => {
+            const subscribers = get().interpolateSubscribers
+
+            subscribers.push(callback)
+
+            return () => {
+                const index = subscribers.indexOf(callback)
+
+                if (index > -1) {
+                    subscribers.splice(index, 1)
+                }
+            }
+        }
     }))
-
-const GameStoreContext = createContext<ReturnType<typeof createGameStore>>(null!)
-
-export const ProvideGameStore = (props: { children: React.ReactNode, runtime: Runtime }) => {
-    const store = createGameStore(props.runtime)
-    
-    return (
-        <GameStoreContext.Provider value={store}>
-            {props.children}
-     
-        </GameStoreContext.Provider>
-    )
-}
-export const useGameStore = <U,> (
-    selector: (state: GameStore) => U, 
-    equalityFn?: (a: U, b: U) => boolean
-): U => {
-    const store = useContext(GameStoreContext)
-    
-    if (!store) {
-        throw new Error("GameStoreContext not found")
-    }
-    
-    return useStore(store, selector, equalityFn)
-}

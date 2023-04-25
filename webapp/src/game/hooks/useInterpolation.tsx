@@ -1,18 +1,18 @@
-import RAPIER from "@dimforge/rapier2d-compat"
-import { useFrame } from "@react-three/fiber"
-import { useContext } from "react"
-import { MathUtils, Vector3 } from "three"
 
-import { Point } from "../../model/world/Point"
-import { GameLoopContext } from "./useGameLoop"
+import { useEffect } from "react"
 
-const interpolationDeltaThreshold = 1
+import { InterpolateUpdate } from "../store/GameStore"
+import { useGameStore } from "../store/useGameStore"
 
 export function useInterpolation(
-    body: RAPIER.RigidBody, 
-    callback: (point: Point, rotation: number) => void,
-    disable?: boolean
+    callback: (update: InterpolateUpdate) => void,
 ) {
+    const interpolateSubscribe = useGameStore(state => state.interpolateSubscribe)
+    useEffect(() => interpolateSubscribe(callback), [callback, interpolateSubscribe])
+}
+
+
+/*
     const gameLoopContext = useContext(GameLoopContext)
      
     let previousTime = 0
@@ -106,4 +106,4 @@ export function useInterpolation(
             callback(lerpVector, lerpRotation)
         }
     })
-}
+    */

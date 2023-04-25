@@ -43,7 +43,6 @@ function Play() {
                     <Navbar>
                         <button className="btn btn-square btn-ghost"
                             onClick={onLevelCancel} >
-                                
                             <StopFillSvg />
                         </button>
                     </Navbar>

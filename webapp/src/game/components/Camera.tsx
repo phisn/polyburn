@@ -3,13 +3,13 @@ import { useFrame, useThree } from "@react-three/fiber"
 import { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 
-import { gameCameraTransitionSpeed } from "../common/Values"
-import { Point } from "../model/world/Point"
-import { GameLoopContext } from "./useGameLoop"
-import { useGameStore } from "./useGameStore"
-import { useInterpolation } from "./useInterpolation"
+import { gameCameraTransitionSpeed } from "../../common/Values"
+import { Point } from "../../model/world/Point"
+import { useGameStore } from "../store/GameStore"
+import { GameLoopContext } from "../useGameLoop"
+import { useInterpolation } from "../useInterpolation"
 
-function GameCameraAnimated() {
+function Camera() {
     const runtime = useGameStore(state => state.runtime)
 
     const cameraRef = useRef<ThreeOrthographicCamera>(null!)
@@ -201,4 +201,4 @@ function moveTo(distance: number, source: number, target: number) {
     }
 }
 
-export default GameCameraAnimated
+export default Camera

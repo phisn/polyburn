@@ -3,17 +3,16 @@ import { Canvas, useThree } from "@react-three/fiber"
 import { Suspense, useRef } from "react"
 import tunnel from "tunnel-rat"
 
+import { useLandscape } from "../common/hooks/useLandscape"
 import { WorldModel } from "../model/world/WorldModel"
+import Camera from "./components/Camera"
 import Level from "./components/Level"
+import Overlay from "./components/overlay/Overlay"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
-import GameCameraAnimated from "./GameCamera"
-import Overlay from "./overlay/Overlay"
+import { useControls } from "./hooks/useControls"
+import { GameLoopContextProvider, useGameLoop } from "./hooks/useGameLoop"
 import { Runtime } from "./runtime/Runtime"
-import { useControls } from "./useControls"
-import { GameLoopContextProvider, useGameLoop } from "./useGameLoop"
-import { ProvideGameStore, useGameStore } from "./useGameStore"
-import { useLandscape } from "./useLandscape"
 
 export interface GameProps {
     world: WorldModel
@@ -56,6 +55,7 @@ function InnerGame(props: GameProps) {
     const runtime = useGameStore(state => state.runtime)
     const controls = useControls()
 
+
     const gameLoopContext = useGameLoop(() => {
         runtime.step({
             thrust: controls.current.thrust,
@@ -75,7 +75,7 @@ function InnerGame(props: GameProps) {
             </overlay.In>
             
             <GameLoopContextProvider value={gameLoopContext.current}>
-                <GameCameraAnimated />
+                <Camera />
 
                 {
                     props.world.shapes.map((shape, index) =>

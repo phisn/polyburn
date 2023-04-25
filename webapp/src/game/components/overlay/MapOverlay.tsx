@@ -1,8 +1,8 @@
 import { useContext, useEffect, useRef  } from "react"
 import { OrthographicCamera } from "three"
 
-import { GameLoopContext } from "../useGameLoop"
-import { useGameStore } from "../useGameStore"
+import { useGameStore } from "../../store/GameStore"
+import { GameLoopContext } from "../../useGameLoop"
 
 function MapOverlay(props: { camera: OrthographicCamera }) {
     const runtime = useGameStore(state => state.runtime)

@@ -3,7 +3,7 @@ import { createContext, useRef } from "react"
 
 export interface GameLoopContext {
     subscribe: (callback: () => void) => () => void,
-    
+
     timePerFrame: number,
     timeAtLastFrame: number,
 }

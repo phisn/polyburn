@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber"
 import { useContext } from "react"
 import { MathUtils, Vector3 } from "three"
 
-import { Point } from "../model/world/Point"
+import { Point } from "../../model/world/Point"
 import { GameLoopContext } from "./useGameLoop"
 
 const interpolationDeltaThreshold = 1

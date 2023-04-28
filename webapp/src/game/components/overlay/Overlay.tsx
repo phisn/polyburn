@@ -3,7 +3,8 @@ import { shallow } from "zustand/shallow"
 
 import { ZoomInSvg } from "../../../common/svg/ZoomInSvg"
 import { ZoomOutSvg } from "../../../common/svg/ZoomOutSvg"
-import { canZoomIn, canZoomOut, useGameStore } from "../../store/GameStore"
+import { useGameStore } from "../../store/useGameStore"
+import { canZoomIn, canZoomOut } from "../../store/Zoom"
 import MapOverlay from "./MapOverlay"
 
 export default function Overlay(props: { 

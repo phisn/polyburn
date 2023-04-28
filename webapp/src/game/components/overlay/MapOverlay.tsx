@@ -1,13 +1,11 @@
-import { useContext, useEffect, useRef  } from "react"
+import { useRef  } from "react"
 import { OrthographicCamera } from "three"
 
-import { useGameStore } from "../../store/GameStore"
-import { GameLoopContext } from "../../useGameLoop"
+import { useInterpolation } from "../../hooks/useInterpolation"
+import { useGameStore } from "../../store/useGameStore"
 
 function MapOverlay(props: { camera: OrthographicCamera }) {
     const runtime = useGameStore(state => state.runtime)
-
-    const gameLoopContext = useContext(GameLoopContext)
 
     const containerDivRef = useRef<HTMLDivElement>(null!)
     const backgroundDivRef = useRef<HTMLDivElement>(null!)
@@ -15,13 +13,9 @@ function MapOverlay(props: { camera: OrthographicCamera }) {
 
     const divSize = { width: 200, height: 100 }
 
-    if (gameLoopContext === null) {
-        throw new Error("GameLoopContext is null")
-    }
-
     // !!! TODO: still laggy because we are not doing any interpolation
 
-    useEffect(() => gameLoopContext.subscribe(() => {
+    useInterpolation(() => {
         containerDivRef.current.style.width = `${divSize.width}px`
         containerDivRef.current.style.height = `${divSize.height}px`
 
@@ -57,7 +51,7 @@ function MapOverlay(props: { camera: OrthographicCamera }) {
         cameraDivRef.current.style.bottom = `${bottomPercent * 100}%`
         cameraDivRef.current.style.left = `${leftPercent * 100}%`
         cameraDivRef.current.style.right = `${rightPercent * 100}%` 
-    }))
+    })
 
     return (
         <>

@@ -5,10 +5,9 @@ import { Object3D } from "three"
 import { changeAnchor } from "../../common/math"
 import { entityModels } from "../../model/world/EntityModels"
 import { EntityType } from "../../model/world/EntityType"
-import { Point } from "../../model/world/Point"
 import { scale } from "../../model/world/Size"
+import { useInterpolation } from "../hooks/useInterpolation"
 import { RuntimeRocket } from "../runtime/entity/RuntimeRocket"
-import { useInterpolation } from "../useInterpolation"
 
 export function Rocket(props: { rocket: RuntimeRocket }) {
     const svgRef = useRef<Object3D>(null!)
@@ -17,17 +16,17 @@ export function Rocket(props: { rocket: RuntimeRocket }) {
     const entry = entityModels[EntityType.Rocket]
     const size = scale(entry.size, entry.scale)
 
-    useInterpolation(props.rocket.body, (point: Point, rotation: number) => {
+    useInterpolation(update => {
         const positionAnchored = changeAnchor(
-            point,
-            rotation,
+            update.rocket.position,
+            update.rocket.rotation,
             size,
             { x: 0.5, y: 0.5 },
             entry.anchor
         )
 
         svgRef.current.position.set(positionAnchored.x, positionAnchored.y, 0)
-        svgRef.current.rotation.set(0, 0, rotation)
+        svgRef.current.rotation.set(0, 0, update.rocket.rotation)
 
         /*
         const positionMidAnchored = changeAnchor(

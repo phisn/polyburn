@@ -91,14 +91,18 @@ export class Runtime {
 
         return {
             handleToEntityType: new Map<number, ColliderType>(),
+            
             rapier,
             queue: new RAPIER.EventQueue(true),
-            futures: new RuntimeFutures
+            futures: new RuntimeFutures,
+
+            tickRate: this.tickRate
         }
     }
     
     private readonly gravityVertical = -20
     private readonly gravityHorizontal = 0
+    private readonly tickRate = 16.6667
 
     private _state: RuntimeState
 }

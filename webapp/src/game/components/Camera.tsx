@@ -1,32 +1,24 @@
 import { OrthographicCamera } from "@react-three/drei"
 import { useFrame, useThree } from "@react-three/fiber"
-import { useCallback, useContext, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 
 import { gameCameraTransitionSpeed } from "../../common/Values"
 import { Point } from "../../model/world/Point"
-import { useGameStore } from "../store/GameStore"
-import { GameLoopContext } from "../useGameLoop"
-import { useInterpolation } from "../useInterpolation"
+import { useInterpolation } from "../hooks/useInterpolation"
+import { useGameStore } from "../store/useGameStore"
+import { ZoomIndexToZoom } from "../store/Zoom"
 
 function Camera() {
     const runtime = useGameStore(state => state.runtime)
 
     const cameraRef = useRef<ThreeOrthographicCamera>(null!)
-    const gameLoopContext = useContext(GameLoopContext)
 
     const [cameraBounds, setCameraBounds] = useState<{ topLeft: Point, bottomRight: Point }>(
         runtime.state.currentLevel.camera
     )
 
     const animating = useRef(false)
-
-    useEffect(() => gameLoopContext.subscribe(() => {
-        if (runtime.state.currentLevel.camera !== cameraBounds) {
-            animating.current = true
-            setCameraBounds(runtime.state.currentLevel.camera)
-        }
-    }))
     
     const cameraTargetSize = useRef<{ x: number, y: number } | null>(null)
     const cameraTargetPosition = useRef<Point | null>(null)
@@ -65,17 +57,13 @@ function Camera() {
         cameraTargetPosition.current = { x: targetPositionX, y: targetPositionY }
     }, [ cameraBounds ])
 
-    useInterpolation(runtime.state.rocket.body, (point: Point) => {
-        previousRocketPosition.current = point
-
-        /*
-        if (animating.current) {
-            void 0
+    useInterpolation(update => {
+        previousRocketPosition.current = update.rocket.position
+        
+        if (runtime.state.currentLevel.camera !== cameraBounds) {
+            animating.current = true
+            setCameraBounds(runtime.state.currentLevel.camera)
         }
-        else {
-            updateCameraPosition()
-        }
-        */
 
         updateCameraPosition()
     })
@@ -105,7 +93,7 @@ function Camera() {
     })
 
     const size = useThree(state => state.size)
-    const zoom = useGameStore(state => state.zoom)
+    const zoom = useGameStore(state => ZoomIndexToZoom[state.zoomIndex])
 
     useEffect(() => {
         const aspect = size.width / size.height

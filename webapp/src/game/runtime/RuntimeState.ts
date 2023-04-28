@@ -11,6 +11,8 @@ export interface RuntimeMetaState {
     rapier: RAPIER.World
     queue: RAPIER.EventQueue
     futures: RuntimeFutures
+
+    tickRate: number
 }
 
 export class RuntimeState {

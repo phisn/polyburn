@@ -10,8 +10,7 @@ import Level from "./components/Level"
 import Overlay from "./components/overlay/Overlay"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
-import { useControls } from "./hooks/useControls"
-import { useGameLoop } from "./hooks/useGameLoop"
+import { useRuntimeRunner } from "./hooks/useRuntimeRunner"
 import { Runtime } from "./runtime/Runtime"
 import { ProvideGameStore, useGameStore } from "./store/useGameStore"
 
@@ -62,18 +61,10 @@ function Game(props: GameProps) {
 }
 
 function InnerGame(props: GameProps) {
-    useLandscape()
-
     const runtime = useGameStore(state => state.runtime)
-    const controls = useControls()
 
-    useGameLoop(() => {
-        runtime.step({
-            thrust: controls.current.thrust,
-            rotation: controls.current.rotation,
-            pause: controls.current.pause
-        })
-    })
+    useLandscape()
+    useRuntimeRunner()
 
     const camera = useThree(state => state.camera) as THREE.OrthographicCamera
 

@@ -1,17 +1,12 @@
 
 import { createStore } from "zustand"
 
-import { Point } from "../../model/world/Point"
 import { Runtime } from "../runtime/Runtime"
+import { InterpolationUpdate } from "./interpolation/InterpolationUpdate"
 import { canZoomIn, canZoomOut } from "./Zoom"
 
-export interface InterpolateUpdate {
-    rocketPosition: Point
-    rocketRotation: number
-}
-
 interface GameState {
-    interpolateSubscribers: ((update: InterpolateUpdate) => void)[]
+    interpolationSubscribers: ((update: InterpolationUpdate) => void)[]
 
     zoomIndex: number
 }
@@ -22,14 +17,15 @@ export interface GameStore extends GameState {
     zoomIn(): void
     zoomOut(): void
 
-    interpolateSubscribe(callback: (update: InterpolateUpdate) => void): () => void
+    interpolateSubscribe(callback: (update: InterpolationUpdate) => void): () => void
 }
 
 export const createGameStore = (runtime: Runtime) => 
     createStore<GameStore>((set, get) => ({
         runtime,
 
-        interpolateSubscribers: [],
+        interpolationSubscribers: [],
+
         zoomIndex: 1,
 
         zoomIn: () => {
@@ -50,8 +46,7 @@ export const createGameStore = (runtime: Runtime) =>
         },
 
         interpolateSubscribe: (callback) => {
-            const subscribers = get().interpolateSubscribers
-
+            const subscribers = get().interpolationSubscribers
             subscribers.push(callback)
 
             return () => {

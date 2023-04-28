@@ -11,26 +11,27 @@ export interface GameLoopContext {
 export const GameLoopContext = createContext<GameLoopContext>(null!)
 export const GameLoopContextProvider = GameLoopContext.Provider
 
-export const useGameLoop = (update: () => void, customTimePerFrame?: number) => {
-    const timePerFrame = customTimePerFrame ?? 1000 / 60
+export const useGameLoop = (update: () => void, afterUpdate: () => void, tickRate: number) => {
     let lastTime = performance.now()
 
     useFrame(() => {
         const now = performance.now()
         
-        if (now - lastTime >= timePerFrame) {
+        if (now - lastTime >= tickRate) {
             let frames = 0
 
             do {
-                lastTime += timePerFrame
+                lastTime += tickRate
                 update()
 
                 frames++
-            } while (now - lastTime >= timePerFrame)
+            } while (now - lastTime >= tickRate)
 
             if (frames > 1) {
                 console.log("Skipped " + (frames - 1) + " frames")
             }
+
+            afterUpdate?.()
         }
     })
 }

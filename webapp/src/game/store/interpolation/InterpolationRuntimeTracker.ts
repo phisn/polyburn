@@ -19,8 +19,6 @@ export class InterpolationRuntimeTracker {
             1.0
         )
 
-        this.previousTime = newTime
-
         return {
             rocket: this.rocketBodyTracker.now(delta)
         }
@@ -28,5 +26,6 @@ export class InterpolationRuntimeTracker {
     
     public next() {
         this.rocketBodyTracker.next()
+        this.previousTime = performance.now()
     }
 }

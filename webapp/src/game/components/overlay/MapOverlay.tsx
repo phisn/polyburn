@@ -13,8 +13,6 @@ function MapOverlay(props: { camera: OrthographicCamera }) {
 
     const divSize = { width: 200, height: 100 }
 
-    // !!! TODO: still laggy because we are not doing any interpolation
-
     useInterpolation(() => {
         containerDivRef.current.style.width = `${divSize.width}px`
         containerDivRef.current.style.height = `${divSize.height}px`

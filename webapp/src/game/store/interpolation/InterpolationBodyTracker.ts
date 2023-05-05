@@ -28,7 +28,7 @@ export class InterpolationBodyTracker {
     }
 
     public now(delta: number) {
-        if (this.body.isSleeping() === false) {
+        if (this.body.isSleeping()) {
             return {
                 position: this.newPosition,
                 rotation: this.newRotation
@@ -69,7 +69,7 @@ export class InterpolationBodyTracker {
         const position = this.body.translation()
         const rotation = this.body.rotation()
         
-        console.log(`new position: ${position.x}, ${position.y}`)
+        // console.log(`new position: ${position.x}, ${position.y}`)
 
         const positionDelta = Math.sqrt(
             Math.pow(position.x - this.previousPosition.x, 2) +

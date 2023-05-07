@@ -26,8 +26,10 @@ export function useRuntimeRunner() {
         },
         () => {
             interpolationTracker.next()
+            console.log("interpolationTracker.next()")
         },
-        runtime.state.meta.tickRate)
+        runtime.state.meta.tickRate,
+        runtime.state.meta.tickRateLag)
 
     useFrame(() => {
         const update = interpolationTracker.now()

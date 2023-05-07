@@ -11,13 +11,17 @@ export interface GameLoopContext {
 export const GameLoopContext = createContext<GameLoopContext>(null!)
 export const GameLoopContextProvider = GameLoopContext.Provider
 
-export const useGameLoop = (update: () => void, afterUpdate: () => void, tickRate: number) => {
+export const useGameLoop = (
+    update: () => void, 
+    afterUpdate: () => void, 
+    tickRate: number, 
+    tickRateLag: number) => {
     let lastTime = performance.now()
 
     useFrame(() => {
         const now = performance.now()
         
-        if (now - lastTime >= tickRate) {
+        if (now - lastTime >= tickRate * tickRateLag) {
             let frames = 0
 
             do {

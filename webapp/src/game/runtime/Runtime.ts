@@ -96,13 +96,15 @@ export class Runtime {
             queue: new RAPIER.EventQueue(true),
             futures: new RuntimeFutures,
 
-            tickRate: this.tickRate
+            tickRate: this.tickRate,
+            tickRateLag: this.tickRateLag
         }
     }
     
     private readonly gravityVertical = -20
     private readonly gravityHorizontal = 0
     private readonly tickRate = 16.6667
+    private readonly tickRateLag = 1
 
     private _state: RuntimeState
 }

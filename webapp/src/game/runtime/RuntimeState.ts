@@ -13,6 +13,9 @@ export interface RuntimeMetaState {
     futures: RuntimeFutures
 
     tickRate: number
+
+    // simulate slow clients
+    tickRateLag: number
 }
 
 export class RuntimeState {

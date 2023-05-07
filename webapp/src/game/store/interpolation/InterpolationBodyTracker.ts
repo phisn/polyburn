@@ -69,8 +69,6 @@ export class InterpolationBodyTracker {
         const position = this.body.translation()
         const rotation = this.body.rotation()
         
-        // console.log(`new position: ${position.x}, ${position.y}`)
-
         const positionDelta = Math.sqrt(
             Math.pow(position.x - this.previousPosition.x, 2) +
             Math.pow(position.y - this.previousPosition.y, 2)
@@ -87,6 +85,7 @@ export class InterpolationBodyTracker {
             position.x,
             position.y, 0)
 
+        /*
         if (positionDelta > interpolationDeltaThreshold) {
             this.previousRotation = rotation
 
@@ -94,5 +93,6 @@ export class InterpolationBodyTracker {
                 position.x,
                 position.y, 0)
         }
+        */
     }
 }

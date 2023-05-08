@@ -24,8 +24,8 @@ export function useRuntimeRunner() {
                 pause: controls.current.pause
             })
         },
-        () => {
-            interpolationTracker.next()
+        time => {
+            interpolationTracker.next(time)
             console.log("interpolationTracker.next()")
         },
         runtime.state.meta.tickRate,

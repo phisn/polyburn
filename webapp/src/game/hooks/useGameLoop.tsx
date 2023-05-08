@@ -13,7 +13,7 @@ export const GameLoopContextProvider = GameLoopContext.Provider
 
 export const useGameLoop = (
     update: () => void, 
-    afterUpdate: () => void, 
+    afterUpdate: (time: number) => void, 
     tickRate: number, 
     tickRateLag: number) => {
     let lastTime = performance.now()
@@ -35,7 +35,7 @@ export const useGameLoop = (
                 console.log("Skipped " + (frames - 1) + " frames")
             }
 
-            afterUpdate?.()
+            afterUpdate?.(lastTime)
         }
     })
 }

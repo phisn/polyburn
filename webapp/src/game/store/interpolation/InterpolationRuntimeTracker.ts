@@ -24,8 +24,8 @@ export class InterpolationRuntimeTracker {
         }
     }
     
-    public next() {
+    public next(time: number) {
         this.rocketBodyTracker.next()
-        this.previousTime = performance.now()
+        this.previousTime = time
     }
 }

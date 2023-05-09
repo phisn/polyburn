@@ -25,8 +25,6 @@ export function Rocket(props: { rocket: RuntimeRocket }) {
             entry.anchor
         )
 
-        console.log(update.rocket.rotation)
-
         svgRef.current.position.set(positionAnchored.x, positionAnchored.y, 0)
         svgRef.current.rotation.set(0, 0, update.rocket.rotation)
 

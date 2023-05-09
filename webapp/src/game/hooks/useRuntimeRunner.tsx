@@ -26,7 +26,6 @@ export function useRuntimeRunner() {
         },
         time => {
             interpolationTracker.next(time)
-            console.log("interpolationTracker.next()")
         },
         runtime.state.meta.tickRate,
         runtime.state.meta.tickRateLag)

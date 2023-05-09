@@ -11,7 +11,7 @@ export function moveVertexActionHandler(params: PointerHandlerParams<MoveVertexA
             hint: null,
             action: {
                 ...params.action,
-                point: params.point
+                point: params.pointMaybeSnapped
             }
         })
     }
@@ -20,7 +20,7 @@ export function moveVertexActionHandler(params: PointerHandlerParams<MoveVertexA
             state.mutate(moveVertex(
                 params.action.shapeIndex,
                 params.action.vertexIndex,
-                params.point
+                params.pointMaybeSnapped
             ))
         }
 

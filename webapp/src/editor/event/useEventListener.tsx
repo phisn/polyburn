@@ -36,6 +36,10 @@ function useEventListener(f: (params: PointerHandlerParams) => void) {
                 raycaster,
                 scene,
                 point,
+                pointMaybeSnapped: {
+                    x: event.snap ? Math.round(point.x) : point.x,
+                    y: event.snap ? Math.round(point.y) : point.y
+                },
                 event,
                 previousEvent: lastPointerEventRef.current ?? undefined,
                 action: void 0

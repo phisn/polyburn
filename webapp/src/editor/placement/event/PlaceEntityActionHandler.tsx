@@ -74,15 +74,8 @@ export function placeEntityActionHandler(params: PointerHandlerParams<PlaceEntit
             */
         }
         else {
-            const rounded: Point = params.event.snap
-                ? {
-                    x: Math.round(params.point.x / snapDistance) * snapDistance,
-                    y: Math.round(params.point.y / snapDistance) * snapDistance
-                }
-                : params.point
-
             const transposed = changeAnchor(
-                rounded,
+                params.pointMaybeSnapped,
                 0,
                 scale(entry.size, entry.scale),
                 { x: 0.5, y: 0.5 },

@@ -23,6 +23,8 @@ export interface PointerHandlerParams<T = void> {
     scene: THREE.Scene
 
     point: Point
+    pointMaybeSnapped: Point
+
     event: EditorInputEvent
     previousEvent?: EditorInputEvent
 }

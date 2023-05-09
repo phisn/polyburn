@@ -13,7 +13,7 @@ function moveCameraActionHandler(params: PointerHandlerParams<MoveCameraAction>)
             hint: null,
             action: {
                 ...params.action,
-                point: params.point
+                point: params.pointMaybeSnapped
             }
         })
     }
@@ -26,7 +26,7 @@ function moveCameraActionHandler(params: PointerHandlerParams<MoveCameraAction>)
             }
             
             const { cameraTopLeft, cameraBottomRight } = moveCameraSideTo(
-                params.action.point,
+                params.pointMaybeSnapped,
                 params.action.side,
                 entity
             )

@@ -1,7 +1,7 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { MathUtils, Vector3 } from "three"
 
-const interpolationDeltaThreshold = 1
+const interpolationDeltaThreshold = 3
 
 export class InterpolationBodyTracker {
     private previousRotation: number
@@ -85,7 +85,6 @@ export class InterpolationBodyTracker {
             position.x,
             position.y, 0)
 
-        /*
         if (positionDelta > interpolationDeltaThreshold) {
             this.previousRotation = rotation
 
@@ -93,6 +92,5 @@ export class InterpolationBodyTracker {
                 position.x,
                 position.y, 0)
         }
-        */
     }
 }

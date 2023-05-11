@@ -6,7 +6,6 @@ import sqrt from "@stdlib/math/base/special/sqrt"
 import { RuntimeState } from "../RuntimeState"
 import { StepContext } from "../StepContext"
 
-
 export function handleRocketCollisions(
     runtime: RuntimeState,
     context: StepContext

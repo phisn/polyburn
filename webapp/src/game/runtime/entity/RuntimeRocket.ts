@@ -32,7 +32,7 @@ export class RuntimeRocket {
     constructor(
         state: RuntimeMetaState,
         world: WorldModel
-    ) {        
+    ) {
         const rocket = world.entities.find(
             entity => entity.type === EntityType.Rocket
         ) as RocketEntityModel | undefined

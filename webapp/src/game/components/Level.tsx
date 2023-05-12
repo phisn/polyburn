@@ -5,8 +5,8 @@ import { Euler } from "three"
 
 import { entityModels } from "../../model/world/EntityModels"
 import { EntityType } from "../../model/world/EntityType"
-import { RuntimeLevel } from "../runtime/entity/RuntimeLevel"
-import { RuntimeRocket } from "../runtime/entity/RuntimeRocket"
+import { RuntimeLevel } from "../runtime/domain/RuntimeLevel"
+import { RuntimeRocket } from "../runtime/rocket/RuntimeRocket"
 
 function Level(props: { rocket: RuntimeRocket, level: RuntimeLevel }) {
     const [unlocked, setUnlocked] = useState(false)

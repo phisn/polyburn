@@ -15,7 +15,7 @@ export class InterpolationRuntimeTracker {
         const newTime = performance.now()
         
         const delta = Math.min(
-            (newTime - this.previousTime) / (this.runtime.state.meta.tickRate * this.runtime.state.meta.tickRateLag),
+            (newTime - this.previousTime) / (this.runtime.state.meta.tickRate * this.runtime.state.meta.tickRateDelayFactor),
             1.0
         )
 

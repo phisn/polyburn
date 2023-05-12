@@ -1,9 +1,9 @@
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 
-import { RuntimeState } from "../RuntimeState"
-import { StepContext } from "../StepContext"
-import { rocketGroundRay } from "./rocketGroundRay"
+import { RuntimeState } from "../../RuntimeState"
+import { StepContext } from "../../StepContext"
+import { rocketGroundRay } from "../rocketGroundRay"
 
 const thrustValue = 7.3
 const thrustGroundMultiplier = 1.3

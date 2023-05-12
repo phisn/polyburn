@@ -1,5 +1,5 @@
-import { RuntimeState } from "../RuntimeState"
-import { StepContext } from "../StepContext"
+import { RuntimeState } from "../../../RuntimeState"
+import { StepContext } from "../../../StepContext"
 
 export function handleParticleEffects(
     runtime: RuntimeState,

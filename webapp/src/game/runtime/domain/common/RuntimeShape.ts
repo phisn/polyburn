@@ -1,8 +1,8 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { ShapeModel } from "../../../model/world/ShapeModel"
-import { ColliderType } from "../ColliderType"
-import { RuntimeMetaState } from "../RuntimeState"
+import { ShapeModel } from "../../../../model/world/ShapeModel"
+import { ColliderType } from "../../ColliderType"
+import { RuntimeMetaState } from "../../RuntimeState"
 
 export function createShape(
     state: RuntimeMetaState,

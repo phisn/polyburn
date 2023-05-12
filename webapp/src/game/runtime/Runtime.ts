@@ -1,7 +1,8 @@
 
 import { WorldModel } from "../../model/world/WorldModel"
+import { Gamemode } from "./gamemode/Gamemode"
 import { RuntimeConfig } from "./RuntimeConfig"
-import { getRuntimeHandlers, RuntimeHandler } from "./RuntimeHandler"
+import { RuntimeHandler } from "./RuntimeHandler"
 import { RuntimeState } from "./RuntimeState"
 import { StepContext } from "./StepContext"
 
@@ -10,26 +11,21 @@ export class Runtime {
 
     constructor(
         config: RuntimeConfig,
-        world: WorldModel
+        world: WorldModel,
+        gamemode: Gamemode
     ) {
-        this._state = this.createRuntimeState(world)
-        this._handlers = getRuntimeHandlers(config)
+        this._handlers = gamemode.createHandlers(config, world)
+        this._state = gamemode.createState(config, world)
     }
 
     step(context: StepContext) {
         for (const handler of this._handlers) {
-            handler(this.state, context)
+            handler(this._state, context)
         }
 
-        this.state.meta.rapier.step(this.state.meta.queue)
-        this.state.meta.futures.step()
+        this._state.meta.rapier.step(this._state.meta.queue)
+        this._state.meta.futures.step()
     }
-
-    private readonly gravityVertical = -20
-    private readonly gravityHorizontal = 0
-
-    private readonly tickRate = 16.6667
-    private readonly tickRateLag = 1
 
     private _handlers: RuntimeHandler[]
     private _state: RuntimeState

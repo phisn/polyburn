@@ -1,15 +1,15 @@
-import { handleCollisionEvents } from "./handler/handleCollisionEvents"
-import { handleParticleEffects } from "./handler/handleParticleEffects"
-import { handleRocketCollisions } from "./handler/handleRocketCollisions"
-import { handleRocketRotation } from "./handler/handleRocketRotation"
-import { handleRocketThrust } from "./handler/handleRocketThrust"
+import { handleCollisionEvents } from "./domain/common/handler/CollisionEventHandler"
+import { handleParticleEffects } from "./domain/particle/handler/ParticleEffectsHandler"
+import { handleRocketCollisions } from "./domain/rocket/handler/RocketCollisionsHandler"
+import { handleRocketRotation } from "./domain/rocket/handler/RocketRotationHandler"
+import { handleRocketThrust } from "./domain/rocket/handler/RocketThrustHandler"
 import { RuntimeConfig } from "./RuntimeConfig"
 import { RuntimeState } from "./RuntimeState"
 import { StepContext } from "./StepContext"
 
 export type RuntimeHandler = (runtime: RuntimeState, context: StepContext) => void
 
-export function getRuntimeHandlers(config: RuntimeConfig): RuntimeHandler[] {
+export function createCommonRuntimeHandlers(config: RuntimeConfig): RuntimeHandler[] {
     const runtimeHandlers: RuntimeHandler[] = [
         handleCollisionEvents,
         handleRocketCollisions,

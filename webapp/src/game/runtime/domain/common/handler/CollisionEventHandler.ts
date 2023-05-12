@@ -1,9 +1,9 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { ColliderType } from "../ColliderType"
+import { ColliderType } from "../../../ColliderType"
+import { RuntimeState } from "../../../RuntimeState"
+import { StepContext } from "../../../StepContext"
 import { RuntimeLevel } from "../entity/RuntimeLevel"
-import { RuntimeState } from "../RuntimeState"
-import { StepContext } from "../StepContext"
 
 export function handleCollisionEvents(runtime: RuntimeState, context: StepContext): void {
     runtime.meta.queue.drainCollisionEvents((h1, h2, started) => {

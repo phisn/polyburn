@@ -5,9 +5,9 @@ import { FlagEntity } from "../../model/world/FlagModel"
 import { Point } from "../../model/world/Point"
 import { WorldModel } from "../../model/world/WorldModel"
 import { ColliderType } from "./ColliderType"
-import { RuntimeLevel } from "./entity/RuntimeLevel"
-import { RuntimeRocket } from "./entity/RuntimeRocket"
-import { createShape } from "./entity/RuntimeShape"
+import { createShape } from "./domain/common/RuntimeShape"
+import { RuntimeLevel } from "./domain/RuntimeLevel"
+import { RuntimeRocket } from "./rocket/RuntimeRocket"
 import { RuntimeFutures } from "./RuntimeFutures"
 
 export interface RuntimeMetaState {
@@ -20,7 +20,7 @@ export interface RuntimeMetaState {
     tickRate: number
 
     // simulate slow clients
-    tickRateLag: number
+    tickRateDelayFactor: number
 }
 
 export class RuntimeState {
@@ -56,16 +56,17 @@ export class RuntimeState {
     }
 }
 
-export function createRuntimeState(world: WorldModel) {
-    const metaState = createMetaState()
-
+export function createRuntimeState(
+    meta: RuntimeMetaState,
+    world: WorldModel
+) {
     const rocket = new RuntimeRocket(
-        metaState,
+        meta,
         world
     )
 
     world.shapes.forEach(
-        shape => createShape(metaState, shape)
+        shape => createShape(meta, shape)
     )
 
     const flags = world.entities
@@ -76,7 +77,7 @@ export function createRuntimeState(world: WorldModel) {
     }
 
     const levels = flags.map(
-        flag => new RuntimeLevel(metaState, flag)
+        flag => new RuntimeLevel(meta, flag)
     )
 
     const firstLevel = findFirstLevel(levels, rocket)
@@ -86,7 +87,7 @@ export function createRuntimeState(world: WorldModel) {
         levels,
         firstLevel,
         rocket,
-        metaState
+        meta
     )
 
     return state
@@ -115,10 +116,15 @@ function findFirstLevel(levels: RuntimeLevel[], rocket: RuntimeRocket) {
     return level
 }
 
-function createMetaState(): RuntimeMetaState {
+export function createMetaState(
+    gravityHorizontal: number,
+    gravityVertical: number,
+    tickRate: number,
+    tickRateDelayFactor: number
+): RuntimeMetaState {
     const rapier = new RAPIER.World({
-        x: this.gravityHorizontal,
-        y: this.gravityVertical
+        x: gravityHorizontal,
+        y: gravityVertical
     })
 
     return {
@@ -128,7 +134,7 @@ function createMetaState(): RuntimeMetaState {
         queue: new RAPIER.EventQueue(true),
         futures: new RuntimeFutures,
 
-        tickRate: this.tickRate,
-        tickRateLag: this.tickRateLag
+        tickRate,
+        tickRateDelayFactor
     }
 }

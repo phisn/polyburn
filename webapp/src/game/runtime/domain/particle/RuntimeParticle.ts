@@ -1,5 +1,5 @@
-import { Point } from "../../../model/world/Point"
-import { RuntimeMetaState } from "../RuntimeState"
+import { Point } from "../../../../model/world/Point"
+import { RuntimeMetaState } from "../../RuntimeState"
 
 class RuntimeParticle {
 

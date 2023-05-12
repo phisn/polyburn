@@ -5,9 +5,9 @@ import { FlagEntity } from "../../model/world/FlagModel"
 import { Point } from "../../model/world/Point"
 import { WorldModel } from "../../model/world/WorldModel"
 import { ColliderType } from "./ColliderType"
+import { RuntimeLevel } from "./domain/common/RuntimeLevel"
 import { createShape } from "./domain/common/RuntimeShape"
-import { RuntimeLevel } from "./domain/RuntimeLevel"
-import { RuntimeRocket } from "./rocket/RuntimeRocket"
+import { RuntimeRocket } from "./domain/rocket/RuntimeRocket"
 import { RuntimeFutures } from "./RuntimeFutures"
 
 export interface RuntimeMetaState {

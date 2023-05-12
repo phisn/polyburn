@@ -1,10 +1,10 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { changeAnchor } from "../../../common/math"
-import { RocketEntityModel } from "../../../model/world/EntityModel"
-import { entityModels } from "../../../model/world/EntityModels"
-import { EntityType } from "../../../model/world/EntityType"
-import { scale } from "../../../model/world/Size"
+import { changeAnchor } from "../../../../common/math"
+import { RocketEntityModel } from "../../../../model/world/EntityModel"
+import { entityModels } from "../../../../model/world/EntityModels"
+import { EntityType } from "../../../../model/world/EntityType"
+import { scale } from "../../../../model/world/Size"
 
 const rawRocketColliders = [
     [

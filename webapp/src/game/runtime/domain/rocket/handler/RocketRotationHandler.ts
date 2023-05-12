@@ -1,5 +1,5 @@
-import { RuntimeState } from "../RuntimeState"
-import { StepContext } from "../StepContext"
+import { RuntimeState } from "../../../RuntimeState"
+import { StepContext } from "../../../StepContext"
 
 export function handleRocketRotation(runtime: RuntimeState, context: StepContext): void {
     if (runtime.rocket.collisionCount > 0) {

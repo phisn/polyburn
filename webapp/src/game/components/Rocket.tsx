@@ -7,7 +7,7 @@ import { entityModels } from "../../model/world/EntityModels"
 import { EntityType } from "../../model/world/EntityType"
 import { scale } from "../../model/world/Size"
 import { useInterpolation } from "../hooks/useInterpolation"
-import { RuntimeRocket } from "../runtime/rocket/RuntimeRocket"
+import { RuntimeRocket } from "../runtime/domain/rocket/RuntimeRocket"
 
 export function Rocket(props: { rocket: RuntimeRocket }) {
     const svgRef = useRef<Object3D>(null!)

@@ -6,7 +6,7 @@ import { Point } from "../../../../model/world/Point"
 import { WorldModel } from "../../../../model/world/WorldModel"
 import { ColliderType } from "../../ColliderType"
 import { RuntimeMetaState } from "../../RuntimeState"
-import { RuntimeLevel } from "../RuntimeLevel"
+import { RuntimeLevel } from "../common/RuntimeLevel"
 import { createRocketEntityBody } from "./RuntimeRocketBody"
 
 export interface RocketSpawn {

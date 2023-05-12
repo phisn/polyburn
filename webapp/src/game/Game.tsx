@@ -11,7 +11,9 @@ import Overlay from "./components/overlay/Overlay"
 import { Rocket } from "./components/Rocket"
 import { Shape } from "./components/Shape"
 import { useRuntimeRunner } from "./hooks/useRuntimeRunner"
+import { CommonGamemode } from "./runtime/gamemode/CommonGamemode"
 import { Runtime } from "./runtime/Runtime"
+import { RuntimeConfig } from "./runtime/RuntimeConfig"
 import { ProvideGameStore, useGameStore } from "./store/useGameStore"
 
 export interface GameProps {
@@ -24,7 +26,15 @@ const rapierInit = RAPIER.init()
 const overlay = tunnel()
 
 function Game(props: GameProps) {
-    const runtimeRef = useRef<Runtime>(new Runtime(props.world))
+    const config: RuntimeConfig = {
+        enableParticles: true,
+    }
+
+    const runtimeRef = useRef<Runtime>(new Runtime(
+        config, 
+        props.world, 
+        new CommonGamemode()
+    ))
 
     return (
         <ProvideGameStore runtime={runtimeRef.current}>

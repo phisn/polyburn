@@ -3,8 +3,8 @@ import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 import sqrt from "@stdlib/math/base/special/sqrt"
 
-import { RuntimeState } from "../RuntimeState"
-import { StepContext } from "../StepContext"
+import { RuntimeState } from "../../../RuntimeState"
+import { StepContext } from "../../../StepContext"
 
 export function handleRocketCollisions(
     runtime: RuntimeState,

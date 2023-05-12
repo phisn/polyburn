@@ -1,9 +1,9 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { captureBox, FlagEntity } from "../../../model/world/FlagModel"
-import { Point } from "../../../model/world/Point"
-import { ColliderType } from "../ColliderType"
-import { RuntimeMetaState } from "../RuntimeState"
+import { captureBox,FlagEntity } from "../../../../model/world/FlagModel"
+import { Point } from "../../../../model/world/Point"
+import { ColliderType } from "../../ColliderType"
+import { RuntimeMetaState } from "../../RuntimeState"
 
 export class RuntimeLevel {
     boundsCollider: RAPIER.Collider

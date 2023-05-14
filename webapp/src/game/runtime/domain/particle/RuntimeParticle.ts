@@ -3,19 +3,20 @@ import RAPIER from "@dimforge/rapier2d-compat"
 import { Point } from "../../../../model/world/Point"
 import { RuntimeMetaState } from "../../RuntimeState"
 
-class RuntimeParticle {
+export class RuntimeParticle {
     get body(): RAPIER.RigidBody { return this._body }
+    get age(): number { return this.time / this.lifeTime }
 
     constructor(
-        private state: RuntimeMetaState,
+        private meta: RuntimeMetaState,
         
         position: Point,
         velocity: Point,
         radius: number,
 
-        private _lifetime: number
+        private lifeTime: number
     ) {
-        this._body = state.rapier.createRigidBody(
+        this._body = meta.rapier.createRigidBody(
             RAPIER.RigidBodyDesc.dynamic()
                 .setTranslation(position.x, position.y)
                 .setLinvel(velocity.x, velocity.y)
@@ -24,24 +25,25 @@ class RuntimeParticle {
 
         const colliderDesc = RAPIER.ColliderDesc.ball(radius)
         
-        const collider = state.rapier.createCollider(
+        meta.rapier.createCollider(
             colliderDesc,
             this._body
         )
     }
 
     // returns true if the particle is dead
-    age(): boolean {
-        this._lifetime -= 1
-
-        if (this._lifetime <= 0) {
-            this.state.rapier.removeRigidBody(this.body)
+    next(): boolean {
+        if (this.time + 1 >= this.lifeTime) {
+            this.meta.rapier.removeRigidBody(this.body)
 
             return true
         }
+        
+        this.time += 1
 
         return false
     }
 
+    private time = 0
     private _body: RAPIER.RigidBody
 }

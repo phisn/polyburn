@@ -7,6 +7,7 @@ import { WorldModel } from "../../model/world/WorldModel"
 import { ColliderType } from "./ColliderType"
 import { RuntimeLevel } from "./domain/common/RuntimeLevel"
 import { createShape } from "./domain/common/RuntimeShape"
+import { RuntimeParticle } from "./domain/particle/RuntimeParticle"
 import { RuntimeRocket } from "./domain/rocket/RuntimeRocket"
 import { RuntimeFutures } from "./RuntimeFutures"
 
@@ -30,7 +31,7 @@ export class RuntimeState {
     currentLevel: RuntimeLevel
 
     rocket: RuntimeRocket
-    particles: RAPIER.RigidBody[] = []
+    particles: RuntimeParticle[] = []
 
     constructor(
         levels: RuntimeLevel[],

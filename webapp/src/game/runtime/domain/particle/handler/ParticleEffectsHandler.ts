@@ -5,5 +5,12 @@ export function handleParticleEffects(
     runtime: RuntimeState,
     context: StepContext
 ) {
-    void 0
+    for (let i = 0; i < runtime.particles.length; i++) {
+        const particle = runtime.particles[i]
+
+        if (particle.next()) {
+            runtime.particles.splice(i, 1)
+            i--
+        }
+    }
 }

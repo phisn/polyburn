@@ -4,6 +4,7 @@ import { InterpolationUpdate } from "./InterpolationUpdate"
 
 export class InterpolationRuntimeTracker {
     private rocketBodyTracker: InterpolationBodyTracker
+    
     private previousTime: number
 
     constructor(private runtime: Runtime) {

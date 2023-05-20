@@ -28,12 +28,21 @@ export const createRuntimeStore = createStore<RuntimeStore>((set, get) => {
 
     const componentChangeListeners = new Map<string, Listener[]>()
 
-    const rs: RuntimeStore = {
+    const store: RuntimeStore = {
         entities: new Map(),
         systems: [],
 
         newEntitySet(...components) {
             const entitiesInSet = new Map<number, RuntimeEntity>()
+            
+            const entitySet: RuntimeEntitySet = {
+                [Symbol.iterator]() { return entitiesInSet.values() },
+                free() {
+                    components.forEach(component => {
+                        removeComponentChangeListeners(component, listener)
+                    })
+                }
+            }
 
             const listener: Listener = {
                 add(entityId: number) {
@@ -44,7 +53,7 @@ export const createRuntimeStore = createStore<RuntimeStore>((set, get) => {
                         return
                     }
 
-                    if (components.every(component => component in entity.components)) {
+                    if (shouldEntityBeInSet(entity)) {
                         entitiesInSet.set(entityId, entity!)
                     }
                 },
@@ -53,20 +62,18 @@ export const createRuntimeStore = createStore<RuntimeStore>((set, get) => {
                 }
             }
             
-            for (const component of components) {
-                const listeners = componentChangeListeners.get(component) ?? []
+            components.forEach(component => {
+                getComponentChangeListeners(component).push(listener)
+            })
 
-            }
-
-            for (const entity of get().entities.values()) {
-                void 0
-            }
-
-            const entitySet: RuntimeEntitySet = {
-                [Symbol.iterator]() { return entitiesInSet.values() },
-                free() {
-                    
+            get().entities.forEach((entity, entityId) => {
+                if (shouldEntityBeInSet(entity)) {
+                    entitiesInSet.set(entityId, entity)
                 }
+            })
+            
+            function shouldEntityBeInSet(entity: RuntimeEntity) {
+                return components.every(component => component in entity.components)
             }
 
             return entitySet
@@ -87,14 +94,14 @@ export const createRuntimeStore = createStore<RuntimeStore>((set, get) => {
                     console.assert(!(component in components), `Component ${component} already exists`)
 
                     components[component] = value
-                    componentChangeListeners.get(component)?.forEach(listener => listener.add(entityId))
+                    getComponentChangeListeners(component).forEach(listener => listener.add(entityId))
                     return this
                 },
                 removeComponent(component: string): RuntimeEntity {
                     console.assert(component in components, `Component ${component} does not exist`)
 
                     delete components[component]
-                    componentChangeListeners.get(component)?.forEach(listener => listener.remove(entityId))
+                    getComponentChangeListeners(component).forEach(listener => listener.remove(entityId))
                     return this
                 }
             }
@@ -110,7 +117,7 @@ export const createRuntimeStore = createStore<RuntimeStore>((set, get) => {
             console.assert(get().entities.has(entityId), `Entity ${entityId} does not exist`)
 
             for (const component in get().entities.get(entityId)?.components) {
-                componentChangeListeners.get(component)?.forEach(listener => listener.remove(entityId))
+                getComponentChangeListeners(component).forEach(listener => listener.remove(entityId))
             }
 
             set(state => {
@@ -127,5 +134,21 @@ export const createRuntimeStore = createStore<RuntimeStore>((set, get) => {
         }
     }
 
-    return rs
+    function getComponentChangeListeners(component: string) {
+        let listeners = componentChangeListeners.get(component)
+
+        if (listeners === undefined) {
+            listeners = []
+            componentChangeListeners.set(component, listeners)
+        }
+
+        return listeners
+    }
+
+    function removeComponentChangeListeners(component: string, listener: Listener) {
+        const listeners = componentChangeListeners.get(component) ?? []
+        listeners.splice(listeners.indexOf(listener), 1)
+    }
+
+    return store
 })

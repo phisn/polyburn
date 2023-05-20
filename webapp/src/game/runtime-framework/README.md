@@ -1,0 +1,1 @@
+- Contains ecs logic. Basicly the normal runtime will use the runtime-core to insert entities and systems into it. The core itself does not contain any buisnesslogic and is more of a framework

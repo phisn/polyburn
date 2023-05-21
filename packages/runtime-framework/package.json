@@ -1,0 +1,15 @@
+{
+    "name": "runtime-framework",
+    "main": "src/index.ts",
+    "types": "src/index.ts",
+    "scripts": {
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "eslint-config-custom": "*",
+        "typescript": "latest"
+    },
+    "devDependencies": {
+        "vitest": "*"
+    }
+}

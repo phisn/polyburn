@@ -1,0 +1,6 @@
+{
+    "name": "eslint-config-custom",
+    "dependencies": {
+        "eslint-config-turbo": "^1.9.8"
+    }
+}

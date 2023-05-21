@@ -42,6 +42,10 @@ module.exports = {
             "error",
             "never"
         ],
+        "brace-style": [
+            "error",
+            "stroustrup", { "allowSingleLine": true }
+        ],
 
         // clean imports
         "unused-imports/no-unused-imports": "error",

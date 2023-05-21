@@ -1,0 +1,17 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "turbo run dev",
+        "test": "turbo run test"
+    },
+    "dependencies": {
+        "@turbo/gen": "^1.9.8",
+        "config": "*",
+        "eslint": "^8.41.0",
+        "turbo": "^1.9.8"
+    },
+    "workspaces": [
+        "packages/*",
+        "packages-dev/*"
+    ]
+}

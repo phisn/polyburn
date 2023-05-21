@@ -19,13 +19,6 @@ root.render(
                     <Route path="/" element={<Play />} />
                     <Route path="/editor" element={<Editor />} />
                     <Route path="*" element={<Editor />} />
-                    {/*        <Route path="editor" element={<Editor />} />
-            <Route path="test" element={<EditorEditor />} />}
-                    <Route path="*" element={
-                        <div>
-                            404
-                        </div>
-                    Ä} /> */}
                 </Route>
             </Routes>
         </BrowserRouter>

@@ -1,0 +1,12 @@
+{
+    "name": "runtime",
+    "main": "src/index.ts",
+    "types": "src/index.ts",
+    "dependencies": {
+        "eslint-config-custom": "*",
+        "typescript": "latest"
+    },
+    "devDependencies": {
+        "vitest": "^0.31.1"
+    }
+}

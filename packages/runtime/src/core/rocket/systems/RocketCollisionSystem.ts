@@ -8,7 +8,7 @@ import { SystemContext } from "../../SystemContext"
 import { SystemFactory } from "../../SystemFactory"
 import { RocketComponent } from "../RocketComponent"
 
-export const newRocketRotationSystem: SystemFactory = (meta: Meta, store: RuntimeStore<SystemContext>) => {
+export const newRocketCollisionSystem: SystemFactory = (meta: Meta, store: RuntimeStore<SystemContext>) => {
     const rockets = store.newEntitySet(
         Components.Rocket,
         Components.Rigidbody,

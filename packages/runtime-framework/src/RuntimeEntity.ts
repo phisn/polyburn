@@ -9,6 +9,6 @@ export interface RuntimeEntity {
     get<T>(component: string): T | undefined
     getSafe<T>(component: string): T 
 
-    set<T>(component: string, value: T): RuntimeEntity
+    set<T>(component: string, value?: T): RuntimeEntity
     remove(component: string): RuntimeEntity
 }

@@ -6,6 +6,9 @@ import { StepContext } from "../../../StepContext"
 import { RuntimeLevel } from "../RuntimeLevel"
 
 export function handleCollisionEvents(runtime: RuntimeState, context: StepContext): void {
+    // I want to listen to all entities created / removed from store and add their body handles to a map
+    // to be able to get the entity from the collider handle
+
     runtime.meta.queue.drainCollisionEvents((h1, h2, started) => {
         const collider1 = runtime.meta.rapier.getCollider(h1)
         const collider2 = runtime.meta.rapier.getCollider(h2)

@@ -14,13 +14,13 @@ export const newRocketRotationSystem: SystemFactory = (meta: Meta, store: Runtim
 
     return (context: SystemContext) => {
         for (const rocket of rockets) {
-            const rocketComponent = rocket.get<RocketComponent>(Components.Rocket) 
+            const rocketComponent = rocket.getSafe<RocketComponent>(Components.Rocket)
 
             if (rocketComponent.collisionCount > 0) {
                 continue
             }
 
-            const rigid = rocket.get<RigidbodyComponent>(Components.Rigidbody)
+            const rigid = rocket.getSafe<RigidbodyComponent>(Components.Rigidbody)
 
             rigid.body.setRotation(
                 rocketComponent.rotationWithoutInput + context.rotation,

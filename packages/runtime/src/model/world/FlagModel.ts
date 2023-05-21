@@ -1,4 +1,4 @@
-import { changeAnchor } from "../ChangeAnchor"
+import { changeAnchor } from "../changeAnchor"
 import { entityModelRegistry } from "./EntityModelRegistry"
 import { EntityType } from "./EntityType"
 import { Point } from "./Point"

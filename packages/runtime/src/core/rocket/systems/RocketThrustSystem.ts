@@ -28,7 +28,7 @@ export const newRocketThrustSystem: SystemFactory = (meta: Meta, store: RuntimeS
         }
     
         for (const rocket of rockets) {
-            const rigid = rocket.get<RigidbodyComponent>(Components.Rigidbody)
+            const rigid = rocket.getSafe<RigidbodyComponent>(Components.Rigidbody)
 
             if (rocketGroundRay(meta.rapier, rigid.body)) {
                 force.x *= thrustGroundMultiplier

@@ -8,6 +8,11 @@ export function respawnRocket(entity: RuntimeEntity) {
     const rigid = entity.get<RigidbodyComponent>(Components.Rigidbody)
     const rocket = entity.get<RocketComponent>(Components.Rocket)
 
+    if (!rigid || !rocket) {
+        console.error("respawnRocket: entity missing rigidbody or rocket component")
+        return
+    }
+
     rigid.body.setTranslation(rocket.spawnPosition, true)
     rigid.body.setRotation(rocket.spawnRotation, true)
 

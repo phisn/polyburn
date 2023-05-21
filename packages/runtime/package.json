@@ -5,6 +5,7 @@
     "dependencies": {
         "@dimforge/rapier2d-compat": "^0.11.2",
         "eslint-config-custom": "*",
+        "mnemonist": "^0.39.5",
         "runtime-framework": "*",
         "tsconfig": "*",
         "typescript": "latest"

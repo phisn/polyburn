@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { changeAnchor } from "../../model/ChangeAnchor"
+import { changeAnchor } from "../../model/changeAnchor"
 import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
 import { EntityType } from "../../model/world/EntityType"
 

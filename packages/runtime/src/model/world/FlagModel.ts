@@ -1,10 +1,10 @@
 import { changeAnchor } from "../changeAnchor"
 import { entityModelRegistry } from "./EntityModelRegistry"
-import { EntityType } from "./EntityType"
+import { EntityModelType } from "./EntityModelType"
 import { Point } from "./Point"
 
 export interface FlagEntity {
-    type: EntityType.RedFlag,
+    type: EntityModelType.RedFlag,
 
     position: Point
     rotation: number
@@ -19,7 +19,7 @@ export interface FlagEntity {
 export const flagCaptureHeight = 0.5
 
 export function captureBox(entity: FlagEntity) {
-    const entry = entityModelRegistry[EntityType.RedFlag]
+    const entry = entityModelRegistry[EntityModelType.RedFlag]
 
     const transformed = changeAnchor(
         entity.position,

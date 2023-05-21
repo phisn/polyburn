@@ -2,6 +2,9 @@
     "name": "runtime",
     "main": "src/index.ts",
     "types": "src/index.ts",
+    "scripts": {
+        "test": "vitest run"
+    },
     "dependencies": {
         "@dimforge/rapier2d-compat": "^0.11.2",
         "eslint-config-custom": "*",

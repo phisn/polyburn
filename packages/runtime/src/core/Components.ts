@@ -3,4 +3,5 @@ export enum Components {
     Rigidbody = "Rigidbody",
     CollisionEventListener = "CollisionEventListener",
     CollisionEvent = "CollisionEvent",
+    EntityType = "EntityType",
 }

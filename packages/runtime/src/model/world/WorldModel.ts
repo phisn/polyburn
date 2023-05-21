@@ -2,7 +2,7 @@
 import LZString from "lz-string"
 
 import { EntityModel } from "./EntityModel"
-import { EntityType } from "./EntityType"
+import { EntityModelType } from "./EntityModelType"
 import { ShapeModel as ShapeModel } from "./ShapeModel"
 
 export interface WorldModel {
@@ -43,11 +43,11 @@ export interface ValidationError {
 }
 
 export function validate(world: WorldModel): ValidationError | null {
-    if (world.entities.filter(entity => entity.type == EntityType.RedFlag).length == 0) {
+    if (world.entities.filter(entity => entity.type == EntityModelType.RedFlag).length == 0) {
         return { message: "Can not run world without a red flag" }
     }
 
-    if (world.entities.filter(entity => entity.type == EntityType.Rocket).length == 0) {
+    if (world.entities.filter(entity => entity.type == EntityModelType.Rocket).length == 0) {
         return { message: "Can not run world without a rocket" }
     }
 

@@ -6,7 +6,7 @@ export interface RuntimeEntity {
     get components(): Components
     get id(): number
 
-    getComponent<T>(component: string): T
-    addComponent<T>(component: string, value: T): RuntimeEntity
-    removeComponent(component: string): RuntimeEntity
+    get<T>(component: string): T
+    add<T>(component: string, value: T): RuntimeEntity
+    remove(component: string): RuntimeEntity
 }

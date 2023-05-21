@@ -62,6 +62,9 @@ module.exports = {
         // https://docs.pmnd.rs/react-three-fiber/tutorials/typescript
         "@typescript-eslint/no-non-null-assertion": "off",
 
+        // we allow empty interfaces for convenience while prototypeing
+        "@typescript-eslint/no-empty-interface": "off",
+
         "import/no-named-as-default-member": "off",
     }
 }

@@ -2,6 +2,11 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
+    "files.exclude": {
+        "**/.turbo": true,
+        "**/dist": true,
+        "**/dev-dist": true,
+    },
     "eslint.validate": [
         "javascript",
         "javascriptreact",

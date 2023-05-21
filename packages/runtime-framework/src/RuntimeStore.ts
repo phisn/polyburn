@@ -4,21 +4,21 @@ import { RuntimeEntity } from "./RuntimeEntity"
 import { RuntimeEntitySet } from "./RuntimeEntitySet"
 import { RuntimeSystem } from "./RuntimeSystem"
 
-interface RuntimeState {
+export interface RuntimeState<T = void> {
     entities: Map<number, RuntimeEntity>
-    systems: RuntimeSystem[]
+    systems: RuntimeSystem<T>[]
 }
 
-interface RuntimeStore extends RuntimeState {
+export interface RuntimeStore<T = void> extends RuntimeState<T> {
     newEntitySet(...components: string[]): RuntimeEntitySet
 
     newEntity(): RuntimeEntity
     removeEntity(entityId: number): void
 
-    addSystem(...system: RuntimeSystem[]): void
+    addSystem(...system: RuntimeSystem<T>[]): void
 }
 
-export const createRuntimeStore = () => createStore<RuntimeStore>((set, get) => {
+export const createRuntimeStore = <T = void> () => createStore<RuntimeStore<T>>((set, get) => {
     let entityIdCounter = 0
 
     interface Listener {
@@ -28,7 +28,7 @@ export const createRuntimeStore = () => createStore<RuntimeStore>((set, get) => 
 
     const componentChangeListeners = new Map<string, Listener[]>()
 
-    const store: RuntimeStore = {
+    const store: RuntimeStore<T> = {
         entities: new Map(),
         systems: [],
 
@@ -90,17 +90,17 @@ export const createRuntimeStore = () => createStore<RuntimeStore>((set, get) => 
                 get id() {
                     return entityId
                 },
-                getComponent<T>(component: string): T {
+                get<T>(component: string): T {
                     return components[component] as T
                 },
-                addComponent<T>(component: string, value: T): RuntimeEntity {
+                add<T>(component: string, value: T): RuntimeEntity {
                     console.assert(!(component in components), `Component ${component} already exists`)
 
                     components[component] = value
                     getComponentChangeListeners(component).forEach(listener => listener.add(entityId))
                     return this
                 },
-                removeComponent(component: string): RuntimeEntity {
+                remove(component: string): RuntimeEntity {
                     console.assert(component in components, `Component ${component} does not exist`)
 
                     delete components[component]

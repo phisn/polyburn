@@ -13,16 +13,16 @@ test("RuntimeStore entity", () => {
     }
 
     entity
-        .addComponent<Component>("test1", { value: 1 })
-        .addComponent<Component>("test2", { value: 2 })
+        .add<Component>("test1", { value: 1 })
+        .add<Component>("test2", { value: 2 })
 
-    expect(entity.getComponent<Component>("test1").value).toBe(1)
-    expect(entity.getComponent<Component>("test2").value).toBe(2)
+    expect(entity.get<Component>("test1").value).toBe(1)
+    expect(entity.get<Component>("test2").value).toBe(2)
 
-    entity.removeComponent("test1")
+    entity.remove("test1")
 
-    expect(entity.getComponent<Component>("test1")).toBeUndefined()
-    expect(entity.getComponent<Component>("test2").value).toBe(2)
+    expect(entity.get<Component>("test1")).toBeUndefined()
+    expect(entity.get<Component>("test2").value).toBe(2)
 
     expect(Object.keys(entity.components).length).toBe(1)
     expect("test2" in entity.components).toBe(true)
@@ -37,17 +37,17 @@ test("RuntimeStore entity set", () => {
     }
 
     newEntity()
-        .addComponent<Component>("test1", { value: 1 })
-        .addComponent<Component>("test2", { value: 2 })
+        .add<Component>("test1", { value: 1 })
+        .add<Component>("test2", { value: 2 })
 
     const c1 = newEntity()
-        .addComponent<Component>("test1", { value: 3 })
-        .addComponent<Component>("test2", { value: 4 })
+        .add<Component>("test1", { value: 3 })
+        .add<Component>("test2", { value: 4 })
 
     for (let i = 0; i < 20; i++) { newEntity() }
 
-    const c2 = newEntity().addComponent<Component>("test1", { value: 1 })
-    const c3 = newEntity().addComponent<Component>("test2", { value: 1 })
+    const c2 = newEntity().add<Component>("test1", { value: 1 })
+    const c3 = newEntity().add<Component>("test2", { value: 1 })
     const c4 = newEntity()
     const c5 = newEntity()
 
@@ -57,8 +57,8 @@ test("RuntimeStore entity set", () => {
     const set4 = store.getState().newEntitySet("test3")
 
     newEntity()
-        .addComponent<Component>("test1", { value: 5 })
-        .addComponent<Component>("test2", { value: 6 })
+        .add<Component>("test1", { value: 5 })
+        .add<Component>("test2", { value: 6 })
 
     for (let i = 0; i < 20; i++) { newEntity() }
 
@@ -67,17 +67,17 @@ test("RuntimeStore entity set", () => {
     expect([...set3].length).toBe(4)
     expect([...set4].length).toBe(0)
 
-    c1.removeComponent("test1")
-    c2.removeComponent("test1")
+    c1.remove("test1")
+    c2.remove("test1")
 
     expect([...set1].length).toBe(4)
     expect([...set2].length).toBe(2)
     expect([...set3].length).toBe(2)
     expect([...set4].length).toBe(0)
 
-    c1.addComponent<Component>("test1", { value: 1 })
-    c2.addComponent<Component>("test1", { value: 1 })
-    c4.addComponent<Component>("test3", { value: 1 })
+    c1.add<Component>("test1", { value: 1 })
+    c2.add<Component>("test1", { value: 1 })
+    c4.add<Component>("test3", { value: 1 })
 
     expect([...set1].length).toBe(4)
     expect([...set2].length).toBe(3)
@@ -110,14 +110,14 @@ test("RuntimeStore systems", () => {
 
     const incrementSystem = () => {
         for (const entity of counterEntities) {
-            const counter = entity.getComponent<CounterComponent>("counter")
+            const counter = entity.get<CounterComponent>("counter")
             counter.value++
         }
     }
 
     const decrementSystem = () => {
         for (const entity of counterEntities) {
-            const counter = entity.getComponent<CounterComponent>("counter")
+            const counter = entity.get<CounterComponent>("counter")
             counter.value--
             counter.value--
         }
@@ -129,23 +129,23 @@ test("RuntimeStore systems", () => {
         store.getState().systems.forEach(system => system())
     }
 
-    const c1 = newEntity().addComponent<CounterComponent>("counter", { value: 0 })
+    const c1 = newEntity().add<CounterComponent>("counter", { value: 0 })
     step()
-    const c2 = newEntity().addComponent<CounterComponent>("counter", { value: 0 })
+    const c2 = newEntity().add<CounterComponent>("counter", { value: 0 })
 
     expect([...counterEntities].length).toBe(2)
-    expect(c1.getComponent<CounterComponent>("counter").value).toBe(1)
-    expect(c2.getComponent<CounterComponent>("counter").value).toBe(0)
+    expect(c1.get<CounterComponent>("counter").value).toBe(1)
+    expect(c2.get<CounterComponent>("counter").value).toBe(0)
 
     for (let i = 0; i < 200; i++) { step() }
 
-    expect(c1.getComponent<CounterComponent>("counter").value).toBe(201)
-    expect(c2.getComponent<CounterComponent>("counter").value).toBe(200)
+    expect(c1.get<CounterComponent>("counter").value).toBe(201)
+    expect(c2.get<CounterComponent>("counter").value).toBe(200)
 
     addSystem(decrementSystem)
 
     for (let i = 0; i < 200; i++) { step() }
 
-    expect(c1.getComponent<CounterComponent>("counter").value).toBe(1)
-    expect(c2.getComponent<CounterComponent>("counter").value).toBe(0)
+    expect(c1.get<CounterComponent>("counter").value).toBe(1)
+    expect(c2.get<CounterComponent>("counter").value).toBe(0)
 })

@@ -1,1 +1,1 @@
-export type RuntimeSystem = () => void
+export type RuntimeSystem<T = void> = (context: T) => void

@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-export interface RuntimeMetaState {
+export interface Meta {
     rapier: RAPIER.World
 }

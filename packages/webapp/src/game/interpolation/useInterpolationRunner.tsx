@@ -13,19 +13,17 @@ function useInterpolationRunner(
                 rotation: number
             }
         } = {}
-        
-        runtime.meta.rapier.
 
-            runtime.meta.rapier.bodies.forEach((body) => {
-                if (body.isSleeping()) {
-                    return
-                }
+        runtime.meta.rapier.bodies.forEach((body) => {
+            if (body.isSleeping()) {
+                return
+            }
 
-                bodies[body.handle] = {
-                    position: body.translation(),
-                    rotation: body.rotation()
-                }
-            })
+            bodies[body.handle] = {
+                position: body.translation(),
+                rotation: body.rotation()
+            }
+        })
 
 
     })

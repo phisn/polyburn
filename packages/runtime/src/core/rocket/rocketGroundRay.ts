@@ -1,18 +1,16 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { changeAnchor } from "../../../../common/math"
-import { entityModels } from "../../../../model/world/EntityModels"
-import { EntityType } from "../../../../model/world/EntityType"
-import { scale } from "../../../../model/world/Size"
+import { changeAnchor } from "../../model/ChangeAnchor"
+import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
+import { EntityType } from "../../model/world/EntityType"
 
 export const rocketGroundRayRaw = (rapier: RAPIER.World, rocket: RAPIER.RigidBody) => {
-    const entry = entityModels[EntityType.Rocket]
-    const size = scale(entry.size, entry.scale)
+    const entry = entityModelRegistry[EntityType.Rocket]
 
     const rayStart = changeAnchor(
         rocket.translation(),
         rocket.rotation(),
-        size,
+        entry,
         { x: 0.5, y: 0.5 },
         { x: 0.5, y: 0.2 }
     )
@@ -20,7 +18,7 @@ export const rocketGroundRayRaw = (rapier: RAPIER.World, rocket: RAPIER.RigidBod
     const rayTarget = changeAnchor(
         rocket.translation(),
         rocket.rotation(),
-        size,
+        entry,
         { x: 0.5, y: 0.5 },
         { x: 0.5, y: -1 }
     )

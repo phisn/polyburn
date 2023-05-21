@@ -2,7 +2,8 @@
     "private": true,
     "scripts": {
         "dev": "turbo run dev",
-        "test": "turbo run test"
+        "test": "turbo run test",
+        "build": "turbo run build"
     },
     "dependencies": {
         "@turbo/gen": "^1.9.8",

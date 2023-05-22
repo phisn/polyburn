@@ -24,6 +24,7 @@ export const useGameStore = <U,> (
     
     if (!store) {
         throw new Error("GameStoreContext not found")
+        
     }
     
     return useStore(store, selector, equalityFn)

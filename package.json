@@ -1,9 +1,9 @@
 {
     "private": true,
     "scripts": {
-        "dev": "turbo run dev",
-        "test": "turbo run test",
-        "build": "turbo run build"
+        "dev": "turbo run dev --no-daemon",
+        "test": "turbo run test --no-daemon",
+        "build": "turbo run build --no-daemon"
     },
     "dependencies": {
         "@turbo/gen": "^1.9.8",

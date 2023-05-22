@@ -13,7 +13,7 @@ import { respawnRocket } from "../respawnRocket"
 import { RocketComponent } from "../RocketComponent"
 
 export const newRocketDeathSystem: SystemFactory = (meta: Meta, store: RuntimeStore<SystemContext>) => {
-    const rockets = store.newEntitySet(
+    const rockets = store.getState().newEntitySet(
         Components.Rocket,
         Components.Rigidbody)
 

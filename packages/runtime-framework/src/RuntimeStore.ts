@@ -1,4 +1,4 @@
-import { createStore } from "zustand"
+import { createStore, StoreApi } from "zustand"
 
 import { RuntimeEntity } from "./RuntimeEntity"
 import { RuntimeEntitySet } from "./RuntimeEntitySet"
@@ -7,15 +7,15 @@ import { RuntimeSystem } from "./RuntimeSystem"
 export interface RuntimeState<T = void> {
     entities: Map<number, RuntimeEntity>
     systems: RuntimeSystem<T>[]
-}
-
-export interface RuntimeStore<T = void> extends RuntimeState<T> {
+    
     newEntitySet(...components: string[]): RuntimeEntitySet
 
     newEntity(): RuntimeEntity
     removeEntity(entityId: number): void
 
     addSystem(...system: RuntimeSystem<T>[]): void
+
+    step(context: T): void
     
     // remove gets called even if the entity was never added
     listenToEntities(
@@ -25,7 +25,9 @@ export interface RuntimeStore<T = void> extends RuntimeState<T> {
     ): () => void
 }
 
-export const createRuntimeStore = <T = void> () => createStore<RuntimeStore<T>>((set, get) => {
+export type RuntimeStore<T = void> = StoreApi<RuntimeState<T>>
+
+export const createRuntimeStore = <T = void> () => createStore<RuntimeState<T>>((set, get) => {
     let entityIdCounter = 0
     
     interface RuntimeEntityListener {
@@ -36,7 +38,7 @@ export const createRuntimeStore = <T = void> () => createStore<RuntimeStore<T>>(
     const componentChangeListeners = new Map<string, RuntimeEntityListener[]>()
     const entityListeners: RuntimeEntityListener[] = []
 
-    const store: RuntimeStore<T> = {
+    const store: RuntimeState<T> = {
         entities: new Map(),
         systems: [],
 
@@ -169,6 +171,9 @@ export const createRuntimeStore = <T = void> () => createStore<RuntimeStore<T>>(
                 ...state,
                 systems: [...state.systems, ...systems]
             }))
+        },
+        step(context) {
+            get().systems.forEach(system => system(context))
         }
     }
 

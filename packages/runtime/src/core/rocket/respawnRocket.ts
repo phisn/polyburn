@@ -1,7 +1,7 @@
 import { RuntimeEntity } from "runtime-framework"
 
 import { RigidbodyComponent } from "../common/components/RigidbodyComponent"
-import { Components } from "./../Components"
+import { Components } from "../Components"
 import { RocketComponent } from "./RocketComponent"
 
 export function respawnRocket(entity: RuntimeEntity) {

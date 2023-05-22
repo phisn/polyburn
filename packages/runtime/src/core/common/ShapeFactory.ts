@@ -7,5 +7,5 @@ import { SystemContext } from "../SystemContext"
 export const newShape = (meta: Meta, store: RuntimeStore<SystemContext>, shape: ShapeModel) => {
     // maybe find way to enforce that new entities have a entitytypecomponent?? or not !simple halten
 
-    store.newEntity()
+    store.getState().newEntity()
 }

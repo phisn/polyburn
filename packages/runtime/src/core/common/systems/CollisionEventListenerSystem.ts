@@ -4,13 +4,14 @@ import { RuntimeEntity, RuntimeStore } from "runtime-framework"
 import { Components } from "../../Components"
 import { Meta } from "../../Meta"
 import { SystemContext } from "../../SystemContext"
+import { SystemFactory } from "../../SystemFactory"
 import { CollisionEventComponent } from "../components/CollisionEventComponent"
 import { RigidbodyComponent } from "../components/RigidbodyComponent"
 
-export const newCollisionEventListenerSystem = (meta: Meta, store: RuntimeStore<SystemContext>) => {
+export const newCollisionEventListenerSystem: SystemFactory = (meta: Meta, store: RuntimeStore<SystemContext>) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
-    store.listenToEntities(
+    store.getState().listenToEntities(
         (entity) => {
             const rigid = entity.getSafe<RigidbodyComponent>(Components.Rigidbody)
             entityToBodyHandle.set(entity.id, rigid.body.handle)
@@ -49,7 +50,7 @@ export const newCollisionEventListenerSystem = (meta: Meta, store: RuntimeStore<
             return undefined
         }
 
-        return store.entities.get(entityId)
+        return store.getState().entities.get(entityId)
     }
 
     function handleCollisionEvent(

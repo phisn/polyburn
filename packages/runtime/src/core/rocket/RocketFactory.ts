@@ -43,7 +43,7 @@ export const newRocket = (meta: Meta, store: RuntimeStore<SystemContext>, rocket
         meta.rapier.createCollider(collider, body)
     })
 
-    return store.newEntity()
+    return store.getState().newEntity()
         .set<RigidbodyComponent>(Components.Rigidbody, { body })
         .set<RocketComponent>(Components.Rocket, {
             collisionCount: 0,

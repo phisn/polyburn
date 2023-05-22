@@ -13,7 +13,7 @@ const thrustValue = 7.3
 const thrustGroundMultiplier = 1.3
 
 export const newRocketThrustSystem: SystemFactory = (meta: Meta, store: RuntimeStore<SystemContext>) => {
-    const rockets = store.newEntitySet(
+    const rockets = store.getState().newEntitySet(
         Components.Rocket,
         Components.Rigidbody)
 

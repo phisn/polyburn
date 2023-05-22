@@ -1,25 +1,14 @@
 
 import RAPIER from "@dimforge/rapier2d-compat"
-import { createRuntimeStore } from "runtime-framework"
 import { test } from "vitest"
 
-import { Meta } from "../core/Meta"
-import { SystemContext } from "../core/SystemContext"
 import { EntityModelType } from "../model/world/EntityModelType"
 import { WorldModel } from "../model/world/WorldModel"
+import { newRuntime } from "../Runtime"
 import { commonGamemode } from "./CommonGamemode"
 
 test("CommonGamemode", async () => {
     await RAPIER.init()
-
-    const rapier = new RAPIER.World(new RAPIER.Vector2(0, 0))
-
-    const meta: Meta = {
-        rapier,
-        queue: new RAPIER.EventQueue(true),
-    }
-
-    const store = createRuntimeStore<SystemContext>()
 
     const world: WorldModel = {
         shapes: [
@@ -40,7 +29,9 @@ test("CommonGamemode", async () => {
         ]
     }
 
-    commonGamemode(meta, store.getState(), world)
+    const store = newRuntime(commonGamemode, world)
+
+    store.getState().step({ rotation: 0, thrust: false })
 
     console.log(`entities: ${[...store.getState().entities].length}`)
 })

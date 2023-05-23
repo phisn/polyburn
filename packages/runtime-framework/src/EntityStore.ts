@@ -2,20 +2,14 @@ import { createStore, StoreApi } from "zustand"
 
 import { RuntimeEntity } from "./RuntimeEntity"
 import { RuntimeEntitySet } from "./RuntimeEntitySet"
-import { RuntimeSystem } from "./RuntimeSystem"
 
-export interface RuntimeState<T = void> {
+export interface EntityStoreState {
     entities: Map<number, RuntimeEntity>
-    systems: RuntimeSystem<T>[]
     
     newEntitySet(...components: string[]): RuntimeEntitySet
 
     newEntity(): RuntimeEntity
     removeEntity(entityId: number): void
-
-    addSystem(...system: RuntimeSystem<T>[]): void
-
-    step(context: T): void
     
     // remove gets called even if the entity was never added
     listenToEntities(
@@ -25,9 +19,9 @@ export interface RuntimeState<T = void> {
     ): () => void
 }
 
-export type RuntimeStore<T = void> = StoreApi<RuntimeState<T>>
+export type EntityStore = StoreApi<EntityStoreState>
 
-export const createRuntimeStore = <T = void> () => createStore<RuntimeState<T>>((set, get) => {
+export const createEntityStore = () => createStore<EntityStoreState>((set, get) => {
     let entityIdCounter = 0
     
     interface RuntimeEntityListener {
@@ -38,9 +32,8 @@ export const createRuntimeStore = <T = void> () => createStore<RuntimeState<T>>(
     const componentChangeListeners = new Map<string, RuntimeEntityListener[]>()
     const entityListeners: RuntimeEntityListener[] = []
 
-    const store: RuntimeState<T> = {
+    const store: EntityStoreState = {
         entities: new Map(),
-        systems: [],
 
         newEntitySet(...components) {
             const entitiesInSet = new Map<number, RuntimeEntity>()
@@ -165,15 +158,6 @@ export const createRuntimeStore = <T = void> () => createStore<RuntimeState<T>>(
                 entities.delete(entityId)
                 return { ...state, entities }
             })
-        },
-        addSystem(...systems) {
-            set(state => ({
-                ...state,
-                systems: [...state.systems, ...systems]
-            }))
-        },
-        step(context) {
-            get().systems.forEach(system => system(context))
         }
     }
 

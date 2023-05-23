@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { RuntimeStore } from "runtime-framework"
+import { EntityStore } from "runtime-framework"
 
 import { changeAnchor } from "../../model/changeAnchor"
 import { RocketEntityModel } from "../../model/world/EntityModel"
@@ -7,13 +7,13 @@ import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
 import { EntityModelType } from "../../model/world/EntityModelType"
 import { EntityTypeComponent } from "../common/components/EntityTypeComponent"
 import { RigidbodyComponent } from "../common/components/RigidbodyComponent"
-import { EntityType } from "../common/EntityType"
+import { EntityType } from "../EntityType"
 import { Components } from "../Components"
 import { Meta } from "../Meta"
 import { SystemContext } from "../SystemContext"
 import { RocketComponent } from "./RocketComponent"
 
-export const newRocket = (meta: Meta, store: RuntimeStore<SystemContext>, rocket: RocketEntityModel) => {
+export const newRocket = (meta: Meta, store: EntityStore, rocket: RocketEntityModel) => {
     const entry = entityModelRegistry[EntityModelType.Rocket]
     
     const positionAtCenter = changeAnchor(

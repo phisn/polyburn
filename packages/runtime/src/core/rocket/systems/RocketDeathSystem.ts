@@ -2,17 +2,16 @@ import RAPIER from "@dimforge/rapier2d-compat"
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 import sqrt from "@stdlib/math/base/special/sqrt"
-import { RuntimeEntity, RuntimeStore } from "runtime-framework"
+import { EntityStore,RuntimeEntity } from "runtime-framework"
 
 import { RigidbodyComponent } from "../../common/components/RigidbodyComponent"
 import { Components } from "../../Components"
 import { Meta } from "../../Meta"
-import { SystemContext } from "../../SystemContext"
 import { SystemFactory } from "../../SystemFactory"
 import { respawnRocket } from "../respawnRocket"
 import { RocketComponent } from "../RocketComponent"
 
-export const newRocketDeathSystem: SystemFactory = (meta: Meta, store: RuntimeStore<SystemContext>) => {
+export const newRocketDeathSystem: SystemFactory = (meta: Meta, store: EntityStore) => {
     const rockets = store.getState().newEntitySet(
         Components.Rocket,
         Components.Rigidbody)

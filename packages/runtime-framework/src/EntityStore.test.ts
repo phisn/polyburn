@@ -1,9 +1,10 @@
 import { expect, test } from "vitest"
 
-import { createRuntimeStore } from "./RuntimeStore"
+import { createEntityStore } from "./EntityStore"
+import { SystemStack } from "./SystemStack"
 
 test("RuntimeStore entity", () => {
-    const store = createRuntimeStore()
+    const store = createEntityStore()
     const { newEntity } = store.getState()
 
     const entity = newEntity()
@@ -29,7 +30,7 @@ test("RuntimeStore entity", () => {
 })
 
 test("RuntimeStore entity set", () => {
-    const store = createRuntimeStore()
+    const store = createEntityStore()
     const { newEntity, removeEntity } = store.getState()
 
     interface Component {
@@ -106,8 +107,8 @@ test("RuntimeStore systems", () => {
         value: number
     }
 
-    const store = createRuntimeStore()
-    const { newEntity, newEntitySet, addSystem } = store.getState()
+    const store = createEntityStore()
+    const { newEntity, newEntitySet } = store.getState()
 
     const counterEntities = newEntitySet("counter")
 
@@ -126,28 +127,30 @@ test("RuntimeStore systems", () => {
         }
     }
 
-    addSystem(incrementSystem)
+    const systemStack1 = new SystemStack<void>(
+        incrementSystem
+    )
 
-    const step = () => {
-        store.getState().systems.forEach(system => system())
-    }
+    const systemStack2 = new SystemStack<void>(
+        incrementSystem,
+        decrementSystem
+    )
 
+    
     const c1 = newEntity().set<CounterComponent>("counter", { value: 0 })
-    step()
+    systemStack1.step()
     const c2 = newEntity().set<CounterComponent>("counter", { value: 0 })
 
     expect([...counterEntities].length).toBe(2)
     expect(c1.get<CounterComponent>("counter")?.value).toBe(1)
     expect(c2.get<CounterComponent>("counter")?.value).toBe(0)
 
-    for (let i = 0; i < 200; i++) { step() }
+    for (let i = 0; i < 200; i++) { systemStack1.step() }
 
     expect(c1.get<CounterComponent>("counter")?.value).toBe(201)
     expect(c2.get<CounterComponent>("counter")?.value).toBe(200)
 
-    addSystem(decrementSystem)
-
-    for (let i = 0; i < 200; i++) { step() }
+    for (let i = 0; i < 200; i++) { systemStack2.step() }
 
     expect(c1.get<CounterComponent>("counter")?.value).toBe(1)
     expect(c2.get<CounterComponent>("counter")?.value).toBe(0)

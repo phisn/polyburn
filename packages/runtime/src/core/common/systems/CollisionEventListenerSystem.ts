@@ -1,5 +1,5 @@
 import { BiMap } from "mnemonist"
-import { RuntimeEntity, RuntimeStore } from "runtime-framework"
+import { EntityStore,RuntimeEntity } from "runtime-framework"
 
 import { Components } from "../../Components"
 import { Meta } from "../../Meta"
@@ -8,7 +8,7 @@ import { SystemFactory } from "../../SystemFactory"
 import { CollisionEventComponent } from "../components/CollisionEventComponent"
 import { RigidbodyComponent } from "../components/RigidbodyComponent"
 
-export const newCollisionEventListenerSystem: SystemFactory = (meta: Meta, store: RuntimeStore<SystemContext>) => {
+export const newCollisionEventListenerSystem: SystemFactory = (meta: Meta, store: EntityStore) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
     store.getState().listenToEntities(

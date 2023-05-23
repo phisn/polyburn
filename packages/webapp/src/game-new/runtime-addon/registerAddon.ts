@@ -1,8 +1,12 @@
-import { RuntimeStore } from "runtime-framework"
+import { EntityStore, SystemStack } from "runtime-framework"
+
+import { newInterpolationFrameSystem } from "./interpolation/InterpolationFrameSystem"
 
 
-export const registerAddon = (runtime: RuntimeStore) => {
-    runtime.getState().addSystem(
-        
+export const registerAddon = (store: EntityStore) => {
+    
+    
+    return new SystemStack(
+        newInterpolationFrameSystem(store),
     )
 }

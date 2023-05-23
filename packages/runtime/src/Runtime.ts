@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { createRuntimeStore } from "runtime-framework"
+import { createEntityStore } from "runtime-framework"
 
 import { Meta } from "./core/Meta"
 import { Gamemode } from "./gamemode/Gamemode"
@@ -11,5 +11,10 @@ export const newRuntime = (gamemode: Gamemode, world: WorldModel) => {
         queue: new RAPIER.EventQueue(true)
     }
 
-    return gamemode(meta, createRuntimeStore(), world)
+    const store = createEntityStore()
+
+    return {
+        store,
+        stack: gamemode(meta, store, world)
+    }
 }

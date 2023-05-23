@@ -1,4 +1,4 @@
-import { RuntimeEntity, RuntimeStore } from "runtime-framework"
+import { EntityStore,RuntimeEntity } from "runtime-framework"
 
 import { CollisionEventComponent } from "../../common/components/CollisionEventComponent"
 import { RigidbodyComponent } from "../../common/components/RigidbodyComponent"
@@ -8,7 +8,7 @@ import { SystemContext } from "../../SystemContext"
 import { SystemFactory } from "../../SystemFactory"
 import { RocketComponent } from "../RocketComponent"
 
-export const newRocketCollisionSystem: SystemFactory = (meta: Meta, store: RuntimeStore<SystemContext>) => {
+export const newRocketCollisionSystem: SystemFactory = (meta: Meta, store: EntityStore) => {
     const rockets = store.getState().newEntitySet(
         Components.Rocket,
         Components.Rigidbody,

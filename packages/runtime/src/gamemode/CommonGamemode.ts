@@ -1,4 +1,5 @@
 import RAPIER from "@dimforge/rapier2d-compat"
+import { SystemStack } from "runtime-framework"
 
 import { newShape } from "../core/common/ShapeFactory"
 import { newRocket } from "../core/rocket/RocketFactory"
@@ -9,10 +10,6 @@ import { Gamemode } from "./Gamemode"
 
 export const commonGamemode: Gamemode = (meta, store, world) => {
     meta.rapier.gravity = new RAPIER.Vector2(0, -20)
-
-    store.getState().addSystem(
-        ...systemFactories.map(factory => factory(meta, store))
-    )
 
     const rocketModel = world.entities.find(entity => entity.type === EntityModelType.Rocket)
 
@@ -26,5 +23,7 @@ export const commonGamemode: Gamemode = (meta, store, world) => {
         newShape(meta, store, shape)
     })
 
-    return store
+    return new SystemStack(
+        ...systemFactories.map(factory => factory(meta, store))
+    )
 }

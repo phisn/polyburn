@@ -1,7 +1,7 @@
-import { EntityStore, SystemStack } from "runtime-framework"
+import { EntityStore } from "runtime-framework"
 
 import { Meta } from "../core/Meta"
-import { SystemContext } from "../core/SystemContext"
+import { RuntimeSystemStack } from "../core/RuntimeSystemStack"
 import { WorldModel } from "../model/world/WorldModel"
 
-export type Gamemode = (meta: Meta, store: EntityStore, world: WorldModel) => SystemStack<SystemContext>
+export type Gamemode = (meta: Meta, store: EntityStore, world: WorldModel) => RuntimeSystemStack

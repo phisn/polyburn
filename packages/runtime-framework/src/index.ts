@@ -1,6 +1,6 @@
 
 export * from "./EntityStore"
-export * from "./RuntimeEntity"
-export * from "./RuntimeEntitySet"
-export * from "./RuntimeSystem"
+export * from "./Entity"
+export * from "./EntitySet"
+export * from "./System"
 export * from "./SystemStack"

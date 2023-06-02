@@ -1,10 +1,10 @@
-import { RuntimeEntity } from "runtime-framework"
+import { Entity } from "runtime-framework"
 
 import { RigidbodyComponent } from "../common/components/RigidbodyComponent"
 import { Components } from "../Components"
 import { RocketComponent } from "./RocketComponent"
 
-export function respawnRocket(entity: RuntimeEntity) {
+export function respawnRocket(entity: Entity) {
     const rigid = entity.get<RigidbodyComponent>(Components.Rigidbody)
     const rocket = entity.get<RocketComponent>(Components.Rocket)
 

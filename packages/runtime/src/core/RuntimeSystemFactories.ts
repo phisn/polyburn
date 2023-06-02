@@ -4,9 +4,9 @@ import { newRocketCollisionSystem } from "./rocket/systems/RocketCollisionSystem
 import { newRocketDeathSystem } from "./rocket/systems/RocketDeathSystem"
 import { newRocketRotationSystem } from "./rocket/systems/RocketRotationSystem"
 import { newRocketThrustSystem } from "./rocket/systems/RocketThrustSystem"
-import { SystemFactory } from "./SystemFactory"
+import { RuntimeSystemFactory } from "./RuntimeSystemFactory"
 
-export const systemFactories: SystemFactory[] = [
+export const runtimeSystemFactories: RuntimeSystemFactory[] = [
     newRapierStepSystem,
     newCollisionEventListenerSystem,
     newRocketCollisionSystem,

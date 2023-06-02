@@ -1,6 +1,5 @@
-import { Meta } from "../../Meta"
-import { SystemFactory } from "../../SystemFactory"
+import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 
-export const newRapierStepSystem: SystemFactory = (meta: Meta) => {
+export const newRapierStepSystem: RuntimeSystemFactory = (_, meta) => {
     return () => meta.rapier.step(meta.queue)
 }

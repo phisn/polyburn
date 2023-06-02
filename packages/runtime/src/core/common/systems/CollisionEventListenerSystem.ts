@@ -1,14 +1,12 @@
 import { BiMap } from "mnemonist"
-import { EntityStore,RuntimeEntity } from "runtime-framework"
+import {Entity } from "runtime-framework"
 
 import { Components } from "../../Components"
-import { Meta } from "../../Meta"
-import { SystemContext } from "../../SystemContext"
-import { SystemFactory } from "../../SystemFactory"
+import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { CollisionEventComponent } from "../components/CollisionEventComponent"
 import { RigidbodyComponent } from "../components/RigidbodyComponent"
 
-export const newCollisionEventListenerSystem: SystemFactory = (meta: Meta, store: EntityStore) => {
+export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, meta) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
     store.getState().listenToEntities(
@@ -54,8 +52,8 @@ export const newCollisionEventListenerSystem: SystemFactory = (meta: Meta, store
     }
 
     function handleCollisionEvent(
-        entity: RuntimeEntity, 
-        other: RuntimeEntity, 
+        entity: Entity,
+        other: Entity,
         started: boolean, 
         sensor: boolean
     ) {

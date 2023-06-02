@@ -1,19 +1,20 @@
 import { createStore, StoreApi } from "zustand"
 
-import { RuntimeEntity } from "./RuntimeEntity"
-import { RuntimeEntitySet } from "./RuntimeEntitySet"
+import { Entity } from "./Entity"
+import { EntitySet } from "./EntitySet"
 
 export interface EntityStoreState {
-    entities: Map<number, RuntimeEntity>
-    
-    newEntitySet(...components: string[]): RuntimeEntitySet
+    entities: Map<number, Entity>
+    world: Entity,
 
-    newEntity(): RuntimeEntity
+    newEntitySet(...components: string[]): EntitySet
+
+    newEntity(): Entity
     removeEntity(entityId: number): void
     
     // remove gets called even if the entity was never added
     listenToEntities(
-        add: (entity: RuntimeEntity) => void,
+        add: (entity: Entity) => void,
         remove: (entityId: number) => void,
         ...components: string[]
     ): () => void
@@ -34,16 +35,17 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
 
     const store: EntityStoreState = {
         entities: new Map(),
+        world: newEntity(),
 
         newEntitySet(...components) {
-            const entitiesInSet = new Map<number, RuntimeEntity>()
+            const entitiesInSet = new Map<number, Entity>()
 
             const free = get().listenToEntities(
                 entity => entitiesInSet.set(entity.id, entity),
                 entityId => entitiesInSet.delete(entityId),
                 ...components)
 
-            const entitySet: RuntimeEntitySet = {
+            const entitySet: EntitySet = {
                 [Symbol.iterator]() { return entitiesInSet.values() },
                 free
             }
@@ -56,6 +58,8 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
 
             return entitySet
         },
+
+        newEntity,
 
         listenToEntities(add, remove, ...components) {
             // special case: listen to all entities
@@ -99,50 +103,6 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
             }
         },
 
-        newEntity() {
-            const entityId = entityIdCounter++
-            const components: { [key: string]: unknown } = {}
-
-            const entity: RuntimeEntity = {
-                get components() { 
-                    return components 
-                },
-                get id() {
-                    return entityId
-                },
-                get<T>(component: string): T {
-                    return components[component] as T
-                },
-                getSafe<T>(component: string): T {
-                    console.assert(component in components, `Component ${component} does not exist`)
-                    return components[component] as T
-                },
-                set<T>(component: string, value: T): RuntimeEntity {
-                    console.assert(!(component in components), `Component ${component} already exists`)
-
-                    components[component] = value
-                    getComponentChangeListeners(component).forEach(listener => listener.add(entityId))
-                    return this
-                },
-                remove(component: string): RuntimeEntity {
-                    console.assert(component in components, `Component ${component} does not exist`)
-
-                    delete components[component]
-                    getComponentChangeListeners(component).forEach(listener => listener.remove(entityId))
-                    return this
-                }
-            }
-
-            set(state => ({
-                ...state,
-                entities: new Map(state.entities).set(entityId, entity)
-            }))
-
-            // calling add after the entity is added to the store
-            entityListeners.forEach(listener => listener.add(entityId))
-
-            return entity
-        },
         removeEntity(entityId) {
             console.assert(get().entities.has(entityId), `Entity ${entityId} does not exist`)
 
@@ -175,6 +135,58 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
     function removeComponentChangeListeners(component: string, listener: RuntimeEntityListener) {
         const listeners = componentChangeListeners.get(component) ?? []
         listeners.splice(listeners.indexOf(listener), 1)
+    }
+
+    function newEntity() {
+        const entityId = entityIdCounter++
+        const components: { [key: string]: unknown } = {}
+
+        const entity: Entity = {
+            get components() {
+                return components
+            },
+            get id() {
+                return entityId
+            },
+            get<T>(component: string): T {
+                return components[component] as T
+            },
+            getSafe<T>(component: string): T {
+                console.assert(component in components, `Component ${component} does not exist`)
+                return components[component] as T
+            },
+            getOrDefault<T>(component: string, def: T): T {
+                if (component in components) {
+                    return components[component] as T
+                }
+
+                return def
+            },
+            set<T>(component: string, value: T): Entity {
+                console.assert(!(component in components), `Component ${component} already exists`)
+
+                components[component] = value
+                getComponentChangeListeners(component).forEach(listener => listener.add(entityId))
+                return this
+            },
+            remove(component: string): Entity {
+                console.assert(component in components, `Component ${component} does not exist`)
+
+                delete components[component]
+                getComponentChangeListeners(component).forEach(listener => listener.remove(entityId))
+                return this
+            }
+        }
+
+        set(state => ({
+            ...state,
+            entities: new Map(state.entities).set(entityId, entity)
+        }))
+
+        // calling add after the entity is added to the store
+        entityListeners.forEach(listener => listener.add(entityId))
+
+        return entity
     }
 
     return store

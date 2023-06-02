@@ -127,15 +127,14 @@ test("RuntimeStore systems", () => {
         }
     }
 
-    const systemStack1 = new SystemStack<void>(
-        incrementSystem
+    const systemStack1 = new SystemStack<void, void>(store, void 0).add(
+        () => incrementSystem
     )
 
-    const systemStack2 = new SystemStack<void>(
-        incrementSystem,
-        decrementSystem
+    const systemStack2 = new SystemStack<void, void>(store, void 0).add(
+        () => incrementSystem,
+        () => decrementSystem
     )
-
     
     const c1 = newEntity().set<CounterComponent>("counter", { value: 0 })
     systemStack1.step()

@@ -7,10 +7,9 @@ import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
 import { EntityModelType } from "../../model/world/EntityModelType"
 import { EntityTypeComponent } from "../common/components/EntityTypeComponent"
 import { RigidbodyComponent } from "../common/components/RigidbodyComponent"
-import { EntityType } from "../EntityType"
 import { Components } from "../Components"
+import { EntityType } from "../EntityType"
 import { Meta } from "../Meta"
-import { SystemContext } from "../SystemContext"
 import { RocketComponent } from "./RocketComponent"
 
 export const newRocket = (meta: Meta, store: EntityStore, rocket: RocketEntityModel) => {

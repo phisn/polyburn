@@ -1,7 +1,9 @@
 
 import RAPIER from "@dimforge/rapier2d-compat"
-import { test } from "vitest"
+import { expect, test } from "vitest"
 
+import { RigidbodyComponent } from "../core/common/components/RigidbodyComponent"
+import { Components } from "../core/Components"
 import { EntityModelType } from "../model/world/EntityModelType"
 import { WorldModel } from "../model/world/WorldModel"
 import { newRuntime } from "../Runtime"
@@ -23,7 +25,7 @@ test("CommonGamemode", async () => {
         entities: [
             {
                 type: EntityModelType.Rocket,
-                position: { x: 0, y: 0 },
+                position: { x: -1, y: -1 },
                 rotation: 0,
             }
         ]
@@ -31,18 +33,17 @@ test("CommonGamemode", async () => {
 
     const { store, stack } = newRuntime(commonGamemode, world)
 
-    stack.step({ rotation: 0, thrust: false })
+    const rockets = store.getState().newEntitySet(Components.Rocket)
+    const rocket = [...rockets][0]
+    const rocketPosition = rocket.getSafe<RigidbodyComponent>(Components.Rigidbody)
+
+    for (let i = 0; i < 100; ++i) {
+        const y = rocketPosition.body.translation().y
+        stack.step({ rotation: i * 10, thrust: false })
+        const newY = rocketPosition.body.translation().y
+
+        expect(y).toBeGreaterThan(newY)
+    }
 
     console.log(`entities: ${[...store.getState().entities].length}`)
-}) 
-
-/*
-
-runtime produces store, systemstack. the systemstack is the primary systemstack.
-the webapp addon now takes the store and produces a new systemstack. the frame systemstaack.
-now both systemstacks are updated at different times. at frame or tick rate. additionally we
-create a visibleComponent that has the component used in it. it basicly finds it through
-looking into the entity identity. if not we do not look into the addon identity because they
-should already have the visible component. 
-
-*/
+})

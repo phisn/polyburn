@@ -1,4 +1,3 @@
-import RAPIER from "@dimforge/rapier2d-compat"
 import { Canvas, useThree } from "@react-three/fiber"
 import { Suspense, useRef } from "react"
 import tunnel from "tunnel-rat"
@@ -19,9 +18,6 @@ import { ProvideGameStore, useGameStore } from "./store/useGameStore"
 export interface GameProps {
     world: WorldModel
 }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const rapierInit = RAPIER.init()
 
 const overlay = tunnel()
 

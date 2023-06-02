@@ -1,20 +1,18 @@
-import { EntityStore,RuntimeEntity } from "runtime-framework"
+import {Entity } from "runtime-framework"
 
 import { CollisionEventComponent } from "../../common/components/CollisionEventComponent"
 import { RigidbodyComponent } from "../../common/components/RigidbodyComponent"
 import { Components } from "../../Components"
-import { Meta } from "../../Meta"
-import { SystemContext } from "../../SystemContext"
-import { SystemFactory } from "../../SystemFactory"
+import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { RocketComponent } from "../RocketComponent"
 
-export const newRocketCollisionSystem: SystemFactory = (meta: Meta, store: EntityStore) => {
+export const newRocketCollisionSystem: RuntimeSystemFactory = (store) => {
     const rockets = store.getState().newEntitySet(
         Components.Rocket,
         Components.Rigidbody,
         Components.CollisionEvent)
 
-    return (context: SystemContext) => {
+    return (context) => {
         for (const rocketEntity of rockets) {
             const rocket = rocketEntity.getSafe<RocketComponent>(Components.Rocket)
             const collisions = rocketEntity.getSafe<CollisionEventComponent>(Components.CollisionEvent)
@@ -39,7 +37,7 @@ export const newRocketCollisionSystem: SystemFactory = (meta: Meta, store: Entit
             collisions.events = []
         }
 
-        function resetInputAfterTakeOff(rocketEntity: RuntimeEntity, rocket: RocketComponent) {
+        function resetInputAfterTakeOff(rocketEntity: Entity, rocket: RocketComponent) {
             const rigid = rocketEntity.getSafe<RigidbodyComponent>(Components.Rigidbody)
             rocket.rotationWithoutInput = rigid.body.rotation() - context.rotation
         }

@@ -2,16 +2,16 @@ import RAPIER from "@dimforge/rapier2d-compat"
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 import sqrt from "@stdlib/math/base/special/sqrt"
-import { EntityStore,RuntimeEntity } from "runtime-framework"
+import {Entity } from "runtime-framework"
 
 import { RigidbodyComponent } from "../../common/components/RigidbodyComponent"
 import { Components } from "../../Components"
 import { Meta } from "../../Meta"
-import { SystemFactory } from "../../SystemFactory"
+import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { respawnRocket } from "../respawnRocket"
 import { RocketComponent } from "../RocketComponent"
 
-export const newRocketDeathSystem: SystemFactory = (meta: Meta, store: EntityStore) => {
+export const newRocketDeathSystem: RuntimeSystemFactory = (store, meta) => {
     const rockets = store.getState().newEntitySet(
         Components.Rocket,
         Components.Rigidbody)
@@ -40,7 +40,7 @@ export const newRocketDeathSystem: SystemFactory = (meta: Meta, store: EntitySto
 function handleRocketCollider(
     meta: Meta,
     collider: RAPIER.Collider,
-    rocket: RuntimeEntity
+    rocket: Entity
 ) {
     meta.rapier.contactsWith(
         collider,
@@ -65,7 +65,7 @@ function handleRocketCollider(
 function handleRocketContact(
     contact: RAPIER.TempContactManifold,
     flipped: boolean,
-    rocket: RuntimeEntity
+    rocket: Entity
 ) {
     const rigid = rocket.getSafe<RigidbodyComponent>(Components.Rigidbody)
 

@@ -31,7 +31,7 @@ export function useInterpolationUpdate(store: EntityStore, tickrate: number) {
                 continue
             }
 
-            interpolateEntity(entity, rigid, delta)
+            interpolateEntity(entity, delta)
         }
     })
 

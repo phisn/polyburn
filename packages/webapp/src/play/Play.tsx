@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom"
 import Navbar from "../common/components/Navbar"
 import useGlobalStore from "../common/GlobalStore"
 import { StopFillSvg } from "../editor/Editor"
-import Game from "../game/Game"
+import Game from "../game-new/Game"
 import { importWorld, WorldModel } from "../model/world/WorldModel"
 
 function Play() {

@@ -33,9 +33,11 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
     const componentChangeListeners = new Map<string, RuntimeEntityListener[]>()
     const entityListeners: RuntimeEntityListener[] = []
 
+    const [worldId, world] = newEntityNoRegister()
+
     const store: EntityStoreState = {
-        entities: new Map(),
-        world: newEntity(),
+        entities: new Map([[worldId, world]]),
+        world,
 
         newEntitySet(...components) {
             const entitiesInSet = new Map<number, Entity>()
@@ -59,7 +61,19 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
             return entitySet
         },
 
-        newEntity,
+        newEntity() {
+            const [id, entity] = newEntityNoRegister()
+
+            set(state => ({
+                ...state,
+                entities: new Map(state.entities).set(id, entity)
+            }))
+
+            // calling add after the entity is added to the store
+            entityListeners.forEach(listener => listener.add(id))
+
+            return entity
+        },
 
         listenToEntities(add, remove, ...components) {
             // special case: listen to all entities
@@ -70,6 +84,8 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
                 }
 
                 entityListeners.push(listener)
+
+                get().entities.forEach(add)
 
                 return () => {
                     entityListeners.splice(entityListeners.indexOf(listener), 1)
@@ -94,6 +110,12 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
 
             components.forEach(component => {
                 getComponentChangeListeners(component).push(internalListener)
+            })
+
+            get().entities.forEach((entity) => {
+                if (components.every(component => component in entity.components)) {
+                    add(entity)
+                }
             })
 
             return () => {
@@ -137,7 +159,7 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
         listeners.splice(listeners.indexOf(listener), 1)
     }
 
-    function newEntity() {
+    function newEntityNoRegister(): [number, Entity] {
         const entityId = entityIdCounter++
         const components: { [key: string]: unknown } = {}
 
@@ -178,15 +200,7 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
             }
         }
 
-        set(state => ({
-            ...state,
-            entities: new Map(state.entities).set(entityId, entity)
-        }))
-
-        // calling add after the entity is added to the store
-        entityListeners.forEach(listener => listener.add(entityId))
-
-        return entity
+        return [entityId, entity]
     }
 
     return store

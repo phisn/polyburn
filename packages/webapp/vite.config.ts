@@ -14,8 +14,8 @@ export default defineConfig({
                 "icon.png",
             ],
             manifest: {
-                name: "Rocket Game",
-                short_name: "Rocket Game",
+                name: "RocketGraphic Game",
+                short_name: "RocketGraphic Game",
 
                 background_color: "#000000",
                 theme_color: "#000000",

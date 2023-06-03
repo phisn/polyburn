@@ -1,4 +1,4 @@
-# Rocket Game
+# RocketGraphic Game
 A rocket game for the web. Including an editor, replays, leaderboards and more. Currently in development.
 
 Run

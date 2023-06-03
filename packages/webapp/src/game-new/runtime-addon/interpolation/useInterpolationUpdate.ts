@@ -3,16 +3,14 @@ import { useMemo } from "react"
 import { RigidbodyComponent } from "runtime/src/core/common/components/RigidbodyComponent"
 import { Components } from "runtime/src/core/Components"
 import { Entity, EntityStore } from "runtime-framework"
-import { MathUtils, Vector3 } from "three"
+import { MathUtils } from "three"
 
 import { AddonComponents } from "../AddonComponents"
 import { InterpolationComponent } from "./InterpolationComponent"
 
 export function useInterpolationUpdate(store: EntityStore, tickrate: number) {
     const entities = useMemo(() =>
-        store.getState().newEntitySet(
-            Components.Rigidbody,
-            AddonComponents.Interpolation),
+        store.getState().newEntitySet(AddonComponents.Interpolation),
     [store]
     )
 
@@ -35,24 +33,35 @@ export function useInterpolationUpdate(store: EntityStore, tickrate: number) {
         }
     })
 
-    const onPhysicsUpdate = (time: number) => {
-        for (const entity of entities) {
-            const interpolation = entity.getSafe<InterpolationComponent>(AddonComponents.Interpolation)
+    return {
+        onPhysicsUpdate(time: number) {
+            for (const entity of entities) {
+                const rigid = entity.getSafe<RigidbodyComponent>(Components.Rigidbody)
 
-            interpolation.previousPosition = interpolation.newPosition
-            interpolation.previousRotation = interpolation.newRotation
+                if (rigid.body.isSleeping()) {
+                    continue
+                }
 
-            const rigid = entity.getSafe<RigidbodyComponent>(Components.Rigidbody)
-            const position = rigid.body.translation()
+                const interpolation = entity.getSafe<InterpolationComponent>(AddonComponents.Interpolation)
 
-            interpolation.newPosition = new Vector3(position.x, position.y)
-            interpolation.newRotation = rigid.body.rotation()
+                interpolation.previousPosition.set(
+                    interpolation.newPosition.x,
+                    interpolation.newPosition.y, 0)
+                interpolation.previousRotation = interpolation.newRotation
+
+                const position = rigid.body.translation()
+
+                interpolation.newPosition.set(position.x, position.y, 0)
+                interpolation.newRotation = rigid.body.rotation()
+
+                if (Components.Rocket in entity.components) {
+                    // console.log(`pp${interpolation.previousPosition.x}|${interpolation.previousPosition.y}, np${interpolation.newPosition.x}|${interpolation.newPosition.y}, p${rigid.body.translation().x}|${rigid.body.translation().y}`)
+                }
+            }
+
+            previousTime = time
         }
-
-        previousTime = time
     }
-
-    return onPhysicsUpdate
 }
 
 function interpolateEntity(entity: Entity, delta: number) {

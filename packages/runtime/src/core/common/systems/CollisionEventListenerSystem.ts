@@ -9,10 +9,13 @@ import { RigidbodyComponent } from "../components/RigidbodyComponent"
 export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, meta) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
+    console.log("boot")
     store.getState().listenToEntities(
         (entity) => {
             const rigid = entity.getSafe<RigidbodyComponent>(Components.Rigidbody)
             entityToBodyHandle.set(entity.id, rigid.body.handle)
+
+            console.log(`register ${entity.id}`)
         },
         (entityId) => {
             entityToBodyHandle.delete(entityId)

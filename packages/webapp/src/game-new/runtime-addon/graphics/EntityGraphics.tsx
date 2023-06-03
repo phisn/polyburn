@@ -1,10 +1,10 @@
-import { Entity,EntityStore } from "runtime-framework"
+import { Entity, EntityStore } from "runtime-framework"
 import { useStore } from "zustand"
 
-import { AddonComponents } from "./runtime-addon/AddonComponents"
-import { GraphicComponent } from "./runtime-addon/graphic/GraphicComponent"
+import { AddonComponents } from "../AddonComponents"
+import { GraphicComponent } from "../graphic/GraphicComponent"
 
-export default function Entities(props: { store: EntityStore }) {
+export default function EntityGraphics(props: { store: EntityStore }) {
     const entitiesMap = useStore(props.store, state => state.entities)
 
     const graphicEntities = [...entitiesMap.values()]
@@ -13,13 +13,13 @@ export default function Entities(props: { store: EntityStore }) {
     return (
         <>
             {graphicEntities.map(entity => (
-                <Entity key={entity.id} entity={entity} />
+                <EntityGraphic key={entity.id} entity={entity} />
             ))}
         </>
     )
 }
 
-function Entity(props: { entity: Entity }) {
+function EntityGraphic(props: { entity: Entity }) {
     const graphicComponent = props.entity.getSafe<GraphicComponent>(AddonComponents.Graphic)
 
     return (

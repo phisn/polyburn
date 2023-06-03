@@ -1,10 +1,12 @@
 import { EntityType } from "runtime/src/core/EntityType"
 
-import { Rocket } from "../../graphics/Rocket"
+import { FlagGraphic } from "../graphics/FlagGraphic"
+import { RocketGraphic } from "../graphics/RocketGraphic"
+import { ShapeGraphic } from "../graphics/ShapeGraphc"
 import { Graphic } from "./GraphicComponent"
 
 export const graphicRegistry: { [key: string]: Graphic } = {
-    [EntityType.Flag]: null!,
-    [EntityType.Rocket]: Rocket,
-    [EntityType.Shape]: null!,
+    [EntityType.Flag]: FlagGraphic,
+    [EntityType.Rocket]: RocketGraphic,
+    [EntityType.Shape]: ShapeGraphic,
 }

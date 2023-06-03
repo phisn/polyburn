@@ -16,8 +16,7 @@ export interface RocketSpawn {
 
 export function bodyRotationFromInput(
     rocket: RuntimeRocket, 
-    inputRotation: number)
-{
+    inputRotation: number) {
     return rocket.rotationNoInput + inputRotation
 }
 
@@ -38,7 +37,7 @@ export class RuntimeRocket {
         ) as RocketEntityModel | undefined
 
         if (!rocket) {
-            throw new Error("Rocket not found")
+            throw new Error("RocketGraphic not found")
         }
 
         this.body = createRocketEntityBody(state.rapier, rocket)

@@ -11,9 +11,7 @@ import { scale } from "../../../model/world/Size"
 import { AddonComponents } from "../AddonComponents"
 import { InterpolationComponent } from "../interpolation/InterpolationComponent"
 
-export function Rocket(props: { entity: Entity }) {
-    const interpolation = props.entity.getSafe<InterpolationComponent>(AddonComponents.Interpolation)
-
+export function RocketGraphic(props: { entity: Entity }) {
     const svgRef = useRef<Object3D>(null!)
     // const lineRef = useRef<any>(null!)
 
@@ -21,13 +19,17 @@ export function Rocket(props: { entity: Entity }) {
     const size = scale(entry.size, entry.scale)
 
     useFrame(() => {
+        const interpolation = props.entity.getSafe<InterpolationComponent>(AddonComponents.Interpolation)
+
         const positionAnchored = changeAnchor(
-            interpolation.position,
+            { x: 0, y: 0 },
             interpolation.rotation,
             size,
             { x: 0.5, y: 0.5 },
             entry.anchor
         )
+
+        console.log(`x${positionAnchored.x}, y${positionAnchored.y}`)
 
         svgRef.current.position.set(positionAnchored.x, positionAnchored.y, 0)
         svgRef.current.rotation.set(0, 0, interpolation.rotation)

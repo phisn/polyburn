@@ -1,8 +1,8 @@
 import { Gamemode } from "runtime/src/gamemode/Gamemode"
 
-import { WorldModel } from "../model/world/WorldModel"
-import { useInterpolationUpdate } from "./runtime-addon/interpolation/useInterpolationUpdate"
-import { newWebappRuntime } from "./runtime-addon/WebappRuntime"
+import { WorldModel } from "../../model/world/WorldModel"
+import { useInterpolationUpdate } from "../runtime-addon/interpolation/useInterpolationUpdate"
+import { newWebappRuntime } from "../runtime-addon/WebappRuntime"
 import { useControls } from "./useControls"
 import { useGameLoop } from "./useGameLoop"
 
@@ -10,7 +10,9 @@ export function useWebappRuntime(gamemode: Gamemode, world: WorldModel) {
     const fixed_world = JSON.parse(JSON.stringify(world)) // dirty hack to prototype for now. fix later
     const { store, stack } = newWebappRuntime(gamemode, fixed_world)
 
-    const onPhysicsUpdate = useInterpolationUpdate(store)
+    const tickrate = 16.6667
+
+    const { onPhysicsUpdate } = useInterpolationUpdate(store, tickrate)
 
     const controls = useControls()
 
@@ -26,7 +28,7 @@ export function useWebappRuntime(gamemode: Gamemode, world: WorldModel) {
             })
         },
         onPhysicsUpdate,
-        1 / 60, 1
+        tickrate, 1
     )
 
     return store

@@ -22,6 +22,8 @@ export const useGameLoop = (
         const now = performance.now()
         
         if (now - lastTime >= tickRate * tickRateLag) {
+            // console.log(`data(now${now}, lastTime${lastTime}, tickRate${tickRate}, tickRateLag${tickRateLag}, now - lastTime${now - lastTime})`)
+
             let frames = 0
 
             do {

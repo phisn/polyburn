@@ -1,11 +1,11 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { SystemStack } from "runtime-framework"
 
-import { newShape } from "../core/common/ShapeFactory"
 import { Meta } from "../core/Meta"
 import { newRocket } from "../core/rocket/RocketFactory"
 import { runtimeSystemFactories } from "../core/RuntimeSystemFactories"
 import { RuntimeSystemContext } from "../core/RuntimeSystemStack"
+import { newShape } from "../core/shape/ShapeFactory"
 import { RocketEntityModel } from "../model/world/EntityModel"
 import { EntityModelType } from "../model/world/EntityModelType"
 import { Gamemode } from "./Gamemode"

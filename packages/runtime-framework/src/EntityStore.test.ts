@@ -68,7 +68,7 @@ test("RuntimeStore entity set", () => {
     expect([...set2].length).toBe(3)
     expect([...set3].length).toBe(4)
     expect([...set4].length).toBe(0)
-    expect([...set5].length).toBe(47)
+    expect([...set5].length).toBe(47 + 1)
 
     c1.remove("test1")
     c2.remove("test1")
@@ -97,9 +97,9 @@ test("RuntimeStore entity set", () => {
     expect([...set2].length).toBe(2)
     expect([...set3].length).toBe(2)
     expect([...set4].length).toBe(0)
-    expect([...set5].length).toBe(42)
+    expect([...set5].length).toBe(42 + 1)
 
-    expect(store.getState().entities.size).toBe(42)
+    expect(store.getState().entities.size).toBe(42 + 1)
 })
 
 test("RuntimeStore systems", () => {

@@ -24,7 +24,7 @@ import { SystemContext } from "../SystemContext"
 
 export const newSystem = (meta: Meta, store: RuntimeStore<SystemContext>) => {
     const rockets = store.newEntitySet(
-        Components.Rocket,
+        Components.RocketGraphic,
         Components.Rigidbody)
 
 }

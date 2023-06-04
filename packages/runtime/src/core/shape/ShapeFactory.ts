@@ -28,7 +28,7 @@ export const newShape = (meta: Meta, store: EntityStore, shape: ShapeModel) => {
     return store.getState().newEntity()
         .set<RigidbodyComponent>(Components.Rigidbody, { body })
         .set<EntityTypeComponent>(Components.EntityType, { type: EntityType.Shape })
-        .set<ShapeComponent>(Components.Shape, { vertices: shape.vertices })
+        .set<ShapeComponent>(Components.o, { vertices: shape.vertices })
 }
 
 function verticesForShape(shape: ShapeModel): [ Float32Array, number, number ] {

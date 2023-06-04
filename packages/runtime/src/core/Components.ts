@@ -4,7 +4,7 @@ export enum Components {
     Moving = "Moving",
 
     Rocket = "Rocket",
-    Shape = "Shape",
+    o = "o",
 
     CollisionEvent = "CollisionEvent",
     CollisionEventListener = "CollisionEventListener",

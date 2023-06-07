@@ -4,23 +4,20 @@ import {Entity } from "runtime-framework"
 import { Components } from "../../Components"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { CollisionEventComponent } from "../components/CollisionEventComponent"
-import { RigidbodyComponent } from "../components/RigidbodyComponent"
+import { RigidBodyComponent } from "../components/RigidBodyComponent"
 
 export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, meta) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
-    console.log("boot")
     store.getState().listenToEntities(
         (entity) => {
-            const rigid = entity.getSafe<RigidbodyComponent>(Components.Rigidbody)
+            const rigid = entity.getSafe<RigidBodyComponent>(Components.RigidBody)
             entityToBodyHandle.set(entity.id, rigid.body.handle)
-
-            console.log(`register ${entity.id}`)
         },
         (entityId) => {
             entityToBodyHandle.delete(entityId)
         },
-        Components.Rigidbody)
+        Components.RigidBody)
 
     return () => {
         meta.queue.drainCollisionEvents((h1, h2, started) => {

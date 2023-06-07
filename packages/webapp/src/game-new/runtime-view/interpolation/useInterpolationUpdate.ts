@@ -1,6 +1,6 @@
 import { useFrame } from "@react-three/fiber"
 import { useMemo } from "react"
-import { RigidbodyComponent } from "runtime/src/core/common/components/RigidbodyComponent"
+import { RigidBodyComponent } from "runtime/src/core/common/components/RigidBodyComponent"
 import { Components } from "runtime/src/core/Components"
 import { Entity, EntityStore } from "runtime-framework"
 import { MathUtils } from "three"
@@ -23,7 +23,7 @@ export function useInterpolationUpdate(store: EntityStore, tickrate: number) {
         )
 
         for (const entity of entities) {
-            const rigid = entity.getSafe<RigidbodyComponent>(Components.Rigidbody)
+            const rigid = entity.getSafe<RigidBodyComponent>(Components.RigidBody)
 
             if (rigid.body.isSleeping()) {
                 continue
@@ -36,7 +36,7 @@ export function useInterpolationUpdate(store: EntityStore, tickrate: number) {
     return {
         onPhysicsUpdate(time: number) {
             for (const entity of entities) {
-                const rigid = entity.getSafe<RigidbodyComponent>(Components.Rigidbody)
+                const rigid = entity.getSafe<RigidBodyComponent>(Components.RigidBody)
 
                 if (rigid.body.isSleeping()) {
                     continue

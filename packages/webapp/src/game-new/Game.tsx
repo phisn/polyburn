@@ -7,7 +7,7 @@ import tunnel from "tunnel-rat"
 
 import { WorldModel } from "../model/world/WorldModel"
 import { useWebappRuntime } from "./hooks/useWebappRuntime"
-import EntityGraphics from "./runtime-addon/graphics/EntityGraphics"
+import EntityGraphics from "./runtime-view/graphics/EntityGraphics"
 
 export interface GameProps {
     world: WorldModel

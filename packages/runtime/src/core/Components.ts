@@ -1,10 +1,12 @@
 export enum Components {
     EntityType = "EntityType",
-    Rigidbody = "Rigidbody",
+
+    RigidBody = "RigidBody",
     Moving = "Moving",
 
     Rocket = "Rocket",
-    o = "o",
+    Shape = "Shape",
+    Level = "Level",
 
     CollisionEvent = "CollisionEvent",
     CollisionEventListener = "CollisionEventListener",

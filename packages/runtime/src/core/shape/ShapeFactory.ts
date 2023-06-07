@@ -3,7 +3,7 @@ import { EntityStore } from "runtime-framework"
 
 import { ShapeModel } from "../../model/world/ShapeModel"
 import { EntityTypeComponent } from "../common/components/EntityTypeComponent"
-import { RigidbodyComponent } from "../common/components/RigidbodyComponent"
+import { RigidBodyComponent } from "../common/components/RigidBodyComponent"
 import { Components } from "../Components"
 import { EntityType } from "../EntityType"
 import { Meta } from "../Meta"
@@ -26,9 +26,9 @@ export const newShape = (meta: Meta, store: EntityStore, shape: ShapeModel) => {
     meta.rapier.createCollider(collider, body)
 
     return store.getState().newEntity()
-        .set<RigidbodyComponent>(Components.Rigidbody, { body })
+        .set<RigidBodyComponent>(Components.RigidBody, { body })
         .set<EntityTypeComponent>(Components.EntityType, { type: EntityType.Shape })
-        .set<ShapeComponent>(Components.o, { vertices: shape.vertices })
+        .set<ShapeComponent>(Components.Shape, { vertices: shape.vertices })
 }
 
 function verticesForShape(shape: ShapeModel): [ Float32Array, number, number ] {

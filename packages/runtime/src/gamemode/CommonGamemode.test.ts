@@ -2,7 +2,7 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { expect, test } from "vitest"
 
-import { RigidbodyComponent } from "../core/common/components/RigidbodyComponent"
+import { RigidBodyComponent } from "../core/common/components/RigidBodyComponent"
 import { Components } from "../core/Components"
 import { EntityModelType } from "../model/world/EntityModelType"
 import { WorldModel } from "../model/world/WorldModel"
@@ -35,7 +35,7 @@ test("CommonGamemode", async () => {
 
     const rockets = store.getState().newEntitySet(Components.Rocket)
     const rocket = [...rockets][0]
-    const rocketPosition = rocket.getSafe<RigidbodyComponent>(Components.Rigidbody)
+    const rocketPosition = rocket.getSafe<RigidBodyComponent>(Components.RigidBody)
 
     for (let i = 0; i < 100; ++i) {
         const y = rocketPosition.body.translation().y

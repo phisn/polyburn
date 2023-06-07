@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-export interface RigidbodyComponent {
+export interface RigidBodyComponent {
     body: RAPIER.RigidBody
 }

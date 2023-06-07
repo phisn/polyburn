@@ -4,7 +4,7 @@ import sin from "@stdlib/math/base/special/sin"
 import sqrt from "@stdlib/math/base/special/sqrt"
 import {Entity } from "runtime-framework"
 
-import { RigidbodyComponent } from "../../common/components/RigidbodyComponent"
+import { RigidBodyComponent } from "../../common/components/RigidBodyComponent"
 import { Components } from "../../Components"
 import { Meta } from "../../Meta"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
@@ -14,7 +14,7 @@ import { RocketComponent } from "../RocketComponent"
 export const newRocketDeathSystem: RuntimeSystemFactory = (store, meta) => {
     const rockets = store.getState().newEntitySet(
         Components.Rocket,
-        Components.Rigidbody)
+        Components.RigidBody)
 
     return () => {
         for (const rocket of rockets) {
@@ -24,7 +24,7 @@ export const newRocketDeathSystem: RuntimeSystemFactory = (store, meta) => {
                 continue
             }
 
-            const rigid = rocket.getSafe<RigidbodyComponent>(Components.Rigidbody)
+            const rigid = rocket.getSafe<RigidBodyComponent>(Components.RigidBody)
 
             for (let i = 0; i < rigid.body.numColliders(); ++i) {
                 handleRocketCollider(
@@ -67,7 +67,7 @@ function handleRocketContact(
     flipped: boolean,
     rocket: Entity
 ) {
-    const rigid = rocket.getSafe<RigidbodyComponent>(Components.Rigidbody)
+    const rigid = rocket.getSafe<RigidBodyComponent>(Components.RigidBody)
 
     const upVector = {
         x: -sin(rigid.body.rotation()),

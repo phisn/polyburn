@@ -1,7 +1,7 @@
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 
-import { RigidbodyComponent } from "../../common/components/RigidbodyComponent"
+import { RigidBodyComponent } from "../../common/components/RigidBodyComponent"
 import { Components } from "../../Components"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { rocketGroundRay } from "../rocketGroundRay"
@@ -12,7 +12,7 @@ const thrustGroundMultiplier = 1.3
 export const newRocketThrustSystem: RuntimeSystemFactory = (store, meta) => {
     const rockets = store.getState().newEntitySet(
         Components.Rocket,
-        Components.Rigidbody)
+        Components.RigidBody)
 
     return (context) => {
         if (!context.thrust) {
@@ -25,7 +25,7 @@ export const newRocketThrustSystem: RuntimeSystemFactory = (store, meta) => {
         }
     
         for (const rocket of rockets) {
-            const rigid = rocket.getSafe<RigidbodyComponent>(Components.Rigidbody)
+            const rigid = rocket.getSafe<RigidBodyComponent>(Components.RigidBody)
 
             if (rocketGroundRay(meta.rapier, rigid.body)) {
                 force.x *= thrustGroundMultiplier

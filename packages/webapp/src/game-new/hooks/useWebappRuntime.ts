@@ -1,8 +1,8 @@
 import { Gamemode } from "runtime/src/gamemode/Gamemode"
 
 import { WorldModel } from "../../model/world/WorldModel"
-import { useInterpolationUpdate } from "../runtime-addon/interpolation/useInterpolationUpdate"
-import { newWebappRuntime } from "../runtime-addon/WebappRuntime"
+import { useInterpolationUpdate } from "../runtime-view/interpolation/useInterpolationUpdate"
+import { newWebappRuntime } from "../runtime-view/WebappRuntime"
 import { useControls } from "./useControls"
 import { useGameLoop } from "./useGameLoop"
 

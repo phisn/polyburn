@@ -1,4 +1,4 @@
-import { RigidbodyComponent } from "runtime/src/core/common/components/RigidbodyComponent"
+import { RigidBodyComponent } from "runtime/src/core/common/components/RigidBodyComponent"
 import { Components } from "runtime/src/core/Components"
 import { RuntimeSystemFactory } from "runtime/src/core/RuntimeSystemFactory"
 import { Vector3 } from "three"
@@ -9,7 +9,7 @@ import { InterpolationComponent } from "./InterpolationComponent"
 export const newInjectInterpolationSystem: RuntimeSystemFactory = (store) => {
     store.getState().listenToEntities(
         (entity) => {
-            const rigid = entity.getSafe<RigidbodyComponent>(Components.Rigidbody)
+            const rigid = entity.getSafe<RigidBodyComponent>(Components.RigidBody)
 
             const position = rigid.body.translation()
             const rotation = rigid.body.rotation()
@@ -26,6 +26,6 @@ export const newInjectInterpolationSystem: RuntimeSystemFactory = (store) => {
             })
         },
         () => { void 0 },
-        Components.Rigidbody,
+        Components.RigidBody,
         Components.Moving)
 }

@@ -1,11 +1,11 @@
 import { Entity } from "runtime-framework"
 
-import { RigidbodyComponent } from "../common/components/RigidbodyComponent"
+import { RigidBodyComponent } from "../common/components/RigidBodyComponent"
 import { Components } from "../Components"
 import { RocketComponent } from "./RocketComponent"
 
 export function respawnRocket(entity: Entity) {
-    const rigid = entity.get<RigidbodyComponent>(Components.Rigidbody)
+    const rigid = entity.get<RigidBodyComponent>(Components.RigidBody)
     const rocket = entity.get<RocketComponent>(Components.Rocket)
 
     if (!rigid || !rocket) {

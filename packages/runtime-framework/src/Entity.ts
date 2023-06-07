@@ -6,6 +6,8 @@ export interface Entity {
     get components(): Components
     get id(): number
 
+    has(...component: string[]): boolean
+
     get<T>(component: string): T | undefined
     getSafe<T>(component: string): T
     getOrDefault<T>(component: string, def: T): T

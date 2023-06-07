@@ -6,7 +6,7 @@ import { RocketEntityModel } from "../../model/world/EntityModel"
 import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
 import { EntityModelType } from "../../model/world/EntityModelType"
 import { EntityTypeComponent } from "../common/components/EntityTypeComponent"
-import { RigidbodyComponent } from "../common/components/RigidbodyComponent"
+import { RigidBodyComponent } from "../common/components/RigidBodyComponent"
 import { Components } from "../Components"
 import { EntityType } from "../EntityType"
 import { Meta } from "../Meta"
@@ -44,7 +44,7 @@ export const newRocket = (meta: Meta, store: EntityStore, rocket: RocketEntityMo
 
     return store.getState().newEntity()
         .set<EntityTypeComponent>(Components.EntityType, { type: EntityType.Rocket })
-        .set<RigidbodyComponent>(Components.Rigidbody, { body })
+        .set<RigidBodyComponent>(Components.RigidBody, { body })
         .set(Components.Moving)
         .set<RocketComponent>(Components.Rocket, {
             collisionCount: 0,

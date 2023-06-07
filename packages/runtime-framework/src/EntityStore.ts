@@ -8,6 +8,7 @@ export interface EntityStoreState {
     world: Entity,
 
     newEntitySet(...components: string[]): EntitySet
+    findEntities(...components: string[]): Entity[]
 
     newEntity(): Entity
     removeEntity(entityId: number): void
@@ -53,13 +54,15 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
             }
 
             get().entities.forEach((entity, entityId) => {
-                if (components.every(component => component in entity.components)) {
+                if (entity.has(...components)) {
                     entitiesInSet.set(entityId, entity)
                 }
             })
 
             return entitySet
         },
+
+        findEntities,
 
         newEntity() {
             const [id, entity] = newEntityNoRegister()
@@ -101,7 +104,7 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
                         return
                     }
 
-                    if (components.every(component => component in entity.components)) {
+                    if (entity.has(...components)) {
                         add(entity)
                     }
                 },
@@ -112,11 +115,7 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
                 getComponentChangeListeners(component).push(internalListener)
             })
 
-            get().entities.forEach((entity) => {
-                if (components.every(component => component in entity.components)) {
-                    add(entity)
-                }
-            })
+            findEntities(...components).forEach(add)
 
             return () => {
                 components.forEach(component => {
@@ -170,6 +169,9 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
             get id() {
                 return entityId
             },
+            has(...component: string[]): boolean {
+                return component.every(component => component in components)
+            },
             get<T>(component: string): T {
                 return components[component] as T
             },
@@ -201,6 +203,18 @@ export const createEntityStore = () => createStore<EntityStoreState>((set, get) 
         }
 
         return [entityId, entity]
+    }
+
+    function findEntities(...components: string[]) {
+        const entities: Entity[] = []
+
+        get().entities.forEach((entity) => {
+            if (entity.has(...components)) {
+                entities.push(entity)
+            }
+        })
+
+        return entities
     }
 
     return store

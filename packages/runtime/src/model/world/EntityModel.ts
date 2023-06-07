@@ -1,5 +1,5 @@
 import { EntityModelType } from "./EntityModelType"
-import { FlagEntity } from "./FlagModel"
+import { FlagEntityModel } from "./FlagEntityModel"
 import { Point } from "./Point"
 
 export interface RocketEntityModel {
@@ -16,4 +16,4 @@ export interface GreenFlagEntityModel {
     rotation: number
 }
 
-export type EntityModel = RocketEntityModel | FlagEntity | GreenFlagEntityModel
+export type EntityModel = RocketEntityModel | FlagEntityModel | GreenFlagEntityModel

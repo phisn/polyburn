@@ -3,7 +3,7 @@ import { entityModelRegistry } from "./EntityModelRegistry"
 import { EntityModelType } from "./EntityModelType"
 import { Point } from "./Point"
 
-export interface FlagEntity {
+export interface FlagEntityModel {
     type: EntityModelType.RedFlag,
 
     position: Point
@@ -18,7 +18,7 @@ export interface FlagEntity {
 
 export const flagCaptureHeight = 0.5
 
-export function captureBox(entity: FlagEntity) {
+export function captureBox(entity: FlagEntityModel) {
     const entry = entityModelRegistry[EntityModelType.RedFlag]
 
     const transformed = changeAnchor(
@@ -40,7 +40,7 @@ export function captureBox(entity: FlagEntity) {
 export function moveCameraSideTo(
     point: Point,
     side: "left" | "right" | "top" | "bottom",
-    entity: FlagEntity,
+    entity: FlagEntityModel,
 ): { cameraTopLeft: Point, cameraBottomRight: Point } {
     switch (side) {
     case "left":
@@ -80,7 +80,7 @@ export function moveCameraSideTo(
 
 export function pointCloseToCameraSide(
     point: Point,
-    entity: FlagEntity,
+    entity: FlagEntityModel,
     snapDistance: number
 ): "left" | "right" | "top" | "bottom" | null {
     // camera is a rectangle defined by entity.cameraTopLeft and entity.cameraBottomRight. Check if a side

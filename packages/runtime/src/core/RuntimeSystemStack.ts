@@ -1,5 +1,4 @@
-import { SystemStack } from "runtime-framework"
-
+import { SystemStack } from "../../../runtime-framework/src"
 import { Meta } from "./Meta"
 
 export interface RuntimeSystemContext {

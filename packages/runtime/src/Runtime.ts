@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { createEntityStore } from "runtime-framework"
 
+import { createEntityStore } from "../../runtime-framework/src"
 import { Meta } from "./core/Meta"
 import { Gamemode } from "./gamemode/Gamemode"
 import { WorldModel } from "./model/world/WorldModel"

@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { EntityStore } from "runtime-framework"
 
+import { EntityStore } from "../../../../runtime-framework/src"
 import { captureBox, FlagEntityModel } from "../../model/world/FlagEntityModel"
 import { EntityTypeComponent } from "../common/components/EntityTypeComponent"
 import { RigidBodyComponent } from "../common/components/RigidBodyComponent"

@@ -1,5 +1,4 @@
-import { Entity } from "runtime-framework"
-
+import { Entity } from "../../../../runtime-framework/src"
 import { RigidBodyComponent } from "../common/components/RigidBodyComponent"
 import { Components } from "../Components"
 import { RocketComponent } from "./RocketComponent"

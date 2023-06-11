@@ -1,1 +1,1 @@
-export type System<T = void> = (context: T) => void
+export type System<Context = void> = (context: Context) => void

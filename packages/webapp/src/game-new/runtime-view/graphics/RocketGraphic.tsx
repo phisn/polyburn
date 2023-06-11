@@ -1,9 +1,9 @@
 import { Svg } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { Suspense, useRef } from "react"
-import { Entity } from "runtime-framework"
 import { Object3D } from "three"
 
+import { Entity } from "../../../../../runtime-framework/src"
 import { changeAnchor } from "../../../common/math"
 import { entityModels } from "../../../model/world/EntityModels"
 import { EntityType } from "../../../model/world/EntityType"

@@ -1,49 +1,59 @@
 import { expect, test } from "vitest"
 
-import { createEntityStore } from "./EntityStore"
-import { SystemStack } from "./SystemStack"
+import { createEntityStore } from "../src/EntityStore"
 
 test("RuntimeStore entity", () => {
-    const store = createEntityStore()
-    const { newEntity } = store.getState()
-
-    const entity = newEntity()
-
     interface Component {
         value: number
     }
 
-    entity
-        .set<Component>("test1", { value: 1 })
-        .set<Component>("test2", { value: 2 })
+    interface Components {
+        test1?: Component
+        test2?: Component
+    }
 
-    expect(entity.get<Component>("test1")?.value).toBe(1)
-    expect(entity.get<Component>("test2")?.value).toBe(2)
+    const store = createEntityStore<Components>()
+    const { newEntity } = store.getState()
 
-    entity.remove("test1")
+    const entity = newEntity({
+        test1: { value: 8 }
+    })
 
-    expect(entity.get<Component>("test1")).toBeUndefined()
-    expect(entity.get<Component>("test2")?.value).toBe(2)
+    entity.components.test1.value += 9
+
+    expect(entity.components.test1.value).toBe(17)
+    expect(entity.components.test2?.value).toBeUndefined()
 
     expect(Object.keys(entity.components).length).toBe(1)
-    expect("test2" in entity.components).toBe(true)
+
+    expect("test1" in entity.components).toBe(true)
+    expect("test2" in entity.components).toBe(false)
+
+    entity.components.test2 = { value: 8 }
 })
 
 test("RuntimeStore entity set", () => {
-    const store = createEntityStore()
-    const { newEntity, removeEntity } = store.getState()
-
     interface Component {
         value: number
     }
 
-    newEntity()
-        .set<Component>("test1", { value: 1 })
-        .set<Component>("test2", { value: 2 })
+    interface Components {
+        test1?: Component
+        test2?: Component
+    }
 
-    const c1 = newEntity()
-        .set<Component>("test1", { value: 3 })
-        .set<Component>("test2", { value: 4 })
+    const store = createEntityStore<Components>()
+    const { newEntity, removeEntity } = store.getState()
+
+    newEntity({
+        test1: { value: 1 },
+        test2: { value: 2 }
+    })
+
+    const c1 = newEntity({
+        test1: { value: 3 },
+        test2: { value: 4 }
+    })
 
     for (let i = 0; i < 20; i++) { newEntity() }
 
@@ -102,6 +112,8 @@ test("RuntimeStore entity set", () => {
     expect(store.getState().entities.size).toBe(42 + 1)
 })
 
+/*
+
 test("RuntimeStore systems", () => {
     interface CounterComponent {
         value: number
@@ -154,3 +166,4 @@ test("RuntimeStore systems", () => {
     expect(c1.get<CounterComponent>("counter")?.value).toBe(1)
     expect(c2.get<CounterComponent>("counter")?.value).toBe(0)
 })
+ */

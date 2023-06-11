@@ -2,9 +2,9 @@ import { useFrame } from "@react-three/fiber"
 import { useMemo } from "react"
 import { RigidBodyComponent } from "runtime/src/core/common/components/RigidBodyComponent"
 import { Components } from "runtime/src/core/Components"
-import { Entity, EntityStore } from "runtime-framework"
 import { MathUtils } from "three"
 
+import { Entity, EntityStore } from "../../../../../runtime-framework/src"
 import { AddonComponents } from "../AddonComponents"
 import { InterpolationComponent } from "./InterpolationComponent"
 

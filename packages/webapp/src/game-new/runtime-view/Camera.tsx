@@ -1,5 +1,6 @@
-import { Entity, EntityStore } from "runtime-framework"
 import { Components } from "runtime/src/core/Components"
+
+import { Entity, EntityStore } from "../../../../runtime-framework/src"
 
 export function Camera(props: { store: EntityStore }) {
     const [ rocket ] = props.store.getState().findEntities(Components.Rocket)

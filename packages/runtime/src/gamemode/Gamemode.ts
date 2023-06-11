@@ -1,5 +1,4 @@
-import { EntityStore } from "runtime-framework"
-
+import { EntityStore } from "../../../runtime-framework/src"
 import { Meta } from "../core/Meta"
 import { RuntimeSystemStack } from "../core/RuntimeSystemStack"
 import { WorldModel } from "../model/world/WorldModel"

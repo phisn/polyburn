@@ -1,221 +1,235 @@
-import { createStore, StoreApi } from "zustand"
+import { createStore , StoreApi } from "zustand"
 
 import { Entity } from "./Entity"
 import { EntitySet } from "./EntitySet"
+import { NarrowComponents } from "./NarrowComponents"
 
-export interface EntityStoreState {
-    entities: Map<number, Entity>
-    world: Entity,
+export interface EntityStoreState<Components extends object> {
+    get entities(): Map<number, Entity<Components>>
+    get world(): Entity<Components>
 
-    newEntitySet(...components: string[]): EntitySet
-    findEntities(...components: string[]): Entity[]
+    newEntity<L extends keyof Components>(base: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>>
 
-    newEntity(): Entity
-    removeEntity(entityId: number): void
-    
-    // remove gets called even if the entity was never added
-    listenToEntities(
-        add: (entity: Entity) => void,
-        remove: (entityId: number) => void,
-        ...components: string[]
+    removeEntity(id: number): void
+
+    findEntities<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowComponents<Components, typeof components[number]>>[]
+    newEntitySet<T extends (keyof Components)[]>(...components: [...T]): EntitySet<NarrowComponents<Components, typeof components[number]>>
+
+    listenToEntities<T extends (keyof Components)[]>(
+        set?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>, isNew: boolean) => void,
+        del?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>) => void,
+        ...components: [...T]
     ): () => void
 }
 
-export type EntityStore = StoreApi<EntityStoreState>
+export const createEntityStore = <Components extends object> () => createStore<EntityStoreState<Components>>((set, get) => {
+    let nextEntityId = 0
 
-export const createEntityStore = () => createStore<EntityStoreState>((set, get) => {
-    let entityIdCounter = 0
-    
-    interface RuntimeEntityListener {
-        add(entityId: number): void
-        remove(entityId: number): void
-    }
+    const newEntityListeners: ((entity: Entity<Components>) => void)[] = []
+    const delEntityListeners: ((entity: Entity<Components>) => void)[] = []
 
-    const componentChangeListeners = new Map<string, RuntimeEntityListener[]>()
-    const entityListeners: RuntimeEntityListener[] = []
+    const componentSetListeners = new Map<keyof Components, ((entity: Entity<Components>, isNew: boolean) => void)[]>()
+    const componentDelListeners = new Map<keyof Components, ((entity: Entity<Components>) => void)[]>()
 
-    const [worldId, world] = newEntityNoRegister()
+    const entities = new Map<number, Entity<Components>>()
+    const world = newEntity({} as Components) as Entity<Components>
 
-    const store: EntityStoreState = {
-        entities: new Map([[worldId, world]]),
-        world,
+    return {
+        get entities() { return entities },
+        get world() { return world },
 
-        newEntitySet(...components) {
-            const entitiesInSet = new Map<number, Entity>()
+        newEntity,
 
-            const free = get().listenToEntities(
-                entity => entitiesInSet.set(entity.id, entity),
-                entityId => entitiesInSet.delete(entityId),
-                ...components)
+        removeEntity(id: number) {
+            const entity = entities.get(id)
 
-            const entitySet: EntitySet = {
-                [Symbol.iterator]() { return entitiesInSet.values() },
-                free
+            if (entity === undefined) {
+                return
             }
 
-            get().entities.forEach((entity, entityId) => {
-                if (entity.has(...components)) {
-                    entitiesInSet.set(entityId, entity)
+            for (const key of Object.keys(entity.components)) {
+                for (const callback of componentDelListeners.get(key as keyof Components) ?? []) {
+                    callback(entity)
                 }
-            })
+            }
+
+            for (const callback of delEntityListeners) {
+                callback(entity)
+            }
+
+            entities.delete(id)
+        },
+        findEntities,
+        newEntitySet<T extends (keyof Components)[]>(...components: [...T]) {
+            const entitiesInSet = new Map<number, Entity<NarrowComponents<Components, typeof components[number]>>>()
+
+            const free = get().listenToEntities(
+                (entity, isNew) => isNew && entitiesInSet.set(entity.id, entity),
+                entity => entitiesInSet.delete(entity.id),
+                ...components)
+
+            const entitySet: EntitySet<NarrowComponents<Components, typeof components[number]>> = {
+                [Symbol.iterator]() {
+                    return entitiesInSet.values()
+                },
+                free,
+            }
+
+            for (const entity of findEntities(...components)) {
+                entitiesInSet.set(entity.id, entity)
+            }
 
             return entitySet
         },
+        listenToEntities(set, del, ...components) {
+            if (set === undefined && del === undefined) {
+                throw new Error("add and remove cannot both be undefined")
+            }
 
-        findEntities,
+            if (components.length === 0) {
+                const commonSet = set as ((entity: Entity<Components>) => void) | undefined
+                const commonDel = del as ((entity: Entity<Components>) => void) | undefined
 
-        newEntity() {
-            const [id, entity] = newEntityNoRegister()
+                if (commonSet) {
+                    newEntityListeners.push(commonSet)
 
-            set(state => ({
-                ...state,
-                entities: new Map(state.entities).set(id, entity)
-            }))
-
-            // calling add after the entity is added to the store
-            entityListeners.forEach(listener => listener.add(id))
-
-            return entity
-        },
-
-        listenToEntities(add, remove, ...components) {
-            // special case: listen to all entities
-            if (components.length == 0) {
-                const listener = { 
-                    add: (entityId: number) => add(get().entities.get(entityId)!),
-                    remove
+                    for (const [, entity] of entities) {
+                        commonSet(entity)
+                    }
                 }
 
-                entityListeners.push(listener)
-
-                get().entities.forEach(add)
+                if (commonDel) {
+                    delEntityListeners.push(commonDel)
+                }
 
                 return () => {
-                    entityListeners.splice(entityListeners.indexOf(listener), 1)
+                    if (commonSet) {
+                        newEntityListeners.splice(newEntityListeners.indexOf(commonSet), 1)
+                    }
+
+                    if (commonDel) {
+                        delEntityListeners.splice(delEntityListeners.indexOf(commonDel), 1)
+                    }
                 }
             }
 
-            const internalListener: RuntimeEntityListener = {
-                add(entityId: number) {
-                    const entity = get().entities.get(entityId)
+            let setListener: (entity: Entity<Components>, isNew: boolean) => void
+            let delListener: (entity: Entity<Components>) => void
 
-                    if (entity === undefined) {
-                        console.error(`Entity ${entityId} does not exist`)
-                        return
-                    }
-
+            if (set) {
+                setListener = (entity: Entity<Components>, isNew: boolean) => {
                     if (entity.has(...components)) {
-                        add(entity)
+                        set(entity, isNew)
                     }
-                },
-                remove
+                }
+
+                components.forEach(component => {
+                    const listeners = componentSetListeners.get(component) ?? []
+                    listeners.push(setListener)
+                    componentSetListeners.set(component, listeners)
+                })
+
+                for (const [, entity] of entities) {
+                    if (entity.has(...components)) {
+                        set(entity, true)
+                    }
+                }
             }
 
-            components.forEach(component => {
-                getComponentChangeListeners(component).push(internalListener)
-            })
+            if (del) {
+                delListener = (entity: Entity<Components>) => {
+                    if (entity.has(...components)) {
+                        del(entity)
+                    }
+                }
 
-            findEntities(...components).forEach(add)
-
-            return () => {
                 components.forEach(component => {
-                    removeComponentChangeListeners(component, internalListener)
+                    const listeners = componentDelListeners.get(component) ?? []
+                    listeners.push(delListener)
+                    componentDelListeners.set(component, listeners)
                 })
             }
-        },
 
-        removeEntity(entityId) {
-            console.assert(get().entities.has(entityId), `Entity ${entityId} does not exist`)
-
-            for (const component in get().entities.get(entityId)?.components) {
-                getComponentChangeListeners(component).forEach(listener => listener.remove(entityId))
-            }
-
-            // calling remove before the entity is removed from the store
-            entityListeners.forEach(listener => listener.remove(entityId))
-
-            set(state => {
-                const entities = new Map(state.entities)
-                entities.delete(entityId)
-                return { ...state, entities }
-            })
-        }
-    }
-
-    function getComponentChangeListeners(component: string) {
-        let listeners = componentChangeListeners.get(component)
-
-        if (listeners === undefined) {
-            listeners = []
-            componentChangeListeners.set(component, listeners)
-        }
-
-        return listeners
-    }
-
-    function removeComponentChangeListeners(component: string, listener: RuntimeEntityListener) {
-        const listeners = componentChangeListeners.get(component) ?? []
-        listeners.splice(listeners.indexOf(listener), 1)
-    }
-
-    function newEntityNoRegister(): [number, Entity] {
-        const entityId = entityIdCounter++
-        const components: { [key: string]: unknown } = {}
-
-        const entity: Entity = {
-            get components() {
-                return components
-            },
-            get id() {
-                return entityId
-            },
-            has(...component: string[]): boolean {
-                return component.every(component => component in components)
-            },
-            get<T>(component: string): T {
-                return components[component] as T
-            },
-            getSafe<T>(component: string): T {
-                console.assert(component in components, `Component ${component} does not exist`)
-                return components[component] as T
-            },
-            getOrDefault<T>(component: string, def: T): T {
-                if (component in components) {
-                    return components[component] as T
+            return () => {
+                if (setListener) {
+                    components.forEach(component => {
+                        const listeners = componentSetListeners.get(component) ?? []
+                        listeners.splice(listeners.indexOf(setListener), 1)
+                        componentSetListeners.set(component, listeners)
+                    })
                 }
 
-                return def
-            },
-            set<T>(component: string, value: T): Entity {
-                console.assert(!(component in components), `Component ${component} already exists`)
+                if (delListener) {
+                    components.forEach(component => {
+                        const listeners = componentDelListeners.get(component) ?? []
+                        listeners.splice(listeners.indexOf(delListener), 1)
+                        componentDelListeners.set(component, listeners)
+                    })
+                }
+            }
+        }
+    }
 
-                components[component] = value
-                getComponentChangeListeners(component).forEach(listener => listener.add(entityId))
-                return this
-            },
-            remove(component: string): Entity {
-                console.assert(component in components, `Component ${component} does not exist`)
+    function findEntities<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowComponents<Components, typeof components[number]>>[] {
+        const found = []
 
-                delete components[component]
-                getComponentChangeListeners(component).forEach(listener => listener.remove(entityId))
-                return this
+        for (const [, entity] of entities) {
+            if (entity.has(...components)) {
+                found.push(entity)
             }
         }
 
-        return [entityId, entity]
+        return found
     }
 
-    function findEntities(...components: string[]) {
-        const entities: Entity[] = []
+    function newEntity<L extends keyof Components>(base: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>> {
+        const entityId = nextEntityId++
 
-        get().entities.forEach((entity) => {
-            if (entity.has(...components)) {
-                entities.push(entity)
-            }
+        const entityComponents = new Proxy(base ?? { } as Components, {
+            set(target, prop, value) {
+                const isNew = prop in target
+                target[prop as L] = value
+
+                for (const callback of componentSetListeners.get(prop as keyof Components) ?? []) {
+                    callback(entity as Entity<Components>, isNew)
+                }
+
+                return true
+            },
+            deleteProperty(target, prop) {
+                if (prop in target) {
+                    for (const callback of componentDelListeners.get(prop as keyof Components) ?? []) {
+                        callback(entity as Entity<Components>)
+                    }
+
+                    return delete target[prop as L]
+                }
+
+                return false
+            },
         })
 
-        return entities
-    }
+        const entity: Entity<NarrowComponents<Components, L>> = {
+            get components() { return entityComponents },
+            get id() { return entityId },
 
-    return store
+            has<T extends (keyof Components)[]>(...components: [...T]) {
+                return components.every(component => component in entityComponents)
+            }
+        }
+
+        for (const key of Object.keys(entity.components)) {
+            for (const callback of componentSetListeners.get(key as keyof Components) ?? []) {
+                callback(entity as Entity<Components>, true)
+            }
+        }
+
+        for (const callback of newEntityListeners) {
+            callback(entity as Entity<Components>)
+        }
+
+        return entity
+    }
 })
+
+export type EntityStore<Components extends object> = StoreApi<EntityStoreState<Components>>

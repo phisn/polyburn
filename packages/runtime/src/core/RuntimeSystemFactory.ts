@@ -1,4 +1,4 @@
-import { SystemFactory } from "runtime-framework/src/SystemFactory"
+import { SystemFactory } from "packages/runtime-framework/src/SystemFactory"
 
 import { Meta } from "./Meta"
 import { RuntimeSystemContext } from "./RuntimeSystemStack"

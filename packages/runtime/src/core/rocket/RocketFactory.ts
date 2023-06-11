@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { EntityStore } from "runtime-framework"
 
+import { EntityStore } from "../../../../runtime-framework/src"
 import { changeAnchor } from "../../model/changeAnchor"
 import { RocketEntityModel } from "../../model/world/EntityModel"
 import { entityModelRegistry } from "../../model/world/EntityModelRegistry"

@@ -1,6 +1,6 @@
 import { BiMap } from "mnemonist"
-import {Entity } from "runtime-framework"
 
+import {Entity } from "../../../../../runtime-framework/src"
 import { Components } from "../../Components"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { CollisionEventComponent } from "../components/CollisionEventComponent"

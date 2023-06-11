@@ -1,6 +1,6 @@
-import { Entity, EntityStore } from "runtime-framework"
 import { useStore } from "zustand"
 
+import { Entity, EntityStore } from "../../../../../runtime-framework/src"
 import { AddonComponents } from "../AddonComponents"
 import { GraphicComponent } from "../graphic/GraphicComponent"
 

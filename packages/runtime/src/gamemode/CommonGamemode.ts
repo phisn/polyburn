@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { SystemStack } from "runtime-framework"
 
+import { SystemStack } from "../../../runtime-framework/src"
 import { Meta } from "../core/Meta"
 import { newRocket } from "../core/rocket/RocketFactory"
 import { runtimeSystemFactories } from "../core/RuntimeSystemFactories"

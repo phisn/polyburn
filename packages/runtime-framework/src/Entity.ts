@@ -1,17 +1,8 @@
-export interface Components {
-    [key: string]: unknown
-}
+import { NarrowComponents } from "./NarrowComponents"
 
-export interface Entity {
+export interface Entity<Components extends object> {
     get components(): Components
     get id(): number
 
-    has(...component: string[]): boolean
-
-    get<T>(component: string): T | undefined
-    getSafe<T>(component: string): T
-    getOrDefault<T>(component: string, def: T): T
-
-    set<T>(component: string, value?: T): Entity
-    remove(component: string): Entity
+    has<T extends (keyof Components)[]>(...components: [...T]): this is Entity<NarrowComponents<Components, typeof components[number]>>
 }

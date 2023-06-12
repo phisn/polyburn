@@ -1,26 +1,19 @@
 
-import { RigidBodyComponent } from "../../common/components/RigidBodyComponent"
-import { Components } from "../../Components"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
-import { RocketComponent } from "../RocketComponent"
 
 export const newRocketRotationSystem: RuntimeSystemFactory = (store) => {
     const rockets = store.getState().newEntitySet(
-        Components.Rocket,
-        Components.RigidBody)
+        "rocket",
+        "rigidBody")
 
     return (context) => {
-        for (const rocket of rockets) {
-            const rocketComponent = rocket.getSafe<RocketComponent>(Components.Rocket)
-
-            if (rocketComponent.collisionCount > 0) {
+        for (const entity of rockets) {
+            if (entity.components.rocket.collisionCount > 0) {
                 continue
             }
 
-            const rigid = rocket.getSafe<RigidBodyComponent>(Components.RigidBody)
-
-            rigid.body.setRotation(
-                rocketComponent.rotationWithoutInput + context.rotation,
+            entity.components.rigidBody.setRotation(
+                entity.components.rocket.rotationWithoutInput + context.rotation,
                 true
             )
         }

@@ -2,35 +2,29 @@ import RAPIER from "@dimforge/rapier2d-compat"
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 import sqrt from "@stdlib/math/base/special/sqrt"
+import { EntityWith } from "runtime-framework/src/NarrowComponents"
 
-import {Entity } from "../../../../../runtime-framework/src"
-import { RigidBodyComponent } from "../../common/components/RigidBodyComponent"
-import { Components } from "../../Components"
 import { Meta } from "../../Meta"
+import { RuntimeComponents } from "../../RuntimeComponents"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { respawnRocket } from "../respawnRocket"
-import { RocketComponent } from "../RocketComponent"
 
 export const newRocketDeathSystem: RuntimeSystemFactory = (store, meta) => {
     const rockets = store.getState().newEntitySet(
-        Components.Rocket,
-        Components.RigidBody)
+        "rocket",
+        "rigidBody")
 
     return () => {
-        for (const rocket of rockets) {
-            const rocketComponent = rocket.getSafe<RocketComponent>(Components.Rocket)
-
-            if (rocketComponent.collisionCount == 0) {
+        for (const entity of rockets) {
+            if (entity.components.rocket.collisionCount == 0) {
                 continue
             }
 
-            const rigid = rocket.getSafe<RigidBodyComponent>(Components.RigidBody)
-
-            for (let i = 0; i < rigid.body.numColliders(); ++i) {
+            for (let i = 0; i < entity.components.rigidBody.numColliders(); ++i) {
                 handleRocketCollider(
                     meta,
-                    rigid.body.collider(i),
-                    rocket
+                    entity.components.rigidBody.collider(i),
+                    entity
                 )
             }
         }
@@ -40,7 +34,7 @@ export const newRocketDeathSystem: RuntimeSystemFactory = (store, meta) => {
 function handleRocketCollider(
     meta: Meta,
     collider: RAPIER.Collider,
-    rocket: Entity
+    entity: EntityWith<RuntimeComponents, "rocket" | "rigidBody">
 ) {
     meta.rapier.contactsWith(
         collider,
@@ -55,7 +49,7 @@ function handleRocketCollider(
                 (contact, flipped) => handleRocketContact(
                     contact,
                     flipped,
-                    rocket
+                    entity
                 )
             )
         }
@@ -65,13 +59,11 @@ function handleRocketCollider(
 function handleRocketContact(
     contact: RAPIER.TempContactManifold,
     flipped: boolean,
-    rocket: Entity
+    rocket: EntityWith<RuntimeComponents, "rocket" | "rigidBody">
 ) {
-    const rigid = rocket.getSafe<RigidBodyComponent>(Components.RigidBody)
-
     const upVector = {
-        x: -sin(rigid.body.rotation()),
-        y: cos(rigid.body.rotation())
+        x: -sin(rocket.components.rigidBody.rotation()),
+        y: cos(rocket.components.rigidBody.rotation())
     }
 
     const otherNormal = flipped

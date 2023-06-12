@@ -2,14 +2,11 @@ import RAPIER from "@dimforge/rapier2d-compat"
 
 import { EntityStore } from "../../../../runtime-framework/src"
 import { ShapeModel } from "../../model/world/ShapeModel"
-import { EntityTypeComponent } from "../common/components/EntityTypeComponent"
-import { RigidBodyComponent } from "../common/components/RigidBodyComponent"
-import { Components } from "../Components"
 import { EntityType } from "../EntityType"
 import { Meta } from "../Meta"
-import { ShapeComponent } from "./ShapeComponent"
+import { RuntimeComponents } from "../RuntimeComponents"
 
-export const newShape = (meta: Meta, store: EntityStore, shape: ShapeModel) => {
+export const newShape = (meta: Meta, store: EntityStore<RuntimeComponents>, shape: ShapeModel) => {
     const [vertices, top, left] = verticesForShape(shape)
 
     const body = meta.rapier.createRigidBody(
@@ -25,10 +22,11 @@ export const newShape = (meta: Meta, store: EntityStore, shape: ShapeModel) => {
 
     meta.rapier.createCollider(collider, body)
 
-    return store.getState().newEntity()
-        .set<RigidBodyComponent>(Components.RigidBody, { body })
-        .set<EntityTypeComponent>(Components.EntityType, { type: EntityType.Shape })
-        .set<ShapeComponent>(Components.Shape, { vertices: shape.vertices })
+    return store.getState().newEntity({
+        entityType: EntityType.Shape,
+        rigidBody: body,
+        shape: { vertices: shape.vertices }
+    })
 }
 
 function verticesForShape(shape: ShapeModel): [ Float32Array, number, number ] {

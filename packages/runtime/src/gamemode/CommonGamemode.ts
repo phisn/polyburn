@@ -3,6 +3,7 @@ import RAPIER from "@dimforge/rapier2d-compat"
 import { SystemStack } from "../../../runtime-framework/src"
 import { Meta } from "../core/Meta"
 import { newRocket } from "../core/rocket/RocketFactory"
+import { RuntimeComponents } from "../core/RuntimeComponents"
 import { runtimeSystemFactories } from "../core/RuntimeSystemFactories"
 import { RuntimeSystemContext } from "../core/RuntimeSystemStack"
 import { newShape } from "../core/shape/ShapeFactory"
@@ -25,7 +26,7 @@ export const commonGamemode: Gamemode = (meta, store, world) => {
         newShape(meta, store, shape)
     })
 
-    return new SystemStack<Meta, RuntimeSystemContext>(store, meta).add(
+    return new SystemStack<RuntimeComponents, Meta, RuntimeSystemContext>(store, meta).add(
         ...runtimeSystemFactories
     )
 }

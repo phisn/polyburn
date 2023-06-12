@@ -1,20 +1,11 @@
-import { Entity } from "../../../../runtime-framework/src"
-import { RigidBodyComponent } from "../common/components/RigidBodyComponent"
-import { Components } from "../Components"
-import { RocketComponent } from "./RocketComponent"
+import { EntityWith } from "runtime-framework/src/NarrowComponents"
 
-export function respawnRocket(entity: Entity) {
-    const rigid = entity.get<RigidBodyComponent>(Components.RigidBody)
-    const rocket = entity.get<RocketComponent>(Components.Rocket)
+import { RuntimeComponents } from "../RuntimeComponents"
 
-    if (!rigid || !rocket) {
-        console.error("respawnRocket: entity missing rigidbody or rocket component")
-        return
-    }
+export function respawnRocket(entity: EntityWith<RuntimeComponents, "rocket" | "rigidBody">) {
+    entity.components.rigidBody.setTranslation(entity.components.rocket.spawnPosition, true)
+    entity.components.rigidBody.setRotation(entity.components.rocket.spawnRotation, true)
 
-    rigid.body.setTranslation(rocket.spawnPosition, true)
-    rigid.body.setRotation(rocket.spawnRotation, true)
-
-    rigid.body.setLinvel({ x: 0, y: 0 }, true)
-    rigid.body.setAngvel(0, true)
+    entity.components.rigidBody.setLinvel({ x: 0, y: 0 }, true)
+    entity.components.rigidBody.setAngvel(0, true)
 }

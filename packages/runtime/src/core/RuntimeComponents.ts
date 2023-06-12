@@ -11,9 +11,8 @@ export interface RuntimeComponents {
     rocket?: RocketComponent
 
     collisionEvent?: CollisionEventComponent
+    collisionEventListener?: EmptyComponent
     entityType?: EntityTypeComponent
-    rigidBody?: RigidBodyComponent
-
     moving?: EmptyComponent
-    collisionEventListener?: EmptyComponent   
+    rigidBody?: RigidBodyComponent
 }

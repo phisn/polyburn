@@ -2,9 +2,6 @@ import RAPIER from "@dimforge/rapier2d-compat"
 
 import { EntityStore } from "../../../../runtime-framework/src"
 import { captureBox, FlagEntityModel } from "../../model/world/FlagEntityModel"
-import { EntityTypeComponent } from "../common/components/EntityTypeComponent"
-import { RigidBodyComponent } from "../common/components/RigidBodyComponent"
-import { Components } from "../Components"
 import { EntityType } from "../EntityType"
 import { Meta } from "../Meta"
 import { RuntimeComponents } from "../RuntimeComponents"
@@ -67,10 +64,7 @@ export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag
         level,
         
         entityType: EntityType.Level,
-        rigidBody: body
+        collisionEventListener: {},
+        rigidBody: body,
     })
-        .set<EntityTypeComponent>(Components.EntityType, { type: EntityType.Level })
-        .set<LevelComponent>(Components.Level, level)
-        .set<RigidBodyComponent>(Components.RigidBody, { body })
-        .set(Components.CollisionEventListener)
 }

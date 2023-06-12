@@ -1,23 +1,16 @@
 import { BiMap } from "mnemonist"
 
 import {Entity } from "../../../../../runtime-framework/src"
-import { Components } from "../../Components"
+import { RuntimeComponents } from "../../RuntimeComponents"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
-import { CollisionEventComponent } from "../components/CollisionEventComponent"
-import { RigidBodyComponent } from "../components/RigidBodyComponent"
 
 export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, meta) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
     store.getState().listenToEntities(
-        (entity) => {
-            const rigid = entity.getSafe<RigidBodyComponent>(Components.RigidBody)
-            entityToBodyHandle.set(entity.id, rigid.body.handle)
-        },
-        (entityId) => {
-            entityToBodyHandle.delete(entityId)
-        },
-        Components.RigidBody)
+        (entity) => entityToBodyHandle.set(entity.id, entity.components.rigidBody.handle),
+        (entity) => entityToBodyHandle.delete(entity.id),
+        "rigidBody")
 
     return () => {
         meta.queue.drainCollisionEvents((h1, h2, started) => {
@@ -52,19 +45,17 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, met
     }
 
     function handleCollisionEvent(
-        entity: Entity,
-        other: Entity,
+        entity: Entity<RuntimeComponents>,
+        other: Entity<RuntimeComponents>,
         started: boolean, 
         sensor: boolean
     ) {
-        if (Components.CollisionEventListener in entity.components) {
-            let collisionEvent = entity.get<CollisionEventComponent>(Components.CollisionEventListener)
-
-            if (collisionEvent === undefined) {
-                collisionEvent = { events: [] }
+        if (entity.has("collisionEventListener")) {
+            if (entity.components.collisionEvent === undefined) {
+                entity.components.collisionEvent = { events: [] }
             }
 
-            collisionEvent.events.push({
+            entity.components.collisionEvent.events.push({
                 other: other.id,
                 started,
                 sensor

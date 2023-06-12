@@ -1,5 +1,4 @@
 import {Entity } from "../../../../../runtime-framework/src"
-import { CollisionEventComponent } from "../../common/components/CollisionEventComponent"
 import { RigidBodyComponent } from "../../common/components/RigidBodyComponent"
 import { Components } from "../../Components"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
@@ -7,16 +6,13 @@ import { RocketComponent } from "../RocketComponent"
 
 export const newRocketCollisionSystem: RuntimeSystemFactory = (store) => {
     const rockets = store.getState().newEntitySet(
-        Components.Rocket,
-        Components.RigidBody,
-        Components.CollisionEvent)
+        "rocket",
+        "rigidBody",
+        "collisionEvent")
 
     return (context) => {
-        for (const rocketEntity of rockets) {
-            const rocket = rocketEntity.getSafe<RocketComponent>(Components.Rocket)
-            const collisions = rocketEntity.getSafe<CollisionEventComponent>(Components.CollisionEvent)
-
-            for (const collision of collisions.events) {
+        for (const entity of rockets) {
+            for (const collision of entity.components.collisionEvent.events) {
                 if (collision.sensor) {
                     continue
                 }

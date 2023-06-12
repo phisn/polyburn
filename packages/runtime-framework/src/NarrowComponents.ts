@@ -4,10 +4,3 @@
 export type NarrowComponents<Components extends object, NarrowTo extends keyof Components> =
     { [K in NarrowTo]-?: Components[K] } & Components
 
-function test() {
-    const i: number | undefined = 8
-    
-    assert(i !== undefined)
-
-    
-}

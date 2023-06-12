@@ -7,9 +7,10 @@ import { RigidBodyComponent } from "../common/components/RigidBodyComponent"
 import { Components } from "../Components"
 import { EntityType } from "../EntityType"
 import { Meta } from "../Meta"
+import { RuntimeComponents } from "../RuntimeComponents"
 import { LevelComponent } from "./LevelComponent"
 
-export const newLevel = (meta: Meta, store: EntityStore, flag: FlagEntityModel) => {
+export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag: FlagEntityModel) => {
     const level: LevelComponent = {
         captured: false,
 
@@ -62,7 +63,12 @@ export const newLevel = (meta: Meta, store: EntityStore, flag: FlagEntityModel) 
         body
     )
 
-    return store.getState().newEntity()
+    return store.getState().newEntity({
+        level,
+        
+        entityType: EntityType.Level,
+        rigidBody: body
+    })
         .set<EntityTypeComponent>(Components.EntityType, { type: EntityType.Level })
         .set<LevelComponent>(Components.Level, level)
         .set<RigidBodyComponent>(Components.RigidBody, { body })

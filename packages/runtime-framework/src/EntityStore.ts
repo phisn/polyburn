@@ -233,14 +233,6 @@ export const createEntityStore = <Components extends object> () => createStore<E
             get components() { return entityComponents },
             get id() { return entityId },
 
-            delete<T extends (keyof Components)[]>(...components: [...T]) {
-                for (const component of components) {
-                    delete entityComponents[component]
-                }
-
-                return entity
-            },
-
             has<T extends (keyof Components)[]>(...components: [...T]) {
                 return components.every(component => component in entityComponents)
             }

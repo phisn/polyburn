@@ -1,8 +1,6 @@
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 
-import { RigidBodyComponent } from "../../common/components/RigidBodyComponent"
-import { Components } from "../../Components"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { rocketGroundRay } from "../rocketGroundRay"
 
@@ -11,8 +9,8 @@ const thrustGroundMultiplier = 1.3
 
 export const newRocketThrustSystem: RuntimeSystemFactory = (store, meta) => {
     const rockets = store.getState().newEntitySet(
-        Components.Rocket,
-        Components.RigidBody)
+        "rocket",
+        "rigidBody")
 
     return (context) => {
         if (!context.thrust) {
@@ -25,21 +23,19 @@ export const newRocketThrustSystem: RuntimeSystemFactory = (store, meta) => {
         }
     
         for (const rocket of rockets) {
-            const rigid = rocket.getSafe<RigidBodyComponent>(Components.RigidBody)
-
-            if (rocketGroundRay(meta.rapier, rigid.body)) {
+            if (rocketGroundRay(meta.rapier, rocket.components.rigidBody)) {
                 force.x *= thrustGroundMultiplier
                 force.y *= thrustGroundMultiplier
             }
     
-            const rotation = rigid.body.rotation()
+            const rotation = rocket.components.rigidBody.rotation()
     
             const rotatedForce = {
                 x: force.x * cos(rotation) - force.y * sin(rotation),
                 y: force.x * sin(rotation) + force.y * cos(rotation)
             }
     
-            rigid.body.applyImpulse(rotatedForce, true)
+            rocket.components.rigidBody.applyImpulse(rotatedForce, true)
         }
     }
 }

@@ -8,7 +8,7 @@ export interface EntityStoreState<Components extends object> {
     get entities(): Map<number, Entity<Components>>
     get world(): Entity<Components>
 
-    newEntity<L extends keyof Components>(base: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>>
+    newEntity<L extends keyof Components = never>(base?: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>>
 
     removeEntity(id: number): void
 
@@ -32,7 +32,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
     const componentDelListeners = new Map<keyof Components, ((entity: Entity<Components>) => void)[]>()
 
     const entities = new Map<number, Entity<Components>>()
-    const world = newEntity({} as Components) as Entity<Components>
+    const world = newEntity() as Entity<Components>
 
     return {
         get entities() { return entities },
@@ -64,7 +64,15 @@ export const createEntityStore = <Components extends object> () => createStore<E
             const entitiesInSet = new Map<number, Entity<NarrowComponents<Components, typeof components[number]>>>()
 
             const free = get().listenToEntities(
-                (entity, isNew) => isNew && entitiesInSet.set(entity.id, entity),
+                (entity, isNew) => {
+                    if (isNew) {
+                        entitiesInSet.set(entity.id, entity)
+                        console.log(`set with ${components.join(", ")} now has ${entity.id}`)
+                    }
+                    else {
+                        console.log(`set with ${components.join(", ")} now updated ${entity.id}`)
+                    }
+                },
                 entity => entitiesInSet.delete(entity.id),
                 ...components)
 
@@ -77,6 +85,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
 
             for (const entity of findEntities(...components)) {
                 entitiesInSet.set(entity.id, entity)
+                console.log(`set with ${components.join(", ")} now has ${entity.id}`)
             }
 
             return entitySet
@@ -87,30 +96,10 @@ export const createEntityStore = <Components extends object> () => createStore<E
             }
 
             if (components.length === 0) {
-                const commonSet = set as ((entity: Entity<Components>) => void) | undefined
-                const commonDel = del as ((entity: Entity<Components>) => void) | undefined
-
-                if (commonSet) {
-                    newEntityListeners.push(commonSet)
-
-                    for (const [, entity] of entities) {
-                        commonSet(entity)
-                    }
-                }
-
-                if (commonDel) {
-                    delEntityListeners.push(commonDel)
-                }
-
-                return () => {
-                    if (commonSet) {
-                        newEntityListeners.splice(newEntityListeners.indexOf(commonSet), 1)
-                    }
-
-                    if (commonDel) {
-                        delEntityListeners.splice(delEntityListeners.indexOf(commonDel), 1)
-                    }
-                }
+                return listenToAllEntities(
+                    set === undefined ? undefined : (entity) => set(entity as Entity<NarrowComponents<Components, typeof components[number]>>, true),
+                    del === undefined ? undefined : (entity) => del(entity as Entity<NarrowComponents<Components, typeof components[number]>>)
+                )
             }
 
             let setListener: (entity: Entity<Components>, isNew: boolean) => void
@@ -170,6 +159,33 @@ export const createEntityStore = <Components extends object> () => createStore<E
         }
     }
 
+    function listenToAllEntities(
+        set?: (entity: Entity<Components>) => void, 
+        del?: (entity: Entity<Components>) => void
+    ) {
+        if (set) {
+            newEntityListeners.push(set)
+
+            for (const [, entity] of entities) {
+                set(entity)
+            }
+        }
+
+        if (del) {
+            delEntityListeners.push(del)
+        }
+
+        return () => {
+            if (set) {
+                newEntityListeners.splice(newEntityListeners.indexOf(set), 1)
+            }
+
+            if (del) {
+                delEntityListeners.splice(delEntityListeners.indexOf(del), 1)
+            }
+        }
+    }
+
     function findEntities<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowComponents<Components, typeof components[number]>>[] {
         const found = []
 
@@ -182,16 +198,20 @@ export const createEntityStore = <Components extends object> () => createStore<E
         return found
     }
 
-    function newEntity<L extends keyof Components>(base: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>> {
+    function newEntity<L extends keyof Components = never>(base?: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>> {
         const entityId = nextEntityId++
 
-        const entityComponents = new Proxy(base ?? { } as Components, {
+        // assuming in type assertion that L is never if base is undefined
+        const entityComponents = new Proxy(base ?? { } as NarrowComponents<Components, L>, {
             set(target, prop, value) {
-                const isNew = prop in target
+                const isNew = !(prop in target)
+                console.log(`target ${entityId} has properties ${Object.keys(target).join(", ")}`)
+
                 target[prop as L] = value
 
                 for (const callback of componentSetListeners.get(prop as keyof Components) ?? []) {
-                    callback(entity as Entity<Components>, isNew)
+                    callback(entity, isNew)
+                    console.log(`set ${prop.toString()} on ${entityId} it is ${isNew ? "new" : "old"}`)
                 }
 
                 return true
@@ -199,7 +219,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
             deleteProperty(target, prop) {
                 if (prop in target) {
                     for (const callback of componentDelListeners.get(prop as keyof Components) ?? []) {
-                        callback(entity as Entity<Components>)
+                        callback(entity)
                     }
 
                     return delete target[prop as L]
@@ -213,19 +233,29 @@ export const createEntityStore = <Components extends object> () => createStore<E
             get components() { return entityComponents },
             get id() { return entityId },
 
+            delete<T extends (keyof Components)[]>(...components: [...T]) {
+                for (const component of components) {
+                    delete entityComponents[component]
+                }
+
+                return entity
+            },
+
             has<T extends (keyof Components)[]>(...components: [...T]) {
                 return components.every(component => component in entityComponents)
             }
         }
 
+        entities.set(entityId, entity)
+
         for (const key of Object.keys(entity.components)) {
             for (const callback of componentSetListeners.get(key as keyof Components) ?? []) {
-                callback(entity as Entity<Components>, true)
+                callback(entity, true)
             }
         }
 
         for (const callback of newEntityListeners) {
-            callback(entity as Entity<Components>)
+            callback(entity)
         }
 
         return entity

@@ -1,5 +1,3 @@
 import { EntityType } from "../../EntityType"
 
-export interface EntityTypeComponent {
-    type: EntityType
-}
+export type EntityTypeComponent = EntityType

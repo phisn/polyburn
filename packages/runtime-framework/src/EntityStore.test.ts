@@ -1,6 +1,7 @@
 import { expect, test } from "vitest"
 
 import { createEntityStore } from "../src/EntityStore"
+import { Entity } from "./Entity"
 
 test("RuntimeStore entity", () => {
     interface Component {
@@ -40,6 +41,7 @@ test("RuntimeStore entity set", () => {
     interface Components {
         test1?: Component
         test2?: Component
+        test3?: Component
     }
 
     const store = createEntityStore<Components>()
@@ -57,10 +59,10 @@ test("RuntimeStore entity set", () => {
 
     for (let i = 0; i < 20; i++) { newEntity() }
 
-    const c2 = newEntity().set<Component>("test1", { value: 1 })
-    const c3 = newEntity().set<Component>("test2", { value: 1 })
+    const c2 = newEntity({ test1: { value: 1 } })
+    const c3 = newEntity({ test2: { value: 1 } })
     const c4 = newEntity()
-    const c5 = newEntity()
+    const c5: Entity<Components> = newEntity()
 
     const set1 = store.getState().newEntitySet("test2")
     const set2 = store.getState().newEntitySet("test1", "test2")
@@ -68,9 +70,10 @@ test("RuntimeStore entity set", () => {
     const set4 = store.getState().newEntitySet("test3")
     const set5 = store.getState().newEntitySet()
 
-    newEntity()
-        .set<Component>("test1", { value: 5 })
-        .set<Component>("test2", { value: 6 })
+    newEntity({
+        test1: { value: 5 },
+        test2: { value: 6 }
+    })
 
     for (let i = 0; i < 20; i++) { newEntity() }
 
@@ -80,17 +83,17 @@ test("RuntimeStore entity set", () => {
     expect([...set4].length).toBe(0)
     expect([...set5].length).toBe(47 + 1)
 
-    c1.remove("test1")
-    c2.remove("test1")
+    delete (c1 as Entity<Components>).components.test1
+    delete (c2 as Entity<Components>).components.test1
 
     expect([...set1].length).toBe(4)
     expect([...set2].length).toBe(2)
     expect([...set3].length).toBe(2)
     expect([...set4].length).toBe(0)
 
-    c1.set<Component>("test1", { value: 1 })
-    c2.set<Component>("test1", { value: 1 })
-    c4.set<Component>("test3", { value: 1 })
+    c1.components.test1 = { value: 1 }
+    c2.components.test1 = { value: 1 }
+    c4.components.test3 = { value: 1 }
 
     expect([...set1].length).toBe(4)
     expect([...set2].length).toBe(3)
@@ -113,7 +116,6 @@ test("RuntimeStore entity set", () => {
 })
 
 /*
-
 test("RuntimeStore systems", () => {
     interface CounterComponent {
         value: number

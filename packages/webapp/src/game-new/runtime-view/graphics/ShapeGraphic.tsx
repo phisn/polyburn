@@ -1,6 +1,6 @@
+import { Entity } from "runtime-framework"
 import * as THREE from "three"
 
-import { Entity } from "../../../../../runtime-framework/src"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
 export function ShapeGraphic(props: { entity: Entity<WebappComponents> }) {

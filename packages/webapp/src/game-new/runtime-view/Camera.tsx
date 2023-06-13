@@ -9,6 +9,7 @@ import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 import { EntityStore } from "../../../../runtime-framework/src"
 import { gameCameraTransitionSpeed } from "../../common/Values"
 import { Point } from "../../model/world/Point"
+import { useGameStore } from "../store/GameStore"
 import { WebappComponents } from "./webapp-runtime/WebappComponents"
 
 export function Camera(props: { store: EntityStore<WebappComponents> }) {
@@ -97,7 +98,7 @@ export function CameraWithEntities(props: { rocket: EntityWith<WebappComponents,
     })
 
     const size = useThree(state => state.size)
-    const zoom = 1 // useGameStore(state => ZoomIndexToZoom[state.zoomIndex])
+    const zoom = useGameStore(store => store.zoom)
 
     useEffect(() => {
         const aspect = size.width / size.height

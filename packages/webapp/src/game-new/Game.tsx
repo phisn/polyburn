@@ -7,6 +7,7 @@ import tunnel from "tunnel-rat"
 import { WorldModel } from "../model/world/WorldModel"
 import { useWebappRuntime } from "./hooks/useWebappRuntime"
 import { RuntimeView } from "./runtime-view/RuntimeView"
+import { ProvideGameStore } from "./store/GameStore"
 
 export interface GameProps {
     world: WorldModel
@@ -56,12 +57,12 @@ function InnerGame(props: GameProps) {
     const store = useWebappRuntime(commonGamemode, props.world)
 
     return (
-        <>
+        <ProvideGameStore entityStore={store}>
             <overlay.In>
             </overlay.In>
             
             <RuntimeView store={store} />
-        </>
+        </ProvideGameStore>
     )
 }
 

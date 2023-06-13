@@ -1,6 +1,7 @@
 import { Svg } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { Suspense, useRef } from "react"
+import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 import { Object3D } from "three"
 
 import { Entity } from "../../../../../runtime-framework/src"
@@ -8,10 +9,13 @@ import { changeAnchor } from "../../../common/math"
 import { entityModels } from "../../../model/world/EntityModels"
 import { EntityType } from "../../../model/world/EntityType"
 import { scale } from "../../../model/world/Size"
-import { AddonComponents } from "../AddonComponents"
-import { InterpolationComponent } from "../interpolation/InterpolationComponent"
+import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
-export function RocketGraphic(props: { entity: Entity }) {
+export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
+    if (!props.entity.has(...RocketEntityComponents)) {
+        throw new Error("Got invalid entity graphic type rocket")
+    }
+
     const svgRef = useRef<Object3D>(null!)
     // const lineRef = useRef<any>(null!)
 
@@ -19,20 +23,21 @@ export function RocketGraphic(props: { entity: Entity }) {
     const size = scale(entry.size, entry.scale)
 
     useFrame(() => {
-        const interpolation = props.entity.getSafe<InterpolationComponent>(AddonComponents.Interpolation)
+        if (!props.entity.has("interpolation")) {
+            console.error("Entity is missing interpolation component")
+            return
+        }
 
         const positionAnchored = changeAnchor(
-            { x: 0, y: 0 },
-            interpolation.rotation,
+            props.entity.components.interpolation.position,
+            props.entity.components.interpolation.rotation,
             size,
             { x: 0.5, y: 0.5 },
             entry.anchor
         )
 
-        console.log(`x${positionAnchored.x}, y${positionAnchored.y}`)
-
         svgRef.current.position.set(positionAnchored.x, positionAnchored.y, 0)
-        svgRef.current.rotation.set(0, 0, interpolation.rotation)
+        svgRef.current.rotation.set(0, 0, props.entity.components.interpolation.rotation)
 
         /*
         const positionMidAnchored = changeAnchor(

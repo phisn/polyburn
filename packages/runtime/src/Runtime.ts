@@ -9,13 +9,13 @@ import { WorldModel } from "./model/world/WorldModel"
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const rapierInit = RAPIER.init()
 
-export const newRuntime = (gamemode: Gamemode, world: WorldModel) => {
+export const newRuntime = <Components extends RuntimeComponents> (gamemode: Gamemode, world: WorldModel) => {
     const meta: Meta = {
         rapier: new RAPIER.World(new RAPIER.Vector2(0, 0)),
         queue: new RAPIER.EventQueue(true)
     }
 
-    const store = createEntityStore<RuntimeComponents>()
+    const store = createEntityStore<Components>()
 
     return {
         store,

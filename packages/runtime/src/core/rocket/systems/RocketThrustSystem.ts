@@ -2,15 +2,14 @@ import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
+import { RocketEntityComponents } from "../RocketEntity"
 import { rocketGroundRay } from "../rocketGroundRay"
 
 const thrustValue = 7.3
 const thrustGroundMultiplier = 1.3
 
 export const newRocketThrustSystem: RuntimeSystemFactory = (store, meta) => {
-    const rockets = store.getState().newEntitySet(
-        "rocket",
-        "rigidBody")
+    const rockets = store.getState().newEntitySet(...RocketEntityComponents)
 
     return (context) => {
         if (!context.thrust) {

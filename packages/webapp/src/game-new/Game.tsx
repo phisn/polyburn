@@ -1,5 +1,4 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { OrthographicCamera } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { Suspense } from "react"
 import { commonGamemode } from "runtime/src/gamemode/CommonGamemode"
@@ -7,7 +6,7 @@ import tunnel from "tunnel-rat"
 
 import { WorldModel } from "../model/world/WorldModel"
 import { useWebappRuntime } from "./hooks/useWebappRuntime"
-import EntityGraphics from "./runtime-view/graphics/EntityGraphics"
+import { RuntimeView } from "./runtime-view/RuntimeView"
 
 export interface GameProps {
     world: WorldModel
@@ -58,12 +57,10 @@ function InnerGame(props: GameProps) {
 
     return (
         <>
-            <OrthographicCamera zoom={2} />
-
             <overlay.In>
             </overlay.In>
-
-            <EntityGraphics store={store} />
+            
+            <RuntimeView store={store} />
         </>
     )
 }

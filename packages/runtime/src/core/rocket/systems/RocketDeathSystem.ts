@@ -8,11 +8,10 @@ import { Meta } from "../../Meta"
 import { RuntimeComponents } from "../../RuntimeComponents"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { respawnRocket } from "../respawnRocket"
+import { RocketEntityComponents } from "../RocketEntity"
 
 export const newRocketDeathSystem: RuntimeSystemFactory = (store, meta) => {
-    const rockets = store.getState().newEntitySet(
-        "rocket",
-        "rigidBody")
+    const rockets = store.getState().newEntitySet(...RocketEntityComponents)
 
     return () => {
         for (const entity of rockets) {
@@ -33,18 +32,18 @@ export const newRocketDeathSystem: RuntimeSystemFactory = (store, meta) => {
 
 function handleRocketCollider(
     meta: Meta,
-    collider: RAPIER.Collider,
+    rocketCollider: RAPIER.Collider,
     entity: EntityWith<RuntimeComponents, "rocket" | "rigidBody">
 ) {
     meta.rapier.contactsWith(
-        collider,
+        rocketCollider,
         (collider) => {
             if (collider.isSensor()) {
                 return
             }
 
             meta.rapier.contactPair(
-                collider,
+                rocketCollider,
                 collider,
                 (contact, flipped) => handleRocketContact(
                     contact,
@@ -86,6 +85,7 @@ function handleRocketContact(
     const distance = sqrt(dx * dx + dy * dy)
 
     if (distance > 0.3) {
+        console.warn(`death because ${distance} > 0.3`)
         respawnRocket(rocket)
     }
 }

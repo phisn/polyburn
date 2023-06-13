@@ -2,7 +2,7 @@ import { createStore , StoreApi } from "zustand"
 
 import { Entity } from "./Entity"
 import { EntitySet } from "./EntitySet"
-import { NarrowComponents } from "./NarrowComponents"
+import { EntityWith, NarrowComponents } from "./NarrowComponents"
 
 export interface EntityStoreState<Components extends object> {
     get entities(): Map<number, Entity<Components>>
@@ -34,6 +34,13 @@ export const createEntityStore = <Components extends object> () => createStore<E
     const entities = new Map<number, Entity<Components>>()
     const world = newEntity() as Entity<Components>
 
+    interface EntitySetCached {
+        set: EntitySet<Record<string, unknown>>
+        referenceCounter: number
+    }
+
+    const entitySetCache = new Map<string, EntitySetCached>()
+
     return {
         get entities() { return entities },
         get world() { return world },
@@ -61,32 +68,49 @@ export const createEntityStore = <Components extends object> () => createStore<E
         },
         findEntities,
         newEntitySet<T extends (keyof Components)[]>(...components: [...T]) {
-            const entitiesInSet = new Map<number, Entity<NarrowComponents<Components, typeof components[number]>>>()
+            const key = components.sort().join(",")
+            const setCached = entitySetCache.get(key)
+
+            if (setCached) {
+                setCached.referenceCounter++
+                return setCached.set as EntitySet<NarrowComponents<Components, typeof components[number]>>
+            }
+
+            const newSet = new Map<number, EntityWith<Components, typeof components[number]>>()
 
             const free = get().listenToEntities(
                 (entity, isNew) => {
                     if (isNew) {
-                        entitiesInSet.set(entity.id, entity)
-                        console.log(`set with ${components.join(", ")} now has ${entity.id}`)
-                    }
-                    else {
-                        console.log(`set with ${components.join(", ")} now updated ${entity.id}`)
+                        newSet.set(entity.id, entity)
                     }
                 },
-                entity => entitiesInSet.delete(entity.id),
+                entity => newSet.delete(entity.id),
                 ...components)
 
             const entitySet: EntitySet<NarrowComponents<Components, typeof components[number]>> = {
                 [Symbol.iterator]() {
-                    return entitiesInSet.values()
+                    return newSet.values()
                 },
-                free,
+                free() {
+                    newSetCached.referenceCounter--
+
+                    if (newSetCached.referenceCounter === 0) {
+                        entitySetCache.delete(key)
+                        free()
+                    }
+                },
+            }
+            
+            for (const entity of findEntities(...components)) {
+                newSet.set(entity.id, entity)
             }
 
-            for (const entity of findEntities(...components)) {
-                entitiesInSet.set(entity.id, entity)
-                console.log(`set with ${components.join(", ")} now has ${entity.id}`)
+            const newSetCached = {
+                set: entitySet,
+                referenceCounter: 1
             }
+
+            entitySetCache.set(key, newSetCached)
 
             return entitySet
         },
@@ -205,13 +229,11 @@ export const createEntityStore = <Components extends object> () => createStore<E
         const entityComponents = new Proxy(base ?? { } as NarrowComponents<Components, L>, {
             set(target, prop, value) {
                 const isNew = !(prop in target)
-                console.log(`target ${entityId} has properties ${Object.keys(target).join(", ")}`)
 
                 target[prop as L] = value
 
                 for (const callback of componentSetListeners.get(prop as keyof Components) ?? []) {
                     callback(entity, isNew)
-                    console.log(`set ${prop.toString()} on ${entityId} it is ${isNew ? "new" : "old"}`)
                 }
 
                 return true

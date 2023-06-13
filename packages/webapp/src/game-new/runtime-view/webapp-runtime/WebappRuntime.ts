@@ -6,9 +6,10 @@ import { newRegisterGraphicsSystem } from "./graphic/RegisterGraphicsSystem"
 import { newInjectInterpolationSystem } from "./interpolation/InjectInterpolationSystem"
 import { newParticleAgeSystem } from "./particle/ParticleAgeSystem"
 import { newParticleSpawnSystem } from "./particle/ParticleSpawnSystem"
+import { WebappComponents } from "./WebappComponents"
 
 export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
-    const { store, stack } = newRuntime(gamemode, world)
+    const { store, stack } = newRuntime<WebappComponents>(gamemode, world)
 
     stack.add(
         newInjectInterpolationSystem,

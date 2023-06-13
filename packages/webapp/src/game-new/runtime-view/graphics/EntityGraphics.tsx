@@ -1,14 +1,14 @@
+import { EntityWith } from "runtime-framework/src/NarrowComponents"
 import { useStore } from "zustand"
 
-import { Entity, EntityStore } from "../../../../../runtime-framework/src"
-import { AddonComponents } from "../AddonComponents"
-import { GraphicComponent } from "../graphic/GraphicComponent"
+import { EntityStore } from "../../../../../runtime-framework/src"
+import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
-export default function EntityGraphics(props: { store: EntityStore }) {
+export default function EntityGraphics(props: { store: EntityStore<WebappComponents> }) {
     const entitiesMap = useStore(props.store, state => state.entities)
 
     const graphicEntities = [...entitiesMap.values()]
-        .filter(entity => AddonComponents.Graphic in entity.components)
+        .filter((entity): entity is EntityWith<WebappComponents, "graphic"> => entity.has("graphic"))
 
     return (
         <>
@@ -19,12 +19,10 @@ export default function EntityGraphics(props: { store: EntityStore }) {
     )
 }
 
-function EntityGraphic(props: { entity: Entity }) {
-    const graphicComponent = props.entity.getSafe<GraphicComponent>(AddonComponents.Graphic)
-
+function EntityGraphic(props: { entity: EntityWith<WebappComponents, "graphic"> }) {
     return (
         <>
-            <graphicComponent.graphic entity={props.entity} />
+            <props.entity.components.graphic entity={props.entity} />
         </>
     )
 }

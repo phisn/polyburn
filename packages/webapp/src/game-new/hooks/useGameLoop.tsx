@@ -12,23 +12,24 @@ export const GameLoopContext = createContext<GameLoopContext>(null!)
 export const GameLoopContextProvider = GameLoopContext.Provider
 
 export const useGameLoop = (
-    update: () => void, 
-    afterUpdate: (time: number) => void, 
-    tickRate: number, 
-    tickRateLag: number) => {
+    events: {
+        update: () => void
+        afterUpdate: (time: number) => void
+        afterFrame: () => void
+    },
+    tickRate: number) => {
+        
     let lastTime = performance.now()
 
     useFrame(() => {
         const now = performance.now()
         
-        if (now - lastTime >= tickRate * tickRateLag) {
-            // console.log(`data(now${now}, lastTime${lastTime}, tickRate${tickRate}, tickRateLag${tickRateLag}, now - lastTime${now - lastTime})`)
-
+        if (now - lastTime >= tickRate) {
             let frames = 0
 
             do {
                 lastTime += tickRate
-                update()
+                events.update()
 
                 frames++
             } while (now - lastTime >= tickRate)
@@ -37,8 +38,9 @@ export const useGameLoop = (
                 console.log("Skipped " + (frames - 1) + " frames")
             }
 
-            // console.log("afterUpdate")
-            afterUpdate?.(lastTime)
+            events.afterUpdate(lastTime)
         }
+
+        events.afterFrame()
     })
 }

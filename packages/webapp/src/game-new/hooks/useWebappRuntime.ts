@@ -12,24 +12,37 @@ export function useWebappRuntime(gamemode: Gamemode, world: WorldModel) {
 
     const tickrate = 16.6667
 
-    const { onPhysicsUpdate } = useInterpolationUpdate(store, tickrate * 1)
+    const { onPhysicsUpdate } = useInterpolationUpdate(store, tickrate)
 
     const controls = useControls()
 
     useGameLoop(
-        () => {
-            if (controls.current.pause) {
-                return
-            }
-
-            stack.step({
-                thrust: controls.current.thrust,
-                rotation: controls.current.rotation
-            })
+        {
+            update: updateSimulation,
+            afterUpdate: updateInterpolation,
+            afterFrame: updateGraphics
         },
-        onPhysicsUpdate,
-        tickrate, 1
+        tickrate
     )
+
+    function updateSimulation() {
+        if (controls.current.pause) {
+            return
+        }
+
+        stack.step({
+            thrust: controls.current.thrust,
+            rotation: controls.current.rotation
+        })
+    }
+
+    function updateInterpolation(time: number) {
+        onPhysicsUpdate(time)
+    }
+
+    function updateGraphics() {
+        void 0
+    }
 
     return store
 }

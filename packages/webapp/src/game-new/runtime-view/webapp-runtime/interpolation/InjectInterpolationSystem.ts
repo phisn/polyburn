@@ -1,6 +1,6 @@
 import { Vector3 } from "three"
 
-import { WebappSystemFactory } from "../../WebappSystemFactory"
+import { WebappSystemFactory } from "../WebappSystemFactory"
 
 export const newInjectInterpolationSystem: WebappSystemFactory = (store) => {
     store.getState().listenToEntities(

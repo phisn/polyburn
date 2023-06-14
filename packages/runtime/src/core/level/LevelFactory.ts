@@ -5,10 +5,9 @@ import { captureBox, FlagEntityModel } from "../../model/world/FlagEntityModel"
 import { EntityType } from "../EntityType"
 import { Meta } from "../Meta"
 import { RuntimeComponents } from "../RuntimeComponents"
-import { LevelComponent } from "./LevelComponent"
 
 export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag: FlagEntityModel) => {
-    const level: LevelComponent = {
+    const level = {
         captured: false,
 
         camera: {
@@ -16,6 +15,7 @@ export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag
             bottomRight: flag.cameraBottomRight
         },
 
+        hideFlag: false,
         flag: flag.position,
         flagRotation: flag.rotation
     }
@@ -61,7 +61,10 @@ export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag
     )
 
     return store.getState().newEntity({
-        level,
+        level: {
+            ...level,
+            boundsCollider
+        },
         
         entityType: EntityType.Level,
         collisionEventListener: {},

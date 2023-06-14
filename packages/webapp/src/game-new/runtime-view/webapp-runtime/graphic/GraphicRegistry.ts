@@ -5,8 +5,8 @@ import { RocketGraphic } from "../../graphics/RocketGraphic"
 import { ShapeGraphic } from "../../graphics/ShapeGraphic"
 import { Graphic } from "./GraphicComponent"
 
-export const graphicRegistry: { [key: string]: Graphic } = {
-    [EntityType.Flag]: FlagGraphic,
+export const graphicRegistry: { [K in EntityType]: Graphic } = {
+    [EntityType.Level]: FlagGraphic,
     [EntityType.Rocket]: RocketGraphic,
     [EntityType.Shape]: ShapeGraphic,
 }

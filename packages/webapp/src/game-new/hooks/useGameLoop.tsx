@@ -37,6 +37,7 @@ export const useGameLoop = (
                 console.log("Skipped " + (frames - 1) + " frames")
             }
 
+            // console.log("afterUpdate")
             afterUpdate?.(lastTime)
         }
     })

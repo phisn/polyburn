@@ -12,7 +12,7 @@ export function useWebappRuntime(gamemode: Gamemode, world: WorldModel) {
 
     const tickrate = 16.6667
 
-    const { onPhysicsUpdate } = useInterpolationUpdate(store, tickrate)
+    const { onPhysicsUpdate } = useInterpolationUpdate(store, tickrate * 1)
 
     const controls = useControls()
 

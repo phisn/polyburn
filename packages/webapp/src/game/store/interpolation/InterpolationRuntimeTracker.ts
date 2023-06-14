@@ -6,7 +6,7 @@ export class InterpolationRuntimeTracker {
     private rocketBodyTracker: InterpolationBodyTracker
     
     private previousTime: number
-
+    
     constructor(private runtime: Runtime) {
         this.rocketBodyTracker = new InterpolationBodyTracker(runtime.state.rocket.body)
         this.previousTime = performance.now()

@@ -9,6 +9,7 @@ import { WebappComponents } from "../WebappComponents"
 export function useInterpolationUpdate(store: EntityStore<WebappComponents>, tickrate: number) {
     const entities = useMemo(() => store.getState().newEntitySet("interpolation", "rigidBody"), [store])
 
+    //console.log("useInterpolationUpdate", entities)
     let previousTime = performance.now()
 
     useFrame(() => {
@@ -16,6 +17,8 @@ export function useInterpolationUpdate(store: EntityStore<WebappComponents>, tic
             (performance.now() - previousTime) / tickrate,
             1.0
         )
+
+        //console.log("interpolation update", delta)
 
         for (const entity of entities) {
             if (entity.components.rigidBody.isSleeping()) {
@@ -28,6 +31,13 @@ export function useInterpolationUpdate(store: EntityStore<WebappComponents>, tic
 
     return {
         onPhysicsUpdate(time: number) {
+            previousTime = time
+
+            const delta = Math.min(
+                (performance.now() - previousTime) / tickrate,
+                1.0
+            )
+
             for (const entity of entities) {
                 if (entity.components.rigidBody.isSleeping()) {
                     continue
@@ -42,9 +52,11 @@ export function useInterpolationUpdate(store: EntityStore<WebappComponents>, tic
 
                 entity.components.interpolation.newPosition.set(position.x, position.y, 0)
                 entity.components.interpolation.newRotation = entity.components.rigidBody.rotation()
-            }
 
-            previousTime = time
+                interpolateEntity(entity, delta)
+
+                //console.log(`updating entity ${entity.id} np x: ${entity.components.interpolation.newPosition.x} y: ${entity.components.interpolation.newPosition.y}, pp x: ${entity.components.interpolation.previousPosition.x} y: ${entity.components.interpolation.previousPosition.y}`)
+            }
         }
     }
 }

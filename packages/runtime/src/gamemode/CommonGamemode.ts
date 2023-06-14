@@ -28,7 +28,11 @@ export const commonGamemode: Gamemode = (meta, store, world) => {
             newLevel(meta, store, entity)
         })
 
-    newRocket(meta, store, rocketModel as RocketEntityModel)
+    const rocket = newRocket(meta, store, rocketModel as RocketEntityModel)
+
+    rocket.components.rocket.currentLevel.components.level.boundsCollider.setSensor(false)
+    rocket.components.rocket.currentLevel.components.level.captured = true
+    rocket.components.rocket.currentLevel.components.level.hideFlag = true
 
     world.shapes.forEach(shape => {
         newShape(meta, store, shape)

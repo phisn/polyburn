@@ -15,7 +15,7 @@ export const useGameLoop = (
     events: {
         update: () => void
         afterUpdate: (time: number) => void
-        afterFrame: () => void
+        afterFrame: (time: number) => void
     },
     tickRate: number) => {
         
@@ -41,6 +41,6 @@ export const useGameLoop = (
             events.afterUpdate(lastTime)
         }
 
-        events.afterFrame()
+        events.afterFrame(lastTime)
     })
 }

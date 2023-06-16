@@ -1,5 +1,5 @@
 
-import { WebappSystemFactory } from "../../WebappSystemFactory"
+import { WebappSystemFactory } from "../WebappSystemFactory"
 import { graphicRegistry } from "./GraphicRegistry"
 
 export const newRegisterGraphicsSystem: WebappSystemFactory = (store) => {

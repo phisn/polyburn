@@ -12,6 +12,9 @@ interface GameState {
 
 export interface GameStore extends GameState {
     get entityStore(): EntityStore<WebappComponents>
+    get graphicListeners(): (() => void)[]
+
+    subscribeGraphicUpdate(listener: () => void): () => void
 
     zoomIn(): void
     zoomOut(): void
@@ -22,8 +25,21 @@ export interface GameStore extends GameState {
 export const createGameStore = (entityStore: EntityStore<WebappComponents>) => 
     createStore<GameStore>((set, get) => ({
         entityStore,
+        graphicListeners: [],
 
         zoomIndex: 0,
+
+        subscribeGraphicUpdate: (listener: () => void) => {
+            set(state => ({
+                graphicListeners: [...state.graphicListeners, listener]
+            }))
+
+            return () => {
+                set(state => ({
+                    graphicListeners: state.graphicListeners.filter(l => l !== listener)
+                }))
+            }
+        },
 
         zoomIn: () => {
             const zoomIndex = get().zoomIndex

@@ -1,19 +1,18 @@
 import { Gamemode } from "runtime/src/gamemode/Gamemode"
 
 import { WorldModel } from "../../model/world/WorldModel"
-import { useInterpolationUpdate } from "../runtime-view/webapp-runtime/interpolation/useInterpolationUpdate"
+import { useUpdateInterpolation } from "../runtime-view/webapp-runtime/interpolation/useUpdateInterpolation"
 import { newWebappRuntime } from "../runtime-view/webapp-runtime/WebappRuntime"
 import { useControls } from "./useControls"
 import { useGameLoop } from "./useGameLoop"
 
+const tickrate = 16.6667
+
 export function useWebappRuntime(gamemode: Gamemode, world: WorldModel) {
     const fixed_world = JSON.parse(JSON.stringify(world)) // dirty hack to prototype for now. fix later
+
     const { store, stack } = newWebappRuntime(gamemode, fixed_world)
-
-    const tickrate = 16.6667
-
-    const { onPhysicsUpdate } = useInterpolationUpdate(store, tickrate)
-
+    const { onPhysicsUpdate } = useUpdateInterpolation(store, tickrate)
     const controls = useControls()
 
     useGameLoop(
@@ -22,8 +21,7 @@ export function useWebappRuntime(gamemode: Gamemode, world: WorldModel) {
             afterUpdate: updateInterpolation,
             afterFrame: updateGraphics
         },
-        tickrate
-    )
+        tickrate)
 
     function updateSimulation() {
         if (controls.current.pause) {
@@ -40,7 +38,7 @@ export function useWebappRuntime(gamemode: Gamemode, world: WorldModel) {
         onPhysicsUpdate(time)
     }
 
-    function updateGraphics() {
+    function updateGraphics(time: number) {
         void 0
     }
 

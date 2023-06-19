@@ -12,8 +12,6 @@ export function ShapeGraphic(props: { entity: Entity<WebappComponents> }) {
         props.entity.components.shape.vertices.map(vertex => new THREE.Vector2(vertex.x, vertex.y))
     )
 
-    console.log("stuff")
-
     return (
         <>
             <mesh>

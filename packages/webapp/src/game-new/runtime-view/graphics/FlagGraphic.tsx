@@ -1,11 +1,11 @@
 import { Svg } from "@react-three/drei"
-import { useFrame } from "@react-three/fiber"
 import { Suspense, useState } from "react"
 import { EntityModelType } from "runtime/src/model/world/EntityModelType"
 import { Entity } from "runtime-framework"
 import { Euler } from "three"
 
 import { entityModels } from "../../../model/world/EntityModels"
+import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
 export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
@@ -21,7 +21,7 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
         ? entityModels[EntityModelType.GreenFlag]
         : entityModels[EntityModelType.RedFlag]
 
-    useFrame(() => {
+    useGraphicUpdate(() => {
         if (!props.entity.has("level")) {
             throw new Error("Got invalid entity graphic type level")
         }

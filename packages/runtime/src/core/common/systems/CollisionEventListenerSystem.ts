@@ -1,3 +1,4 @@
+import RAPIER from "@dimforge/rapier2d-compat"
 import { BiMap } from "mnemonist"
 
 import {Entity } from "../../../../../runtime-framework/src"
@@ -25,8 +26,8 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, met
                 return
             }
 
-            handleCollisionEvent(entity1, entity2, started, collider2.isSensor())
-            handleCollisionEvent(entity2, entity1, started, collider1.isSensor())
+            handleCollisionEvent(entity1, entity2, started, collider2)
+            handleCollisionEvent(entity2, entity1, started, collider1)
         })
     }
 
@@ -48,7 +49,7 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, met
         entity: Entity<RuntimeComponents>,
         other: Entity<RuntimeComponents>,
         started: boolean, 
-        sensor: boolean
+        collider: RAPIER.Collider
     ) {
         if (entity.has("collisionEventListener")) {
             if (entity.components.collisionEvent === undefined) {
@@ -57,8 +58,9 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, met
 
             entity.components.collisionEvent.events.push({
                 other: other.id,
+                otherColliderHandle: collider.handle,
                 started,
-                sensor
+                sensor: collider.isSensor()
             })
         }
     }

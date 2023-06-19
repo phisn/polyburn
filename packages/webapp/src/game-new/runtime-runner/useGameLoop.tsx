@@ -38,9 +38,20 @@ export const useGameLoop = (
                 console.log("Skipped " + (frames - 1) + " frames")
             }
 
-            events.afterUpdate(lastTime)
+            const delta = getDelta()
+
+            events.afterUpdate(delta)
+            events.afterFrame(delta)
+        }
+        else {
+            events.afterFrame(getDelta())
         }
 
-        events.afterFrame(lastTime)
+        function getDelta() {
+            return Math.min(
+                (performance.now() - lastTime) / tickRate,
+                1.0
+            )
+        }
     })
 }

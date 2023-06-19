@@ -1,5 +1,4 @@
 import { Svg } from "@react-three/drei"
-import { useFrame } from "@react-three/fiber"
 import { Suspense, useRef } from "react"
 import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 import { Object3D } from "three"
@@ -9,6 +8,7 @@ import { changeAnchor } from "../../../common/math"
 import { entityModels } from "../../../model/world/EntityModels"
 import { EntityType } from "../../../model/world/EntityType"
 import { scale } from "../../../model/world/Size"
+import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
 export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
@@ -22,7 +22,7 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
     const entry = entityModels[EntityType.Rocket]
     const size = scale(entry.size, entry.scale)
 
-    useFrame(() => {
+    useGraphicUpdate(() => {
         if (!props.entity.has("interpolation")) {
             console.error("Entity is missing interpolation component")
             return

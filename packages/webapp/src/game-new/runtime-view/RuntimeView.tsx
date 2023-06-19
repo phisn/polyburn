@@ -1,14 +1,15 @@
 
-import { EntityStore } from "../../../../runtime-framework/src"
+import { useGameStore } from "../store/GameStore"
 import { Camera } from "./Camera"
 import EntityGraphics from "./graphics/EntityGraphics"
-import { WebappComponents } from "./webapp-runtime/WebappComponents"
 
-export function RuntimeView(props: { store: EntityStore<WebappComponents> }) {
+export function RuntimeView() {
+    const store = useGameStore(store => store.entityStore)
+
     return (
         <>
-            <EntityGraphics store={props.store} />
-            <Camera store={props.store} />
+            <EntityGraphics store={store} />
+            <Camera store={store} />
         </>
     )
 }

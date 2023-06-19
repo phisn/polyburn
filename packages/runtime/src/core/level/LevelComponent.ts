@@ -14,4 +14,5 @@ export interface LevelComponent {
     flagRotation: number
 
     boundsCollider: RAPIER.Collider
+    captureCollider: RAPIER.Collider
 }

@@ -1,16 +1,16 @@
 import { createStore , StoreApi } from "zustand"
 
-import { Entity } from "./Entity"
+import { Entity, EntityId } from "./Entity"
 import { EntitySet } from "./EntitySet"
 import { EntityWith, NarrowComponents } from "./NarrowComponents"
 
 export interface EntityStoreState<Components extends object> {
-    get entities(): Map<number, Entity<Components>>
+    get entities(): Map<EntityId, Entity<Components>>
     get world(): Entity<Components>
 
     newEntity<L extends keyof Components = never>(base?: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>>
 
-    removeEntity(id: number): void
+    removeEntity(id: EntityId): void
 
     findEntities<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowComponents<Components, typeof components[number]>>[]
     newEntitySet<T extends (keyof Components)[]>(...components: [...T]): EntitySet<NarrowComponents<Components, typeof components[number]>>
@@ -31,7 +31,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
     const componentSetListeners = new Map<keyof Components, ((entity: Entity<Components>, isNew: boolean) => void)[]>()
     const componentDelListeners = new Map<keyof Components, ((entity: Entity<Components>) => void)[]>()
 
-    const entities = new Map<number, Entity<Components>>()
+    const entities = new Map<EntityId, Entity<Components>>()
     const world = newEntity() as Entity<Components>
 
     interface EntitySetCached {
@@ -47,7 +47,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
 
         newEntity,
 
-        removeEntity(id: number) {
+        removeEntity(id: EntityId) {
             const entity = entities.get(id)
 
             if (entity === undefined) {
@@ -76,7 +76,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
                 return setCached.set as EntitySet<NarrowComponents<Components, typeof components[number]>>
             }
 
-            const newSet = new Map<number, EntityWith<Components, typeof components[number]>>()
+            const newSet = new Map<EntityId, EntityWith<Components, typeof components[number]>>()
 
             const free = get().listenToEntities(
                 (entity, isNew) => {

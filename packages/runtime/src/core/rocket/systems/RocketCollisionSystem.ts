@@ -8,6 +8,15 @@ export const newRocketCollisionSystem: RuntimeSystemFactory = (store) => {
         for (const entity of rockets) {
             for (const collision of entity.components.collisionEvent.events) {
                 if (collision.sensor) {
+                    const other = store.getState().entities.get(collision.other)
+
+                    if (other?.has("level") && 
+                        collision.otherColliderHandle == other.components.level.captureCollider.handle) {
+
+                        other.components.level.captured = true
+                        console.log("yes")
+                    }
+
                     continue
                 }
 

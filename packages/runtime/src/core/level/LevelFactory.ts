@@ -55,7 +55,7 @@ export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag
         throw new Error("Failed to create collider")
     }
 
-    meta.rapier.createCollider(
+    const captureCollider = meta.rapier.createCollider(
         captureColliderDesc,
         body
     )
@@ -63,7 +63,8 @@ export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag
     return store.getState().newEntity({
         level: {
             ...level,
-            boundsCollider
+            boundsCollider,
+            captureCollider
         },
         
         entityType: EntityType.Level,

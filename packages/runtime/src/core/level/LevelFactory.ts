@@ -68,7 +68,6 @@ export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag
         },
         
         entityType: EntityType.Level,
-        collisionEventListener: {},
         rigidBody: body,
     })
 }

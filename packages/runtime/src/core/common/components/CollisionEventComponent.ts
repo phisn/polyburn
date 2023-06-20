@@ -1,14 +1,16 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { EntityId } from "runtime-framework"
+import { Entity } from "runtime-framework"
+
+import { RuntimeComponents } from "../../RuntimeComponents"
 
 interface CollisionEvent {
-    other: EntityId
+    other: Entity<RuntimeComponents>
     otherColliderHandle: RAPIER.ColliderHandle
     
     started: boolean
     sensor: boolean
 }
 
-export interface CollisionEventComponent {
+export interface CollisionComponent {
     events: CollisionEvent[]
 }

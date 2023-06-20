@@ -13,7 +13,17 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, met
         (entity) => entityToBodyHandle.delete(entity.id),
         "rigidBody")
 
+    const entitiesWithCollision = store.getState().newEntitySet(
+        "collision"
+    )
+
     return () => {
+        for (const entity of entitiesWithCollision) {
+            if (entity.components.collision.events.length > 0) {
+                entity.components.collision.events.length = 0
+            }
+        }
+
         meta.queue.drainCollisionEvents((h1, h2, started) => {
             const collider1 = meta.rapier.getCollider(h1)
             const collider2 = meta.rapier.getCollider(h2)
@@ -51,13 +61,9 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, met
         started: boolean, 
         collider: RAPIER.Collider
     ) {
-        if (entity.has("collisionEventListener")) {
-            if (entity.components.collisionEvent === undefined) {
-                entity.components.collisionEvent = { events: [] }
-            }
-
-            entity.components.collisionEvent.events.push({
-                other: other.id,
+        if (entity.has("collision")) {
+            entity.components.collision.events.push({
+                other,
                 otherColliderHandle: collider.handle,
                 started,
                 sensor: collider.isSensor()

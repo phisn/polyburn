@@ -2,18 +2,16 @@ import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { RocketEntityComponents } from "../RocketEntity"
 
 export const newRocketCollisionSystem: RuntimeSystemFactory = (store) => {
-    const rockets = store.getState().newEntitySet("collisionEvent", ...RocketEntityComponents)
+    const rockets = store.getState().newEntitySet("collision", ...RocketEntityComponents)
 
     return (context) => {
         for (const entity of rockets) {
-            for (const collision of entity.components.collisionEvent.events) {
+            for (const collision of entity.components.collision.events) {
                 if (collision.sensor) {
-                    const other = store.getState().entities.get(collision.other)
+                    if (collision.other?.has("level") && 
+                        collision.otherColliderHandle == collision.other.components.level.captureCollider.handle) {
 
-                    if (other?.has("level") && 
-                        collision.otherColliderHandle == other.components.level.captureCollider.handle) {
-
-                        other.components.level.captured = true
+                        collision.other.components.level.captured = true
                         console.log("yes")
                     }
 
@@ -31,8 +29,6 @@ export const newRocketCollisionSystem: RuntimeSystemFactory = (store) => {
                     entity.components.rocket.rotationWithoutInput = entity.components.rigidBody.rotation() - context.rotation
                 }
             }
-
-            entity.components.collisionEvent.events = []
         }
     }
 }

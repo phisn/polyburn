@@ -61,7 +61,7 @@ export const newRocket = (meta: Meta, store: EntityStore<RuntimeComponents>, roc
         },
 
         entityType: EntityType.Rocket,
-        collisionEventListener: {},
+        collision: { events: [] },
         moving: {},
         rigidBody: body,
     })

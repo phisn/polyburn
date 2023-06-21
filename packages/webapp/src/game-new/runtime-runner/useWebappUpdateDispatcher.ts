@@ -25,7 +25,7 @@ export function useWebappUpdateDispatcher(store: EntityStore<WebappComponents>) 
         }
 
         for (const listener of listeners) {
-            listener()
+            listener.current()
         }
     }
 

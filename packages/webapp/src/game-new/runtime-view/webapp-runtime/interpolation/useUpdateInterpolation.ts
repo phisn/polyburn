@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { EntityStore } from "runtime-framework"
 
 import { WebappComponents } from "../WebappComponents"
-import { interpolateEntity } from "./interplolateEntity"
+import { interpolateEntity } from "./InterpolatedEntity"
 
 export function useUpdateInterpolation(store: EntityStore<WebappComponents>, tickrate: number) {
     const entities = useMemo(

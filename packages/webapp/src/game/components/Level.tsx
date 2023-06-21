@@ -1,5 +1,4 @@
 import { Svg } from "@react-three/drei"
-import { useFrame } from "@react-three/fiber"
 import { Suspense, useState } from "react"
 import { Euler } from "three"
 
@@ -15,14 +14,16 @@ function Level(props: { rocket: RuntimeRocket, level: RuntimeLevel }) {
         ? entityModels[EntityType.GreenFlag]
         : entityModels[EntityType.RedFlag]
 
+    /*
     useFrame(() => {
-        const showUnlocked = props.level.captured || 
+        const showUnlocked = props || 
             props.rocket.currentLevelCapture === props.level
 
         if (showUnlocked !== unlocked) {
             setUnlocked(showUnlocked)
         }
     })
+    */
 
     return (
         <Suspense>

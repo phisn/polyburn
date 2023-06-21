@@ -1,5 +1,7 @@
 import { newCollisionEventListenerSystem } from "./common/systems/CollisionEventListenerSystem"
 import { newRapierStepSystem } from "./common/systems/RapierStepSystem"
+import { newLevelCaptureTimerSystem } from "./level/LevelCaptureTimerSystem"
+import { newLevelCaptureTriggerSystem } from "./level/LevelCaptureTriggerSystem"
 import { newRocketCollisionSystem } from "./rocket/systems/RocketCollisionSystem"
 import { newRocketDeathSystem } from "./rocket/systems/RocketDeathSystem"
 import { newRocketRotationSystem } from "./rocket/systems/RocketRotationSystem"
@@ -8,7 +10,12 @@ import { RuntimeSystemFactory } from "./RuntimeSystemFactory"
 
 export const runtimeSystemFactories: RuntimeSystemFactory[] = [
     newRapierStepSystem,
+
     newCollisionEventListenerSystem,
+
+    newLevelCaptureTimerSystem, // increase time before capture can start
+    newLevelCaptureTriggerSystem,
+
     newRocketCollisionSystem,
     newRocketDeathSystem,
     newRocketRotationSystem,

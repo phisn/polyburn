@@ -12,9 +12,9 @@ interface GameState {
 
 export interface GameStore extends GameState {
     get entityStore(): EntityStore<WebappComponents>
-    get graphicListeners(): (() => void)[]
+    get graphicListeners(): React.MutableRefObject<() => void>[]
 
-    subscribeGraphicUpdate(listener: () => void): () => void
+    subscribeGraphicUpdate(listener: React.MutableRefObject<() => void>): () => void
 
     zoomIn(): void
     zoomOut(): void
@@ -29,7 +29,7 @@ export const createGameStore = (entityStore: EntityStore<WebappComponents>) =>
 
         zoomIndex: 0,
 
-        subscribeGraphicUpdate: (listener: () => void) => {
+        subscribeGraphicUpdate: (listener: React.MutableRefObject<() => void>) => {
             set(state => ({
                 graphicListeners: [...state.graphicListeners, listener]
             }))

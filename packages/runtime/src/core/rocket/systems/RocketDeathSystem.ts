@@ -4,7 +4,7 @@ import sin from "@stdlib/math/base/special/sin"
 import sqrt from "@stdlib/math/base/special/sqrt"
 import { EntityWith } from "runtime-framework/src/NarrowComponents"
 
-import { Meta } from "../../Meta"
+import { Meta } from "../../common/Meta"
 import { RuntimeComponents } from "../../RuntimeComponents"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { respawnRocket } from "../respawnRocket"

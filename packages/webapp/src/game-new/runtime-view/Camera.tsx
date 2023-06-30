@@ -10,6 +10,7 @@ import { EntityStore } from "../../../../runtime-framework/src"
 import { gameCameraTransitionSpeed } from "../../common/Values"
 import { Point } from "../../model/world/Point"
 import { useGameStore } from "../store/GameStore"
+import { useGraphicUpdate } from "../store/useGraphicUpdate"
 import { WebappComponents } from "./webapp-runtime/WebappComponents"
 
 export function Camera(props: { store: EntityStore<WebappComponents> }) {
@@ -64,16 +65,19 @@ export function CameraWithEntities(props: { rocket: EntityWith<WebappComponents,
         cameraTargetPosition.current = { x: targetPositionX, y: targetPositionY }
     }, [ cameraBounds ])
 
-    useFrame((_, delta) => {
+    useGraphicUpdate(() => {
         previousRocketPosition.current = props.rocket.components.interpolation.position
         
         if (props.rocket.components.rocket.currentLevel.components.level.camera !== cameraBounds) {
+            console.log("Camera bounds changed")
             animating.current = true
             setCameraBounds(props.rocket.components.rocket.currentLevel.components.level.camera)
         }
 
         updateCameraPosition()
+    })
 
+    useFrame((_, delta) => {
         if (animating.current) {
             const distance = delta * gameCameraTransitionSpeed
 

@@ -3,7 +3,7 @@ import { Entity } from "runtime-framework"
 
 import { RuntimeComponents } from "../../RuntimeComponents"
 
-interface CollisionEvent {
+export interface CollisionEvent {
     other: Entity<RuntimeComponents>
     otherColliderHandle: RAPIER.ColliderHandle
     

@@ -1,7 +1,7 @@
 import RAPIER from "@dimforge/rapier2d-compat"
+import { Meta } from "runtime/src/core/common/Meta"
 
 import { createEntityStore } from "../../runtime-framework/src"
-import { Meta } from "./core/Meta"
 import { RuntimeComponents } from "./core/RuntimeComponents"
 import { Gamemode } from "./gamemode/Gamemode"
 import { WorldModel } from "./model/world/WorldModel"

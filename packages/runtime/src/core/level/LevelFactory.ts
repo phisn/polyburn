@@ -2,8 +2,8 @@ import RAPIER from "@dimforge/rapier2d-compat"
 
 import { EntityStore } from "../../../../runtime-framework/src"
 import { captureBox, FlagEntityModel } from "../../model/world/FlagEntityModel"
-import { EntityType } from "../EntityType"
-import { Meta } from "../Meta"
+import { EntityType } from "../common/EntityType"
+import { Meta } from "../common/Meta"
 import { RuntimeComponents } from "../RuntimeComponents"
 
 export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag: FlagEntityModel) => {

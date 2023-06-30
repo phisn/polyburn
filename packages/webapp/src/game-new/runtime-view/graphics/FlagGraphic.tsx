@@ -13,8 +13,6 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
         throw new Error("Got invalid entity graphic type level")
     }
 
-    console.log("flag graphic")
-
     const [unlocked, setUnlocked] = useState(false)
 
     const entry = unlocked
@@ -29,7 +27,6 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
         const showUnlocked = props.entity.components.level.captured
 
         if (showUnlocked !== unlocked) {
-            console.log("flag graphic update to " + showUnlocked + " from " + unlocked)
             setUnlocked(showUnlocked)
         }
     })

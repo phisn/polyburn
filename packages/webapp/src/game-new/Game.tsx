@@ -1,11 +1,12 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { Canvas } from "@react-three/fiber"
+import { Canvas, useThree } from "@react-three/fiber"
 import { Suspense } from "react"
 import { RuntimeSystemStack } from "runtime/src/core/RuntimeSystemStack"
 import { commonGamemode } from "runtime/src/gamemode/CommonGamemode"
 import tunnel from "tunnel-rat"
 
 import { WorldModel } from "../model/world/WorldModel"
+import Overlay from "./overlay/Overlay"
 import { useWebappRuntime } from "./runtime-runner/useWebappRuntime"
 import { RuntimeView } from "./runtime-view/RuntimeView"
 import { newWebappRuntime } from "./runtime-view/webapp-runtime/WebappRuntime"
@@ -56,10 +57,13 @@ function Game(props: { world: WorldModel }) {
 
 function InnerGame(props: { stack: RuntimeSystemStack }) {
     useWebappRuntime(props.stack)
+    
+    const camera = useThree(state => state.camera) as THREE.OrthographicCamera
 
     return (
-        <>
+        <>    
             <overlay.In>
+                <Overlay camera={camera} />
             </overlay.In>
             
             <RuntimeView/>

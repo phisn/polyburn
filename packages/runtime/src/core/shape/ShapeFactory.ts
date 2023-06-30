@@ -2,8 +2,8 @@ import RAPIER from "@dimforge/rapier2d-compat"
 
 import { EntityStore } from "../../../../runtime-framework/src"
 import { ShapeModel } from "../../model/world/ShapeModel"
-import { EntityType } from "../EntityType"
-import { Meta } from "../Meta"
+import { EntityType } from "../common/EntityType"
+import { Meta } from "../common/Meta"
 import { RuntimeComponents } from "../RuntimeComponents"
 
 export const newShape = (meta: Meta, store: EntityStore<RuntimeComponents>, shape: ShapeModel) => {

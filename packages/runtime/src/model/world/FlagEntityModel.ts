@@ -25,9 +25,21 @@ export function captureBox(entity: FlagEntityModel) {
         entity.position,
         entity.rotation,
         entry,
-        { x: 0, y: 0 },
+        { x: 0.5, y: 1 },
         { x: 0.2, y: 0 }
     )
+
+    console.log(`position will be ${JSON.stringify(transformed)} with rotation ${entity.rotation}, entry: ${JSON.stringify(entry)}`)
+
+    const alt_transformed = changeAnchor(
+        entity.position,
+        entity.rotation,
+        entry,
+        { x: 0, y: 1 },
+        { x: 0.2, y: 1 }
+    )
+
+    console.log(`alt position will be ${JSON.stringify(alt_transformed)} with rotation ${entity.rotation}`)
 
     const size = {
         width: entity.captureLeft + entity.captureRight,

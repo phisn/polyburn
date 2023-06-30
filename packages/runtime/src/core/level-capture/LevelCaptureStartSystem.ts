@@ -1,20 +1,19 @@
 
 
 import { Entity } from "runtime-framework"
-import { EntityWith } from "runtime-framework/src/NarrowComponents"
 
+import { isCollisionWithCapture, LevelEntity } from "../level/LevelEntity"
 import { RocketEntity, RocketEntityComponents } from "../rocket/RocketEntity"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
-export const newLevelCaptureTriggerSystem: RuntimeSystemFactory = (store) => {
+export const newLevelCaptureStartSystem: RuntimeSystemFactory = (store) => {
     const entities = store.getState().newEntitySet(...RocketEntityComponents)
 
     return () => {
         for (const rocketEntity of entities) {
             for (const collisionEvent of rocketEntity.components.collision.events) {
-                if (collisionEvent.other?.has("level") &&
-                    collisionEvent.other.components.level.captureCollider.handle === collisionEvent.otherColliderHandle) {
+                if (isCollisionWithCapture(collisionEvent, collisionEvent.other)) {
 
                     if (collisionEvent.started) {
                         startCapture(rocketEntity, collisionEvent.other)
@@ -22,13 +21,14 @@ export const newLevelCaptureTriggerSystem: RuntimeSystemFactory = (store) => {
                     else {
                         stopCapture(rocketEntity, collisionEvent.other)
                     }
+                    
                 }
             }
         }
     }
 }
 
-function startCapture(rocketEntity: RocketEntity, level: EntityWith<RuntimeComponents, "level">) {
+function startCapture(rocketEntity: RocketEntity, level: LevelEntity) {
     rocketEntity.components.levelCapturing = {
         level,
         timeToCapture: 100
@@ -37,9 +37,10 @@ function startCapture(rocketEntity: RocketEntity, level: EntityWith<RuntimeCompo
     level.components.level.captured = true
 }
 
-function stopCapture(rocketEntity: RocketEntity, level: EntityWith<RuntimeComponents, "level">) {
+function stopCapture(rocketEntity: RocketEntity, level: LevelEntity) {
     if (rocketEntity.has("levelCapturing")) {
-        delete (rocketEntity as Entity<RuntimeComponents>).components.levelCapturing
         level.components.level.captured = false
+        
+        delete (rocketEntity as Entity<RuntimeComponents>).components.levelCapturing
     }
 }

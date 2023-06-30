@@ -1,4 +1,4 @@
-import { EntityType } from "runtime/src/core/EntityType"
+import { EntityType } from "runtime/src/core/common/EntityType"
 
 import { FlagGraphic } from "../../graphics/FlagGraphic"
 import { RocketGraphic } from "../../graphics/RocketGraphic"

@@ -27,7 +27,7 @@ export const createGameStore = (entityStore: EntityStore<WebappComponents>) =>
         entityStore,
         graphicListeners: [],
 
-        zoomIndex: 0,
+        zoomIndex: 4,
 
         subscribeGraphicUpdate: (listener: React.MutableRefObject<() => void>) => {
             set(state => ({

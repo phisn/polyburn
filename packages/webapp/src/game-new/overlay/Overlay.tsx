@@ -16,8 +16,6 @@ export default function Overlay(props: {
         state.zoomOut
     ], shallow)
 
-    console.log("Render Overlay with", zoomIndex)
-
     return (
         <div className="absolute bottom-0 left-1/2 p-4 transform -translate-x-1/2">
             <div className="flex items-center select-none">

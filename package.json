@@ -1,7 +1,7 @@
 {
     "private": true,
     "scripts": {
-        "dev": "turbo run dev --no-daemon",
+        "dev": "turbo run dev --no-daemon -- --port 51772",
         "test": "turbo run test --no-daemon",
         "build": "turbo run build --no-daemon"
     },

@@ -5,7 +5,7 @@ import { EntitySet } from "./EntitySet"
 import { EntityWith, NarrowComponents } from "./NarrowComponents"
 
 export interface EntityStoreState<Components extends object> {
-    get entities(): Map<EntityId, Entity<Components>>
+    entities : Map<EntityId, Entity<Components>>
     get world(): Entity<Components>
 
     newEntity<L extends keyof Components = never>(base?: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>>
@@ -31,8 +31,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
     const componentSetListeners = new Map<keyof Components, ((entity: Entity<Components>, isNew: boolean) => void)[]>()
     const componentDelListeners = new Map<keyof Components, ((entity: Entity<Components>) => void)[]>()
 
-    const entities = new Map<EntityId, Entity<Components>>()
-    const world = newEntity() as Entity<Components>
+    const world = null! // newEntity() as Entity<Components>
 
     interface EntitySetCached {
         set: EntitySet<Record<string, unknown>>
@@ -42,13 +41,13 @@ export const createEntityStore = <Components extends object> () => createStore<E
     const entitySetCache = new Map<string, EntitySetCached>()
 
     return {
-        get entities() { return entities },
+        entities: new Map<EntityId, Entity<Components>>(),
         get world() { return world },
 
         newEntity,
 
         removeEntity(id: EntityId) {
-            const entity = entities.get(id)
+            const entity = get().entities.get(id)
 
             if (entity === undefined) {
                 return
@@ -64,7 +63,16 @@ export const createEntityStore = <Components extends object> () => createStore<E
                 callback(entity)
             }
 
-            entities.delete(id)
+            set(x => {
+                const newEntities = new Map(x.entities)
+                newEntities.delete(id)
+
+                return {
+                    entities: newEntities
+                }
+            })
+            
+            set(x => x)
         },
         findEntities,
         newEntitySet<T extends (keyof Components)[]>(...components: [...T]) {
@@ -142,7 +150,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
                     componentSetListeners.set(component, listeners)
                 })
 
-                for (const [, entity] of entities) {
+                for (const [, entity] of get().entities) {
                     if (entity.has(...components)) {
                         set(entity, true)
                     }
@@ -190,7 +198,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
         if (set) {
             newEntityListeners.push(set)
 
-            for (const [, entity] of entities) {
+            for (const [, entity] of get().entities) {
                 set(entity)
             }
         }
@@ -213,7 +221,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
     function findEntities<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowComponents<Components, typeof components[number]>>[] {
         const found = []
 
-        for (const [, entity] of entities) {
+        for (const [, entity] of get().entities) {
             if (entity.has(...components)) {
                 found.push(entity)
             }
@@ -228,7 +236,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
         // assuming in type assertion that L is never if base is undefined
         const entityComponents = new Proxy(base ?? { } as NarrowComponents<Components, L>, {
             set(target, prop, value) {
-                const isNew = !(prop in target)
+                const isNew = prop in target === false
 
                 target[prop as L] = value
 
@@ -260,7 +268,11 @@ export const createEntityStore = <Components extends object> () => createStore<E
             }
         }
 
-        entities.set(entityId, entity)
+        set(x => ({
+            entities: new Map(x.entities).set(entityId, entity)
+        }))
+
+        // entities.set(entityId, entity)
 
         for (const key of Object.keys(entity.components)) {
             for (const callback of componentSetListeners.get(key as keyof Components) ?? []) {

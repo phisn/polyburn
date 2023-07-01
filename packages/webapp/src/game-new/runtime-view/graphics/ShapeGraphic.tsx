@@ -5,7 +5,7 @@ import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
 export function ShapeGraphic(props: { entity: Entity<WebappComponents> }) {
     if (!props.entity.has("shape")) {
-        throw new Error("Got invalid entity graphic type shape")
+        throw new Error("Got invalid entity graphic type")
     }
 
     const threeShape = new THREE.Shape(

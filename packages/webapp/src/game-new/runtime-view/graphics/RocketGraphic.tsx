@@ -13,7 +13,7 @@ import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
 export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
     if (!props.entity.has(...RocketEntityComponents)) {
-        throw new Error("Got invalid entity graphic type rocket")
+        throw new Error("Got invalid entity graphic type")
     }
 
     const svgRef = useRef<Object3D>(null!)
@@ -38,7 +38,7 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
             entry.anchor
         )
 
-        svgRef.current.position.set(positionAnchored.x, positionAnchored.y, 0)
+        svgRef.current.position.set(positionAnchored.x, positionAnchored.y, 1)
         svgRef.current.rotation.set(0, 0, props.entity.components.interpolation.rotation)
 
         /*

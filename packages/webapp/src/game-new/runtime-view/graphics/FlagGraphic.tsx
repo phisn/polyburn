@@ -1,5 +1,6 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useState } from "react"
+import { LevelEntityComponents } from "runtime/src/core/level/LevelEntity"
 import { EntityModelType } from "runtime/src/model/world/EntityModelType"
 import { Entity } from "runtime-framework"
 import { Euler } from "three"
@@ -9,8 +10,8 @@ import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
 export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
-    if (!props.entity.has("level")) {
-        throw new Error("Got invalid entity graphic type level")
+    if (!props.entity.has(...LevelEntityComponents)) {
+        throw new Error("Got invalid entity graphic type")
     }
 
     const [unlocked, setUnlocked] = useState(false)

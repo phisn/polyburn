@@ -5,7 +5,7 @@ import { newRuntime } from "runtime/src/Runtime"
 import { newRegisterGraphicsSystem } from "./graphic/RegisterGraphicsSystem"
 import { newInjectInterpolationSystem } from "./interpolation/InjectInterpolationSystem"
 import { newParticleAgeSystem } from "./particle/ParticleAgeSystem"
-import { newParticleSpawnSystem } from "./particle/ParticleSpawnSystem"
+import { newThrustParticleSpawnSystem } from "./particle-thrust/ThrustParticleSpawnSystem"
 import { WebappComponents } from "./WebappComponents"
 
 export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
@@ -14,7 +14,7 @@ export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
     stack.add(
         newInjectInterpolationSystem,
         newParticleAgeSystem,
-        newParticleSpawnSystem,
+        newThrustParticleSpawnSystem,
         newRegisterGraphicsSystem,
     )
 

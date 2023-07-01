@@ -3,7 +3,7 @@ import { Vector3 } from "three"
 import { WebappSystemFactory } from "../WebappSystemFactory"
 
 export const newInjectInterpolationSystem: WebappSystemFactory = (store) => {
-    store.getState().listenToEntities(
+    store.listenToEntities(
         (entity) => {
             const position = entity.components.rigidBody.translation()
             const rotation = entity.components.rigidBody.rotation()

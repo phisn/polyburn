@@ -9,7 +9,7 @@ export default function Map(props: { camera: OrthographicCamera }) {
     const store = useGameStore(state => state.entityStore)
 
     const rockets = useMemo(
-        () => store.getState().newEntitySet(...RocketEntityComponents),
+        () => store.newEntitySet(...RocketEntityComponents),
         [store]
     )
 

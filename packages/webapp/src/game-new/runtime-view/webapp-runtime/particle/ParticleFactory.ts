@@ -28,7 +28,7 @@ export const newParticle = (meta: Meta, store: EntityStore<WebappComponents>, co
             .setAngularDamping(0.05)
             .setGravityScale(0))
 
-    return store.getState().newEntity({
+    return store.newEntity({
         particle: {
             size: config.size,
             age: 0,

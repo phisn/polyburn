@@ -8,7 +8,7 @@ import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
 export const newLevelCaptureStartSystem: RuntimeSystemFactory = (store) => {
-    const entities = store.getState().newEntitySet(...RocketEntityComponents)
+    const entities = store.newEntitySet(...RocketEntityComponents)
 
     return () => {
         for (const rocketEntity of entities) {

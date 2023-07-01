@@ -31,6 +31,5 @@ test("CommonGamemode", async () => {
 
     const { store, stack } = newRuntime(commonGamemode, world)
 
-    const rockets = store.getState().newEntitySet("rocket", "rigidBody")
-
+    const rockets = store.newEntitySet("rocket", "rigidBody")
 })

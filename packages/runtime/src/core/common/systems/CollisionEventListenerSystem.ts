@@ -8,12 +8,12 @@ import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, meta) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
-    store.getState().listenToEntities(
+    store.listenToEntities(
         (entity) => entityToBodyHandle.set(entity.id, entity.components.rigidBody.handle),
         (entity) => entityToBodyHandle.delete(entity.id),
         "rigidBody")
 
-    const entitiesWithCollision = store.getState().newEntitySet(
+    const entitiesWithCollision = store.newEntitySet(
         "collision"
     )
 
@@ -52,7 +52,7 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, met
             return undefined
         }
 
-        return store.getState().entities.get(entityId)
+        return store.entities.get(entityId)
     }
 
     function handleCollisionEvent(

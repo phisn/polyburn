@@ -9,7 +9,7 @@ const thrustValue = 7.3
 const thrustGroundMultiplier = 1.3
 
 export const newRocketThrustSystem: RuntimeSystemFactory = (store, meta) => {
-    const rockets = store.getState().newEntitySet(...RocketEntityComponents)
+    const rockets = store.newEntitySet(...RocketEntityComponents)
 
     return (context) => {
         if (!context.thrust) {

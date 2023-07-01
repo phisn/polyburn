@@ -1,18 +1,15 @@
 import { EntityWith } from "runtime-framework/src/NarrowComponents"
-import { useStore } from "zustand"
 
 import { EntityStore } from "../../../../../runtime-framework/src"
+import { useEntitySet } from "../../../../../runtime-framework/src/useEntitySet"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
 export default function EntityGraphics(props: { store: EntityStore<WebappComponents> }) {
-    const entitiesMap = useStore(props.store, state => state.entities)
-    
-    const graphicEntities = [...entitiesMap.values()]
-        .filter((entity): entity is EntityWith<WebappComponents, "graphic"> => entity.has("graphic"))
+    const entities = useEntitySet(props.store, "graphic")
 
     return (
         <>
-            {graphicEntities.map(entity => (
+            {entities.map(entity => (
                 <EntityGraphic key={entity.id} entity={entity} />
             ))}
         </>

@@ -1,7 +1,7 @@
 import { WebappSystemFactory } from "../WebappSystemFactory"
 
 export const newParticleAgeSystem: WebappSystemFactory = (store, meta) => {
-    const particles = store.getState().newEntitySet("particle", "rigidBody")
+    const particles = store.newEntitySet("particle", "rigidBody")
 
     return () => {
         for (const particle of particles) {
@@ -9,7 +9,7 @@ export const newParticleAgeSystem: WebappSystemFactory = (store, meta) => {
 
             if (particle.components.particle.age >= particle.components.particle.lifeTime) {
                 meta.rapier.removeRigidBody(particle.components.rigidBody)
-                store.getState().removeEntity(particle.id)
+                store.removeEntity(particle.id)
             }
         }
     }

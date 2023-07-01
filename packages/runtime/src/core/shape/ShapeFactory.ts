@@ -22,7 +22,7 @@ export const newShape = (meta: Meta, store: EntityStore<RuntimeComponents>, shap
 
     meta.rapier.createCollider(collider, body)
 
-    return store.getState().newEntity({
+    return store.newEntity({
         entityType: EntityType.Shape,
         rigidBody: body,
         shape: { vertices: shape.vertices }

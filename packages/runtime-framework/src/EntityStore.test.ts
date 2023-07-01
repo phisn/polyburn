@@ -14,7 +14,7 @@ test("RuntimeStore entity", () => {
     }
 
     const store = createEntityStore<Components>()
-    const { newEntity } = store.getState()
+    const { newEntity } = store
 
     const entity = newEntity({
         test1: { value: 8 }
@@ -45,7 +45,7 @@ test("RuntimeStore entity set", () => {
     }
 
     const store = createEntityStore<Components>()
-    const { newEntity, removeEntity } = store.getState()
+    const { newEntity, removeEntity } = store
 
     newEntity({
         test1: { value: 1 },
@@ -64,11 +64,11 @@ test("RuntimeStore entity set", () => {
     const c4 = newEntity()
     const c5: Entity<Components> = newEntity()
 
-    const set1 = store.getState().newEntitySet("test2")
-    const set2 = store.getState().newEntitySet("test1", "test2")
-    const set3 = store.getState().newEntitySet("test1")
-    const set4 = store.getState().newEntitySet("test3")
-    const set5 = store.getState().newEntitySet()
+    const set1 = store.newEntitySet("test2")
+    const set2 = store.newEntitySet("test1", "test2")
+    const set3 = store.newEntitySet("test1")
+    const set4 = store.newEntitySet("test3")
+    const set5 = store.newEntitySet()
 
     newEntity({
         test1: { value: 5 },
@@ -112,7 +112,7 @@ test("RuntimeStore entity set", () => {
     expect([...set4].length).toBe(0)
     expect([...set5].length).toBe(42 + 1)
 
-    expect(store.getState().entities.size).toBe(42 + 1)
+    expect(store.entities.size).toBe(42 + 1)
 })
 
 test("RuntimeStore test entity with undefined component", () => {
@@ -127,7 +127,7 @@ test("RuntimeStore test entity with undefined component", () => {
     }
 
     const store = createEntityStore<Components>()
-    const { newEntity, newEntitySet } = store.getState()
+    const { newEntity, newEntitySet } = store
 
     newEntity({ test1: { value: 5 }, test2: {} })
     newEntity({ test1: { value: 5 }, test2: {} })

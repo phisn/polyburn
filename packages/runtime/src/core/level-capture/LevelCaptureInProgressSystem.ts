@@ -6,7 +6,7 @@ import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
 export const newLevelCaptureInProgressSystem: RuntimeSystemFactory = (store) => {
-    const entities = store.getState().newEntitySet("levelCapturing", ...RocketEntityComponents)
+    const entities = store.newEntitySet("levelCapturing", ...RocketEntityComponents)
 
     return () => {
         for (const entity of entities) {

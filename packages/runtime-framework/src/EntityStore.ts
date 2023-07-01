@@ -1,11 +1,10 @@
-import { createStore , StoreApi } from "zustand"
 
 import { Entity, EntityId } from "./Entity"
 import { EntitySet } from "./EntitySet"
 import { EntityWith, NarrowComponents } from "./NarrowComponents"
 
 export interface EntityStoreState<Components extends object> {
-    entities : Map<EntityId, Entity<Components>>
+    get entities(): Map<EntityId, Entity<Components>>
     get world(): Entity<Components>
 
     newEntity<L extends keyof Components = never>(base?: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>>
@@ -15,6 +14,12 @@ export interface EntityStoreState<Components extends object> {
     findEntities<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowComponents<Components, typeof components[number]>>[]
     newEntitySet<T extends (keyof Components)[]>(...components: [...T]): EntitySet<NarrowComponents<Components, typeof components[number]>>
 
+    listenToNewEntities<T extends (keyof Components)[]>(
+        set?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>, isNew: boolean) => void,
+        del?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>) => void,
+        ...components: [...T]
+    ): () => void
+
     listenToEntities<T extends (keyof Components)[]>(
         set?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>, isNew: boolean) => void,
         del?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>) => void,
@@ -22,8 +27,10 @@ export interface EntityStoreState<Components extends object> {
     ): () => void
 }
 
-export const createEntityStore = <Components extends object> () => createStore<EntityStoreState<Components>>((set, get) => {
+export const createEntityStore = <Components extends object> () => {
     let nextEntityId = 0
+
+    const entities = new Map<EntityId, Entity<Components>>()
 
     const newEntityListeners: ((entity: Entity<Components>) => void)[] = []
     const delEntityListeners: ((entity: Entity<Components>) => void)[] = []
@@ -31,7 +38,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
     const componentSetListeners = new Map<keyof Components, ((entity: Entity<Components>, isNew: boolean) => void)[]>()
     const componentDelListeners = new Map<keyof Components, ((entity: Entity<Components>) => void)[]>()
 
-    const world = null! // newEntity() as Entity<Components>
+    const world = newEntity() as Entity<Components>
 
     interface EntitySetCached {
         set: EntitySet<Record<string, unknown>>
@@ -41,13 +48,13 @@ export const createEntityStore = <Components extends object> () => createStore<E
     const entitySetCache = new Map<string, EntitySetCached>()
 
     return {
-        entities: new Map<EntityId, Entity<Components>>(),
+        entities,
         get world() { return world },
 
         newEntity,
 
         removeEntity(id: EntityId) {
-            const entity = get().entities.get(id)
+            const entity = entities.get(id)
 
             if (entity === undefined) {
                 return
@@ -63,16 +70,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
                 callback(entity)
             }
 
-            set(x => {
-                const newEntities = new Map(x.entities)
-                newEntities.delete(id)
-
-                return {
-                    entities: newEntities
-                }
-            })
-            
-            set(x => x)
+            entities.delete(id)
         },
         findEntities,
         newEntitySet<T extends (keyof Components)[]>(...components: [...T]) {
@@ -86,7 +84,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
 
             const newSet = new Map<EntityId, EntityWith<Components, typeof components[number]>>()
 
-            const free = get().listenToEntities(
+            const free = this.listenToEntities(
                 (entity, isNew) => {
                     if (isNew) {
                         newSet.set(entity.id, entity)
@@ -108,10 +106,6 @@ export const createEntityStore = <Components extends object> () => createStore<E
                     }
                 },
             }
-            
-            for (const entity of findEntities(...components)) {
-                newSet.set(entity.id, entity)
-            }
 
             const newSetCached = {
                 set: entitySet,
@@ -122,7 +116,11 @@ export const createEntityStore = <Components extends object> () => createStore<E
 
             return entitySet
         },
-        listenToEntities(set, del, ...components) {
+        listenToNewEntities<T extends (keyof Components)[]>(
+            set?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>, isNew: boolean) => void,
+            del?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>) => void,
+            ...components: [...T]
+        ): () => void {
             if (set === undefined && del === undefined) {
                 throw new Error("add and remove cannot both be undefined")
             }
@@ -149,12 +147,6 @@ export const createEntityStore = <Components extends object> () => createStore<E
                     listeners.push(setListener)
                     componentSetListeners.set(component, listeners)
                 })
-
-                for (const [, entity] of get().entities) {
-                    if (entity.has(...components)) {
-                        set(entity, true)
-                    }
-                }
             }
 
             if (del) {
@@ -188,6 +180,23 @@ export const createEntityStore = <Components extends object> () => createStore<E
                     })
                 }
             }
+        },
+        listenToEntities<T extends (keyof Components)[]>(
+            set?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>, isNew: boolean) => void,
+            del?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>) => void,
+            ...components: [...T]
+        ) {
+            const free = this.listenToNewEntities(set, del, ...components)
+
+            if (set) {
+                for (const [, entity] of entities) {
+                    if (entity.has(...components)) {
+                        set(entity, true)
+                    }
+                }
+            }
+
+            return free
         }
     }
 
@@ -198,7 +207,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
         if (set) {
             newEntityListeners.push(set)
 
-            for (const [, entity] of get().entities) {
+            for (const [, entity] of entities) {
                 set(entity)
             }
         }
@@ -221,7 +230,7 @@ export const createEntityStore = <Components extends object> () => createStore<E
     function findEntities<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowComponents<Components, typeof components[number]>>[] {
         const found = []
 
-        for (const [, entity] of get().entities) {
+        for (const [, entity] of entities) {
             if (entity.has(...components)) {
                 found.push(entity)
             }
@@ -267,12 +276,8 @@ export const createEntityStore = <Components extends object> () => createStore<E
                 return components.every(component => component in entityComponents)
             }
         }
-
-        set(x => ({
-            entities: new Map(x.entities).set(entityId, entity)
-        }))
-
-        // entities.set(entityId, entity)
+        
+        entities.set(entityId, entity)
 
         for (const key of Object.keys(entity.components)) {
             for (const callback of componentSetListeners.get(key as keyof Components) ?? []) {
@@ -286,6 +291,6 @@ export const createEntityStore = <Components extends object> () => createStore<E
 
         return entity
     }
-})
+}
 
-export type EntityStore<Components extends object> = StoreApi<EntityStoreState<Components>>
+export type EntityStore<Components extends object> = EntityStoreState<Components>

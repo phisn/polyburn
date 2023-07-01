@@ -60,7 +60,7 @@ export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag
         body
     )
 
-    return store.getState().newEntity({
+    return store.newEntity({
         level: {
             ...level,
             boundsCollider,

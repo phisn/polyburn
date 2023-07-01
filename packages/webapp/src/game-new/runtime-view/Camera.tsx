@@ -14,7 +14,7 @@ import { useGraphicUpdate } from "../store/useGraphicUpdate"
 import { WebappComponents } from "./webapp-runtime/WebappComponents"
 
 export function Camera(props: { store: EntityStore<WebappComponents> }) {
-    const [ rocket ] = props.store.getState().findEntities("interpolation", ...RocketEntityComponents)
+    const [ rocket ] = props.store.findEntities("interpolation", ...RocketEntityComponents)
 
     return <CameraWithEntities rocket={rocket} />
 }

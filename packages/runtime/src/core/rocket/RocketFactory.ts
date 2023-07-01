@@ -45,12 +45,12 @@ export const newRocket = (meta: Meta, store: EntityStore<RuntimeComponents>, roc
         (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y)
     )
 
-    const firstLevel = store.getState().findEntities("level").reduce((previous, current) => {
+    const firstLevel = store.findEntities("level").reduce((previous, current) => {
         return distance(previous.components.level.flag, rocket.position) < distance(current.components.level.flag, rocket.position)
             ? previous : current
     })
 
-    return store.getState().newEntity({
+    return store.newEntity({
         rocket: {
             collisionCount: 0,
             rotationWithoutInput: rocket.rotation,

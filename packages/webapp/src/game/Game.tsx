@@ -74,6 +74,7 @@ function InnerGame(props: GameProps) {
 
     const camera = useThree(state => state.camera) as THREE.OrthographicCamera
 
+    
     return (
         <>
             <overlay.In>

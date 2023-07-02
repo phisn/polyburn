@@ -40,12 +40,12 @@ export const spawnParticles = (meta: Meta, source: ParticleSourceComponent, amou
                 .setGravityScale(0))
 
         meta.rapier.createCollider(
-            RAPIER.ColliderDesc.ball(config.size / 1.414)
+            RAPIER.ColliderDesc.ball(config.size)
                 .setCollisionGroups(0x0004_0002)
                 .setRestitution(0.05)
                 .setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Max)
                 .setFriction(0)
-                .setFrictionCombineRule(RAPIER.CoefficientCombineRule.Min),
+                .setFrictionCombineRule(RAPIER.Coef ficientCombineRule.Min),
             body
         )
 

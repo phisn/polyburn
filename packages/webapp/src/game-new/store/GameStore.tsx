@@ -12,9 +12,10 @@ interface GameState {
 
 export interface GameStore extends GameState {
     get entityStore(): EntityStore<WebappComponents>
-    get graphicListeners(): React.MutableRefObject<() => void>[]
+    get graphicListeners(): React.MutableRefObject<(ticked: boolean) => void>[]
 
-    subscribeGraphicUpdate(listener: React.MutableRefObject<() => void>): () => void
+    // ticked indicates whether the physics engine ticked since the last frame
+    subscribeGraphicUpdate(listener: React.MutableRefObject<(ticked: boolean) => void>): () => void
 
     zoomIn(): void
     zoomOut(): void

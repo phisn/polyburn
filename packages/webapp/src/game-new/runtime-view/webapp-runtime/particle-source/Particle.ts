@@ -10,7 +10,7 @@ export interface Particle {
     size: number
     age: number
     lifeTime: number
-    
+
     gradientOverTime: Gradient
 }
 
@@ -45,7 +45,7 @@ export const spawnParticles = (meta: Meta, source: ParticleSourceComponent, amou
                 .setRestitution(0.05)
                 .setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Max)
                 .setFriction(0)
-                .setFrictionCombineRule(RAPIER.Coef ficientCombineRule.Min),
+                .setFrictionCombineRule(RAPIER.CoefficientCombineRule.Min),
             body
         )
 

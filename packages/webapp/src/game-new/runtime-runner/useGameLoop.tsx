@@ -15,7 +15,7 @@ export const useGameLoop = (
     events: {
         update: () => void
         afterUpdate: (time: number) => void
-        afterFrame: (time: number) => void
+        afterFrame: (time: number, ticked: boolean) => void
     },
     tickRate: number) => {
         
@@ -41,10 +41,10 @@ export const useGameLoop = (
             const delta = getDelta()
 
             events.afterUpdate(delta)
-            events.afterFrame(delta)
+            events.afterFrame(delta, true)
         }
         else {
-            events.afterFrame(getDelta())
+            events.afterFrame(getDelta(), false)
         }
 
         function getDelta() {

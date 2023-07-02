@@ -27,7 +27,7 @@ export function ParticleSourceGraphic(props: { entity: Entity<WebappComponents> 
     const instanceMatrix = new THREE.Matrix4()
     const instanceColor = new THREE.Color()
 
-    useGraphicUpdate(() => {
+    useGraphicUpdate((ticked) => {
         if (!entity.has("interpolation")) {
             console.error("Entity is missing interpolation component")
             return
@@ -48,16 +48,19 @@ export function ParticleSourceGraphic(props: { entity: Entity<WebappComponents> 
                     i, 
                     instanceMatrix
                         .makeScale(particle.size, particle.size, 1)
-                        .setPosition(position.x, position.y, 0))
+                        .setPosition(position.x, position.y, 0)) 
 
-                const color = colorInGradient(
-                    particle.gradientOverTime,
-                    particle.age / particle.lifeTime
-                )
+                // only change color if age has changed
+                if (ticked) {
+                    const color = colorInGradient(
+                        particle.gradientOverTime,
+                        particle.age / particle.lifeTime
+                    )
 
-                instanceMeshRef.current.setColorAt(
-                    i, 
-                    instanceColor.setRGB(color[0], color[1], color[2], "srgb"))
+                    instanceMeshRef.current.setColorAt(
+                        i, 
+                        instanceColor.setRGB(color[0], color[1], color[2], "srgb"))
+                }
                 
                 i++
             }
@@ -66,7 +69,8 @@ export function ParticleSourceGraphic(props: { entity: Entity<WebappComponents> 
         }
 
         instanceMeshRef.current.instanceMatrix.needsUpdate = true
-        if (instanceMeshRef.current.instanceColor) {
+
+        if (instanceMeshRef.current.instanceColor && ticked) {
             instanceMeshRef.current.instanceColor.needsUpdate = true
         }
 

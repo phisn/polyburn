@@ -9,6 +9,7 @@ import { RuntimeComponents } from "../RuntimeComponents"
 export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag: FlagEntityModel) => {
     const level = {
         captured: false,
+        inCapture: false,
 
         camera: {
             topLeft: flag.cameraTopLeft,

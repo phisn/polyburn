@@ -34,12 +34,12 @@ function startCapture(rocketEntity: RocketEntity, level: LevelEntity) {
         timeToCapture: 100
     }
 
-    level.components.level.captured = true
+    level.components.level.inCapture = true
 }
 
 function stopCapture(rocketEntity: RocketEntity, level: LevelEntity) {
     if (rocketEntity.has("levelCapturing")) {
-        level.components.level.captured = false
+        level.components.level.inCapture = false
         
         delete (rocketEntity as Entity<RuntimeComponents>).components.levelCapturing
     }

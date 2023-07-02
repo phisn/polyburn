@@ -7,8 +7,11 @@ import { LevelComponent } from "./level/LevelComponent"
 import { LevelCapturingComponent } from "./level-capture/LevelCapturingComponent"
 import { RocketComponent } from "./rocket/RocketComponent"
 import { ShapeComponent } from "./shape/ShapeComponent"
+import { WorldComponent } from "./world/WorldComponent"
 
 export interface RuntimeComponents {
+    world?: WorldComponent
+
     level?: LevelComponent
     levelCapturing?: LevelCapturingComponent
     rocket?: RocketComponent

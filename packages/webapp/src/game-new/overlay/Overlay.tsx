@@ -6,6 +6,7 @@ import { ZoomOutSvg } from "../../common/svg/ZoomOutSvg"
 import { useGameStore } from "../store/GameStore"
 import { canZoomIn, canZoomOut } from "../store/ZoomSteps"
 import Map from "./Map"
+import { Timer } from "./Timer"
 
 export default function Overlay(props: { 
     camera: OrthographicCamera,
@@ -17,20 +18,27 @@ export default function Overlay(props: {
     ], shallow)
 
     return (
-        <div className="absolute bottom-0 left-1/2 p-4 transform -translate-x-1/2">
-            <div className="flex items-center select-none">
-                <button className={`btn btn-square btn-ghost select-none ${!canZoomIn(zoomIndex) && "invisible"}`}
-                    onClick={zoomIn}>
-                    <ZoomInSvg className="w-6 h-6" />
-                </button>
+        <>
+            <div className="absolute bottom-0 left-1/2 p-4 transform -translate-x-1/2">
+                <div className="flex items-center select-none">
+                    <button className={`btn btn-square btn-ghost select-none ${!canZoomIn(zoomIndex) && "invisible"}`}
+                        onClick={zoomIn}>
+                        <ZoomInSvg className="w-6 h-6" />
+                    </button>
 
-                <Map camera={props.camera} />
+                    <Map camera={props.camera} />
                             
-                <button className={`btn btn-square btn-ghost select-none ${!canZoomOut(zoomIndex) && "invisible"}`}
-                    onClick={zoomOut}>
-                    <ZoomOutSvg className="w-6 h-6" />
-                </button>
+                    <button className={`btn btn-square btn-ghost select-none ${!canZoomOut(zoomIndex) && "invisible"}`}
+                        onClick={zoomOut}>
+                        <ZoomOutSvg className="w-6 h-6" />
+                    </button>
+                </div>
             </div>
-        </div>
+            <div className="absolute top-0 right-0 p-4">
+                <div className="flex items-center select-none">
+                    <Timer />
+                </div>
+            </div>
+        </>
     )
 }

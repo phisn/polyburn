@@ -2,7 +2,7 @@ import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 
 import { newParticleSourceComponent } from "../particle-source/ParticleSourceComponent"
 import { WebappSystemFactory } from "../WebappSystemFactory"
-import { newThrustParticleFactory } from "./ThrustParticleFactoryFactory"
+import { newThrustParticleFactory } from "./ThrustParticleFactory"
 
 export const newThrustParticleInjectSystem: WebappSystemFactory = (store) => {
     store.listenToEntities(

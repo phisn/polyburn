@@ -3,6 +3,7 @@ import { Point } from "webapp/src/model/world/Point"
 
 export interface LevelComponent {
     captured: boolean
+    inCapture: boolean
 
     camera: {
         topLeft: Point

@@ -7,9 +7,11 @@ import { newRocketDeathSystem } from "./rocket/systems/RocketDeathSystem"
 import { newRocketRotationSystem } from "./rocket/systems/RocketRotationSystem"
 import { newRocketThrustSystem } from "./rocket/systems/RocketThrustSystem"
 import { RuntimeSystemFactory } from "./RuntimeSystemFactory"
+import { newWorldTickSystem } from "./world/WorldTickSystem"
 
 export const runtimeSystemFactories: RuntimeSystemFactory[] = [
     newRapierStepSystem,
+    newWorldTickSystem,
 
     newCollisionEventListenerSystem,
 

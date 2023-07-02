@@ -10,5 +10,6 @@ export type LevelEntity = EntityWith<RuntimeComponents, typeof LevelEntityCompon
 
 export function isCollisionWithCapture(collision: CollisionEvent, other: Entity<RuntimeComponents>): other is LevelEntity {
     return collision.other?.has(...LevelEntityComponents) &&
-        collision.other.components.level.captureCollider.handle === collision.otherColliderHandle
+        collision.other.components.level.captureCollider.handle === collision.otherColliderHandle &&
+        collision.other.components.level.captured === false
 }

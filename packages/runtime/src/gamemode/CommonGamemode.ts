@@ -38,7 +38,28 @@ export const commonGamemode: Gamemode = (meta, store, world) => {
         newShape(meta, store, shape)
     })
 
+    store.world.components.world = {
+        ticks: 0,
+        finished: false
+    }
+
     return new SystemStack<RuntimeComponents, Meta, RuntimeSystemContext>(store, meta).add(
-        ...runtimeSystemFactories
+        ...runtimeSystemFactories,
+        () => {
+            const levels = store.newEntitySet("level")
+
+            return () => {
+                if (store.world.has("world") && store.world.components.world.finished === false) {
+                    for (const level of levels) {
+                        if (level.components.level.captured === false) {
+                            return
+                        }
+                    }
+
+                    console.log("Finished")
+                    store.world.components.world.finished = true
+                }
+            }
+        }
     )
 }

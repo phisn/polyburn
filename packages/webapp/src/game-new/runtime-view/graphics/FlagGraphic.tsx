@@ -25,7 +25,7 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
             throw new Error("Got invalid entity graphic type level")
         }
 
-        const showUnlocked = props.entity.components.level.captured
+        const showUnlocked = props.entity.components.level.captured || props.entity.components.level.inCapture
 
         if (showUnlocked !== unlocked) {
             setUnlocked(showUnlocked)

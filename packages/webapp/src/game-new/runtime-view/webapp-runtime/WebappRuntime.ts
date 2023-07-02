@@ -4,8 +4,9 @@ import { newRuntime } from "runtime/src/Runtime"
 
 import { newRegisterGraphicsSystem } from "./graphic/RegisterGraphicsSystem"
 import { newInjectInterpolationSystem } from "./interpolation/InjectInterpolationSystem"
-import { newParticleAgeSystem } from "./particle/ParticleAgeSystem"
-import { newThrustParticleSpawnSystem } from "./particle-thrust/ThrustParticleSpawnSystem"
+import { newParticleAgeSystem } from "./particle-source/ParticleAgeSystem"
+import { newThrustParticleInjectSystem } from "./particle-thrust-source/ThrustParticleInjectSystem"
+import { newThrustParticleSpawnSystem } from "./particle-thrust-source/ThrustParticleSpawnSystem"
 import { WebappComponents } from "./WebappComponents"
 
 export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
@@ -15,6 +16,7 @@ export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
         newInjectInterpolationSystem,
         newParticleAgeSystem,
         newThrustParticleSpawnSystem,
+        newThrustParticleInjectSystem,
         newRegisterGraphicsSystem,
     )
 

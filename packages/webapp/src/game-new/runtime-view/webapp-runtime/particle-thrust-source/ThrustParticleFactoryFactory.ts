@@ -3,13 +3,13 @@ import { changeAnchor } from "runtime/src/model/changeAnchor"
 import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry"
 import { EntityModelType } from "runtime/src/model/world/EntityModelType"
 
-import { Gradient } from "../particle/Gradient"
-import { ParticleConfiguration } from "../particle/ParticleConfiguration"
+import { Gradient } from "../particle-source/Gradient"
+import { ParticleConfiguration } from "../particle-source/ParticleSourceComponent"
 
 const velocity = 15  
 
-const minAngle = -Math.PI / 20
-const maxAngle = Math.PI / 20
+const minAngle = -Math.PI / 16
+const maxAngle = Math.PI / 16
 
 const minLifetime = 24 * 0.9
 const maxLifetime = 42 * 0.9
@@ -25,7 +25,7 @@ const gradient: Gradient = [
     { color: [0.311, 0.311, 0.311], time: 1.000 }, // 0.732 },
 ]
 
-export const newThrustParticleConfiguration = (rocket: RocketEntity): ParticleConfiguration => {
+export const newThrustParticleFactory = (rocket: RocketEntity) => (): ParticleConfiguration => {
     const rocketEntry = entityModelRegistry[EntityModelType.Rocket]
 
     const rocketRotation = rocket.components.rigidBody.rotation()

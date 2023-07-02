@@ -19,7 +19,9 @@ export const newInjectInterpolationSystem: WebappSystemFactory = (store) => {
                 previousRotation: rotation,
             }
         },
-        undefined,
+        (entity) => {
+            delete entity.components.interpolation
+        },
         "rigidBody",
         "moving")
 }

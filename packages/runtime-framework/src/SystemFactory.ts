@@ -1,4 +1,3 @@
-import { EntityStore } from "../src/EntityStore"
 import { System } from "./System"
 
-export type SystemFactory<Components extends object, Meta, Context> = (store: EntityStore<Components>, meta: Meta) => System<Context> | void
+export type SystemFactory<FactoryContext, Context> = (factoryContext: FactoryContext) => System<Context> | void

@@ -1,5 +1,5 @@
 
-import { EntityWith } from "runtime-framework/src/NarrowComponents"
+import { EntityWith } from "runtime-framework/src/NarrowProperties"
 
 import { Point } from "../../model/world/Point"
 import { RuntimeComponents } from "../RuntimeComponents"

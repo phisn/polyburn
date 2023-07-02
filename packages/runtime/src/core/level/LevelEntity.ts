@@ -1,5 +1,5 @@
 import { Entity } from "runtime-framework"
-import { EntityWith } from "runtime-framework/src/NarrowComponents"
+import { EntityWith } from "runtime-framework/src/NarrowProperties"
 
 import { CollisionEvent } from "../common/components/CollisionEventComponent"
 import { RuntimeComponents } from "../RuntimeComponents"

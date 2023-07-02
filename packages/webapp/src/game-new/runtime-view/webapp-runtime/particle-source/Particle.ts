@@ -1,6 +1,5 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { Meta } from "../../../../../../runtime/src/core/common/Meta"
 import { Gradient } from "./Gradient"
 import { ParticleSourceComponent } from "./ParticleSourceComponent"
 
@@ -14,7 +13,7 @@ export interface Particle {
     gradientOverTime: Gradient
 }
 
-export const spawnParticles = (meta: Meta, source: ParticleSourceComponent, amount = 1) => {
+export const spawnParticles = (rapier: RAPIER.World, source: ParticleSourceComponent, amount = 1) => {
     for (let offset = 0; offset < amount; offset++) {
         const config = source.newConfig()
 
@@ -31,7 +30,7 @@ export const spawnParticles = (meta: Meta, source: ParticleSourceComponent, amou
             y: config.spawnPosition.y + config.spawnVelocity.y * offset * 0.017,
         }
 
-        const body = meta.rapier.createRigidBody(
+        const body = rapier.createRigidBody(
             RAPIER.RigidBodyDesc.dynamic()
                 .setTranslation(spawnPositionWithOffset.x, spawnPositionWithOffset.y)
                 .lockRotations()
@@ -39,7 +38,7 @@ export const spawnParticles = (meta: Meta, source: ParticleSourceComponent, amou
                 .setAngularDamping(0.05)
                 .setGravityScale(0))
 
-        meta.rapier.createCollider(
+        rapier.createCollider(
             RAPIER.ColliderDesc.ball(config.size)
                 .setCollisionGroups(0x0004_0002)
                 .setRestitution(0.05)
@@ -56,7 +55,7 @@ export const spawnParticles = (meta: Meta, source: ParticleSourceComponent, amou
         }
 
         if (source.particles[nextParticleIndex] !== undefined) {
-            removeParticle(meta, source, nextParticleIndex)
+            removeParticle(rapier, source, nextParticleIndex)
         }
 
         source.particles[nextParticleIndex] = {
@@ -74,7 +73,7 @@ export const spawnParticles = (meta: Meta, source: ParticleSourceComponent, amou
     }
 }
 
-export const removeParticle = (meta: Meta, source: ParticleSourceComponent, index: number) => {
+export const removeParticle = (rapier: RAPIER.World, source: ParticleSourceComponent, index: number) => {
     const particle = source.particles[index]
 
     if (particle === undefined) {
@@ -84,6 +83,6 @@ export const removeParticle = (meta: Meta, source: ParticleSourceComponent, inde
     source.particles[index] = undefined
     --source.amount
 
-    meta.rapier.removeRigidBody(particle.body)
+    rapier.removeRigidBody(particle.body)
 }
 

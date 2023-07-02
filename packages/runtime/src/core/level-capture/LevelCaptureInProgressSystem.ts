@@ -5,8 +5,8 @@ import { RocketEntityComponents, updateCurrentLevel } from "../rocket/RocketEnti
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
-export const newLevelCaptureInProgressSystem: RuntimeSystemFactory = (store) => {
-    const entities = store.newEntitySet("levelCapturing", ...RocketEntityComponents)
+export const newLevelCaptureInProgressSystem: RuntimeSystemFactory = ({ store }) => {
+    const entities = store.newSet("levelCapturing", ...RocketEntityComponents)
 
     return () => {
         for (const entity of entities) {

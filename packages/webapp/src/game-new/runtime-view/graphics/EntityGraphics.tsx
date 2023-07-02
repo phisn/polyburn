@@ -1,7 +1,5 @@
-import { EntityWith } from "runtime-framework/src/NarrowComponents"
+import { EntityStore, EntityWith, useEntitySet } from "runtime-framework"
 
-import { EntityStore } from "../../../../../runtime-framework/src"
-import { useEntitySet } from "../../../../../runtime-framework/src/useEntitySet"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 import { ParticleSourceGraphic } from "./ParticleSourceGraphic"
 

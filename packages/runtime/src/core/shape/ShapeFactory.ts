@@ -1,15 +1,14 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { EntityStore } from "../../../../runtime-framework/src"
 import { ShapeModel } from "../../model/world/ShapeModel"
 import { EntityType } from "../common/EntityType"
-import { Meta } from "../common/Meta"
 import { RuntimeComponents } from "../RuntimeComponents"
+import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
 
-export const newShape = (meta: Meta, store: EntityStore<RuntimeComponents>, shape: ShapeModel) => {
+export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shape: ShapeModel) => {
     const [vertices, top, left] = verticesForShape(shape)
 
-    const body = meta.rapier.createRigidBody(
+    const body = context.rapier.createRigidBody(
         RAPIER.RigidBodyDesc.fixed()
             .setTranslation(left, top)
     )
@@ -21,9 +20,9 @@ export const newShape = (meta: Meta, store: EntityStore<RuntimeComponents>, shap
         throw new Error("Failed to create collider")
     }
 
-    meta.rapier.createCollider(collider, body)
+    context.rapier.createCollider(collider, body)
 
-    return store.newEntity({
+    return context.store.create({
         entityType: EntityType.Shape,
         rigidBody: body,
         shape: { vertices: shape.vertices }

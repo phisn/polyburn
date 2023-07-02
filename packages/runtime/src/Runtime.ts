@@ -1,8 +1,9 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { Meta } from "runtime/src/core/common/Meta"
 
 import { createEntityStore } from "../../runtime-framework/src"
+import { createMessageStore } from "../../runtime-framework/src/MessageStore"
 import { RuntimeComponents } from "./core/RuntimeComponents"
+import { RuntimeFactoryContext } from "./core/RuntimeFactoryContext"
 import { Gamemode } from "./gamemode/Gamemode"
 import { WorldModel } from "./model/world/WorldModel"
 
@@ -10,15 +11,16 @@ import { WorldModel } from "./model/world/WorldModel"
 const rapierInit = RAPIER.init()
 
 export const newRuntime = <Components extends RuntimeComponents> (gamemode: Gamemode, world: WorldModel) => {
-    const meta: Meta = {
+    const context: RuntimeFactoryContext<Components> = {
+        store: createEntityStore(),
+        messageStore: createMessageStore(),
+
         rapier: new RAPIER.World(new RAPIER.Vector2(0, 0)),
-        queue: new RAPIER.EventQueue(true)
+        queue: new RAPIER.EventQueue(true),
     }
 
-    const store = createEntityStore<Components>()
-
     return {
-        store,
-        stack: gamemode(meta, store, world)
+        store: context.store,
+        stack: gamemode(context, world)
     }
 }

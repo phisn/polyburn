@@ -7,7 +7,7 @@ import { useGameStore } from "../store/GameStore"
 
 export function useWebappUpdateDispatcher(store: EntityStore<WebappComponents>) {
     const entities = useMemo(
-        () => store.newEntitySet("interpolation", "rigidBody"), 
+        () => store.newSet("interpolation", "rigidBody"), 
         [store]
     )
 

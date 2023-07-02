@@ -14,7 +14,7 @@ test("RuntimeStore entity", () => {
     }
 
     const store = createEntityStore<Components>()
-    const { newEntity } = store
+    const { create: newEntity } = store
 
     const entity = newEntity({
         test1: { value: 8 }
@@ -45,7 +45,7 @@ test("RuntimeStore entity set", () => {
     }
 
     const store = createEntityStore<Components>()
-    const { newEntity, removeEntity } = store
+    const { create: newEntity, remove: removeEntity } = store
 
     newEntity({
         test1: { value: 1 },
@@ -64,11 +64,11 @@ test("RuntimeStore entity set", () => {
     const c4 = newEntity()
     const c5: Entity<Components> = newEntity()
 
-    const set1 = store.newEntitySet("test2")
-    const set2 = store.newEntitySet("test1", "test2")
-    const set3 = store.newEntitySet("test1")
-    const set4 = store.newEntitySet("test3")
-    const set5 = store.newEntitySet()
+    const set1 = store.newSet("test2")
+    const set2 = store.newSet("test1", "test2")
+    const set3 = store.newSet("test1")
+    const set4 = store.newSet("test3")
+    const set5 = store.newSet()
 
     newEntity({
         test1: { value: 5 },
@@ -127,7 +127,7 @@ test("RuntimeStore test entity with undefined component", () => {
     }
 
     const store = createEntityStore<Components>()
-    const { newEntity, newEntitySet } = store
+    const { create: newEntity, newSet: newEntitySet } = store
 
     newEntity({ test1: { value: 5 }, test2: {} })
     newEntity({ test1: { value: 5 }, test2: {} })

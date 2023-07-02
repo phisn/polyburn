@@ -1,12 +1,11 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { EntityStore } from "../../../../runtime-framework/src"
 import { captureBox, FlagEntityModel } from "../../model/world/FlagEntityModel"
 import { EntityType } from "../common/EntityType"
-import { Meta } from "../common/Meta"
 import { RuntimeComponents } from "../RuntimeComponents"
+import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
 
-export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag: FlagEntityModel) => {
+export const newLevel = (factoryContext: RuntimeFactoryContext<RuntimeComponents>, flag: FlagEntityModel) => {
     const level = {
         captured: false,
         inCapture: false,
@@ -21,7 +20,7 @@ export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag
         flagRotation: flag.rotation
     }
 
-    const body = meta.rapier.createRigidBody(
+    const body = factoryContext.rapier.createRigidBody(
         RAPIER.RigidBodyDesc.fixed()
     )
 
@@ -38,7 +37,7 @@ export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag
         throw new Error("Failed to create collider")
     }
 
-    const boundsCollider = meta.rapier.createCollider(
+    const boundsCollider = factoryContext.rapier.createCollider(
         colliderDesc,
         body
     )
@@ -56,12 +55,12 @@ export const newLevel = (meta: Meta, store: EntityStore<RuntimeComponents>, flag
         throw new Error("Failed to create collider")
     }
 
-    const captureCollider = meta.rapier.createCollider(
+    const captureCollider = factoryContext.rapier.createCollider(
         captureColliderDesc,
         body
     )
 
-    return store.newEntity({
+    return factoryContext.store.create({
         level: {
             ...level,
             boundsCollider,

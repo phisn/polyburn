@@ -1,4 +1,4 @@
-import { EntityWith } from "runtime-framework/src/NarrowComponents"
+import { EntityWith } from "runtime-framework/src/NarrowProperties"
 
 import { RuntimeComponents } from "../RuntimeComponents"
 

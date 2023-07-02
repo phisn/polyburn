@@ -6,7 +6,7 @@ import { interpolateEntity } from "./InterpolatedEntity"
 
 export function useUpdateInterpolation(store: EntityStore<WebappComponents>, tickrate: number) {
     const entities = useMemo(
-        () => store.newEntitySet("interpolation", "rigidBody"), 
+        () => store.newSet("interpolation", "rigidBody"), 
         [store]
     )
 

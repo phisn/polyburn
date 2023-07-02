@@ -5,15 +5,15 @@ import {Entity } from "../../../../../runtime-framework/src"
 import { RuntimeComponents } from "../../RuntimeComponents"
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 
-export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, meta) => {
+export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, rapier, queue }) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
-    store.listenToEntities(
+    store.listenTo(
         (entity) => entityToBodyHandle.set(entity.id, entity.components.rigidBody.handle),
         (entity) => entityToBodyHandle.delete(entity.id),
         "rigidBody")
 
-    const entitiesWithCollision = store.newEntitySet(
+    const entitiesWithCollision = store.newSet(
         "collision"
     )
 
@@ -24,9 +24,9 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = (store, met
             }
         }
 
-        meta.queue.drainCollisionEvents((h1, h2, started) => {
-            const collider1 = meta.rapier.getCollider(h1)
-            const collider2 = meta.rapier.getCollider(h2)
+        queue.drainCollisionEvents((h1, h2, started) => {
+            const collider1 = rapier.getCollider(h1)
+            const collider2 = rapier.getCollider(h2)
 
             const entity1 = entityFromHandle(collider1.parent()?.handle)
             const entity2 = entityFromHandle(collider2.parent()?.handle)

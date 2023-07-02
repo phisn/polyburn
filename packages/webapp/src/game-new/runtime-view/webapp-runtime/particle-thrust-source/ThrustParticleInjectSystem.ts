@@ -4,8 +4,8 @@ import { newParticleSourceComponent } from "../particle-source/ParticleSourceCom
 import { WebappSystemFactory } from "../WebappSystemFactory"
 import { newThrustParticleFactory } from "./ThrustParticleFactory"
 
-export const newThrustParticleInjectSystem: WebappSystemFactory = (store) => {
-    store.listenToEntities(
+export const newThrustParticleInjectSystem: WebappSystemFactory = ({ store }) => {
+    store.listenTo(
         (entity) => {
             entity.components.particleSource = newParticleSourceComponent(
                 1000,

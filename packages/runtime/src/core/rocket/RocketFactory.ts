@@ -1,17 +1,16 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { EntityStore } from "../../../../runtime-framework/src"
 import { changeAnchor } from "../../model/changeAnchor"
 import { RocketEntityModel } from "../../model/world/EntityModel"
 import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
 import { EntityModelType } from "../../model/world/EntityModelType"
 import { Point } from "../../model/world/Point"
 import { EntityType } from "../common/EntityType"
-import { Meta } from "../common/Meta"
 import { RuntimeComponents } from "../RuntimeComponents"
+import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
 import { RocketEntity } from "./RocketEntity"
 
-export const newRocket = (meta: Meta, store: EntityStore<RuntimeComponents>, rocket: RocketEntityModel): RocketEntity => {
+export const newRocket = (context: RuntimeFactoryContext<RuntimeComponents>, rocket: RocketEntityModel): RocketEntity => {
     const entry = entityModelRegistry[EntityModelType.Rocket]
     
     const positionAtCenter = changeAnchor(
@@ -21,7 +20,7 @@ export const newRocket = (meta: Meta, store: EntityStore<RuntimeComponents>, roc
         { x: 0, y: 1 },
         { x: 0.5, y: 0.5 })
         
-    const body = meta.rapier.createRigidBody(
+    const body = context.rapier.createRigidBody(
         RAPIER.RigidBodyDesc.dynamic()
             .setTranslation(positionAtCenter.x, positionAtCenter.y)
             .setRotation(rocket.rotation)
@@ -39,19 +38,19 @@ export const newRocket = (meta: Meta, store: EntityStore<RuntimeComponents>, roc
             .setMass(i == 0 ? 20 : 0.5)
             .setCollisionGroups(0x0001_0002)
 
-        meta.rapier.createCollider(collider, body)
+        context.rapier.createCollider(collider, body)
     })
 
     const distance = (p1: Point, p2: Point) => Math.sqrt(
         (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y)
     )
 
-    const firstLevel = store.findEntities("level").reduce((previous, current) => {
+    const firstLevel = context.store.find("level").reduce((previous, current) => {
         return distance(previous.components.level.flag, rocket.position) < distance(current.components.level.flag, rocket.position)
             ? previous : current
     })
 
-    return store.newEntity({
+    return context.store.create({
         rocket: {
             collisionCount: 0,
             rotationWithoutInput: rocket.rotation,

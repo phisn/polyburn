@@ -1,8 +1,8 @@
 import { WebappSystemFactory } from "../WebappSystemFactory"
 import { removeParticle } from "./Particle"
 
-export const newParticleAgeSystem: WebappSystemFactory = (store, meta) => {
-    const entities = store.newEntitySet("particleSource")
+export const newParticleAgeSystem: WebappSystemFactory = ({ store, rapier }) => {
+    const entities = store.newSet("particleSource")
 
     return () => {
         for (const entity of entities) {
@@ -13,7 +13,7 @@ export const newParticleAgeSystem: WebappSystemFactory = (store, meta) => {
                     particle.age++
 
                     if (particle.age >= particle.lifeTime) {
-                        removeParticle(meta, entity.components.particleSource, i)
+                        removeParticle(rapier, entity.components.particleSource, i)
                     }
                 }
 

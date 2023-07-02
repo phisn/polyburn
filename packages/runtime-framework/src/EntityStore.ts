@@ -1,33 +1,32 @@
 
 import { Entity, EntityId } from "./Entity"
 import { EntitySet } from "./EntitySet"
-import { EntityWith, NarrowComponents } from "./NarrowComponents"
+import { EntityWith, NarrowProperties } from "./NarrowProperties"
 
 export interface EntityStoreState<Components extends object> {
     get entities(): Map<EntityId, Entity<Components>>
     get world(): Entity<Components>
 
-    newEntity<L extends keyof Components = never>(base?: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>>
+    create<L extends keyof Components = never>(base?: NarrowProperties<Components, L>): Entity<NarrowProperties<Components, L>>
+    remove(id: EntityId): void
 
-    removeEntity(id: EntityId): void
+    find<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowProperties<Components, T[number]>>[]
+    newSet<T extends (keyof Components)[]>(...components: [...T]): EntitySet<NarrowProperties<Components, T[number]>>
 
-    findEntities<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowComponents<Components, typeof components[number]>>[]
-    newEntitySet<T extends (keyof Components)[]>(...components: [...T]): EntitySet<NarrowComponents<Components, typeof components[number]>>
-
-    listenToNewEntities<T extends (keyof Components)[]>(
-        set?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>, isNew: boolean) => void,
-        del?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>) => void,
+    listenToNew<T extends (keyof Components)[]>(
+        set?: (entity: Entity<NarrowProperties<Components, T[number]>>, isNew: boolean) => void,
+        del?: (entity: Entity<NarrowProperties<Components, T[number]>>) => void,
         ...components: [...T]
     ): () => void
 
-    listenToEntities<T extends (keyof Components)[]>(
-        set?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>, isNew: boolean) => void,
-        del?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>) => void,
+    listenTo<T extends (keyof Components)[]>(
+        set?: (entity: Entity<NarrowProperties<Components, T[number]>>, isNew: boolean) => void,
+        del?: (entity: Entity<NarrowProperties<Components, T[number]>>) => void,
         ...components: [...T]
     ): () => void
 }
 
-export const createEntityStore = <Components extends object> () => {
+export const createEntityStore = <Components extends object>(): EntityStoreState<Components> => {
     let nextEntityId = 0
 
     const entities = new Map<EntityId, Entity<Components>>()
@@ -51,9 +50,9 @@ export const createEntityStore = <Components extends object> () => {
         entities,
         get world() { return world },
 
-        newEntity,
+        create: newEntity,
 
-        removeEntity(id: EntityId) {
+        remove(id: EntityId) {
             const entity = entities.get(id)
 
             if (entity === undefined) {
@@ -72,19 +71,19 @@ export const createEntityStore = <Components extends object> () => {
 
             entities.delete(id)
         },
-        findEntities,
-        newEntitySet<T extends (keyof Components)[]>(...components: [...T]) {
+        find: findEntities,
+        newSet<T extends (keyof Components)[]>(...components: [...T]) {
             const key = components.sort().join(",")
             const setCached = entitySetCache.get(key)
 
             if (setCached) {
                 setCached.referenceCounter++
-                return setCached.set as EntitySet<NarrowComponents<Components, typeof components[number]>>
+                return setCached.set as EntitySet<NarrowProperties<Components, T[number]>>
             }
 
-            const newSet = new Map<EntityId, EntityWith<Components, typeof components[number]>>()
+            const newSet = new Map<EntityId, EntityWith<Components, T[number]>>()
 
-            const free = this.listenToEntities(
+            const free = this.listenTo(
                 (entity, isNew) => {
                     if (isNew) {
                         newSet.set(entity.id, entity)
@@ -93,7 +92,7 @@ export const createEntityStore = <Components extends object> () => {
                 entity => newSet.delete(entity.id),
                 ...components)
 
-            const entitySet: EntitySet<NarrowComponents<Components, typeof components[number]>> = {
+            const entitySet: EntitySet<NarrowProperties<Components, T[number]>> = {
                 [Symbol.iterator]() {
                     return newSet.values()
                 },
@@ -116,9 +115,9 @@ export const createEntityStore = <Components extends object> () => {
 
             return entitySet
         },
-        listenToNewEntities<T extends (keyof Components)[]>(
-            set?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>, isNew: boolean) => void,
-            del?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>) => void,
+        listenToNew<T extends (keyof Components)[]>(
+            set?: (entity: Entity<NarrowProperties<Components, T[number]>>, isNew: boolean) => void,
+            del?: (entity: Entity<NarrowProperties<Components, T[number]>>) => void,
             ...components: [...T]
         ): () => void {
             if (set === undefined && del === undefined) {
@@ -127,8 +126,8 @@ export const createEntityStore = <Components extends object> () => {
 
             if (components.length === 0) {
                 return listenToAllEntities(
-                    set === undefined ? undefined : (entity) => set(entity as Entity<NarrowComponents<Components, typeof components[number]>>, true),
-                    del === undefined ? undefined : (entity) => del(entity as Entity<NarrowComponents<Components, typeof components[number]>>)
+                    set === undefined ? undefined : (entity) => set(entity as Entity<NarrowProperties<Components, T[number]>>, true),
+                    del === undefined ? undefined : (entity) => del(entity as Entity<NarrowProperties<Components, T[number]>>)
                 )
             }
 
@@ -181,12 +180,12 @@ export const createEntityStore = <Components extends object> () => {
                 }
             }
         },
-        listenToEntities<T extends (keyof Components)[]>(
-            set?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>, isNew: boolean) => void,
-            del?: (entity: Entity<NarrowComponents<Components, typeof components[number]>>) => void,
+        listenTo<T extends (keyof Components)[]>(
+            set?: (entity: Entity<NarrowProperties<Components, T[number]>>, isNew: boolean) => void,
+            del?: (entity: Entity<NarrowProperties<Components, T[number]>>) => void,
             ...components: [...T]
         ) {
-            const free = this.listenToNewEntities(set, del, ...components)
+            const free = this.listenToNew(set, del, ...components)
 
             if (set) {
                 for (const [, entity] of entities) {
@@ -227,7 +226,7 @@ export const createEntityStore = <Components extends object> () => {
         }
     }
 
-    function findEntities<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowComponents<Components, typeof components[number]>>[] {
+    function findEntities<T extends (keyof Components)[]>(...components: [...T]): Entity<NarrowProperties<Components, T[number]>>[] {
         const found = []
 
         for (const [, entity] of entities) {
@@ -239,11 +238,11 @@ export const createEntityStore = <Components extends object> () => {
         return found
     }
 
-    function newEntity<L extends keyof Components = never>(base?: NarrowComponents<Components, L>): Entity<NarrowComponents<Components, L>> {
+    function newEntity<L extends keyof Components = never>(base?: NarrowProperties<Components, L>): Entity<NarrowProperties<Components, L>> {
         const entityId = nextEntityId++
 
         // assuming in type assertion that L is never if base is undefined
-        const entityComponents = new Proxy(base ?? { } as NarrowComponents<Components, L>, {
+        const entityComponents = new Proxy(base ?? { } as NarrowProperties<Components, L>, {
             set(target, prop, value) {
                 const isNew = prop in target === false
 
@@ -268,7 +267,7 @@ export const createEntityStore = <Components extends object> () => {
             },
         })
 
-        const entity: Entity<NarrowComponents<Components, L>> = {
+        const entity: Entity<NarrowProperties<Components, L>> = {
             get components() { return entityComponents },
             get id() { return entityId },
 

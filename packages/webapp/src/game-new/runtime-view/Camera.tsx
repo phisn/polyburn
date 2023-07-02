@@ -3,7 +3,7 @@ import { OrthographicCamera } from "@react-three/drei"
 import { useFrame, useThree } from "@react-three/fiber"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
-import { EntityWith } from "runtime-framework/src/NarrowComponents"
+import { EntityWith } from "runtime-framework/src/NarrowProperties"
 import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 
 import { EntityStore } from "../../../../runtime-framework/src"
@@ -14,7 +14,7 @@ import { useGraphicUpdate } from "../store/useGraphicUpdate"
 import { WebappComponents } from "./webapp-runtime/WebappComponents"
 
 export function Camera(props: { store: EntityStore<WebappComponents> }) {
-    const [ rocket ] = props.store.findEntities("interpolation", ...RocketEntityComponents)
+    const [ rocket ] = props.store.find("interpolation", ...RocketEntityComponents)
 
     return <CameraWithEntities rocket={rocket} />
 }

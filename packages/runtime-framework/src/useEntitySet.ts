@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react"
 
 import { EntityId } from "./Entity"
 import { EntityStore } from "./EntityStore"
-import { EntityWith } from "./NarrowComponents"
+import { EntityWith } from "./NarrowProperties"
 
 export function useEntitySet<Components extends object, T extends (keyof Components)[]>(
     store: EntityStore<Components>,
@@ -10,14 +10,14 @@ export function useEntitySet<Components extends object, T extends (keyof Compone
 ): EntityWith<Components, T[number]>[] {
     const newSet = new Map<EntityId, EntityWith<Components, typeof components[number]>>()
 
-    for (const entity of store.findEntities(...components)) {
+    for (const entity of store.find(...components)) {
         newSet.set(entity.id, entity)
     }
 
     let memoizeValues = [...newSet.values()]
     
     return useSyncExternalStore(
-        (callback) => store.listenToNewEntities(
+        (callback) => store.listenToNew(
             (entity, isNew) => {
                 if (isNew) {
                     newSet.set(entity.id, entity)

@@ -1,8 +1,8 @@
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { RocketEntityComponents } from "../RocketEntity"
 
-export const newRocketCollisionSystem: RuntimeSystemFactory = (store) => {
-    const rockets = store.newEntitySet("collision", ...RocketEntityComponents)
+export const newRocketCollisionSystem: RuntimeSystemFactory = ({ store }) => {
+    const rockets = store.newSet("collision", ...RocketEntityComponents)
 
     return (context) => {
         for (const entity of rockets) {

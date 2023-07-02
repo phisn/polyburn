@@ -25,6 +25,8 @@ export const newRocketThrustSystem: RuntimeSystemFactory = (store, meta) => {
             if (rocketGroundRay(meta.rapier, rocket.components.rigidBody)) {
                 force.x *= thrustGroundMultiplier
                 force.y *= thrustGroundMultiplier
+
+                console.log("ground")
             }
     
             const rotation = rocket.components.rigidBody.rotation()

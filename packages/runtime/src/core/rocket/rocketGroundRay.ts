@@ -35,7 +35,7 @@ export const rocketGroundRayRaw = (rapier: RAPIER.World, rocket: RAPIER.RigidBod
         1,
         false,
         undefined,
-        undefined,
+        0x0001_0002,
         undefined,
         rocket
     )

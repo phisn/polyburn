@@ -39,6 +39,16 @@ export const spawnParticles = (meta: Meta, source: ParticleSourceComponent, amou
                 .setAngularDamping(0.05)
                 .setGravityScale(0))
 
+        meta.rapier.createCollider(
+            RAPIER.ColliderDesc.ball(config.size / 1.414)
+                .setCollisionGroups(0x0004_0002)
+                .setRestitution(0.05)
+                .setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Max)
+                .setFriction(0)
+                .setFrictionCombineRule(RAPIER.CoefficientCombineRule.Min),
+            body
+        )
+
         const nextParticleIndex = (source.latestParticle + 1) % source.bufferAmount 
 
         if (nextParticleIndex >= source.particles.length) {

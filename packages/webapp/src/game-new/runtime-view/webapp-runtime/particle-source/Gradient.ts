@@ -36,7 +36,28 @@ export function colorInGradient(gradient: Gradient, position: number): [number, 
     return gradient[gradient.length - 1].color
 }
 
-export function gradientColorToNumber(color: [number, number, number]) {
-    const round = (value: number) => Math.round(value * 255)
-    return round(color[0]) * 256 * 256 + round(color[1]) * 256 + round(color[2])
+export function invertGradient(gradient: Gradient): Gradient {
+    return gradient.map(entry => {
+        return {
+            color: [
+                1 - entry.color[0],
+                1 - entry.color[1],
+                1 - entry.color[2],
+            ],
+            time: entry.time
+        }
+    })
+}
+
+export function rgpRemixGradient(gradient: Gradient): Gradient {
+    return gradient.map(entry => {
+        return {
+            color: [
+                entry.color[2],
+                entry.color[1],
+                entry.color[0],
+            ],
+            time: entry.time
+        }
+    })
 }

@@ -37,6 +37,7 @@ export const newRocket = (meta: Meta, store: EntityStore<RuntimeComponents>, roc
 
         collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
             .setMass(i == 0 ? 20 : 0.5)
+            .setCollisionGroups(0x0001_0002)
 
         meta.rapier.createCollider(collider, body)
     })

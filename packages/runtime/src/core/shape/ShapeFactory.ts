@@ -15,6 +15,7 @@ export const newShape = (meta: Meta, store: EntityStore<RuntimeComponents>, shap
     )
 
     const collider = RAPIER.ColliderDesc.polyline(vertices)
+        .setCollisionGroups(0x0002_0005)
 
     if (collider === null) {
         throw new Error("Failed to create collider")

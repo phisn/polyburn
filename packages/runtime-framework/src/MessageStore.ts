@@ -1,9 +1,8 @@
 import { MessageCollector } from "./MessageCollector"
-import { NarrowProperties } from "./NarrowProperties"
 
 export interface MessageStore<Message extends object> {
-    publish<T extends (keyof Message)[]>(message: NarrowProperties<Message, T[number]>): this
-    collect<T extends keyof Message>(message: T): MessageCollector<Message, T>
+    publish<T extends keyof Message>(messageName: T, message: Required<Message>[T]): this
+    collect<T extends keyof Message>(messageName: T): MessageCollector<Message, T>
 }
 
 export type EmptyMessage = Record<string, never>
@@ -12,10 +11,10 @@ export const createMessageStore = <Message extends object>(): MessageStore<Messa
     const listenerMap = new Map<keyof Message, Set<(message: Message[keyof Message]) => void>>()
 
     return {
-        publish<T extends (keyof Message)[]>(message: NarrowProperties<Message, T[number]>) {
-            for (const key of Object.keys(message)) {
+        publish<T extends keyof Message>(messageName: T, message: Required<Message>[T]) {
+            for (const key of Object.keys(messageName)) {
                 for (const callback of listenerMap.get(key as keyof Message) ?? []) {
-                    callback(message[key as keyof Message])
+                    callback(message)
                 }
             }
 

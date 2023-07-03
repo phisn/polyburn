@@ -2,6 +2,7 @@ import { RocketEntity } from "runtime/src/core/rocket/RocketEntity"
 import { changeAnchor } from "runtime/src/model/changeAnchor"
 import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry"
 import { EntityModelType } from "runtime/src/model/world/EntityModelType"
+import { randInt } from "three/src/math/MathUtils"
 
 import { Gradient, rgpRemixGradient } from "../particle-source/Gradient"
 import { ParticleConfiguration } from "../particle-source/ParticleSourceComponent"
@@ -17,13 +18,25 @@ const maxLifetime = 42 * 0.9
 const minSize = 0.30
 const maxSize = 0.70 
 
-const gradient: Gradient = rgpRemixGradient([
+const gradient: Gradient = [
     { color: [1.000, 0.726, 0.000], time: 0.000 }, // 0.000 },
     { color: [1.000, 0.618, 0.318], time: 0.200 }, // 0.188 },
     { color: [1.000, 0.000, 0.000], time: 0.400 }, // 0.394 },
     { color: [0.650, 0.650, 0.650], time: 0.650 }, // 0.476 },
     { color: [0.311, 0.311, 0.311], time: 1.000 }, // 0.732 },
-])
+]
+
+const mixedIndex = randInt(0, 4)
+
+const mixed = [
+    gradient,
+    rgpRemixGradient(gradient, [2, 1, 0]),
+    rgpRemixGradient(gradient, [2, 0, 1]),
+    rgpRemixGradient(gradient, [1, 2, 0]),
+    rgpRemixGradient(gradient, [1, 0, 2]),
+][mixedIndex]
+
+console.log(`choosen gradient: ${mixedIndex}`)
 
 export const newThrustParticleFactory = (rocket: RocketEntity) => (): ParticleConfiguration => {
     const rocketEntry = entityModelRegistry[EntityModelType.Rocket]
@@ -51,7 +64,7 @@ export const newThrustParticleFactory = (rocket: RocketEntity) => (): ParticleCo
         size: randomValueBetween(minSize, maxSize),
         lifeTime: Math.round(randomValueBetween(minLifetime, maxLifetime)),
 
-        gradientOverTime: gradient
+        gradientOverTime: mixed
     }
 }
 

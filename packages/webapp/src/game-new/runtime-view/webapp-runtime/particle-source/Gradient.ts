@@ -49,13 +49,13 @@ export function invertGradient(gradient: Gradient): Gradient {
     })
 }
 
-export function rgpRemixGradient(gradient: Gradient): Gradient {
+export function rgpRemixGradient(gradient: Gradient, mix: [number, number, number]): Gradient {
     return gradient.map(entry => {
         return {
             color: [
-                entry.color[2],
-                entry.color[1],
-                entry.color[0],
+                entry.color[mix[0]],
+                entry.color[mix[1]],
+                entry.color[mix[2]],
             ],
             time: entry.time
         }

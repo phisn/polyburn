@@ -1,11 +1,12 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { BiMap } from "mnemonist"
+import {Entity, MessageStore } from "runtime-framework"
 
-import {Entity } from "../../../../../runtime-framework/src"
-import { RuntimeComponents } from "../../RuntimeComponents"
-import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
+import { RuntimeComponents } from "../RuntimeComponents"
+import { RuntimeMessage } from "../RuntimeMessage"
+import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
-export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, rapier, queue }) => {
+export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, messageStore, rapier, queue }) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
     store.listenTo(
@@ -13,17 +14,7 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, r
         (entity) => entityToBodyHandle.delete(entity.id),
         "rigidBody")
 
-    const entitiesWithCollision = store.newSet(
-        "collision"
-    )
-
     return () => {
-        for (const entity of entitiesWithCollision) {
-            if (entity.components.collision.events.length > 0) {
-                entity.components.collision.events.length = 0
-            }
-        }
-
         queue.drainCollisionEvents((h1, h2, started) => {
             const collider1 = rapier.getCollider(h1)
             const collider2 = rapier.getCollider(h2)
@@ -36,8 +27,8 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, r
                 return
             }
 
-            handleCollisionEvent(entity1, entity2, started, collider2)
-            handleCollisionEvent(entity2, entity1, started, collider1)
+            handleCollisionEvent(entity1, collider1, entity2, collider2, started, messageStore)
+            handleCollisionEvent(entity2, collider2, entity1, collider1, started, messageStore)
         })
     }
 
@@ -56,18 +47,22 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, r
     }
 
     function handleCollisionEvent(
-        entity: Entity<RuntimeComponents>,
+        primary: Entity<RuntimeComponents>,
+        primaryCollider: RAPIER.Collider,
         other: Entity<RuntimeComponents>,
+        otherCollider: RAPIER.Collider,
         started: boolean, 
-        collider: RAPIER.Collider
+        messageStore: MessageStore<RuntimeMessage>
     ) {
-        if (entity.has("collision")) {
-            entity.components.collision.events.push({
-                other,
-                otherColliderHandle: collider.handle,
-                started,
-                sensor: collider.isSensor()
-            })
-        }
+        messageStore.publish("collision", {
+            primary,
+            primaryCollider,
+            
+            other,
+            otherCollider,
+
+            started,
+            sensor: otherCollider.isSensor()
+        })
     }
 }

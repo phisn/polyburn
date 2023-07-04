@@ -26,8 +26,8 @@ export const spawnParticles = (rapier: RAPIER.World, source: ParticleSourceCompo
 
         const spawnPositionWithOffset = {
             // 0.017 was determined by trial and error. it is the amount of velocity applied per physics update.
-            x: config.spawnPosition.x + config.spawnVelocity.x * offset * 0.017,
-            y: config.spawnPosition.y + config.spawnVelocity.y * offset * 0.017,
+            x: config.spawnPosition.x + config.spawnVelocity.x * (offset / amount) * 0.017,
+            y: config.spawnPosition.y + config.spawnVelocity.y * (offset / amount) * 0.017,
         }
 
         const body = rapier.createRigidBody(

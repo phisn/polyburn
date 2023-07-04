@@ -1,7 +1,7 @@
 import { Entity } from "runtime-framework"
 import { EntityWith } from "runtime-framework/src/NarrowProperties"
 
-import { CollisionEvent } from "../common/components/CollisionEventComponent"
+import { CollisionEvent } from "../collision/CollisionEventComponent"
 import { RuntimeComponents } from "../RuntimeComponents"
 
 export const LevelEntityComponents = ["level", "entityType", "rigidBody"] as const

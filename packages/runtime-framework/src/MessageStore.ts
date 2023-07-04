@@ -1,36 +1,44 @@
 import { MessageCollector } from "./MessageCollector"
+import { InfertTargetComponents as InferTargetComponents, MessageWithTarget, NarrowWithoutTarget as WithoutTarget, NarrowWithTarget as WithTarget } from "./MessageWithTarget"
+import { NarrowProperties } from "./NarrowProperties"
 
-export interface MessageStore<Message extends object> {
-    publish<T extends keyof Message>(messageName: T, message: Required<Message>[T]): this
-    collect<T extends keyof Message>(messageName: T): MessageCollector<Message, T>
+export interface MessageStore<Components extends object, Messages extends object> {
+    publish<T extends keyof WithoutTarget<Messages, Components>>(messageName: T, message: WithoutTarget<Messages, Components>[T]): this
+    publishTarget<T extends keyof WithTarget<Messages, Components>>(messageName: T, message: WithTarget<Messages, Components>[T]): void
+
+    collect<T extends keyof Messages>(messageName: T): MessageCollector<Messages, T>
+    collectTarget<T extends keyof WithTarget<Messages, Components>, K extends (keyof Components & keyof InferTargetComponents<Messages[T]>)[]>(messageName: T, ...components: [...K]): MessageWithTarget<NarrowProperties<Components, K[number]>>
 }
 
 export type EmptyMessage = Record<string, never>
 
-export const createMessageStore = <Message extends object>(): MessageStore<Message> => {
-    const listenerMap = new Map<keyof Message, Set<(message: Message[keyof Message]) => void>>()
+export const createMessageStore = <Components extends object, Messages extends object>(): MessageStore<Components, Messages> => {
+    const listenerMap = new Map<keyof Messages, Set<(message: Messages[keyof Messages]) => void>>()
 
     return {
-        publish<T extends keyof Message>(messageName: T, message: Required<Message>[T]) {
+        publish<T extends keyof WithoutTarget<Messages, Components>>(messageName: T, message: WithoutTarget<Messages, Components>[T]) {
             for (const key of Object.keys(messageName)) {
-                for (const callback of listenerMap.get(key as keyof Message) ?? []) {
+                for (const callback of listenerMap.get(key as keyof Messages) ?? []) {
                     callback(message)
                 }
             }
 
             return this
         },
-        collect<T extends keyof Message>(message: T): MessageCollector<Message, T> {
-            let listeners = listenerMap.get(message)
+        publishTarget<T extends keyof WithTarget<Messages, Components>>(messageName: T, message: WithTarget<Messages, Components>[T]) {
+            void 0
+        },
+        collect<T extends keyof Messages>(messageName: T): MessageCollector<Messages, T> {
+            let listeners = listenerMap.get(messageName)
 
             if (listeners === undefined) {
                 listeners = new Set()
-                listenerMap.set(message, listeners)
+                listenerMap.set(messageName, listeners)
             }
 
-            let messages = [] as Message[keyof Message][]
+            let messages = [] as Messages[keyof Messages][]
 
-            const listener = (message: Message[keyof Message]) =>
+            const listener = (message: Messages[keyof Messages]) =>
                 messages.push(message)
 
             listeners.add(listener)
@@ -39,7 +47,7 @@ export const createMessageStore = <Message extends object>(): MessageStore<Messa
                 consume() {
                     const consumedMessages = messages
                     messages = []
-                    return consumedMessages as Message[T][]
+                    return consumedMessages as Messages[T][]
                 },
                 free() {
                     listeners?.delete(listener)
@@ -47,6 +55,9 @@ export const createMessageStore = <Message extends object>(): MessageStore<Messa
             }
 
             return collector
+        },
+        collectTarget<T extends keyof WithTarget<Messages, Components>, K extends (keyof Components & keyof InferTargetComponents<Messages[T]>)[]>(messageName: T, ...components: [...K]): MessageWithTarget<NarrowProperties<Components, K[number]>> {
+            return null!
         }
     }
 }

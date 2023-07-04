@@ -17,7 +17,9 @@ export interface ParticleSourceComponent {
 
 export interface ParticleConfiguration {
     spawnPosition: Point
+
     spawnVelocity: Point
+    additionalVelocity: Point
 
     size: number
 

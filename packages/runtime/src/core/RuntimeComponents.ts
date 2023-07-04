@@ -1,6 +1,5 @@
 import { EmptyComponent } from "runtime-framework"
 
-import { CollisionComponent } from "./common/components/CollisionEventComponent"
 import { EntityTypeComponent } from "./common/components/EntityTypeComponent"
 import { RigidBodyComponent } from "./common/components/RigidBodyComponent"
 import { LevelComponent } from "./level/LevelComponent"
@@ -17,7 +16,6 @@ export interface RuntimeComponents {
     rocket?: RocketComponent
     shape?: ShapeComponent
 
-    collision?: CollisionComponent
     entityType?: EntityTypeComponent
     moving?: EmptyComponent
     rigidBody?: RigidBodyComponent

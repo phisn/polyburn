@@ -53,13 +53,15 @@ export const newThrustParticleFactory = (rocket: RocketEntity) => (): ParticleCo
     const randomAngle = randomValueBetween(minAngle, maxAngle)
 
     const spawnVelocity = {
-        x: velocity * Math.sin(rocketRotation + randomAngle),
+        x: velocity * Math.sin(rocketRotation + randomAngle) + rocket.components.rigidBody.linvel().x * 0.8,
         y: velocity * Math.cos(rocketRotation + randomAngle) * -1
     }
 
     return {
         spawnPosition,
+
         spawnVelocity,
+        additionalVelocity: rocket.components.rigidBody.linvel(),
 
         size: randomValueBetween(minSize, maxSize),
         lifeTime: Math.round(randomValueBetween(minLifetime, maxLifetime)),

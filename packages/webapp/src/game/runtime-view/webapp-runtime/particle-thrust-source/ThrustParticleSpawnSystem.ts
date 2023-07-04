@@ -6,7 +6,7 @@ import { WebappSystemFactory } from "../WebappSystemFactory"
 export const newThrustParticleSpawnSystem: WebappSystemFactory = ({ store, rapier }) => {
     const rockets = store.newSet("particleSource", ...RocketEntityComponents)
 
-    const particlePerFrame = 3 
+    const particlePerFrame = 3
 
     return (context) => {
         if (context.thrust) {

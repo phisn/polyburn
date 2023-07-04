@@ -1,4 +1,4 @@
-import { newCollisionEventListenerSystem } from "./common/systems/CollisionEventListenerSystem"
+import { newCollisionEventListenerSystem } from "./collision/CollisionListenerSystem"
 import { newRapierStepSystem } from "./common/systems/RapierStepSystem"
 import { newLevelCaptureInProgressSystem } from "./level-capture/LevelCaptureInProgressSystem"
 import { newLevelCaptureStartSystem } from "./level-capture/LevelCaptureStartSystem"

@@ -3,7 +3,7 @@ import { Entity } from "runtime-framework"
 import * as THREE from "three"
 
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
-import { colorInGradient } from "../webapp-runtime/particle-source/Gradient"
+import { colorInGradient } from "../webapp-runtime/particle/Gradient"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
 export function ParticleSourceGraphic(props: { entity: Entity<WebappComponents> }) {
@@ -28,11 +28,6 @@ export function ParticleSourceGraphic(props: { entity: Entity<WebappComponents> 
     const instanceColor = new THREE.Color()
 
     useGraphicUpdate((ticked) => {
-        if (!entity.has("interpolation")) {
-            console.error("Entity is missing interpolation component")
-            return
-        }
-
         instanceMeshRef.current.count = entity.components.particleSource.amount
 
         let i = 0

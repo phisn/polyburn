@@ -1,9 +1,8 @@
 
 import { createContext, useContext } from "react"
-import { EntityStore } from "runtime-framework"
 import { createStore, useStore } from "zustand"
 
-import { WebappComponents } from "../runtime-view/webapp-runtime/WebappComponents"
+import { WebappFactoryContext } from "../runtime-view/webapp-runtime/WebappFactoryContext"
 import { ZoomSteps } from "./ZoomSteps"
 
 interface GameState {
@@ -11,7 +10,7 @@ interface GameState {
 }
 
 export interface GameStore extends GameState {
-    get entityStore(): EntityStore<WebappComponents>
+    get systemContext(): WebappFactoryContext
     get graphicListeners(): React.MutableRefObject<(ticked: boolean) => void>[]
 
     // ticked indicates whether the physics engine ticked since the last frame
@@ -23,9 +22,9 @@ export interface GameStore extends GameState {
     get zoom(): number
 }
 
-export const createGameStore = (entityStore: EntityStore<WebappComponents>) => 
+export const createGameStore = (systemContext: WebappFactoryContext) => 
     createStore<GameStore>((set, get) => ({
-        entityStore,
+        systemContext,
         graphicListeners: [],
 
         zoomIndex: 0,
@@ -68,8 +67,8 @@ export const createGameStore = (entityStore: EntityStore<WebappComponents>) =>
 
 const GameStoreContext = createContext<ReturnType<typeof createGameStore>>(null!)
 
-export const ProvideGameStore = (props: { children: React.ReactNode, entityStore: EntityStore<WebappComponents> }) => {
-    const store = createGameStore(props.entityStore)
+export const ProvideGameStore = (props: { children: React.ReactNode, systemContext: WebappFactoryContext }) => {
+    const store = createGameStore(props.systemContext)
         
     return (
         <GameStoreContext.Provider value={store}>

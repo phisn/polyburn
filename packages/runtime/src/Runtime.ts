@@ -15,12 +15,12 @@ export const newRuntime = <Components extends RuntimeComponents> (gamemode: Game
         store: createEntityStore(),
         messageStore: createMessageStore(),
 
-        rapier: new RAPIER.World(new RAPIER.Vector2(0, 0)),
+        physics: new RAPIER.World(new RAPIER.Vector2(0, 0)),
         queue: new RAPIER.EventQueue(true),
     }
 
     return {
-        store: context.store,
+        context,
         stack: gamemode(context, world)
     }
 }

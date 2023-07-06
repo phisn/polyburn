@@ -4,7 +4,7 @@ import { changeAnchor } from "../../model/changeAnchor"
 import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
 import { EntityModelType } from "../../model/world/EntityModelType"
 
-export const rocketGroundRayRaw = (rapier: RAPIER.World, rocket: RAPIER.RigidBody) => {
+export const rocketGroundRayRaw = (physics: RAPIER.World, rocket: RAPIER.RigidBody) => {
     const entry = entityModelRegistry[EntityModelType.Rocket]
 
     const rayStart = changeAnchor(
@@ -30,7 +30,7 @@ export const rocketGroundRayRaw = (rapier: RAPIER.World, rocket: RAPIER.RigidBod
 
     const ray = new RAPIER.Ray(rayStart, rayDir)
 
-    const cast = rapier.castRay(
+    const cast = physics.castRay(
         ray,
         1,
         false,
@@ -48,5 +48,5 @@ export const rocketGroundRayRaw = (rapier: RAPIER.World, rocket: RAPIER.RigidBod
     }
 }
 
-export const rocketGroundRay = (rapier: RAPIER.World, rocket: RAPIER.RigidBody) => 
-    rocketGroundRayRaw(rapier, rocket)?.cast
+export const rocketGroundRay = (physics: RAPIER.World, rocket: RAPIER.RigidBody) => 
+    rocketGroundRayRaw(physics, rocket)?.cast

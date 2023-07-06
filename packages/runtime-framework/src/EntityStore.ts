@@ -96,6 +96,7 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
                 [Symbol.iterator]() {
                     return newSet.values()
                 },
+                /*
                 free() {
                     newSetCached.referenceCounter--
 
@@ -104,6 +105,7 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
                         free()
                     }
                 },
+                */
             }
 
             const newSetCached = {
@@ -273,6 +275,9 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
 
             has<T extends (keyof Components)[]>(...components: [...T]) {
                 return components.every(component => component in entityComponents)
+            },
+            extend() {
+                return true
             }
         }
         

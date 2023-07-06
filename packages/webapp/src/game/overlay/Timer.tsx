@@ -4,7 +4,7 @@ import { useGameStore } from "../store/GameStore"
 import { useGraphicUpdate } from "../store/useGraphicUpdate"
 
 export function Timer() {
-    const store = useGameStore(state => state.entityStore)
+    const { store } = useGameStore(state => state.systemContext)
 
     const divRef = useRef<HTMLDivElement>(null!)
 

@@ -7,11 +7,13 @@ import { newRocketDeathSystem } from "./rocket/systems/RocketDeathSystem"
 import { newRocketRotationSystem } from "./rocket/systems/RocketRotationSystem"
 import { newRocketThrustSystem } from "./rocket/systems/RocketThrustSystem"
 import { RuntimeSystemFactory } from "./RuntimeSystemFactory"
-import { newWorldTickSystem } from "./world/WorldTickSystem"
+import { newWorldFinishSystem } from "./world/WorldFinishSystem"
+import { newWorldTrackerSystem } from "./world/WorldTrackerSystem"
 
 export const runtimeSystemFactories: RuntimeSystemFactory[] = [
     newRapierStepSystem,
-    newWorldTickSystem,
+    newWorldTrackerSystem,
+    newWorldFinishSystem,
 
     newCollisionEventListenerSystem,
 
@@ -30,6 +32,8 @@ import { RuntimeStore } from "runtime-framework"
 import { Components } from "../../Components"
 import { Meta } from "../../Meta"
 import { SystemContext } from "../SystemContext"
+import { newWorldTrackerSystem } from './world/WorldTrackerSystem';
+import { newWorldFinishSystem } from './world/WorldFinishSystem';
 
 export const newSystem = (meta: Meta, store: RuntimeStore<SystemContext>) => {
     const rockets = store.newEntitySet(

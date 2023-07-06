@@ -1,7 +1,8 @@
 
-import { Entity } from "runtime-framework"
+import { Entity, EntityWith } from "runtime-framework"
 
-import { RocketEntityComponents, updateCurrentLevel } from "../rocket/RocketEntity"
+import { LevelEntity } from "../level/LevelEntity"
+import { RocketEntityComponents, updateCurrentLevel as updateRocketCurrentLevel } from "../rocket/RocketEntity"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
@@ -13,15 +14,30 @@ export const newLevelCaptureInProgressSystem: RuntimeSystemFactory = ({ store, m
             entity.components.levelCapturing.timeToCapture -= 1
 
             if (entity.components.levelCapturing.timeToCapture <= 0) {
-                messageStore.publish("finished", {})
+                const velocity = entity.components.rigidBody.linvel()
 
-                entity.components.levelCapturing.level.components.level.inCapture = false
-                entity.components.levelCapturing.level.components.level.captured = true
+                if (Math.abs(velocity.x) > 0.0001 || Math.abs(velocity.y) > 0.0001) {
+                    entity.components.levelCapturing.timeToCapture = 100
+                    continue
+                }
                 
-                updateCurrentLevel(entity, entity.components.levelCapturing.level)
+                const level = entity.components.levelCapturing.level
 
-                delete (entity as Entity<RuntimeComponents>).components.levelCapturing
+                finishCapture(entity, level)
+                updateRocketCurrentLevel(entity, level)
+
+                messageStore.publish("levelCaptured", {
+                    level: level,
+                    rocket: entity
+                })
             }
         }
+    }
+
+    function finishCapture(entity: EntityWith<RuntimeComponents, "levelCapturing">, level: LevelEntity) {
+        level.components.level.inCapture = false
+        level.components.level.captured = true
+        
+        delete (entity as Entity<RuntimeComponents>).components.levelCapturing
     }
 }

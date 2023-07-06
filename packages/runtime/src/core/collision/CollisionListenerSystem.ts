@@ -3,10 +3,10 @@ import { BiMap } from "mnemonist"
 import {Entity, MessageStore } from "runtime-framework"
 
 import { RuntimeComponents } from "../RuntimeComponents"
-import { RuntimeMessage } from "../RuntimeMessage"
+import { RuntimeMessages } from "../RuntimeMessages"
 import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
-export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, messageStore, rapier, queue }) => {
+export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, messageStore, physics, queue }) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
     store.listenTo(
@@ -16,8 +16,8 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, m
 
     return () => {
         queue.drainCollisionEvents((h1, h2, started) => {
-            const collider1 = rapier.getCollider(h1)
-            const collider2 = rapier.getCollider(h2)
+            const collider1 = physics.getCollider(h1)
+            const collider2 = physics.getCollider(h2)
 
             const entity1 = entityFromHandle(collider1.parent()?.handle)
             const entity2 = entityFromHandle(collider2.parent()?.handle)
@@ -47,16 +47,16 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, m
     }
 
     function handleCollisionEvent(
-        primary: Entity<RuntimeComponents>,
-        primaryCollider: RAPIER.Collider,
+        target: Entity<RuntimeComponents>,
+        targetCollider: RAPIER.Collider,
         other: Entity<RuntimeComponents>,
         otherCollider: RAPIER.Collider,
         started: boolean, 
-        messageStore: MessageStore<RuntimeMessage>
+        messageStore: MessageStore<RuntimeComponents, RuntimeMessages>
     ) {
-        messageStore.publish("collision", {
-            primary,
-            primaryCollider,
+        messageStore.publishTarget("collision", {
+            target,
+            targetCollider,
             
             other,
             otherCollider,

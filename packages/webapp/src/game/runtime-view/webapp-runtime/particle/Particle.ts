@@ -1,7 +1,7 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
 import { Gradient } from "./Gradient"
-import { ParticleSourceComponent } from "./ParticleSourceComponent"
+import { ParticleSourceComponent } from "./ParticleSource"
 
 export interface Particle {
     body: RAPIER.RigidBody
@@ -13,7 +13,7 @@ export interface Particle {
     gradientOverTime: Gradient
 }
 
-export const spawnParticles = (rapier: RAPIER.World, source: ParticleSourceComponent, amount = 1) => {
+export const spawnParticles = (particlePhysics: RAPIER.World, source: ParticleSourceComponent, amount = 1) => {
     for (let offset = 0; offset < amount; offset++) {
         const config = source.newConfig()
 
@@ -30,15 +30,15 @@ export const spawnParticles = (rapier: RAPIER.World, source: ParticleSourceCompo
             y: config.spawnPosition.y + config.spawnVelocity.y * (offset / amount) * 0.017,
         }
 
-        const body = rapier.createRigidBody(
+        const body = particlePhysics.createRigidBody(
             RAPIER.RigidBodyDesc.dynamic()
                 .setTranslation(spawnPositionWithOffset.x, spawnPositionWithOffset.y)
                 .lockRotations()
-                .setLinvel(config.spawnVelocity.x, config.spawnVelocity.y)
+                .setLinvel(config.spawnVelocity.x + config.additionalVelocity.x * 0.5, config.spawnVelocity.y)
                 .setAngularDamping(0.05)
                 .setGravityScale(0))
 
-        rapier.createCollider(
+        particlePhysics.createCollider(
             RAPIER.ColliderDesc.ball(config.size)
                 .setCollisionGroups(0x0004_0002)
                 .setRestitution(0.05)
@@ -55,7 +55,7 @@ export const spawnParticles = (rapier: RAPIER.World, source: ParticleSourceCompo
         }
 
         if (source.particles[nextParticleIndex] !== undefined) {
-            removeParticle(rapier, source, nextParticleIndex)
+            removeParticle(particlePhysics, source, nextParticleIndex)
         }
 
         source.particles[nextParticleIndex] = {
@@ -73,7 +73,7 @@ export const spawnParticles = (rapier: RAPIER.World, source: ParticleSourceCompo
     }
 }
 
-export const removeParticle = (rapier: RAPIER.World, source: ParticleSourceComponent, index: number) => {
+export const removeParticle = (particlePhysics: RAPIER.World, source: ParticleSourceComponent, index: number) => {
     const particle = source.particles[index]
 
     if (particle === undefined) {
@@ -83,6 +83,6 @@ export const removeParticle = (rapier: RAPIER.World, source: ParticleSourceCompo
     source.particles[index] = undefined
     --source.amount
 
-    rapier.removeRigidBody(particle.body)
+    particlePhysics.removeRigidBody(particle.body)
 }
 

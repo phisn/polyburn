@@ -3,7 +3,7 @@ import { SystemFactory } from "./SystemFactory"
 
 export class SystemStack<FactoryContext extends object, Context> {
     private systems: System<Context>[] = []
-    
+   
     constructor(private factoryContext: FactoryContext) {
     }
 
@@ -19,5 +19,16 @@ export class SystemStack<FactoryContext extends object, Context> {
         )
 
         return this
+    }
+
+    public extend<ExtensionFactoryContext>(extension: ExtensionFactoryContext): SystemStack<FactoryContext & ExtensionFactoryContext, Context> {
+        const newStack = new SystemStack<FactoryContext & ExtensionFactoryContext, Context>({
+            ...this.factoryContext,
+            ...extension
+        })
+
+        newStack.systems = this.systems
+        
+        return newStack
     }
 }

@@ -4,11 +4,10 @@ export interface MessageWithTarget<Components extends object> {
     target: Entity<Components>
 }
 
-export type InfertTargetComponents<T> = T extends MessageWithTarget<infer Components> ? Components : never
+export type InferTargetComponents<T> = T extends MessageWithTarget<infer Components> ? Components : never
 
-export type NarrowWithTarget<Message extends object, Components extends object> =
-    { [K in keyof Message]: Message[K] extends MessageWithTarget<Components> ? Message[K] : never }
+export type WithTarget<Message extends object, Components extends object> =
+    { [K in keyof Message]: Required<Message>[K] extends MessageWithTarget<Components> ? Required<Message>[K] : never }
 
-export type NarrowWithoutTarget<Message extends object, Components extends object> =
-    { [K in keyof Message]: Message[K] extends MessageWithTarget<Components> ? never : Message[K] }
-
+export type WithoutTarget<Message extends object, Components extends object> =
+    { [K in keyof Message]: Required<Message>[K] extends MessageWithTarget<Components> ? never : Required<Message>[K] }

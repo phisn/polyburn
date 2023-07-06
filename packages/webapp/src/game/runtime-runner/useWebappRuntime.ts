@@ -11,7 +11,7 @@ const tickrate = 16.6667
 export function useWebappRuntime(stack: RuntimeSystemStack) {
     const controls = useControls()
 
-    const store = useGameStore(store => store.entityStore)
+    const { store } = useGameStore(store => store.systemContext)
     const { updateInterpolation, updateGraphics } = useWebappUpdateDispatcher(store)
 
     useGameLoop(
@@ -26,10 +26,10 @@ export function useWebappRuntime(stack: RuntimeSystemStack) {
         if (controls.current.pause) {
             return
         }
-
+        
         stack.step({
             thrust: controls.current.thrust,
-            rotation: controls.current.rotation
+            rotation: Math.fround(controls.current.rotation)
         })
     }
 

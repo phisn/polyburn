@@ -70,7 +70,7 @@ export function CameraWithEntities(props: { rocket: EntityWith<WebappComponents,
         
         if (props.rocket.components.rocket.currentLevel.components.level.camera !== cameraBounds) {
             console.log("Camera bounds changed")
-            animating.current = true
+            animating.current = false
             setCameraBounds(props.rocket.components.rocket.currentLevel.components.level.camera)
         }
 

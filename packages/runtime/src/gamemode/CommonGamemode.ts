@@ -14,7 +14,7 @@ import { FlagEntityModel } from "../model/world/FlagEntityModel"
 import { Gamemode } from "./Gamemode"
 
 export const commonGamemode: Gamemode = (context, world) => {
-    context.rapier.gravity = new RAPIER.Vector2(0, -20)
+    context.physics.gravity = new RAPIER.Vector2(0, -20)
 
     const rocketModel = world.entities.find(entity => entity.type === EntityModelType.Rocket)
 
@@ -39,27 +39,12 @@ export const commonGamemode: Gamemode = (context, world) => {
     })
 
     context.store.world.components.world = {
+        replay: [],
         ticks: 0,
         finished: false
     }
 
     return new SystemStack<RuntimeFactoryContext<RuntimeComponents>, RuntimeSystemContext>(context).add(
         ...runtimeSystemFactories,
-        () => {
-            const levels = context.store.newSet("level")
-
-            return () => {
-                if (context.store.world.has("world") && context.store.world.components.world.finished === false) {
-                    for (const level of levels) {
-                        if (level.components.level.captured === false) {
-                            return
-                        }
-                    }
-
-                    console.log("Finished")
-                    context.store.world.components.world.finished = true
-                }
-            }
-        }
     )
 }

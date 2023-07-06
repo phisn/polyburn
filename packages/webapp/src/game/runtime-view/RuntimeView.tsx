@@ -4,7 +4,7 @@ import { Camera } from "./Camera"
 import EntityGraphics from "./graphics/EntityGraphics"
 
 export function RuntimeView() {
-    const store = useGameStore(store => store.entityStore)
+    const { store } = useGameStore(store => store.systemContext)
 
     return (
         <>

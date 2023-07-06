@@ -1,4 +1,4 @@
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 
-export const newRapierStepSystem: RuntimeSystemFactory = ({ rapier, queue }) => 
-    () => rapier.step(queue)
+export const newRapierStepSystem: RuntimeSystemFactory = ({ physics, queue }) => 
+    () => physics.step(queue)

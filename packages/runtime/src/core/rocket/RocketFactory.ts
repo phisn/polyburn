@@ -20,7 +20,7 @@ export const newRocket = (context: RuntimeFactoryContext<RuntimeComponents>, roc
         { x: 0, y: 1 },
         { x: 0.5, y: 0.5 })
         
-    const body = context.rapier.createRigidBody(
+    const body = context.physics.createRigidBody(
         RAPIER.RigidBodyDesc.dynamic()
             .setTranslation(positionAtCenter.x, positionAtCenter.y)
             .setRotation(rocket.rotation)
@@ -38,7 +38,7 @@ export const newRocket = (context: RuntimeFactoryContext<RuntimeComponents>, roc
             .setMass(i == 0 ? 20 : 0.5)
             .setCollisionGroups(0x0001_0002)
 
-        context.rapier.createCollider(collider, body)
+        context.physics.createCollider(collider, body)
     })
 
     const distance = (p1: Point, p2: Point) => Math.sqrt(
@@ -54,14 +54,13 @@ export const newRocket = (context: RuntimeFactoryContext<RuntimeComponents>, roc
         rocket: {
             collisionCount: 0,
             rotationWithoutInput: rocket.rotation,
-            spawnPosition: rocket.position,
+            spawnPosition: positionAtCenter,
             spawnRotation: rocket.rotation,
 
             currentLevel: firstLevel
         },
 
         entityType: EntityType.Rocket,
-        collision: { events: [] },
         moving: {},
         rigidBody: body,
     })

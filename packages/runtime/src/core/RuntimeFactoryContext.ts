@@ -2,12 +2,12 @@ import RAPIER from "@dimforge/rapier2d-compat"
 import { EntityStoreState, MessageStore } from "runtime-framework"
 
 import { RuntimeComponents } from "./RuntimeComponents"
-import { RuntimeMessage } from "./RuntimeMessage"
+import { RuntimeMessages } from "./RuntimeMessages"
 
 export interface RuntimeFactoryContext<Components extends RuntimeComponents> {
     store: EntityStoreState<Components>
-    messageStore: MessageStore<RuntimeMessage>
+    messageStore: MessageStore<Components, RuntimeMessages>
 
-    rapier: RAPIER.World
+    physics: RAPIER.World
     queue: RAPIER.EventQueue
 }

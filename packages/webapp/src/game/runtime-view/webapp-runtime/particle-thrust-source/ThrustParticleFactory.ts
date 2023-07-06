@@ -4,8 +4,8 @@ import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry
 import { EntityModelType } from "runtime/src/model/world/EntityModelType"
 import { randInt } from "three/src/math/MathUtils"
 
-import { Gradient, rgpRemixGradient } from "../particle-source/Gradient"
-import { ParticleConfiguration } from "../particle-source/ParticleSourceComponent"
+import { Gradient, rgpRemixGradient } from "../particle/Gradient"
+import { ParticleConfiguration } from "../particle/ParticleSource"
 
 const velocity = 15  
 
@@ -53,7 +53,7 @@ export const newThrustParticleFactory = (rocket: RocketEntity) => (): ParticleCo
     const randomAngle = randomValueBetween(minAngle, maxAngle)
 
     const spawnVelocity = {
-        x: velocity * Math.sin(rocketRotation + randomAngle) + rocket.components.rigidBody.linvel().x * 0.8,
+        x: velocity * Math.sin(rocketRotation + randomAngle),
         y: velocity * Math.cos(rocketRotation + randomAngle) * -1
     }
 

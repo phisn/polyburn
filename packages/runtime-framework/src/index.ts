@@ -9,4 +9,5 @@ export * from "./System"
 export * from "./SystemFactory"
 export * from "./SystemStack"
 export * from "./useEntitySet"
+export * from "./useMessage"
 

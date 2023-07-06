@@ -6,6 +6,7 @@ import { ZoomOutSvg } from "../../common/svg/ZoomOutSvg"
 import { useGameStore } from "../store/GameStore"
 import { canZoomIn, canZoomOut } from "../store/ZoomSteps"
 import Map from "./Map"
+import Replay from "./Replay"
 import { Timer } from "./Timer"
 
 export default function Overlay(props: { 
@@ -18,7 +19,10 @@ export default function Overlay(props: {
     ], shallow)
 
     return (
-        <>
+        <>    
+            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <Replay />
+            </div>
             <div className="absolute bottom-0 left-1/2 p-4 transform -translate-x-1/2">
                 <div className="flex items-center select-none">
                     <button className={`btn btn-square btn-ghost select-none ${!canZoomIn(zoomIndex) && "invisible"}`}

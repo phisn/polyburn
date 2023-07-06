@@ -9,7 +9,7 @@ import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { respawnRocket } from "../respawnRocket"
 import { RocketEntityComponents } from "../RocketEntity"
 
-export const newRocketDeathSystem: RuntimeSystemFactory = ({ store, rapier }) => {
+export const newRocketDeathSystem: RuntimeSystemFactory = ({ store, physics }) => {
     const rockets = store.newSet(...RocketEntityComponents)
 
     return () => {
@@ -20,7 +20,7 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({ store, rapier }) =>
 
             for (let i = 0; i < entity.components.rigidBody.numColliders(); ++i) {
                 handleRocketCollider(
-                    rapier,
+                    physics,
                     entity.components.rigidBody.collider(i),
                     entity
                 )
@@ -30,18 +30,18 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({ store, rapier }) =>
 }
 
 function handleRocketCollider(
-    rapier: RAPIER.World,
+    physics: RAPIER.World,
     rocketCollider: RAPIER.Collider,
     entity: EntityWith<RuntimeComponents, "rocket" | "rigidBody">
 ) {
-    rapier.contactsWith(
+    physics.contactsWith(
         rocketCollider,
         (collider) => {
             if (collider.isSensor()) {
                 return
             }
 
-            rapier.contactPair(
+            physics.contactPair(
                 rocketCollider,
                 collider,
                 (contact, flipped) => handleRocketContact(
@@ -84,7 +84,7 @@ function handleRocketContact(
     const distance = sqrt(dx * dx + dy * dy)
 
     if (distance > 0.3) {
-        console.warn(`death because ${distance} > 0.3`)
+        // console.warn(`death because ${distance} > 0.3`)
         respawnRocket(rocket)
     }
 }

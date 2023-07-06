@@ -1,9 +1,20 @@
 import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 
-import { spawnParticles } from "../particle-source/Particle"
+import { injectParticleSource } from "../particle/InjectParticleSource"
+import { spawnParticles } from "../particle/Particle"
+import { newParticleSourceComponent } from "../particle/ParticleSource"
 import { WebappSystemFactory } from "../WebappSystemFactory"
+import { newThrustParticleFactory } from "./ThrustParticleFactory"
 
-export const newThrustParticleSpawnSystem: WebappSystemFactory = ({ store, rapier }) => {
+export const newThrustParticleSpawnSystem: WebappSystemFactory = ({ store, particlePhysics }) => {
+    injectParticleSource(
+        store,
+        entity => newParticleSourceComponent(
+            1000,
+            newThrustParticleFactory(entity)
+        ),
+        ...RocketEntityComponents)
+    
     const rockets = store.newSet("particleSource", ...RocketEntityComponents)
 
     const particlePerFrame = 3
@@ -11,7 +22,7 @@ export const newThrustParticleSpawnSystem: WebappSystemFactory = ({ store, rapie
     return (context) => {
         if (context.thrust) {
             for (const rocket of rockets) {
-                spawnParticles(rapier, rocket.components.particleSource, particlePerFrame)
+                spawnParticles(particlePhysics, rocket.components.particleSource, particlePerFrame)
             }
         }
     }

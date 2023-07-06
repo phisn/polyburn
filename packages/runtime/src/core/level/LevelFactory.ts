@@ -20,7 +20,7 @@ export const newLevel = (factoryContext: RuntimeFactoryContext<RuntimeComponents
         flagRotation: flag.rotation
     }
 
-    const body = factoryContext.rapier.createRigidBody(
+    const body = factoryContext.physics.createRigidBody(
         RAPIER.RigidBodyDesc.fixed()
     )
 
@@ -37,7 +37,7 @@ export const newLevel = (factoryContext: RuntimeFactoryContext<RuntimeComponents
         throw new Error("Failed to create collider")
     }
 
-    const boundsCollider = factoryContext.rapier.createCollider(
+    const boundsCollider = factoryContext.physics.createCollider(
         colliderDesc,
         body
     )
@@ -55,7 +55,7 @@ export const newLevel = (factoryContext: RuntimeFactoryContext<RuntimeComponents
         throw new Error("Failed to create collider")
     }
 
-    const captureCollider = factoryContext.rapier.createCollider(
+    const captureCollider = factoryContext.physics.createCollider(
         captureColliderDesc,
         body
     )

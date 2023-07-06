@@ -7,22 +7,20 @@ import { RocketEntity, RocketEntityComponents } from "../rocket/RocketEntity"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
-export const newLevelCaptureStartSystem: RuntimeSystemFactory = ({ store }) => {
-    const entities = store.newSet(...RocketEntityComponents)
+export const newLevelCaptureStartSystem: RuntimeSystemFactory = ({ messageStore }) => {
+    const collisions = messageStore.collectTarget("collision", ...RocketEntityComponents)
 
     return () => {
-        for (const rocketEntity of entities) {
-            for (const collisionEvent of rocketEntity.components.collision.events) {
-                if (isCollisionWithCapture(collisionEvent, collisionEvent.other)) {
+        for (const collision of collisions) {
+            if (isCollisionWithCapture(collision, collision.other)) {
 
-                    if (collisionEvent.started) {
-                        startCapture(rocketEntity, collisionEvent.other)
-                    }
-                    else {
-                        stopCapture(rocketEntity, collisionEvent.other)
-                    }
-                    
+                if (collision.started) {
+                    startCapture(collision.target, collision.other)
                 }
+                else {
+                    stopCapture(collision.target, collision.other)
+                }
+                
             }
         }
     }
@@ -33,6 +31,8 @@ function startCapture(rocketEntity: RocketEntity, level: LevelEntity) {
         level,
         timeToCapture: 100
     }
+
+    
 
     level.components.level.inCapture = true
 }

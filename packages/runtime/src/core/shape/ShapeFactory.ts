@@ -8,7 +8,7 @@ import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
 export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shape: ShapeModel) => {
     const [vertices, top, left] = verticesForShape(shape)
 
-    const body = context.rapier.createRigidBody(
+    const body = context.physics.createRigidBody(
         RAPIER.RigidBodyDesc.fixed()
             .setTranslation(left, top)
     )
@@ -20,7 +20,7 @@ export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shap
         throw new Error("Failed to create collider")
     }
 
-    context.rapier.createCollider(collider, body)
+    context.physics.createCollider(collider, body)
 
     return context.store.create({
         entityType: EntityType.Shape,

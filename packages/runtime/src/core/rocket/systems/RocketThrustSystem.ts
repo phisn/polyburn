@@ -8,7 +8,7 @@ import { rocketGroundRay } from "../rocketGroundRay"
 const thrustValue = 7.3
 const thrustGroundMultiplier = 1.3
 
-export const newRocketThrustSystem: RuntimeSystemFactory = ({ store, rapier }) => {
+export const newRocketThrustSystem: RuntimeSystemFactory = ({ store, physics }) => {
     const rockets = store.newSet(...RocketEntityComponents)
 
     return (context) => {
@@ -22,7 +22,7 @@ export const newRocketThrustSystem: RuntimeSystemFactory = ({ store, rapier }) =
         }
     
         for (const rocket of rockets) {
-            if (rocketGroundRay(rapier, rocket.components.rigidBody)) {
+            if (rocketGroundRay(physics, rocket.components.rigidBody)) {
                 force.x *= thrustGroundMultiplier
                 force.y *= thrustGroundMultiplier
             }

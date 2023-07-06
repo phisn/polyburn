@@ -4,6 +4,9 @@ import { changeAnchor } from "../../model/changeAnchor"
 import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
 import { EntityModelType } from "../../model/world/EntityModelType"
 
+const rayDir = new RAPIER.Vector2(0, 1)
+const ray = new RAPIER.Ray(new RAPIER.Vector2(0, 0), new RAPIER.Vector2(0, 1))
+
 export const rocketGroundRayRaw = (physics: RAPIER.World, rocket: RAPIER.RigidBody) => {
     const entry = entityModelRegistry[EntityModelType.Rocket]
 
@@ -23,12 +26,11 @@ export const rocketGroundRayRaw = (physics: RAPIER.World, rocket: RAPIER.RigidBo
         { x: 0.5, y: -1 }
     )
 
-    const rayDir = new RAPIER.Vector2(
-        rayTarget.x - rayStart.x,
-        rayTarget.y - rayStart.y
-    )
+    rayDir.x = rayTarget.x - rayStart.x
+    rayDir.y = rayTarget.y - rayStart.y
 
-    const ray = new RAPIER.Ray(rayStart, rayDir)
+    ray.dir = rayDir
+    ray.origin = rayStart
 
     const cast = physics.castRay(
         ray,

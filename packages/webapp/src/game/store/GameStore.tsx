@@ -15,6 +15,7 @@ export interface GameStore extends GameState {
 
     // ticked indicates whether the physics engine ticked since the last frame
     subscribeGraphicUpdate(listener: React.MutableRefObject<(ticked: boolean) => void>): () => void
+    
 
     zoomIn(): void
     zoomOut(): void

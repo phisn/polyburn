@@ -24,21 +24,19 @@ export const spawnParticles = (particlePhysics: RAPIER.World, source: ParticleSo
         //  physic updates we simulate the movement of fractional physics updates by taking the amount of particles spawned
         //  per instance into account.
 
-        const spawnPositionWithOffset = {
-            // 0.017 was determined by trial and error. it is the amount of velocity applied per physics update.
-            x: config.spawnPosition.x + config.spawnVelocity.x * (offset / amount) * 0.017,
-            y: config.spawnPosition.y + config.spawnVelocity.y * (offset / amount) * 0.017,
-        }
+        // 0.017 was determined by trial and error. it is the amount of velocity applied per physics update.
+        const spawnPositionWithOffsetX = config.spawnPosition.x + config.spawnVelocity.x * (offset / amount) * 0.017
+        const spawnPositionWithOffsetY = config.spawnPosition.y + config.spawnVelocity.y * (offset / amount) * 0.017
 
         const body = particlePhysics.createRigidBody(
             RAPIER.RigidBodyDesc.dynamic()
-                .setTranslation(spawnPositionWithOffset.x, spawnPositionWithOffset.y)
+                .setTranslation(spawnPositionWithOffsetX, spawnPositionWithOffsetY)
                 .lockRotations()
                 .setLinvel(config.spawnVelocity.x + config.additionalVelocity.x * 0.5, config.spawnVelocity.y)
                 .setAngularDamping(0.05)
                 .setGravityScale(0))
 
-        particlePhysics.createCollider(
+        /*particlePhysics.createCollider(
             RAPIER.ColliderDesc.ball(config.size)
                 .setCollisionGroups(0x0004_0002)
                 .setRestitution(0.05)
@@ -47,6 +45,7 @@ export const spawnParticles = (particlePhysics: RAPIER.World, source: ParticleSo
                 .setFrictionCombineRule(RAPIER.CoefficientCombineRule.Min),
             body
         )
+        */
 
         const nextParticleIndex = (source.latestParticle + 1) % source.bufferAmount 
 
@@ -82,7 +81,7 @@ export const removeParticle = (particlePhysics: RAPIER.World, source: ParticleSo
 
     source.particles[index] = undefined
     --source.amount
-
+    
     particlePhysics.removeRigidBody(particle.body)
 }
 

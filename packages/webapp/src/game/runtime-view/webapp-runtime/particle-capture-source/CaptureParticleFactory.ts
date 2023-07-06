@@ -6,7 +6,7 @@ import { ParticleConfiguration } from "../particle/ParticleSource"
 const velocity = 20
 
 const minLifetime = 50
-const maxLifetime = 250 
+const maxLifetime = 250
 
 const minSize = 0.5
 const maxSize = 1

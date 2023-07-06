@@ -6,8 +6,10 @@ export const newParticleAgeSystem: WebappSystemFactory = ({ store, particlePhysi
 
     return () => {
         for (const entity of entities) {
-            for (let i = 0; i < entity.components.particleSource.particles.length; i++) {
-                const particle = entity.components.particleSource.particles[i]
+            const particles = entity.components.particleSource.particles
+
+            for (let i = 0; i < particles.length; i++) {
+                const particle = particles[i]
                 
                 if (particle) {
                     particle.age++
@@ -15,7 +17,7 @@ export const newParticleAgeSystem: WebappSystemFactory = ({ store, particlePhysi
                     if (particle.age >= particle.lifeTime) {
                         removeParticle(visualPhysics, entity.components.particleSource, i)
                     }
-                }
+                } 
 
             }
         }

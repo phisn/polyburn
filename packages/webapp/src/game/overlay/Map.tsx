@@ -19,7 +19,11 @@ export default function Map(props: { camera: OrthographicCamera }) {
 
     const divSize = { width: 200, height: 100 }
 
-    useGraphicUpdate(() => {
+    useGraphicUpdate((ticked) => {
+        if (ticked === false) {
+            return
+        }
+
         const [rocket] = rockets
 
         containerDivRef.current.style.width = `${divSize.width}px`

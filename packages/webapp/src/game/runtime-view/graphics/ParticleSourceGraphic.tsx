@@ -28,15 +28,21 @@ export function ParticleSourceGraphic(props: { entity: Entity<WebappComponents> 
     const instanceColor = new THREE.Color()
 
     useGraphicUpdate((ticked) => {
-        instanceMeshRef.current.count = entity.components.particleSource.amount
+        if (ticked === false) {
+            return
+        }
+
+        const particleSource = entity.components.particleSource
+        
+        instanceMeshRef.current.count = particleSource.amount
 
         let i = 0
-        let j = entity.components.particleSource.latestParticle
+        let j = particleSource.latestParticle
 
-        while (i < entity.components.particleSource.amount) {
-            const particle = entity.components.particleSource.particles[j]
+        while (i < particleSource.amount) {
+            const particle = particleSource.particles[j]
 
-            if (particle) {
+            if (particle !== undefined) {
                 const position = particle.body.translation()
 
                 instanceMeshRef.current.setMatrixAt(
@@ -45,22 +51,19 @@ export function ParticleSourceGraphic(props: { entity: Entity<WebappComponents> 
                         .makeScale(particle.size, particle.size, 1)
                         .setPosition(position.x, position.y, 0)) 
 
-                // only change color if age has changed
-                if (ticked) {
-                    const color = colorInGradient(
-                        particle.gradientOverTime,
-                        particle.age / particle.lifeTime
-                    )
+                const color = colorInGradient(
+                    particle.gradientOverTime,
+                    particle.age / particle.lifeTime
+                )
 
-                    instanceMeshRef.current.setColorAt(
-                        i, 
-                        instanceColor.setRGB(color[0], color[1], color[2], "srgb"))
-                }
+                instanceMeshRef.current.setColorAt(
+                    i, 
+                    instanceColor.setRGB(color[0], color[1], color[2], "srgb"))
                 
                 i++
             }
 
-            j = (j - 1 + entity.components.particleSource.particles.length) % entity.components.particleSource.particles.length
+            j = (j - 1 + particleSource.particles.length) % particleSource.particles.length
         }
 
         instanceMeshRef.current.instanceMatrix.needsUpdate = true

@@ -18,12 +18,20 @@ export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
     const { context, stack } = newRuntime<WebappComponents>(gamemode, world)
 
     const particlePhysics = RAPIER.World.restoreSnapshot(context.physics.takeSnapshot())
-
+ 
     particlePhysics.forEachRigidBody(body => {
         if (body.isFixed() === false) {
             particlePhysics.removeRigidBody(body)
         }
     })
+
+    for (const level of context.store.find("level")) {
+        const bounds = level.components.level.boundsCollider.parent()
+        
+        if (bounds) {
+            particlePhysics.removeRigidBody(bounds)
+        }
+    }
 
     const contextExtended: WebappFactoryContext = {
         ...context,

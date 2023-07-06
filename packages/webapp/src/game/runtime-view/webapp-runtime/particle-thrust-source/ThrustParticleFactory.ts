@@ -7,7 +7,7 @@ import { randInt } from "three/src/math/MathUtils"
 import { Gradient, rgpRemixGradient } from "../particle/Gradient"
 import { ParticleConfiguration } from "../particle/ParticleSource"
 
-const velocity = 15  
+const velocity = 15 
 
 const minAngle = -Math.PI / 16
 const maxAngle = Math.PI / 16
@@ -41,10 +41,11 @@ console.log(`choosen gradient: ${mixedIndex}`)
 export const newThrustParticleFactory = (rocket: RocketEntity) => (): ParticleConfiguration => {
     const rocketEntry = entityModelRegistry[EntityModelType.Rocket]
 
-    const rocketRotation = rocket.components.rigidBody.rotation()
+    const rigidBody = rocket.components.rigidBody
+    const rocketRotation = rigidBody.rotation()
 
     const spawnPosition = changeAnchor(
-        rocket.components.rigidBody.translation(),
+        rigidBody.translation(),
         rocketRotation,
         rocketEntry,
         { x: 0.5, y: 0.5 },
@@ -61,7 +62,7 @@ export const newThrustParticleFactory = (rocket: RocketEntity) => (): ParticleCo
         spawnPosition,
 
         spawnVelocity,
-        additionalVelocity: rocket.components.rigidBody.linvel(),
+        additionalVelocity: rigidBody.linvel(),
 
         size: randomValueBetween(minSize, maxSize),
         lifeTime: Math.round(randomValueBetween(minLifetime, maxLifetime)),

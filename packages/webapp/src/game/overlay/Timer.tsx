@@ -8,7 +8,11 @@ export function Timer() {
 
     const divRef = useRef<HTMLDivElement>(null!)
 
-    useGraphicUpdate(() => {
+    useGraphicUpdate((ticked) => {
+        if (ticked === false) {
+            return
+        }
+
         if (store.world.has("world")) {
             divRef.current.innerText = store.world.components.world.ticks.toString()
         }

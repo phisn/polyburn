@@ -36,7 +36,7 @@ export const spawnParticles = (particlePhysics: RAPIER.World, source: ParticleSo
                 .setAngularDamping(0.05)
                 .setGravityScale(0))
 
-        /*particlePhysics.createCollider(
+        particlePhysics.createCollider(
             RAPIER.ColliderDesc.ball(config.size)
                 .setCollisionGroups(0x0004_0002)
                 .setRestitution(0.05)
@@ -45,7 +45,6 @@ export const spawnParticles = (particlePhysics: RAPIER.World, source: ParticleSo
                 .setFrictionCombineRule(RAPIER.CoefficientCombineRule.Min),
             body
         )
-        */
 
         const nextParticleIndex = (source.latestParticle + 1) % source.bufferAmount 
 

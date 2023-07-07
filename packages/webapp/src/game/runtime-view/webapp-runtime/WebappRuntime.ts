@@ -8,7 +8,7 @@ import { RuntimeSystemContext } from "../../../../../runtime/src/core/RuntimeSys
 import { newRegisterGraphicsSystem } from "./graphic/RegisterGraphicsSystem"
 import { newInjectInterpolationSystem } from "./interpolation/InjectInterpolationSystem"
 import { newParticleAgeSystem } from "./particle/ParticleAgeSystem"
-import { newParticlePhysicsSystem } from "./particle/ParticlePhysicsSystem"
+import { newParticleStepSystem } from "./particle/ParticleStepSystem"
 import { newCaptureParticleSpawnSystem } from "./particle-capture-source/CaptureParticleSpawnSystem"
 import { newThrustParticleSpawnSystem } from "./particle-thrust-source/ThrustParticleSpawnSystem"
 import { WebappComponents } from "./WebappComponents"
@@ -18,7 +18,7 @@ export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
     const { context, stack } = newRuntime<WebappComponents>(gamemode, world)
 
     const particlePhysics = RAPIER.World.restoreSnapshot(context.physics.takeSnapshot())
- 
+
     particlePhysics.forEachRigidBody(body => {
         if (body.isFixed() === false) {
             particlePhysics.removeRigidBody(body)
@@ -43,7 +43,7 @@ export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
     })
 
     stackExtended.add(
-        newParticlePhysicsSystem,
+        newParticleStepSystem,
         newCaptureParticleSpawnSystem,
         newInjectInterpolationSystem,
         newParticleAgeSystem,

@@ -10,7 +10,7 @@ export const newThrustParticleSpawnSystem: WebappSystemFactory = ({ store, parti
     injectParticleSource(
         store,
         entity => newParticleSourceComponent(
-            1000,
+            300,
             newThrustParticleFactory(entity)
         ),
         ...RocketEntityComponents)
@@ -18,11 +18,20 @@ export const newThrustParticleSpawnSystem: WebappSystemFactory = ({ store, parti
     const rockets = store.newSet("particleSource", ...RocketEntityComponents)
 
     const particlePerFrame = 3
+    let aggregate = 0
 
     return (context) => {
         if (context.thrust) {
-            for (const rocket of rockets) {
-                spawnParticles(particlePhysics, rocket.components.particleSource, particlePerFrame)
+            aggregate += particlePerFrame
+
+            if (aggregate >= 1) {
+                const particles = Math.floor(aggregate)
+
+                for (const rocket of rockets) {
+                    spawnParticles(particlePhysics, rocket.components.particleSource, particles)
+                }
+
+                aggregate -= particles
             }
         }
     }

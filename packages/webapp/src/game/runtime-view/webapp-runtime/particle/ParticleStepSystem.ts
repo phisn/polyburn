@@ -1,4 +1,4 @@
 import { WebappSystemFactory } from "../WebappSystemFactory"
 
-export const newParticlePhysicsSystem: WebappSystemFactory = ({ particlePhysics }) =>
+export const newParticleStepSystem: WebappSystemFactory = ({ particlePhysics }) =>
     () => particlePhysics.step()

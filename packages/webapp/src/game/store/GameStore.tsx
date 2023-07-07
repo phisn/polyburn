@@ -13,9 +13,14 @@ export interface GameStore extends GameState {
     get systemContext(): WebappFactoryContext
     get graphicListeners(): React.MutableRefObject<(ticked: boolean) => void>[]
 
+    get performance(): number
+    get maxPerformance(): number
+    
+    inclinePerformance(): void
+    declinePerformance(): void
+
     // ticked indicates whether the physics engine ticked since the last frame
     subscribeGraphicUpdate(listener: React.MutableRefObject<(ticked: boolean) => void>): () => void
-    
 
     zoomIn(): void
     zoomOut(): void
@@ -27,6 +32,21 @@ export const createGameStore = (systemContext: WebappFactoryContext) =>
     createStore<GameStore>((set, get) => ({
         systemContext,
         graphicListeners: [],
+
+        maxPerformance: 3,
+        performance: 3,
+
+        inclinePerformance: () => {
+            set(state => ({
+                performance: Math.min(state.performance + 1, state.maxPerformance)
+            }))
+        },
+
+        declinePerformance: () => {
+            set(state => ({
+                performance: Math.max(state.performance - 1, 1)
+            }))
+        },
 
         zoomIndex: 0,
 

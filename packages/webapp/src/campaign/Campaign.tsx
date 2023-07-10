@@ -19,7 +19,11 @@ export function Campaign() {
     const [mapSelected, setMapSelected] = useState<string | null>(null)
     
     return (
-        <div className="relative transition">
+        <div className="relative transition pt-4">
+            <div className="flex justify-center text-3xl">
+                Campaign
+            </div>
+
             <div className="flex justify-center pb-12">
                 <div className="w-full grid justify-center p-4 gap-8 sm:grid-cols-2">
                     {levels.map((level, i) => (<Level onClick={() => setMapSelected(level)} key={i} />))}
@@ -36,11 +40,11 @@ export function Campaign() {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0">
 
-                <div className="absolute top-0 bottom-0 left-0 right-0 w-full py-4 backdrop-blur-md"
+                <div className="absolute top-0 bottom-0 left-0 right-0 w-full py-4 backdrop-blur-md bg-opacity-10 bg-white "
                     onClick={() => setMapSelected(null)}>
                     <div className="flex justify-center">
                         <div className="w-full grid p-4 gap-6">
-                            <div className="grid grid-cols-3 btn btn-ghost">
+                            <div className="justify-self-center w-full grid grid-cols-3 btn btn-ghost max-w-[32rem]">
                                 <div className="justify-self-center">
                                     <BackArrow  />
                                 </div>

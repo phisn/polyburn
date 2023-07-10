@@ -40,11 +40,11 @@ export function Campaign() {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0">
 
-                <div className="absolute top-0 bottom-0 left-0 right-0 w-full py-4 backdrop-blur-md bg-opacity-10 bg-white "
+                <div className="absolute top-0 bottom-0 left-0 right-0 w-full py-4 backdrop-blur-md"
                     onClick={() => setMapSelected(null)}>
                     <div className="flex justify-center">
                         <div className="w-full grid p-4 gap-6">
-                            <div className="justify-self-center w-full grid grid-cols-3 btn btn-ghost max-w-[32rem]">
+                            <div className="justify-self-center w-full grid grid-cols-3 btn btn-ghost max-w-[32rem] bg-opacity-70 bg-white">
                                 <div className="justify-self-center">
                                     <BackArrow  />
                                 </div>

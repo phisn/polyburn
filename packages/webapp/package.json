@@ -17,7 +17,7 @@
     "@react-three/drei": "^9.56.28",
     "@react-three/fiber": "^8.11.5",
     "@stdlib/math": "^0.0.11",
-    "daisyui": "^2.47.0",
+    "daisyui": "^3.2.1",
     "eslint-config-custom": "*",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",

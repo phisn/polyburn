@@ -14,6 +14,6 @@
     "devDependencies": {
         "eslint-config-custom": "workspace:*",
         "tsconfig": "workspace:*",
-        "vitest": "^0.31.1"
+        "vitest": "^0.31.4"
     }
 }

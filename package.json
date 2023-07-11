@@ -1,19 +1,28 @@
 {
     "private": true,
     "scripts": {
-        "dev": "turbo run dev --no-daemon -- --port 51772",
-        "test": "turbo run test --no-daemon",
-        "build": "turbo run build --no-daemon",
-        "preview": "turbo run preview"
+        "build": "turbo run build",
+        "dev": "turbo run dev",
+        "lint": "turbo run lint",
+        "format": "prettier --write \"**/*.{ts,tsx,md}\""
     },
-    "workspaces": [
-        "packages/*",
-        "packages-dev/*"
-    ],
     "devDependencies": {
-        "@turbo/gen": "^1.9.8",
-        "config": "*",
-        "eslint": "^8.41.0",
-        "turbo": "^1.10.1"
+        "@turbo/gen": "^1.9.7",
+        "eslint": "^7.32.0",
+        "eslint-config-custom": "workspace:*",
+        "prettier": "^2.5.1",
+        "prettier-plugin-organize-imports": "^3.2.2",
+        "turbo": "latest"
+    },
+    "packageManager": "pnpm@7.15.0",
+    "name": "rocket-game",
+    "prettier": {
+        "printWidth": 80,
+        "tabWidth": 4,
+        "semi": false,
+        "arrowParens": "avoid",
+        "plugins": [
+            "prettier-plugin-organize-imports"
+        ]
     }
 }

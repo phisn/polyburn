@@ -1,9 +1,15 @@
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 
-export const newRocketCollisionSystem: RuntimeSystemFactory = ({ messageStore }) => {
-    const collisions = messageStore.collectTarget("collision", "rocket", "rigidBody")
+export const newRocketCollisionSystem: RuntimeSystemFactory = ({
+    messageStore,
+}) => {
+    const collisions = messageStore.collectTarget(
+        "collision",
+        "rocket",
+        "rigidBody",
+    )
 
-    return (context) => {
+    return context => {
         for (const collision of collisions) {
             if (collision.otherCollider.isSensor()) {
                 continue
@@ -11,13 +17,14 @@ export const newRocketCollisionSystem: RuntimeSystemFactory = ({ messageStore })
 
             if (collision.started) {
                 collision.target.components.rocket.collisionCount++
-            }
-            else {
+            } else {
                 collision.target.components.rocket.collisionCount--
             }
 
             if (collision.target.components.rocket.collisionCount == 0) {
-                collision.target.components.rocket.rotationWithoutInput = collision.target.components.rigidBody.rotation() - context.rotation
+                collision.target.components.rocket.rotationWithoutInput =
+                    collision.target.components.rigidBody.rotation() -
+                    context.rotation
             }
         }
     }

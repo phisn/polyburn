@@ -2,20 +2,23 @@ import RAPIER from "@dimforge/rapier2d-compat"
 
 import { changeAnchor } from "../../model/changeAnchor"
 import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
-import { EntityModelType } from "../../model/world/EntityModelType"
+import { EntityType } from "../common/EntityType"
 
 const rayDir = new RAPIER.Vector2(0, 1)
 const ray = new RAPIER.Ray(new RAPIER.Vector2(0, 0), new RAPIER.Vector2(0, 1))
 
-export const rocketGroundRayRaw = (physics: RAPIER.World, rocket: RAPIER.RigidBody) => {
-    const entry = entityModelRegistry[EntityModelType.Rocket]
+export const rocketGroundRayRaw = (
+    physics: RAPIER.World,
+    rocket: RAPIER.RigidBody,
+) => {
+    const entry = entityModelRegistry[EntityType.Rocket]
 
     const rayStart = changeAnchor(
         rocket.translation(),
         rocket.rotation(),
         entry,
         { x: 0.5, y: 0.5 },
-        { x: 0.5, y: 0.2 }
+        { x: 0.5, y: 0.2 },
     )
 
     const rayTarget = changeAnchor(
@@ -23,7 +26,7 @@ export const rocketGroundRayRaw = (physics: RAPIER.World, rocket: RAPIER.RigidBo
         rocket.rotation(),
         entry,
         { x: 0.5, y: 0.5 },
-        { x: 0.5, y: -1 }
+        { x: 0.5, y: -1 },
     )
 
     rayDir.x = rayTarget.x - rayStart.x
@@ -39,16 +42,18 @@ export const rocketGroundRayRaw = (physics: RAPIER.World, rocket: RAPIER.RigidBo
         undefined,
         0x0001_0002,
         undefined,
-        rocket
+        rocket,
     )
 
     return {
         cast,
         ray,
         rayStart,
-        rayTarget
+        rayTarget,
     }
 }
 
-export const rocketGroundRay = (physics: RAPIER.World, rocket: RAPIER.RigidBody) => 
-    rocketGroundRayRaw(physics, rocket)?.cast
+export const rocketGroundRay = (
+    physics: RAPIER.World,
+    rocket: RAPIER.RigidBody,
+) => rocketGroundRayRaw(physics, rocket)?.cast

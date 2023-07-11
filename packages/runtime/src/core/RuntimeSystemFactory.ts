@@ -4,4 +4,7 @@ import { RuntimeComponents } from "./RuntimeComponents"
 import { RuntimeFactoryContext } from "./RuntimeFactoryContext"
 import { RuntimeSystemContext } from "./RuntimeSystemStack"
 
-export type RuntimeSystemFactory = SystemFactory<RuntimeFactoryContext<RuntimeComponents>, RuntimeSystemContext>
+export type RuntimeSystemFactory = SystemFactory<
+    RuntimeFactoryContext<RuntimeComponents>,
+    RuntimeSystemContext
+>

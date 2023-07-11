@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 
-import { createEntityStore } from "../src/EntityStore"
 import { EmptyComponent, Entity } from "./Entity"
+import { createEntityStore } from "./EntityStore"
 
 test("RuntimeStore entity", () => {
     interface Component {
@@ -17,7 +17,7 @@ test("RuntimeStore entity", () => {
     const { create: newEntity } = store
 
     const entity = newEntity({
-        test1: { value: 8 }
+        test1: { value: 8 },
     })
 
     entity.components.test1.value += 9
@@ -49,15 +49,17 @@ test("RuntimeStore entity set", () => {
 
     newEntity({
         test1: { value: 1 },
-        test2: { value: 2 }
+        test2: { value: 2 },
     })
 
     const c1 = newEntity({
         test1: { value: 3 },
-        test2: { value: 4 }
+        test2: { value: 4 },
     })
 
-    for (let i = 0; i < 20; i++) { newEntity() }
+    for (let i = 0; i < 20; i++) {
+        newEntity()
+    }
 
     const c2 = newEntity({ test1: { value: 1 } })
     const c3 = newEntity({ test2: { value: 1 } })
@@ -72,10 +74,12 @@ test("RuntimeStore entity set", () => {
 
     newEntity({
         test1: { value: 5 },
-        test2: { value: 6 }
+        test2: { value: 6 },
     })
 
-    for (let i = 0; i < 20; i++) { newEntity() }
+    for (let i = 0; i < 20; i++) {
+        newEntity()
+    }
 
     expect([...set1].length).toBe(4)
     expect([...set2].length).toBe(3)
@@ -146,7 +150,7 @@ test("RuntimeStore test entity with undefined component", () => {
     newEntity({ test3: {} })
 
     expect([...set].length).toBe(6)
-    
+
     delete (c1.components as Components).test2
 
     expect([...set].length).toBe(5)

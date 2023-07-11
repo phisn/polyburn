@@ -1,4 +1,4 @@
-import { EntityModelType } from "./EntityModelType"
+import { EntityType } from "../../core/common/EntityType"
 
 interface Entry {
     width: number
@@ -10,13 +10,12 @@ export interface EntityModelRegistry {
 }
 
 export const entityModelRegistry: EntityModelRegistry = {
-    [EntityModelType.Rocket]: {
-        width: 1.8, height: 3.6
+    [EntityType.Rocket]: {
+        width: 1.8,
+        height: 3.6,
     },
-    [EntityModelType.GreenFlag]: {
-        width: 1.65, height: 2.616
+    [EntityType.Level]: {
+        width: 1.65,
+        height: 2.616,
     },
-    [EntityModelType.RedFlag]: {
-        width: 1.65, height: 2.616
-    }
 }

@@ -9,7 +9,10 @@ import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { respawnRocket } from "../respawnRocket"
 import { RocketEntityComponents } from "../RocketEntity"
 
-export const newRocketDeathSystem: RuntimeSystemFactory = ({ store, physics }) => {
+export const newRocketDeathSystem: RuntimeSystemFactory = ({
+    store,
+    physics,
+}) => {
     const rockets = store.newSet(...RocketEntityComponents)
 
     return () => {
@@ -18,11 +21,15 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({ store, physics }) =
                 continue
             }
 
-            for (let i = 0; i < entity.components.rigidBody.numColliders(); ++i) {
+            for (
+                let i = 0;
+                i < entity.components.rigidBody.numColliders();
+                ++i
+            ) {
                 handleRocketCollider(
                     physics,
                     entity.components.rigidBody.collider(i),
-                    entity
+                    entity,
                 )
             }
         }
@@ -32,36 +39,27 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({ store, physics }) =
 function handleRocketCollider(
     physics: RAPIER.World,
     rocketCollider: RAPIER.Collider,
-    entity: EntityWith<RuntimeComponents, "rocket" | "rigidBody">
+    entity: EntityWith<RuntimeComponents, "rocket" | "rigidBody">,
 ) {
-    physics.contactsWith(
-        rocketCollider,
-        (collider) => {
-            if (collider.isSensor()) {
-                return
-            }
-
-            physics.contactPair(
-                rocketCollider,
-                collider,
-                (contact, flipped) => handleRocketContact(
-                    contact,
-                    flipped,
-                    entity
-                )
-            )
+    physics.contactsWith(rocketCollider, collider => {
+        if (collider.isSensor()) {
+            return
         }
-    )
+
+        physics.contactPair(rocketCollider, collider, (contact, flipped) =>
+            handleRocketContact(contact, flipped, entity),
+        )
+    })
 }
 
 function handleRocketContact(
     contact: RAPIER.TempContactManifold,
     flipped: boolean,
-    rocket: EntityWith<RuntimeComponents, "rocket" | "rigidBody">
+    rocket: EntityWith<RuntimeComponents, "rocket" | "rigidBody">,
 ) {
     const upVector = {
         x: -sin(rocket.components.rigidBody.rotation()),
-        y: cos(rocket.components.rigidBody.rotation())
+        y: cos(rocket.components.rigidBody.rotation()),
     }
 
     const otherNormal = flipped
@@ -69,13 +67,12 @@ function handleRocketContact(
         : contact.localNormal2()
 
     const otherNormalLength = sqrt(
-        otherNormal.x * otherNormal.x + 
-        otherNormal.y * otherNormal.y
+        otherNormal.x * otherNormal.x + otherNormal.y * otherNormal.y,
     )
 
     const otherNormalNormalized = {
         x: otherNormal.x / otherNormalLength,
-        y: otherNormal.y / otherNormalLength
+        y: otherNormal.y / otherNormalLength,
     }
 
     const dx = otherNormalNormalized.x - upVector.x

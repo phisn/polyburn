@@ -6,11 +6,13 @@
         "test": "vitest run"
     },
     "dependencies": {
-        "eslint-config-custom": "*",
-        "tsconfig": "*",
+        "react": "^18.2.0",
         "typescript": "latest"
     },
     "devDependencies": {
+        "@types/react": "^18.0.22",
+        "eslint-config-custom": "workspace:*",
+        "tsconfig": "workspace:*",
         "vitest": "*"
     }
 }

@@ -8,4 +8,7 @@ export interface RuntimeSystemContext {
     thrust: boolean
 }
 
-export type RuntimeSystemStack = SystemStack<RuntimeFactoryContext<RuntimeComponents>, RuntimeSystemContext>
+export type RuntimeSystemStack = SystemStack<
+    RuntimeFactoryContext<RuntimeComponents>,
+    RuntimeSystemContext
+>

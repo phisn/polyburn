@@ -1,4 +1,3 @@
-
 import { EntityWith } from "runtime-framework/src/NarrowProperties"
 
 import { Point } from "../../model/world/Point"

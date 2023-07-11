@@ -7,10 +7,12 @@ import { RuntimeFactoryContext } from "./core/RuntimeFactoryContext"
 import { Gamemode } from "./gamemode/Gamemode"
 import { WorldModel } from "./model/world/WorldModel"
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const rapierInit = RAPIER.init()
 
-export const newRuntime = <Components extends RuntimeComponents> (gamemode: Gamemode, world: WorldModel) => {
+export const newRuntime = <Components extends RuntimeComponents>(
+    gamemode: Gamemode,
+    world: WorldModel,
+) => {
     const context: RuntimeFactoryContext<Components> = {
         store: createEntityStore(),
         messageStore: createMessageStore(),
@@ -21,6 +23,6 @@ export const newRuntime = <Components extends RuntimeComponents> (gamemode: Game
 
     return {
         context,
-        stack: gamemode(context, world)
+        stack: gamemode(context, world),
     }
 }

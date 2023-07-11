@@ -9,7 +9,7 @@ export interface CollisionMessage extends MessageWithTarget<RuntimeComponents> {
 
     other: Entity<RuntimeComponents>
     otherCollider: RAPIER.Collider
-    
+
     started: boolean
     sensor: boolean
 }

@@ -1,4 +1,3 @@
-
 export type MessageCollector<Message> = Iterable<Message>
 
 /*

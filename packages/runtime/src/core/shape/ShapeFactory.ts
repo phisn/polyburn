@@ -5,16 +5,18 @@ import { EntityType } from "../common/EntityType"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
 
-export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shape: ShapeModel) => {
+export const newShape = (
+    context: RuntimeFactoryContext<RuntimeComponents>,
+    shape: ShapeModel,
+) => {
     const [vertices, top, left] = verticesForShape(shape)
 
     const body = context.physics.createRigidBody(
-        RAPIER.RigidBodyDesc.fixed()
-            .setTranslation(left, top)
+        RAPIER.RigidBodyDesc.fixed().setTranslation(left, top),
     )
 
-    const collider = RAPIER.ColliderDesc.polyline(vertices)
-        .setCollisionGroups(0x0002_0005)
+    const collider =
+        RAPIER.ColliderDesc.polyline(vertices).setCollisionGroups(0x0002_0005)
 
     if (collider === null) {
         throw new Error("Failed to create collider")
@@ -25,13 +27,19 @@ export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shap
     return context.store.create({
         entityType: EntityType.Shape,
         rigidBody: body,
-        shape: { vertices: shape.vertices }
+        shape: { vertices: shape.vertices },
     })
 }
 
-function verticesForShape(shape: ShapeModel): [ Float32Array, number, number ] {
-    const left = shape.vertices.reduce((acc, vertex) => Math.min(acc, vertex.x), Infinity)
-    const top  = shape.vertices.reduce((acc, vertex) => Math.min(acc, vertex.y), Infinity)
+function verticesForShape(shape: ShapeModel): [Float32Array, number, number] {
+    const left = shape.vertices.reduce(
+        (acc, vertex) => Math.min(acc, vertex.x),
+        Infinity,
+    )
+    const top = shape.vertices.reduce(
+        (acc, vertex) => Math.min(acc, vertex.y),
+        Infinity,
+    )
 
     const vertices = new Float32Array(shape.vertices.length * 2 + 2)
 
@@ -43,5 +51,5 @@ function verticesForShape(shape: ShapeModel): [ Float32Array, number, number ] {
     vertices[vertices.length - 2] = shape.vertices[0].x - left
     vertices[vertices.length - 1] = shape.vertices[0].y - top
 
-    return [ vertices, top, left ]
+    return [vertices, top, left]
 }

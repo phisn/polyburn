@@ -1,18 +1,28 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { BiMap } from "mnemonist"
-import {Entity, MessageStore } from "runtime-framework"
+import { Entity, MessageStore } from "runtime-framework"
 
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeMessages } from "../RuntimeMessages"
 import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
-export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, messageStore, physics, queue }) => {
+export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({
+    store,
+    messageStore,
+    physics,
+    queue,
+}) => {
     const entityToBodyHandle = new BiMap<number, number>()
 
     store.listenTo(
-        (entity) => entityToBodyHandle.set(entity.id, entity.components.rigidBody.handle),
-        (entity) => entityToBodyHandle.delete(entity.id),
-        "rigidBody")
+        entity =>
+            entityToBodyHandle.set(
+                entity.id,
+                entity.components.rigidBody.handle,
+            ),
+        entity => entityToBodyHandle.delete(entity.id),
+        "rigidBody",
+    )
 
     return () => {
         queue.drainCollisionEvents((h1, h2, started) => {
@@ -27,8 +37,22 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, m
                 return
             }
 
-            handleCollisionEvent(entity1, collider1, entity2, collider2, started, messageStore)
-            handleCollisionEvent(entity2, collider2, entity1, collider1, started, messageStore)
+            handleCollisionEvent(
+                entity1,
+                collider1,
+                entity2,
+                collider2,
+                started,
+                messageStore,
+            )
+            handleCollisionEvent(
+                entity2,
+                collider2,
+                entity1,
+                collider1,
+                started,
+                messageStore,
+            )
         })
     }
 
@@ -51,18 +75,18 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({ store, m
         targetCollider: RAPIER.Collider,
         other: Entity<RuntimeComponents>,
         otherCollider: RAPIER.Collider,
-        started: boolean, 
-        messageStore: MessageStore<RuntimeComponents, RuntimeMessages>
+        started: boolean,
+        messageStore: MessageStore<RuntimeComponents, RuntimeMessages>,
     ) {
         messageStore.publishTarget("collision", {
             target,
             targetCollider,
-            
+
             other,
             otherCollider,
 
             started,
-            sensor: otherCollider.isSensor()
+            sensor: otherCollider.isSensor(),
         })
     }
 }

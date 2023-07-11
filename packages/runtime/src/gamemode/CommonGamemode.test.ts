@@ -1,4 +1,3 @@
-
 import RAPIER from "@dimforge/rapier2d-compat"
 import { test } from "vitest"
 
@@ -17,16 +16,16 @@ test("CommonGamemode", async () => {
                     { x: 0, y: 0 },
                     { x: 1, y: 0 },
                     { x: 1, y: 1 },
-                ]
-            }
+                ],
+            },
         ],
         entities: [
             {
                 type: EntityModelType.Rocket,
                 position: { x: -1, y: -1 },
                 rotation: 0,
-            }
-        ]
+            },
+        ],
     }
 
     const { store, stack } = newRuntime(commonGamemode, world)

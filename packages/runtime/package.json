@@ -5,13 +5,15 @@
     },
     "dependencies": {
         "@dimforge/rapier2d-compat": "^0.11.2",
-        "eslint-config-custom": "*",
+        "@stdlib/math": "^0.0.11",
+        "lz-string": "^1.5.0",
         "mnemonist": "^0.39.5",
-        "runtime-framework": "*",
-        "tsconfig": "*",
+        "runtime-framework": "workspace:*",
         "typescript": "latest"
     },
     "devDependencies": {
+        "eslint-config-custom": "workspace:*",
+        "tsconfig": "workspace:*",
         "vitest": "^0.31.1"
     }
 }

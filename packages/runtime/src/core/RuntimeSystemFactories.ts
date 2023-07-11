@@ -23,7 +23,7 @@ export const runtimeSystemFactories: RuntimeSystemFactory[] = [
     newRocketCollisionSystem,
     newRocketDeathSystem,
     newRocketRotationSystem,
-    newRocketThrustSystem
+    newRocketThrustSystem,
 ]
 
 /*

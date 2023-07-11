@@ -1,6 +1,0 @@
-export function SideBar() {
-    return (
-        <>
-        </>
-    )
-}

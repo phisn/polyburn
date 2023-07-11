@@ -1,16 +1,15 @@
-
 import LZString from "lz-string"
 
+import { EntityType } from "../../core/common/EntityType"
 import { EntityModel } from "./EntityModel"
-import { EntityModelType } from "./EntityModelType"
-import { ShapeModel as ShapeModel } from "./ShapeModel"
+import { ShapeModel } from "./ShapeModel"
 
 export interface WorldModel {
     shapes: ShapeModel[]
     entities: EntityModel[]
 }
 
-function customStringify(world: WorldModel) { 
+function customStringify(world: WorldModel) {
     return JSON.stringify(world, (_, value) => {
         if (typeof value === "number") {
             return Math.round(value * 100) / 100
@@ -34,7 +33,7 @@ export function importWorld(world: string): WorldModel {
     if (!data.startsWith("rw|")) {
         throw new Error("Invalid world data")
     }
-    
+
     return JSON.parse(data.substring(3))
 }
 
@@ -43,11 +42,17 @@ export interface ValidationError {
 }
 
 export function validate(world: WorldModel): ValidationError | null {
-    if (world.entities.filter(entity => entity.type == EntityModelType.RedFlag).length == 0) {
+    if (
+        world.entities.filter(entity => entity.type == EntityType.Level)
+            .length == 0
+    ) {
         return { message: "Can not run world without a red flag" }
     }
 
-    if (world.entities.filter(entity => entity.type == EntityModelType.Rocket).length == 0) {
+    if (
+        world.entities.filter(entity => entity.type == EntityType.Rocket)
+            .length == 0
+    ) {
         return { message: "Can not run world without a rocket" }
     }
 

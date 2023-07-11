@@ -1,4 +1,3 @@
-
 export * from "./Entity"
 export * from "./EntitySet"
 export * from "./EntityStore"
@@ -10,4 +9,3 @@ export * from "./SystemFactory"
 export * from "./SystemStack"
 export * from "./useEntitySet"
 export * from "./useMessage"
-

@@ -1,7 +1,0 @@
-{
-  "extends": "tsconfig/tsconfig.json",
-  "include": ["src", "src/game-new/runtime-view/graphics/.tsx"],
-  "references": [
-    { "path": "./tsconfig.node.json" }
-  ]
-}

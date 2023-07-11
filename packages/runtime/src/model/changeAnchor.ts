@@ -6,13 +6,14 @@ export const changeAnchor = (
     rotation: number,
     size: { width: number; height: number },
     sourceAnchor: { x: number; y: number },
-    targetAnchor: { x: number; y: number }
-) =>
-    ({
-        x: position.x 
-            + cos(rotation) * (size.width  * (targetAnchor.x - sourceAnchor.x)) 
-            - sin(rotation) * (size.height * (targetAnchor.y - sourceAnchor.y)),
-        y: position.y 
-            + sin(rotation) * (size.width  * (targetAnchor.x - sourceAnchor.x)) 
-            + cos(rotation) * (size.height * (targetAnchor.y - sourceAnchor.y))
-    })
+    targetAnchor: { x: number; y: number },
+) => ({
+    x:
+        position.x +
+        cos(rotation) * (size.width * (targetAnchor.x - sourceAnchor.x)) -
+        sin(rotation) * (size.height * (targetAnchor.y - sourceAnchor.y)),
+    y:
+        position.y +
+        sin(rotation) * (size.width * (targetAnchor.x - sourceAnchor.x)) +
+        cos(rotation) * (size.height * (targetAnchor.y - sourceAnchor.y)),
+})

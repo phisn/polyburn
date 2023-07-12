@@ -51,7 +51,7 @@ export default function Replay() {
         <>
             {finished && (
                 <Dialog open={finished} closeDialog={() => setFinished(false)}>
-                    <div className="text-white text-xl">
+                    <div className="text-xl text-white">
                         Export world as base64
                     </div>
 
@@ -60,7 +60,7 @@ export default function Replay() {
                         value={base64}
                         spellCheck="false"
                         rows={4}
-                        className="textarea textarea-bordered w-full h-auto resize-none scrollbar-none"
+                        className="textarea textarea-bordered scrollbar-none h-auto w-full resize-none"
                     ></textarea>
 
                     <div className="space-x-4">

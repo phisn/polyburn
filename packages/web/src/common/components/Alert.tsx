@@ -8,7 +8,7 @@ export interface AlertProps {
 const successSvg = (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="stroke-current flex-shrink-0 h-6 w-6"
+        className="h-6 w-6 flex-shrink-0 stroke-current"
         fill="none"
         viewBox="0 0 24 24"
     >
@@ -24,7 +24,7 @@ const successSvg = (
 const errorSvg = (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="stroke-current flex-shrink-0 h-6 w-6"
+        className="h-6 w-6 flex-shrink-0 stroke-current"
         fill="none"
         viewBox="0 0 24 24"
     >
@@ -42,7 +42,7 @@ const infoSvg = (
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
-        className="stroke-current flex-shrink-0 w-6 h-6"
+        className="h-6 w-6 flex-shrink-0 stroke-current"
     >
         <path
             strokeLinecap="round"
@@ -56,7 +56,7 @@ const infoSvg = (
 const warningSvg = (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="stroke-current flex-shrink-0 h-6 w-6"
+        className="h-6 w-6 flex-shrink-0 stroke-current"
         fill="none"
         viewBox="0 0 24 24"
     >

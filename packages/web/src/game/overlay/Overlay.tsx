@@ -1,8 +1,8 @@
 import { OrthographicCamera } from "three"
 import { shallow } from "zustand/shallow"
 
-import { ZoomInSvg } from "../../common/svg/ZoomInSvg"
-import { ZoomOutSvg } from "../../common/svg/ZoomOutSvg"
+import { ZoomInSvg } from "../../common/inline-svg/ZoomIn"
+import { ZoomOutSvg } from "../../common/inline-svg/ZoomOut"
 import { useGameStore } from "../store/GameStore"
 import { canZoomIn, canZoomOut } from "../store/ZoomSteps"
 import Map from "./Map"
@@ -17,18 +17,18 @@ export default function Overlay(props: { camera: OrthographicCamera }) {
 
     return (
         <>
-            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
                 <Replay />
             </div>
-            <div className="absolute bottom-0 left-1/2 p-4 transform -translate-x-1/2">
-                <div className="flex items-center select-none">
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 transform p-4">
+                <div className="flex select-none items-center">
                     <button
                         className={`btn btn-square btn-ghost select-none ${
                             !canZoomIn(zoomIndex) && "invisible"
                         }`}
                         onClick={zoomIn}
                     >
-                        <ZoomInSvg className="w-6 h-6" />
+                        <ZoomInSvg className="h-6 w-6" />
                     </button>
 
                     <Map camera={props.camera} />
@@ -39,12 +39,12 @@ export default function Overlay(props: { camera: OrthographicCamera }) {
                         }`}
                         onClick={zoomOut}
                     >
-                        <ZoomOutSvg className="w-6 h-6" />
+                        <ZoomOutSvg className="h-6 w-6" />
                     </button>
                 </div>
             </div>
-            <div className="absolute top-0 right-0 p-4">
-                <div className="flex items-center select-none">
+            <div className="absolute right-0 top-0 p-4">
+                <div className="flex select-none items-center">
                     <Timer />
                 </div>
             </div>

@@ -12,8 +12,6 @@
         "lib": ["DOM", "DOM.Iterable", "ESNext"],
         "moduleResolution": "node",
         "noImplicitAny": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
         "preserveWatchOutput": true,
         "skipLibCheck": true,
         "strict": true,

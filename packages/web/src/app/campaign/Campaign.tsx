@@ -75,6 +75,7 @@ export default function Campaign() {
                 <div className="grid w-full gap-8 p-4 md:grid-cols-2">
                     {levels.map((level, i) => (
                         <div
+                            key={i}
                             className={`justify-self-center ${
                                 i % 2 === 0
                                     ? "md:justify-self-end"

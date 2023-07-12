@@ -111,7 +111,7 @@ export const createEntityStore = <
                 EntityWith<Components, T[number]>
             >()
 
-            const free = this.listenTo(
+            this.listenTo(
                 (entity, isNew) => {
                     if (isNew) {
                         newSet.set(entity.id, entity)

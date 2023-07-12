@@ -16,7 +16,7 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
         throw new Error("Got invalid entity graphic type")
     }
 
-    const svgRef = useRef<Object3D>(null!)
+    const svgRef = useRef<Object3D>()
     // const lineRef = useRef<any>(null!)
 
     const entry = entityModelRegistry[EntityType.Rocket]
@@ -25,6 +25,11 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
     useGraphicUpdate(() => {
         if (!props.entity.has("interpolation")) {
             console.error("Entity is missing interpolation component")
+            return
+        }
+
+        // svgref might be undefined while in suspense
+        if (svgRef.current === undefined) {
             return
         }
 
@@ -43,6 +48,9 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
             0,
             0,
             props.entity.components.interpolation.rotation,
+        )
+        console.log(
+            `rocket at { x: ${positionAnchored.x}, y: ${positionAnchored.y} }`,
         )
 
         /*
@@ -72,7 +80,7 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
     return (
         <Suspense>
             <Svg
-                ref={svgRef}
+                ref={svgRef as any}
                 src={graphicEntry.src}
                 scale={graphicEntry.scale}
             />

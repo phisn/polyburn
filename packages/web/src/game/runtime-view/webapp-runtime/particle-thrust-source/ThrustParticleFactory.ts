@@ -53,6 +53,12 @@ export const newThrustParticleFactory =
             { x: 0.5, y: 0.3 },
         )
 
+        console.log(
+            `rigidbody is at ${JSON.stringify(
+                rigidBody.translation(),
+            )}, spawnPosition is ${JSON.stringify(spawnPosition)}`,
+        )
+
         const randomAngle = randomValueBetween(minAngle, maxAngle)
 
         const spawnVelocity = {

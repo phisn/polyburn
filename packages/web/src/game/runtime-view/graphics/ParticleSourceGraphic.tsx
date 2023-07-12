@@ -3,8 +3,8 @@ import { Entity } from "runtime-framework"
 import * as THREE from "three"
 
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
-import { colorInGradient } from "../webapp-runtime/particle/Gradient"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
+import { colorInGradient } from "../webapp-runtime/particle/Gradient"
 
 export function ParticleSourceGraphic(props: {
     entity: Entity<WebappComponents>
@@ -14,13 +14,6 @@ export function ParticleSourceGraphic(props: {
     }
 
     const entity = props.entity
-
-    /*
-    const currentGradientColor = () => gradientColorToNumber(colorInGradient(
-        entity.components.particle.gradientOverTime,
-        entity.components.particle.age / entity.components.particle.lifeTime
-    ))
-    */
 
     const instanceMeshRef = useRef<THREE.InstancedMesh>(null!)
 
@@ -75,26 +68,14 @@ export function ParticleSourceGraphic(props: {
         if (instanceMeshRef.current.instanceColor && ticked) {
             instanceMeshRef.current.instanceColor.needsUpdate = true
         }
-
-        /*
-        meshRef.current.position.set(
-            particle.components.interpolation.position.x,
-            particle.components.interpolation.position.y,
-            0)
-        */
-
-        /*
-        if (previousAgeRef.current !== particle.components.particle.age) {
-            materialRef.current.color.set(currentGradientColor())
-
-            materialRef.current.needsUpdate = true
-            previousAgeRef.current = particle.components.particle.age
-        }
-        */
     })
 
     useLayoutEffect(() => {
-        instanceMeshRef.current.setColorAt(0, new THREE.Color(0x000000))
+        instanceMeshRef.current.setColorAt(0, new THREE.Color(0xffffff))
+
+        // frustumCulled must be set to false or else particles may sometimes not be rendered
+        // because three.js somehow can not detect correctly that they are in the frustum
+        instanceMeshRef.current.frustumCulled = false
     }, [])
 
     return (
@@ -111,5 +92,12 @@ export function ParticleSourceGraphic(props: {
                 <meshBasicMaterial opacity={0.8} transparent />
             </instancedMesh>
         </>
+
+        /*
+        <mesh position={new THREE.Vector3(-18, 40, 0)}>
+            <planeGeometry args={[5, 5]} />
+            <meshBasicMaterial color={"white"} />
+        </mesh>
+        */
     )
 }

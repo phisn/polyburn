@@ -21,7 +21,7 @@ export default function Campaign() {
         { name: "Third Gamemode", locked: true },
     ]
 
-    const levels = ["level1", "level2", "level3"]
+    const levels = ["Level 1", "Level 2", "Level 3"]
 
     const [mapSelected, setMapSelected] = useState<string | null>(null)
     const [playing, setPlaying] = useState<WorldModel>()
@@ -61,13 +61,21 @@ export default function Campaign() {
             <div className="flex justify-center text-3xl">Campaign</div>
 
             <div className="flex justify-center pb-12">
-                <div className="w-full grid justify-center p-4 gap-8 sm:grid-cols-2">
+                <div className="grid p-4 gap-8 md:grid-cols-2 w-full">
                     {levels.map((level, i) => (
-                        <Level
-                            name={level}
-                            onClick={() => setMapSelected(level)}
-                            key={i}
-                        />
+                        <div
+                            className={`justify-self-center ${
+                                i % 2 === 0
+                                    ? "md:justify-self-end"
+                                    : "md:justify-self-start"
+                            }`}
+                        >
+                            <Level
+                                name={level}
+                                onClick={() => setMapSelected(level)}
+                                key={i}
+                            />
+                        </div>
                     ))}
                 </div>
             </div>
@@ -190,38 +198,45 @@ function BackArrow(props: { className?: string }) {
 
 function Level(props: { name: string; onClick?: () => void }) {
     return (
-        <div className="flex relative rounded-2xl aspect-[7/4] max-w-[32rem]">
-            {/*
-                <div className="absolute bottom-0 left-0 right-0 bg-base-100 opacity-80 self-end z-10">
-                    <div className="grid grid-cols-5">
-                        <div className="hidden md:block">
+        <div className="flex relative rounded-2xl aspect-[7/4] max-w-[28rem] isolate">
+            <div className="absolute top-0 left-0 right-0 bottom-0">
+                <div className="bg-zinc-800 p-3 px-8 rounded-2xl w-fit text-lg sm">
+                    {props.name}
+                </div>
+
+                <div className="absolute bottom-0 right-0 bg-zinc-800 rounded-2xl">
+                    <div className="grid">
+                        <div className="steps items-center py-2">
+                            <div
+                                data-content=""
+                                className="step step-secondary"
+                            ></div>
+                            <div
+                                data-content=""
+                                className="step step-secondary"
+                            ></div>
+                            <div data-content="" className="step"></div>
                         </div>
-                        <div className="steps items-center col-span-4 md:col-span-3">
-                            <div data-content="" className="step _step-primary">
-                            </div>
-                            <div data-content="" className="step _step-primary">
-                            </div>
-                            <div data-content="" className="step">
-                            </div>
-                        </div>
+                        {/*
                         <button className="rounded-br-2xl p-4 hover:bg-base-300 active:bg-slate-600 transition ml-auto">
                             <Trohpy className="rounded-none" />
                         </button>
+                        */}
                     </div>
                 </div>
-                */}
+            </div>
             <button
-                className="group absolute top-0 left-0 right-0 bottom-0 rounded-2xl hover:backdrop-blur-2xl active:bg-gray-500 opacity-80"
+                className="group absolute top-0 left-0 right-0 bottom-0 rounded-2xl hover:bg-black active:opacity-50 opacity-50"
                 onClick={props.onClick}
             >
-                <div className="select-none invisible group-hover:visible flex justify-center items-center h-full text-2xl text-base-100">
-                    PLAY
-                </div>
+                <div className="select-none invisible group-hover:visible flex justify-center items-center h-full text-2xl text-base-100"></div>
             </button>
-            <img
-                className="rounded-2xl -z-20"
-                src="https://placehold.co/700x400"
-            />
+            <div className="p-3">
+                <img
+                    className="rounded-2xl -z-20"
+                    src="https://placehold.co/700x400"
+                />
+            </div>
         </div>
     )
 }
@@ -277,7 +292,7 @@ function Gamemode(props: GamemodeProps) {
             }`}
             onClick={e => e.stopPropagation()}
         >
-            <div className="bg-base-300 rounded-2xl flex join relative z-10">
+            <div className="bg-zinc-900 rounded-2xl flex join relative z-10">
                 <button
                     className="join-item w-full p-6 text-left hover:bg-base-100 active:bg-slate-600 transition"
                     onClick={() => runLevel()}

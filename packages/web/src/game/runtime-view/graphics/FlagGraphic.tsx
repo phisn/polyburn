@@ -20,8 +20,6 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
         ? entityGraphicRegistry[EntityGraphicType.GreenFlag]
         : entityGraphicRegistry[EntityGraphicType.RedFlag]
 
-    console.log(`entry src is ${entry.src}!`)
-
     useGraphicUpdate(() => {
         if (!props.entity.has("level")) {
             throw new Error("Got invalid entity graphic type level")

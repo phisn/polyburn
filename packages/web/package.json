@@ -30,14 +30,15 @@
         "zustand": "^4.3.9"
     },
     "devDependencies": {
-        "@types/node": "^17.0.45",
+        "@types/node": "^20.4.1",
         "@types/react": "^18.2.14",
         "@types/react-dom": "^18.2.6",
+        "@types/three": "^0.153.0",
         "autoprefixer": "^10.4.14",
         "eslint-config-custom": "workspace:*",
         "postcss": "^8.4.25",
         "tailwindcss": "^3.3.2",
         "tsconfig": "workspace:*",
-        "typescript": "^4.9.5"
+        "typescript": "^5.1.6"
     }
 }

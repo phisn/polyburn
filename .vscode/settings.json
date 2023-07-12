@@ -1,0 +1,16 @@
+{
+    "editor.formatOnSave": true,
+    // enable per-language (here: Prettier as formatter)
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "files.exclude": {
+        "**/.turbo": true,
+        "**/dist": true,
+        "**/dev-dist": true,
+    },
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact"
+    ],
+}

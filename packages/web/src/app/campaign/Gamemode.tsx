@@ -96,9 +96,9 @@ function RankInfo(props: GamemodeRankProps) {
     const colorClick = colorMap[props.rank ?? "Iron"].click
 
     return (
-        <button
+        <div
             // margin of one pixel to prevent the border shining through
-            className={`absolute bottom-0 left-0 right-0 top-0 m-[1px] flex items-end rounded-2xl rounded-t-3xl ${color} ${colorHover} ${colorClick}`}
+            className={`absolute bottom-0 left-0 right-0 top-0 m-[1px] flex items-end rounded-2xl rounded-t-3xl hover:cursor-pointer ${color} ${colorHover} ${colorClick}`}
         >
             <div
                 className={
@@ -109,6 +109,6 @@ function RankInfo(props: GamemodeRankProps) {
                 <div className="flex justify-center">{props.time}</div>
                 <div className="flex justify-end"># {props.position}</div>
             </div>
-        </button>
+        </div>
     )
 }

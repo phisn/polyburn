@@ -40,10 +40,10 @@ export function Level(props: LevelProps) {
                     </div>
                 </div>
             </div>
-            <button
-                className="absolute bottom-0 left-0 right-0 top-0 rounded-2xl opacity-10 transition hover:bg-white active:opacity-30"
+            <div
+                className="absolute bottom-0 left-0 right-0 top-0 rounded-2xl opacity-10 transition hover:cursor-pointer hover:bg-white active:opacity-30"
                 onClick={props.onClick}
-            ></button>
+            ></div>
             <div className="flex p-3">
                 <img
                     className="w-full rounded-2xl"

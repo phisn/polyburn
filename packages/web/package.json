@@ -21,13 +21,11 @@
         "react-device-detect": "^2.2.3",
         "react-dom": "^18.2.0",
         "react-hotkeys-hook": "^4.4.1",
-        "react-particles": "^2.10.1",
         "react-use": "^17.4.0",
         "runtime": "workspace:*",
         "runtime-framework": "workspace:*",
         "tailwind-scrollbar": "^3.0.4",
         "three": "^0.154.0",
-        "tsparticles": "^2.11.0",
         "tunnel-rat": "^0.1.2",
         "zustand": "^4.3.9"
     },

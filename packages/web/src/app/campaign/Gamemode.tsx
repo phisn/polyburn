@@ -31,19 +31,19 @@ export function Gamemode(props: GamemodeProps) {
 
     return (
         <div
-            className={`relative mx-auto w-full max-w-[32rem] rounded-2xl ${
+            className={`relative mx-auto w-full max-w-md rounded-2xl ${
                 props.rank ? "pb-6" : ""
             }`}
             onClick={e => e.stopPropagation()}
         >
             <div className="join relative z-10 flex rounded-2xl bg-zinc-900">
                 <button
-                    className="join-item hover:bg-base-100 w-full p-6 text-left transition active:bg-slate-600"
+                    className="join-item hover:bg-base-100 hxs:p-6 w-full p-4 px-6 text-left transition active:bg-slate-600"
                     onClick={() => runLevel()}
                 >
                     {props.name}
                 </button>
-                <button className="join-item hover:bg-base-100 p-6 transition active:bg-slate-600">
+                <button className="join-item hover:bg-base-100 hxs:p-6 p-4 px-6 transition active:bg-slate-600">
                     <TrophySvg
                         className="rounded-r-none"
                         width="24"

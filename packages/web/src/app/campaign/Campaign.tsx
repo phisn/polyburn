@@ -29,10 +29,17 @@ export default function Campaign() {
         { name: "Map 1", maxProgress: 3, progress: { modes: 2 } },
         { name: "Map 2", maxProgress: 3 },
         { name: "Map 3", maxProgress: 3 },
+        { name: "Map 3", maxProgress: 3 },
+        { name: "Map 3", maxProgress: 3, progress: { modes: 2 } },
     ]
 
-    const [mapSelected, setMapSelected] = useState<string | null>(null)
+    const [mapSelected, setMapSelected] = useState<string>()
     const [playing, setPlaying] = useState<WorldModel>()
+
+    function onMapSelected(name: string | undefined) {
+        setMapSelected(name)
+        window.scrollTo(0, 0)
+    }
 
     if (playing) {
         return (
@@ -56,7 +63,7 @@ export default function Campaign() {
                             className="btn btn-square btn-ghost"
                             onClick={() => {
                                 setPlaying(undefined)
-                                setMapSelected(null)
+                                setMapSelected(undefined)
                             }}
                         >
                             <StopSvg width="16" height="16" />
@@ -68,23 +75,27 @@ export default function Campaign() {
     }
 
     return (
-        <div className="relative h-screen pt-4 transition">
+        <div className="relative min-h-screen pt-4 transition">
             <div className="flex justify-center text-3xl">Campaign</div>
 
             <div className="flex justify-center pb-12">
-                <div className="grid w-full gap-8 p-4 md:grid-cols-2">
+                <div
+                    className={`grid w-full gap-8 p-4 sm:grid-cols-2 ${
+                        mapSelected && "max-h-screen overflow-hidden"
+                    }`}
+                >
                     {levels.map((level, i) => (
                         <div
                             key={i}
                             className={`justify-self-center ${
                                 i % 2 === 0
-                                    ? "md:justify-self-end"
-                                    : "md:justify-self-start"
+                                    ? "sm:justify-self-end"
+                                    : "sm:justify-self-start"
                             }`}
                         >
                             <Level
                                 {...level}
-                                onClick={() => setMapSelected(level.name)}
+                                onClick={() => onMapSelected(level.name)}
                             />
                         </div>
                     ))}
@@ -92,7 +103,7 @@ export default function Campaign() {
             </div>
 
             <Transition
-                show={mapSelected !== null}
+                show={mapSelected !== undefined}
                 as={Fragment}
                 enter="ease-out duration-200"
                 enterFrom="opacity-0"
@@ -102,12 +113,12 @@ export default function Campaign() {
                 leaveTo="opacity-0"
             >
                 <div
-                    className="absolute bottom-0 left-0 right-0 top-0 w-full bg-white bg-opacity-10 py-4 backdrop-blur-md"
-                    onClick={() => setMapSelected(null)}
+                    className="absolute left-0 top-0 min-h-full w-full bg-white bg-opacity-10 py-4 backdrop-blur-md"
+                    onClick={() => onMapSelected(undefined)}
                 >
                     <div className="flex justify-center">
                         <div className="grid w-full gap-6 p-4">
-                            <div className="btn grid w-full max-w-[32rem] grid-cols-3 justify-self-center bg-opacity-50">
+                            <div className="btn grid w-full max-w-[28rem] grid-cols-3 justify-self-center bg-opacity-50">
                                 <div className="justify-self-center">
                                     <BackArrowSvg height="40" width="40" />
                                 </div>

@@ -60,7 +60,7 @@ export function Gamemode(props: GamemodeProps) {
 
 function LockedOverlay() {
     return (
-        <div className="group absolute bottom-0 left-0 right-0 top-0 z-20 flex rounded-2xl backdrop-blur">
+        <div className="group absolute bottom-0 left-0 right-0 top-0 z-20 flex rounded-2xl backdrop-blur ">
             <div className="flex w-full items-center justify-center group-hover:hidden">
                 <div className="mr-2">Locked</div>
                 <LockedSvg width="24" height="24" />

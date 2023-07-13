@@ -1,5 +1,4 @@
 import { LockedSvg } from "../../common/inline-svg/Locked"
-import { UnlockedSvg } from "../../common/inline-svg/Unlocked"
 
 export interface LevelProgress {
     modes: number
@@ -57,13 +56,14 @@ export function Level(props: LevelProps) {
 
 function LockedOverlay() {
     return (
-        <div className="group absolute bottom-0 left-0 right-0 top-0 z-20 flex rounded-2xl backdrop-blur">
-            <div className="flex w-full items-center justify-center group-hover:hidden">
+        <div className="group absolute bottom-0 left-0 right-0 top-0 z-20 flex rounded-2xl backdrop-blur-2xl">
+            <div className="absolute bottom-0 left-0 right-0 top-0 rounded-2xl bg-white opacity-5"></div>
+            <div className="absolute bottom-0 left-0 right-0 top-0 flex w-full items-center justify-center text-zinc-200 group-hover:hidden">
                 <div className="mr-2">Locked</div>
                 <LockedSvg width="24" height="24" />
             </div>
-            <div className="hidden w-full select-none items-center justify-center p-6 group-hover:flex">
-                <UnlockedSvg width="24" height="24" />
+            <div className="absolute bottom-0 left-0 right-0 top-0 hidden w-full select-none items-center justify-center p-6 text-zinc-200 group-hover:flex">
+                <LockedSvg width="24" height="24" />
                 <div className="ml-2">Beat the previous map!</div>
             </div>
         </div>

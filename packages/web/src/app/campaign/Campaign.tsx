@@ -30,7 +30,7 @@ export default function Campaign() {
         { name: "Map 2", maxProgress: 3 },
         { name: "Map 3", maxProgress: 3 },
         { name: "Map 3", maxProgress: 3 },
-        { name: "Map 3", maxProgress: 3, progress: { modes: 2 } },
+        { name: "Map 3", maxProgress: 3 },
     ]
 
     const [mapSelected, setMapSelected] = useState<string>()
@@ -76,8 +76,6 @@ export default function Campaign() {
 
     return (
         <div className="relative min-h-screen pt-4 transition">
-            <div className="flex justify-center text-3xl">Campaign</div>
-
             <div className="flex justify-center pb-12">
                 <div
                     className={`grid w-full gap-8 p-4 sm:grid-cols-2 ${

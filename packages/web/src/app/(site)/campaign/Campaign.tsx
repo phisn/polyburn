@@ -3,10 +3,10 @@
 import { Transition } from "@headlessui/react"
 import { Fragment, useState } from "react"
 import { WorldModel } from "runtime/src/model/world/WorldModel"
-import Navbar from "../../common/components/Navbar"
-import { BackArrowSvg } from "../../common/inline-svg/BackArrow"
-import { StopSvg } from "../../common/inline-svg/Stop"
-import Game from "../../game/Game"
+import Navbar from "../../../common/components/Navbar"
+import { BackArrowSvg } from "../../../common/inline-svg/BackArrow"
+import { StopSvg } from "../../../common/inline-svg/Stop"
+import Game from "../../../game/Game"
 import { Gamemode, GamemodeStats } from "./Gamemode"
 import { Level, LevelInfo } from "./Level"
 
@@ -75,7 +75,7 @@ export default function Campaign() {
     }
 
     return (
-        <div className="relative min-h-screen pt-4 transition">
+        <div className="relative pt-4 transition">
             <div className="flex justify-center pb-12">
                 <div
                     className={`grid w-full gap-8 p-4 sm:grid-cols-2 ${
@@ -111,7 +111,7 @@ export default function Campaign() {
                 leaveTo="opacity-0"
             >
                 <div
-                    className="absolute left-0 top-0 min-h-full w-full bg-white bg-opacity-10 py-4 backdrop-blur-md"
+                    className="fixed left-0 top-0 min-h-full w-full bg-white bg-opacity-10 py-4 backdrop-blur-md"
                     onClick={() => onMapSelected(undefined)}
                 >
                     <div className="flex justify-center">

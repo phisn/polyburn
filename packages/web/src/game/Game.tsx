@@ -3,7 +3,7 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { PerformanceMonitor } from "@react-three/drei"
 import { Canvas, useThree } from "@react-three/fiber"
-import { Suspense } from "react"
+import { Suspense, use } from "react"
 import { RuntimeSystemStack } from "runtime/src/core/RuntimeSystemStack"
 import { commonGamemode } from "runtime/src/gamemode/CommonGamemode"
 import tunnel from "tunnel-rat"
@@ -17,10 +17,19 @@ import { newWebappRuntime } from "./runtime-view/webapp-runtime/WebappRuntime"
 import { ProvideGameStore, useGameStore } from "./store/GameStore"
 
 const rapierInit = RAPIER.init()
-
 const overlay = tunnel()
 
 function Game(props: { world: WorldModel }) {
+    return (
+        <Suspense>
+            <GameInSuspense {...props} />
+        </Suspense>
+    )
+}
+
+function GameInSuspense(props: { world: WorldModel }) {
+    use(rapierInit)
+
     const world = JSON.parse(JSON.stringify(props.world)) // dirty hack to prototype for now. fix later
     const { context, stack } = newWebappRuntime(commonGamemode, world)
 
@@ -55,7 +64,7 @@ function Game(props: { world: WorldModel }) {
                     }}
                 >
                     <Suspense>
-                        <InnerGame stack={stack} />
+                        <GameInThree stack={stack} />
                     </Suspense>
                 </Canvas>
 
@@ -65,7 +74,7 @@ function Game(props: { world: WorldModel }) {
     )
 }
 
-function InnerGame(props: { stack: RuntimeSystemStack }) {
+function GameInThree(props: { stack: RuntimeSystemStack }) {
     useWebappRuntime(props.stack)
 
     const camera = useThree(state => state.camera) as THREE.OrthographicCamera

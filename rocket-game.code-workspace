@@ -1,19 +1,5 @@
 {
     "folders": [
-        /*
-        {
-            "name": "webapp",
-            "path": "packages/webapp"
-        },
-		{
-            "name": "infrastructure",
-            "path": "packages/infrastructure"
-        },
-		{
-            "name": "runtime",
-            "path": "packages/runtime"
-        },
-        */
         {
             "name": "root",
             "path": "."
@@ -27,9 +13,6 @@
         "svg.preview.background": "black"
     },
     "extensions": {
-        "recommendations": [
-            "dbaeumer.vscode-eslint",
-            "usernamehw.errorlens",
-        ]
+        "recommendations": ["dbaeumer.vscode-eslint", "usernamehw.errorlens"]
     }
 }

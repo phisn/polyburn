@@ -1,9 +1,11 @@
-import "./global.css"
+import { Outlet } from "react-router-dom"
+import { Navbar } from "./Navbar"
 
-export default function RootLayout(props: { children: React.ReactNode }) {
+export function Layout() {
     return (
-        <html lang="en" className="bg-base-300">
-            {props.children}
-        </html>
+        <div className="flex h-screen flex-col">
+            <Navbar />
+            <Outlet />
+        </div>
     )
 }

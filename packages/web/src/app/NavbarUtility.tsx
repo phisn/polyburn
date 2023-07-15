@@ -1,8 +1,8 @@
 "use client"
 
 import { BrowserView } from "react-device-detect"
-import { Pencil } from "../../common/inline-svg/Pencil"
-import { Person } from "../../common/inline-svg/Person"
+import { Pencil } from "../common/inline-svg/Pencil"
+import { Person } from "../common/inline-svg/Person"
 
 export function NavbarUtility() {
     return (

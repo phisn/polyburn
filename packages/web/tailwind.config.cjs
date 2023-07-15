@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
+    content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx,mdx}"],
     theme: {
         extend: {
             screens: {
@@ -23,5 +23,10 @@ module.exports = {
                 },
             },
         ],
+    },
+    variants: {
+        extend: {
+            visibility: ["group-hover"],
+        },
     },
 }

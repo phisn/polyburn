@@ -20,14 +20,6 @@ const rapierInit = RAPIER.init()
 const overlay = tunnel()
 
 function Game(props: { world: WorldModel }) {
-    return (
-        <Suspense>
-            <GameInSuspense {...props} />
-        </Suspense>
-    )
-}
-
-function GameInSuspense(props: { world: WorldModel }) {
     use(rapierInit)
 
     const world = JSON.parse(JSON.stringify(props.world)) // dirty hack to prototype for now. fix later
@@ -36,7 +28,7 @@ function GameInSuspense(props: { world: WorldModel }) {
     return (
         <ProvideGameStore systemContext={context}>
             <div
-                className="h-screen w-screen select-none"
+                className="h-full select-none"
                 style={{
                     msTouchAction: "manipulation",
                     touchAction: "none",

@@ -1,8 +1,6 @@
 {
-    "extends": "tsconfig/nextjs.json",
-    "compilerOptions": {
-        "plugins": [{ "name": "next" }]
-    },
-    "include": ["src", "next-env.d.ts", ".next/types/**/*.ts"],
+    "extends": "tsconfig/react.json",
+    "compilerOptions": {},
+    "include": ["src"],
     "exclude": ["node_modules"]
 }

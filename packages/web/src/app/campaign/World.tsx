@@ -1,22 +1,25 @@
-import { LockedSvg } from "../../../common/inline-svg/Locked"
+import { LockedSvg } from "../../common/inline-svg/Locked"
 
-export interface LevelProgress {
+export interface WorldProgress {
     modes: number
 }
 
-export interface LevelInfo {
+export interface WorldInfo {
+    raw: string
     name: string
-    progress?: LevelProgress
+    progress?: WorldProgress
     maxProgress: number
 }
 
-export interface LevelProps extends LevelInfo {
+export interface WorldProps extends WorldInfo {
     onClick?: () => void
 }
 
-export function Level(props: LevelProps) {
+export function World(props: WorldProps) {
     return (
-        <div className="relative isolate flex aspect-[7/4] max-w-[28rem] rounded-2xl">
+        <div
+            className={`relative isolate flex aspect-[7/4] max-w-[28rem] rounded-2xl`}
+        >
             <div className="absolute bottom-0 left-0 right-0 top-0 isolate">
                 <div className="w-fit rounded-2xl bg-zinc-800 p-3 px-8 text-xl text-zinc-200">
                     {props.name}
@@ -28,7 +31,7 @@ export function Level(props: LevelProps) {
                             {Array.from(
                                 { length: props.maxProgress },
                                 (_, i) => (
-                                    <LevelProgressStep
+                                    <WorldProgressStep
                                         key={i}
                                         index={i}
                                         progress={props.progress}
@@ -70,9 +73,9 @@ function LockedOverlay() {
     )
 }
 
-function LevelProgressStep(props: {
+function WorldProgressStep(props: {
     index: number
-    progress: LevelProgress | undefined
+    progress: WorldProgress | undefined
 }) {
     return (
         <div

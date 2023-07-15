@@ -1,11 +1,18 @@
 module.exports = {
-    extends: ["next/core-web-vitals", "turbo", "prettier"],
+    extends: [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:react/jsx-runtime",
+        "turbo",
+        "prettier",
+    ],
     rules: {
         "@next/next/no-html-link-for-pages": "off",
     },
+    parser: "@typescript-eslint/parser",
+    plugins: ["prettier", "react", "turbo", "@typescript-eslint"],
     parserOptions: {
-        babelOptions: {
-            presets: [require.resolve("next/babel")],
-        },
+        ecmaVersion: "latest",
+        sourceType: "module",
     },
 }

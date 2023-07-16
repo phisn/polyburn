@@ -14,6 +14,9 @@ export interface GameStore extends GameState {
 
     get performance(): number
     get maxPerformance(): number
+    get started(): boolean
+
+    start(): void
 
     inclinePerformance(): void
     declinePerformance(): void
@@ -36,6 +39,11 @@ export const createGameStore = (systemContext: WebappFactoryContext) =>
 
         maxPerformance: 3,
         performance: 3,
+        started: false,
+
+        start: () => {
+            set({ started: true })
+        },
 
         inclinePerformance: () => {
             set(state => ({

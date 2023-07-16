@@ -61,7 +61,7 @@ export default function Campaign() {
         const map = importWorld(worldSelected.raw)
 
         return (
-            <div className="absolute bottom-0 left-0 right-0 top-0 h-full">
+            <div className="absolute bottom-0 left-0 right-0 top-0 ">
                 <Game world={map} />
 
                 <div
@@ -96,32 +96,32 @@ export default function Campaign() {
     console.log("pending", isPending)
 
     return (
-        <div className="flex h-full pt-4 transition">
-            <div className="relative flex h-full w-full justify-center">
+        <>
+            <div className="relative h-full">
                 <div
-                    className={`grid w-full gap-8 p-4 sm:grid-cols-2 ${
-                        worldSelected &&
-                        "absolute bottom-0 top-0 overflow-hidden"
+                    className={`flex h-full w-full justify-center pt-4 ${
+                        worldSelected && "absolute top-0 overflow-hidden"
                     }`}
                 >
-                    {worlds.map((world, i) => (
-                        <div
-                            key={i}
-                            className={`justify-self-center ${
-                                i % 2 === 0
-                                    ? "sm:justify-self-end"
-                                    : "sm:justify-self-start"
-                            }`}
-                        >
-                            <World
-                                {...world}
-                                onClick={() => onWorldSelected(world)}
-                            />
-                        </div>
-                    ))}
+                    <div className="grid h-min w-full gap-8 p-4 sm:grid-cols-2">
+                        {worlds.map((world, i) => (
+                            <div
+                                key={i}
+                                className={`justify-self-center ${
+                                    i % 2 === 0
+                                        ? "sm:justify-self-end"
+                                        : "sm:justify-self-start"
+                                }`}
+                            >
+                                <World
+                                    {...world}
+                                    onClick={() => onWorldSelected(world)}
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
-
             <Transition
                 show={worldSelected !== undefined}
                 as={Fragment}
@@ -133,7 +133,7 @@ export default function Campaign() {
                 leaveTo="opacity-0"
             >
                 <div
-                    className="fixed left-0 top-0 min-h-full w-full bg-white bg-opacity-10 py-4 backdrop-blur-md"
+                    className="absolute left-0 top-0 min-h-screen w-full overflow-visible overscroll-contain bg-white bg-opacity-10 py-4 backdrop-blur-md"
                     onClick={() => {
                         onWorldSelected(undefined)
                     }}
@@ -173,6 +173,6 @@ export default function Campaign() {
                     </Transition>
                 </div>
             </Transition>
-        </div>
+        </>
     )
 }

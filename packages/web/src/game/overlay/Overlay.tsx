@@ -7,6 +7,7 @@ import { useGameStore } from "../store/GameStore"
 import { canZoomIn, canZoomOut } from "../store/ZoomSteps"
 import Map from "./Map"
 import Replay from "./Replay"
+import { Starting } from "./Starting"
 import { Timer } from "./Timer"
 
 export default function Overlay(props: { camera: OrthographicCamera }) {
@@ -17,6 +18,7 @@ export default function Overlay(props: { camera: OrthographicCamera }) {
 
     return (
         <>
+            <Starting />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
                 <Replay />
             </div>

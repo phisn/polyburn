@@ -11,6 +11,8 @@ export function useWebappRuntime(stack: RuntimeSystemStack) {
     const controls = useControls()
 
     const { store } = useGameStore(store => store.systemContext)
+    const [started, start] = useGameStore(store => [store.started, store.start])
+
     const { updateInterpolation, updateGraphics } =
         useWebappUpdateDispatcher(store)
 
@@ -24,6 +26,14 @@ export function useWebappRuntime(stack: RuntimeSystemStack) {
     )
 
     function updateSimulation() {
+        if (started === false) {
+            if (controls.current.thrust) {
+                start()
+            } else {
+                return
+            }
+        }
+
         if (controls.current.pause) {
             return
         }
@@ -34,5 +44,5 @@ export function useWebappRuntime(stack: RuntimeSystemStack) {
         })
     }
 
-    return store
+    return { controls }
 }

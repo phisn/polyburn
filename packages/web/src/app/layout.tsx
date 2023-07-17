@@ -3,7 +3,7 @@ import { Navbar } from "./Navbar"
 
 export function Layout() {
     return (
-        <div className="flex h-screen flex-col">
+        <div className="bg-base-300 flex h-screen flex-col">
             <Navbar />
             <Outlet />
         </div>

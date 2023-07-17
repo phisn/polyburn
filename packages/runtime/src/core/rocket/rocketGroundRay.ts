@@ -10,6 +10,7 @@ const ray = new RAPIER.Ray(new RAPIER.Vector2(0, 0), new RAPIER.Vector2(0, 1))
 export const rocketGroundRayRaw = (
     physics: RAPIER.World,
     rocket: RAPIER.RigidBody,
+    length: number,
 ) => {
     const entry = entityModelRegistry[EntityType.Rocket]
 
@@ -37,7 +38,7 @@ export const rocketGroundRayRaw = (
 
     const cast = physics.castRay(
         ray,
-        1,
+        length,
         false,
         undefined,
         0x0001_0002,
@@ -56,4 +57,5 @@ export const rocketGroundRayRaw = (
 export const rocketGroundRay = (
     physics: RAPIER.World,
     rocket: RAPIER.RigidBody,
-) => rocketGroundRayRaw(physics, rocket)?.cast
+    length: number,
+) => rocketGroundRayRaw(physics, rocket, length)?.cast

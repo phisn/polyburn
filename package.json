@@ -23,6 +23,7 @@
         "tabWidth": 4,
         "semi": false,
         "arrowParens": "avoid",
+        "endOfLine": "crlf",
         "plugins": [
             "prettier-plugin-organize-imports",
             "prettier-plugin-tailwindcss"

@@ -5,14 +5,12 @@ import { VitePWA } from "vite-plugin-pwa"
 export default defineConfig({
     plugins: [
         react(),
-        VitePWA({ 
+        VitePWA({
             registerType: "autoUpdate",
             devOptions: {
                 enabled: false,
             },
-            includeAssets: [
-                "icon.png",
-            ],
+            includeAssets: ["icon.png"],
             manifest: {
                 name: "RocketGraphic Game",
                 short_name: "RocketGraphic Game",
@@ -40,13 +38,13 @@ export default defineConfig({
                         src: "icon-196.png",
                         sizes: "196x196",
                         type: "image/png",
-                    }
-                ]
+                    },
+                ],
             },
             workbox: {
                 globPatterns: ["**/*.{js,css,html,png,svg}"],
                 maximumFileSizeToCacheInBytes: 1024 * 1024 * 16,
-            }
-        })
-    ]
+            },
+        }),
+    ],
 })

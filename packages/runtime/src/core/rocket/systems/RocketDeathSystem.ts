@@ -10,6 +10,7 @@ import { respawnRocket } from "../respawnRocket"
 import { RocketEntityComponents } from "../RocketEntity"
 
 export const newRocketDeathSystem: RuntimeSystemFactory = ({
+    config,
     store,
     physics,
 }) => {
@@ -27,61 +28,59 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({
                 ++i
             ) {
                 handleRocketCollider(
-                    physics,
                     entity.components.rigidBody.collider(i),
                     entity,
                 )
             }
         }
     }
-}
 
-function handleRocketCollider(
-    physics: RAPIER.World,
-    rocketCollider: RAPIER.Collider,
-    entity: EntityWith<RuntimeComponents, "rocket" | "rigidBody">,
-) {
-    physics.contactsWith(rocketCollider, collider => {
-        if (collider.isSensor()) {
-            return
+    function handleRocketCollider(
+        rocketCollider: RAPIER.Collider,
+        entity: EntityWith<RuntimeComponents, "rocket" | "rigidBody">,
+    ) {
+        physics.contactsWith(rocketCollider, collider => {
+            if (collider.isSensor()) {
+                return
+            }
+
+            physics.contactPair(rocketCollider, collider, (contact, flipped) =>
+                handleRocketContact(contact, flipped, entity),
+            )
+        })
+    }
+
+    function handleRocketContact(
+        contact: RAPIER.TempContactManifold,
+        flipped: boolean,
+        rocket: EntityWith<RuntimeComponents, "rocket" | "rigidBody">,
+    ) {
+        const upVector = {
+            x: -sin(rocket.components.rigidBody.rotation()),
+            y: cos(rocket.components.rigidBody.rotation()),
         }
 
-        physics.contactPair(rocketCollider, collider, (contact, flipped) =>
-            handleRocketContact(contact, flipped, entity),
+        const otherNormal = flipped
+            ? contact.localNormal1()
+            : contact.localNormal2()
+
+        const otherNormalLength = sqrt(
+            otherNormal.x * otherNormal.x + otherNormal.y * otherNormal.y,
         )
-    })
-}
 
-function handleRocketContact(
-    contact: RAPIER.TempContactManifold,
-    flipped: boolean,
-    rocket: EntityWith<RuntimeComponents, "rocket" | "rigidBody">,
-) {
-    const upVector = {
-        x: -sin(rocket.components.rigidBody.rotation()),
-        y: cos(rocket.components.rigidBody.rotation()),
-    }
+        const otherNormalNormalized = {
+            x: otherNormal.x / otherNormalLength,
+            y: otherNormal.y / otherNormalLength,
+        }
 
-    const otherNormal = flipped
-        ? contact.localNormal1()
-        : contact.localNormal2()
+        const dx = otherNormalNormalized.x - upVector.x
+        const dy = otherNormalNormalized.y - upVector.y
 
-    const otherNormalLength = sqrt(
-        otherNormal.x * otherNormal.x + otherNormal.y * otherNormal.y,
-    )
+        const distance = sqrt(dx * dx + dy * dy)
 
-    const otherNormalNormalized = {
-        x: otherNormal.x / otherNormalLength,
-        y: otherNormal.y / otherNormalLength,
-    }
-
-    const dx = otherNormalNormalized.x - upVector.x
-    const dy = otherNormalNormalized.y - upVector.y
-
-    const distance = sqrt(dx * dx + dy * dy)
-
-    if (distance > 0.3) {
-        // console.warn(`death because ${distance} > 0.3`)
-        respawnRocket(rocket)
+        if (distance > config.explosionAngle) {
+            // console.warn(`death because ${distance} > 0.3`)
+            respawnRocket(rocket)
+        }
     }
 }

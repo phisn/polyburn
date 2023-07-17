@@ -10,9 +10,13 @@
             "**/target": true
         },
         "typescript.tsdk": "webapp\\node_modules\\typescript\\lib",
-        "svg.preview.background": "black"
+        "svg.preview.background": "black",
+        "prettier.requireConfig": true
     },
     "extensions": {
-        "recommendations": ["dbaeumer.vscode-eslint", "usernamehw.errorlens"]
+        "recommendations": [
+            "dbaeumer.vscode-eslint",
+            "usernamehw.errorlens"
+        ]
     }
 }

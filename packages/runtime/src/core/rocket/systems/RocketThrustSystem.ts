@@ -5,10 +5,8 @@ import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { RocketEntityComponents } from "../RocketEntity"
 import { rocketGroundRay } from "../rocketGroundRay"
 
-const thrustValue = 7.3
-const thrustGroundMultiplier = 1.3
-
 export const newRocketThrustSystem: RuntimeSystemFactory = ({
+    config,
     store,
     physics,
 }) => {
@@ -21,13 +19,19 @@ export const newRocketThrustSystem: RuntimeSystemFactory = ({
 
         const force = {
             x: 0,
-            y: thrustValue,
+            y: config.thrustValue,
         }
 
         for (const rocket of rockets) {
-            if (rocketGroundRay(physics, rocket.components.rigidBody)) {
-                force.x *= thrustGroundMultiplier
-                force.y *= thrustGroundMultiplier
+            if (
+                rocketGroundRay(
+                    physics,
+                    rocket.components.rigidBody,
+                    config.thrustValue,
+                )
+            ) {
+                force.x *= config.thrustGroundMultiplier
+                force.y *= config.thrustGroundMultiplier
             }
 
             const rotation = rocket.components.rigidBody.rotation()

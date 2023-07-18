@@ -7,7 +7,7 @@ export interface NativeEvent {
     leftButton: boolean
 }
 
-export interface Event {
+export interface EditorEvent {
     position: Vector3
     clicked: boolean
 }
@@ -66,3 +66,4 @@ export function EventHandler() {
 
     return <></>
 }
+

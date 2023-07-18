@@ -16,6 +16,7 @@
         "@stdlib/math": "^0.0.11",
         "@vitejs/plugin-react": "^3.0.1",
         "daisyui": "^3.2.1",
+        "js-sdsl": "^4.4.1",
         "lz-string": "^1.5.0",
         "react": "0.0.0-experimental-546fe4681-20230713",
         "react-device-detect": "^2.2.3",

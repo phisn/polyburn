@@ -21,3 +21,4 @@ export type WithoutTarget<Message extends object, Components extends object> = {
         ? never
         : Required<Message>[K]
 }
+

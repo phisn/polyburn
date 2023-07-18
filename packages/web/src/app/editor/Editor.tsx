@@ -4,12 +4,12 @@ import { useMemo } from "react"
 import { EntityType } from "runtime/src/core/common/EntityType"
 import { Level } from "./entities/Level"
 import { Rocket } from "./entities/Rocket"
-import { Shape } from "./entities/Shape"
+import { Shape } from "./entities/shape/Shape"
 import { EventHandler } from "./EventHandler"
 import {
     createEditorStore,
     ProvideEditorStore,
-    useEditorStore,
+    useEntities,
 } from "./store/EditorStore"
 import { editorTunnel } from "./Tunnel"
 
@@ -38,7 +38,7 @@ export function Editor() {
 }
 
 function Entities() {
-    const { entities } = useEditorStore()
+    const { entities } = useEntities()
 
     return (
         <>
@@ -52,3 +52,4 @@ function Entities() {
         </>
     )
 }
+

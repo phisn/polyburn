@@ -5,7 +5,6 @@ import { PerformanceMonitor } from "@react-three/drei"
 import { Canvas, useThree } from "@react-three/fiber"
 import { Suspense, use } from "react"
 import { RuntimeSystemStack } from "runtime/src/core/RuntimeSystemStack"
-import { commonGamemode } from "runtime/src/gamemode/CommonGamemode"
 import tunnel from "tunnel-rat"
 import { shallow } from "zustand/shallow"
 
@@ -23,7 +22,7 @@ function Game(props: { world: WorldModel }) {
     use(rapierInit)
 
     const world = JSON.parse(JSON.stringify(props.world)) // dirty hack to prototype for now. fix later
-    const { context, stack } = newWebappRuntime(commonGamemode, world)
+    const { context, stack } = newWebappRuntime(null!, world)
 
     return (
         <ProvideGameStore systemContext={context}>
@@ -99,3 +98,4 @@ function GameInThree(props: { stack: RuntimeSystemStack }) {
 }
 
 export default Game
+

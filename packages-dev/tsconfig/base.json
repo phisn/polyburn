@@ -15,7 +15,9 @@
         "preserveWatchOutput": true,
         "skipLibCheck": true,
         "strict": true,
-        "target": "ESNext"
+        "target": "ESNext",
+        "sourceMap": true
     },
     "exclude": ["node_modules"]
 }
+

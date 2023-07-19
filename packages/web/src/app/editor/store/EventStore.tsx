@@ -22,17 +22,23 @@ interface EventStore {
     subscribeEvent: (listener: ListenerRef) => () => void
 
     event: (event: EditorEvent) => boolean
-
-    events: OrderedSet<ListenerRef>
 }
 
 const createEventStore = (): EventStore => {
+    const listeners = new OrderedSet<ListenerRef>(
+        [],
+        (x, y) => y.current.priority - x.current.priority,
+    )
+
     return {
-        subscribeEvent(): () => void {
-            return () => {}
+        subscribeEvent: listener => {
+            listeners.insert(listener)
+            return () => {
+                listeners.eraseElementByKey(listener)
+            }
         },
-        event(event: EditorEvent) {
-            for (const listener of this.events) {
+        event: event => {
+            for (const listener of listeners) {
                 if (listener.current.callback(event) === ConsumeEvent) {
                     return true
                 }
@@ -40,16 +46,12 @@ const createEventStore = (): EventStore => {
 
             return false
         },
-        events: new OrderedSet<ListenerRef>(
-            [],
-            (x, y) => y.current.priority - x.current.priority,
-        ),
     }
 }
 
 const Context = createContext<EventStore>(null!)
 
-export function ProvideEntityStore(props: { children: React.ReactNode }) {
+export function ProvideEventStore(props: { children: React.ReactNode }) {
     const store = useMemo(createEventStore, [])
 
     return <Context.Provider value={store}>{props.children}</Context.Provider>

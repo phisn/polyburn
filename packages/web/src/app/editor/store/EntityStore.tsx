@@ -1,12 +1,13 @@
 import { createContext, useContext, useMemo, useSyncExternalStore } from "react"
 import { LevelState } from "../entities/LevelState"
-import { RocketState } from "../entities/RocketState"
-import { ShapeState } from "../entities/ShapeState"
+import { ShapeState } from "../entities/shape/ShapeState"
+import { RocketState } from "./RocketState"
 
 export type EntityState = ShapeState | RocketState | LevelState
 
 interface Mutation {
     mutates: number[]
+    removeOrCreate: boolean
 
     do: () => void
     undo: () => void
@@ -28,15 +29,30 @@ const createEntityStore = (): EntityStore => {
 
 const Context = createContext<EntityStore>(null!)
 
-export function ProvideEntityStore(props: { children: React.ReactNode }) {
+export function ProvideEntityStore(props: {
+    children: React.ReactNode
+    entities: EntityState[]
+}) {
     const store = useMemo(createEntityStore, [])
+
+    for (const entity of props.entities) {
+        store.entities.set(entity.id, entity)
+    }
 
     return <Context.Provider value={store}>{props.children}</Context.Provider>
 }
 
 export function useEntities() {
     const store = useContext(Context)
-    return useSyncExternalStore(store.subscribeMutation, () => store.entities)
+    return useSyncExternalStore(
+        listener =>
+            store.subscribeMutation(mutation => {
+                if (mutation.removeOrCreate) {
+                    listener()
+                }
+            }),
+        () => store.entities,
+    )
 }
 
 export function useEntity<T>(entity: number) {

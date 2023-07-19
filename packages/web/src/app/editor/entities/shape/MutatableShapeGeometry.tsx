@@ -1,8 +1,12 @@
-import { Point } from "runtime/src/model/world/Point"
-import { BufferGeometry, Float32BufferAttribute, ShapeUtils } from "three"
+import {
+    BufferGeometry,
+    Float32BufferAttribute,
+    ShapeUtils,
+    Vector2,
+} from "three"
 
 export class MutatableShapeGeometry extends BufferGeometry {
-    update(vertices: Point[]) {
+    update(vertices: Vector2[]) {
         // check direction of vertices
         if (ShapeUtils.isClockWise(vertices) === false) {
             vertices = vertices.reverse()

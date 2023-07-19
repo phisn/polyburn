@@ -1,7 +1,14 @@
-import { forwardRef, useRef, useState } from "react"
+import { forwardRef, useEffect, useRef, useState } from "react"
 import { Point } from "runtime/src/model/world/Point"
 import { Mesh } from "three"
-import { baseZoomFactor, snapDistance } from "../../../../common/Values"
+import {
+    baseZoomFactor,
+    highlightColor,
+    shapeColor,
+    shapeColorHighlighted,
+    shapeColorSelected,
+    snapDistance,
+} from "../../../../common/Values"
 import { useEntity } from "../../store/EntityStore"
 import {
     ConsumeEvent,
@@ -35,11 +42,22 @@ export function Shape(props: { id: number }) {
     const geometryRef = useRef(new MutatableShapeGeometry())
     const verticesRef = useRef<Mesh[]>([])
 
+    const markerRef = useRef<Mesh>(null!)
+
+    function showMarker(point: Point) {
+        markerRef.current.visible = true
+        markerRef.current.position.set(point.x, point.y, 0)
+    }
+
     useEventListener(
         event => {
             const isPointInside = isPointInsideShape(event.position, state)
 
-            if (state.selected) {
+            // make marker invisible by default. only visible
+            // if event triggers it
+            markerRef.current.visible = false
+
+            if (selected) {
                 const closestVertex = findClosestVertex(
                     state,
                     event.position,
@@ -47,7 +65,7 @@ export function Shape(props: { id: number }) {
                 )
 
                 if (closestVertex) {
-                    // ...
+                    showMarker(closestVertex.point)
                     return ConsumeEvent
                 }
 
@@ -58,7 +76,7 @@ export function Shape(props: { id: number }) {
                 )
 
                 if (closestEdge) {
-                    // ...
+                    showMarker(closestEdge.point)
                     return ConsumeEvent
                 }
 
@@ -84,13 +102,17 @@ export function Shape(props: { id: number }) {
                 }
             }
         },
-        state.selected ? Priority.Selected : Priority.Normal,
+        selected ? Priority.Selected : Priority.Normal,
     )
+
+    useEffect(() => {
+        geometryRef.current.update(state.vertices)
+    }, [])
 
     function Selected() {
         return (
             <>
-                {state.vertices.map((_, i) => (
+                {state.vertices.map((vertex, i) => (
                     <Vertex
                         key={i}
                         ref={ref => (verticesRef.current[i] = ref!)}
@@ -103,12 +125,29 @@ export function Shape(props: { id: number }) {
     return (
         <>
             <mesh ref={meshRef} geometry={geometryRef.current}>
-                <meshBasicMaterial color={hovered ? "green" : "red"} />
+                <meshBasicMaterial color={materialColor()} />
             </mesh>
 
-            {state.selected && <Selected />}
+            <mesh ref={markerRef} visible={false}>
+                <circleGeometry args={[5.0 * baseZoomFactor]} />
+                <meshBasicMaterial color={highlightColor} />
+            </mesh>
+
+            {selected && <Selected />}
         </>
     )
+
+    function materialColor() {
+        if (selected) {
+            return shapeColorSelected
+        }
+
+        if (hovered) {
+            return shapeColorHighlighted
+        }
+
+        return shapeColor
+    }
 }
 
 export function isPointInsideShape(point: Point, shape: ShapeState): boolean {

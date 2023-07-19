@@ -1,6 +1,9 @@
 {
     "extends": "tsconfig/react.json",
-    "compilerOptions": {},
-    "include": ["src"],
+    "compilerOptions": {
+        "inlineSources": true
+    },
+    "include": ["src/**/*"],
     "exclude": ["node_modules"]
 }
+

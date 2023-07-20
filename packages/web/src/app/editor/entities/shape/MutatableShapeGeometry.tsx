@@ -5,12 +5,30 @@ import {
     Vector2,
 } from "three"
 
+function IterateInOrder(
+    vertices: Vector2[],
+    callback: (i: number, vertex: Vector2) => void,
+) {
+    for (let i = 0; i < vertices.length; i++) {
+        callback(i, vertices[i])
+    }
+}
+
+function IterateInReverseOrder(
+    vertices: Vector2[],
+    callback: (i: number, vertex: Vector2) => void,
+) {
+    for (let i = vertices.length - 1; i >= 0; i--) {
+        callback(i, vertices[i])
+    }
+}
+
 export class MutatableShapeGeometry extends BufferGeometry {
     update(vertices: Vector2[]) {
         // check direction of vertices
-        if (ShapeUtils.isClockWise(vertices) === false) {
-            vertices = vertices.reverse()
-        }
+        const iterate = ShapeUtils.isClockWise(vertices)
+            ? IterateInOrder
+            : IterateInReverseOrder
 
         const faces = ShapeUtils.triangulateShape(vertices, [])
 
@@ -29,7 +47,7 @@ export class MutatableShapeGeometry extends BufferGeometry {
         const bufferNormals = new Float32Array(vertices.length * 3)
         const bufferUvs = new Float32Array(vertices.length * 2)
 
-        for (let i = 0, l = vertices.length; i < l; i++) {
+        iterate(vertices, (i, vertex) => {
             buffer[i * 3] = vertices[i].x
             buffer[i * 3 + 1] = vertices[i].y
             buffer[i * 3 + 2] = 0
@@ -39,7 +57,7 @@ export class MutatableShapeGeometry extends BufferGeometry {
 
             bufferUvs[i * 2] = vertices[i].x
             bufferUvs[i * 2 + 1] = vertices[i].y
-        }
+        })
 
         this.setIndex(indices)
 
@@ -53,4 +71,3 @@ export class MutatableShapeGeometry extends BufferGeometry {
         this.attributes.position.needsUpdate = true
     }
 }
-

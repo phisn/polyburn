@@ -25,14 +25,18 @@ interface EventStore {
 }
 
 const createEventStore = (): EventStore => {
-    const listeners = new OrderedSet<ListenerRef>(
-        [],
-        (x, y) => y.current.priority - x.current.priority,
-    )
+    const listeners = new OrderedSet<ListenerRef>([], (x, y) => {
+        if (x.current.priority === y.current.priority) {
+            return x.current.callback === y.current.callback ? 0 : -1
+        }
+
+        return y.current.priority - x.current.priority
+    })
 
     return {
         subscribeEvent: listener => {
             listeners.insert(listener)
+
             return () => {
                 listeners.eraseElementByKey(listener)
             }
@@ -40,7 +44,14 @@ const createEventStore = (): EventStore => {
         event: event => {
             for (const listener of listeners) {
                 if (listener.current.callback(event) === ConsumeEvent) {
-                    return true
+                    if (event.consumed) {
+                        console.error(
+                            "Event was consumed multiple times. This is not allowed.",
+                            listener.current.callback,
+                        )
+                    }
+
+                    event.consumed = true
                 }
             }
 
@@ -84,5 +95,5 @@ export enum Priority {
     Fallback = -1,
     Normal = 0,
     Selected = 1,
+    Action = 2,
 }
-

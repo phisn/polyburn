@@ -5,12 +5,19 @@ import { useEventDispatch } from "./store/EventStore"
 
 export interface NativeEvent {
     positionInWindow: { x: number; y: number }
-    leftButton: boolean
+
+    leftButtonDown: boolean
+
+    shiftKey: boolean
+    ctrlKey: boolean
 }
 
-export interface EditorEvent {
+export interface EditorEvent extends NativeEvent {
     position: Vector3
-    clicked: boolean
+
+    leftButtonClicked: boolean
+
+    consumed: boolean
 }
 
 function canvasToWorld(
@@ -39,10 +46,12 @@ export function EventHandler() {
 
     useEffect(() => {
         const onPointerEvent = (event: PointerEvent) => {
-            console.log("pointer event", event.buttons)
             onEditorInputChanged({
                 positionInWindow: { x: event.clientX, y: event.clientY },
-                leftButton: (event.buttons & 1) === 1,
+                leftButtonDown: (event.buttons & 1) === 1,
+
+                shiftKey: event.shiftKey,
+                ctrlKey: event.ctrlKey,
             })
         }
 
@@ -50,17 +59,20 @@ export function EventHandler() {
             const lastNativeEvent = lastNativeEventRef.current ?? nativeEvent
 
             const event: EditorEvent = {
+                ...nativeEvent,
+
                 position: canvasToWorld(
                     nativeEvent.positionInWindow,
                     camera,
                     canvas,
                 ),
-                clicked: nativeEvent.leftButton && !lastNativeEvent.leftButton,
-            }
 
-            console.log(
-                `nlb: ${nativeEvent.leftButton}, llb: ${lastNativeEvent.leftButton}, clicked: ${event.clicked}`,
-            )
+                leftButtonClicked:
+                    nativeEvent.leftButtonDown &&
+                    !lastNativeEvent.leftButtonDown,
+
+                consumed: false,
+            }
 
             lastNativeEventRef.current = nativeEvent
 
@@ -80,4 +92,3 @@ export function EventHandler() {
 
     return <></>
 }
-

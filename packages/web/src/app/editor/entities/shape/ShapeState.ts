@@ -6,5 +6,7 @@ export interface ShapeState {
     id: number
 
     position: Vector3
+
     vertices: Vector2[]
+    colors: number[]
 }

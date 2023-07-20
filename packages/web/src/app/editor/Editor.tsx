@@ -11,41 +11,6 @@ import { ProvideEntityStore, useEntities } from "./store/EntityStore"
 import { ProvideEventStore } from "./store/EventStore"
 
 export function Editor() {
-    const circle = []
-
-    for (let i = 0; i < 32; i++) {
-        const angle = (i / 32) * Math.PI * 2
-
-        circle.push(new Vector2(Math.cos(angle) * 8, Math.sin(angle) * 8))
-    }
-
-    const star = []
-
-    for (let i = 0; i < 32; i++) {
-        const angle = (i / 32) * Math.PI * 2
-
-        const radius = i % 2 === 0 ? 8 : 4
-
-        star.push(
-            new Vector2(Math.cos(angle) * radius, Math.sin(angle) * radius),
-        )
-    }
-
-    const uglyStar = []
-
-    for (let i = 0; i < 32; i++) {
-        const angle = (i / 32) * Math.PI * 2
-
-        const radius = i % 2 === 0 ? 4 : 2
-
-        uglyStar.push(
-            new Vector2(
-                Math.cos(angle) * radius * (1 + Math.random() * 1),
-                Math.sin(angle) * radius * (1 + Math.random() * 1),
-            ),
-        )
-    }
-
     return (
         <ProvideEntityStore
             entities={[
@@ -59,6 +24,7 @@ export function Editor() {
                         new Vector2(5, 5),
                         new Vector2(0, 5),
                     ],
+                    colors: [0xff0000, 0x00ff00, 0x0000ff, 0xff0000],
                 },
                 {
                     type: EntityType.Shape,
@@ -70,13 +36,7 @@ export function Editor() {
                         new Vector2(10, 10),
                         new Vector2(5, 10),
                     ],
-                },
-
-                {
-                    type: EntityType.Shape,
-                    id: 3,
-                    position: new Vector3(0, 0),
-                    vertices: uglyStar,
+                    colors: [0xff0000, 0x00ff00, 0x0000ff, 0xff0000],
                 },
             ]}
         >

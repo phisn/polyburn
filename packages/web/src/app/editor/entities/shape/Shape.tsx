@@ -1,7 +1,8 @@
+import { Html } from "@react-three/drei"
 import { MeshProps } from "@react-three/fiber"
 import { forwardRef, useEffect, useRef, useState } from "react"
 import { Point } from "runtime/src/model/world/Point"
-import { Mesh, Vector2 } from "three"
+import { Mesh, Vector2, Vector3 } from "three"
 import {
     baseZoomFactor,
     highlightColor,
@@ -51,7 +52,17 @@ interface ModeVertex {
     vertexIndex: number
 }
 
-type Mode = ModeNone | ModeSelected | ModeMoving | ModeVertex
+interface ModeVertexContextMenu {
+    type: "vertexContextMenu"
+    vertexIndex: number
+}
+
+type Mode =
+    | ModeNone
+    | ModeSelected
+    | ModeMoving
+    | ModeVertex
+    | ModeVertexContextMenu
 
 export function Shape(props: { id: number }) {
     const state: ShapeState = useEntity(props.id)
@@ -124,10 +135,15 @@ export function Shape(props: { id: number }) {
                             priority,
                         )
 
-                        geometryRef.current.update(state.vertices)
+                        geometryRef.current.update(state.vertices, state.colors)
 
                         setMode({
                             type: "vertex",
+                            vertexIndex: closestVertex.vertexIndex,
+                        })
+                    } else if (event.rightButtonClicked) {
+                        setMode({
+                            type: "vertexContextMenu",
                             vertexIndex: closestVertex.vertexIndex,
                         })
                     } else {
@@ -154,7 +170,13 @@ export function Shape(props: { id: number }) {
                             ),
                         )
 
-                        geometryRef.current.update(state.vertices)
+                        state.colors.splice(
+                            closestEdge.edge[1],
+                            0,
+                            state.colors[closestEdge.edge[0]],
+                        )
+
+                        geometryRef.current.update(state.vertices, state.colors)
 
                         setMode({
                             type: "vertex",
@@ -207,6 +229,12 @@ export function Shape(props: { id: number }) {
                 }
 
                 return ConsumeEvent
+            case "vertexContextMenu":
+                if (event.leftButtonClicked) {
+                    setMode({ type: "selected" })
+                }
+
+                return ConsumeEvent
             case "vertex":
                 if (event.leftButtonDown) {
                     const intersection = resolveIntersection(
@@ -238,7 +266,7 @@ export function Shape(props: { id: number }) {
                         priority,
                     )
 
-                    geometryRef.current.update(state.vertices)
+                    geometryRef.current.update(state.vertices, state.colors)
                 } else {
                     setMode({ type: "selected" })
                 }
@@ -248,7 +276,7 @@ export function Shape(props: { id: number }) {
     }, priority)
 
     useEffect(() => {
-        geometryRef.current.update(state.vertices)
+        geometryRef.current.update(state.vertices, state.colors)
     }, [])
 
     function Selected() {
@@ -269,6 +297,48 @@ export function Shape(props: { id: number }) {
         )
     }
 
+    function VertexContext(props: { mode: ModeVertexContextMenu }) {
+        const vertex = state.vertices[props.mode.vertexIndex]
+
+        return (
+            <>
+                <Html
+                    as="div"
+                    position={
+                        new Vector3(
+                            vertex.x + state.position.x,
+                            vertex.y + state.position.y,
+                        )
+                    }
+                >
+                    <div className="ml-2 mt-2 flex space-x-4 rounded-2xl bg-white bg-opacity-60 p-4 px-8 backdrop-blur-xl">
+                        <div className="text-xl font-bold text-zinc-900">
+                            Color{" "}
+                        </div>
+                        <input
+                            type="color"
+                            className="w-16"
+                            value={`#${state.colors[props.mode.vertexIndex]
+                                .toString(16)
+                                .padStart(6, "0")}`}
+                            onChange={event => {
+                                state.colors[props.mode.vertexIndex] = parseInt(
+                                    event.target.value.substring(1),
+                                    16,
+                                )
+
+                                geometryRef.current.update(
+                                    state.vertices,
+                                    state.colors,
+                                )
+                            }}
+                        ></input>
+                    </div>
+                </Html>
+            </>
+        )
+    }
+
     return (
         <>
             <mesh
@@ -276,7 +346,7 @@ export function Shape(props: { id: number }) {
                 geometry={geometryRef.current}
                 position={[state.position.x, state.position.y, priority]}
             >
-                <meshBasicMaterial color={materialColor()} />
+                <meshBasicMaterial color={"white"} vertexColors />
             </mesh>
 
             <mesh ref={markerRef} visible={false}>
@@ -284,6 +354,7 @@ export function Shape(props: { id: number }) {
                 <meshBasicMaterial color={highlightColor} />
             </mesh>
 
+            {mode.type === "vertexContextMenu" && <VertexContext mode={mode} />}
             {mode.type !== "none" && <Selected />}
         </>
     )
@@ -299,28 +370,6 @@ export function Shape(props: { id: number }) {
 
         return shapeColor
     }
-}
-
-export function moveElementTo(array: any[], from: number, to: number) {
-    if (to === from) {
-        return
-    }
-
-    const target = array[from]
-
-    if (to > from) {
-        for (let i = from; i < to; ++i) {
-            array[i] = array[i + 1]
-        }
-    } else {
-        for (let i = from; i > to; --i) {
-            array[i] = array[i - 1]
-        }
-    }
-
-    array[to] = target
-
-    return array
 }
 
 export function resolveIntersection(
@@ -343,65 +392,29 @@ export function resolveIntersection(
             continue
         }
 
-        if (
-            intersects(
-                shape.vertices[vertexIndex],
-                moveTo,
-                shape.vertices[i],
-                shape.vertices[j],
-            )
-        ) {
-            console.log(`before ${JSON.stringify(shape.vertices)}`)
-
-            shape.vertices.splice(i + 1, 0, shape.vertices[vertexIndex])
-            shape.vertices.splice(
-                vertexIndex < i ? vertexIndex : vertexIndex + 1,
-                1,
-            )
-
-            return vertexIndex < i ? i : i + 1
-        }
-
         const left =
             (vertexIndex - 1 + shape.vertices.length) % shape.vertices.length
+
         const right = (vertexIndex + 1) % shape.vertices.length
 
         if (
-            i !== left &&
-            j !== left &&
-            intersects(
-                moveTo,
-                shape.vertices[left],
-                shape.vertices[i],
-                shape.vertices[j],
-            )
+            (i !== right &&
+                j !== right &&
+                intersects(
+                    moveTo,
+                    shape.vertices[right],
+                    shape.vertices[i],
+                    shape.vertices[j],
+                )) ||
+            (i !== left &&
+                j !== left &&
+                intersects(
+                    moveTo,
+                    shape.vertices[left],
+                    shape.vertices[i],
+                    shape.vertices[j],
+                ))
         ) {
-            console.log(
-                `i: ${i}, j: ${j}, left: ${left}, right: ${right} vertexIndex: ${vertexIndex}`,
-            )
-            shape.vertices.splice(i + 1, 0, shape.vertices[vertexIndex])
-            shape.vertices.splice(
-                vertexIndex < i ? vertexIndex : vertexIndex + 1,
-                1,
-            )
-
-            return vertexIndex < i ? i : i + 1
-        }
-
-        if (
-            i !== right &&
-            j !== right &&
-            intersects(
-                moveTo,
-                shape.vertices[right],
-                shape.vertices[i],
-                shape.vertices[j],
-            )
-        ) {
-            console.log(
-                `i: ${i}, j: ${j}, left: ${left}, right: ${right} vertexIndex: ${vertexIndex}`,
-            )
-
             shape.vertices.splice(i + 1, 0, shape.vertices[vertexIndex])
             shape.vertices.splice(
                 vertexIndex < i ? vertexIndex : vertexIndex + 1,

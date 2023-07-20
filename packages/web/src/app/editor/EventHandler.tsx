@@ -7,6 +7,7 @@ export interface NativeEvent {
     positionInWindow: { x: number; y: number }
 
     leftButtonDown: boolean
+    rightButtonDown: boolean
 
     shiftKey: boolean
     ctrlKey: boolean
@@ -16,6 +17,7 @@ export interface EditorEvent extends NativeEvent {
     position: Vector3
 
     leftButtonClicked: boolean
+    rightButtonClicked: boolean
 
     consumed: boolean
 }
@@ -49,6 +51,7 @@ export function EventHandler() {
             onEditorInputChanged({
                 positionInWindow: { x: event.clientX, y: event.clientY },
                 leftButtonDown: (event.buttons & 1) === 1,
+                rightButtonDown: (event.buttons & 2) === 2,
 
                 shiftKey: event.shiftKey,
                 ctrlKey: event.ctrlKey,
@@ -71,6 +74,10 @@ export function EventHandler() {
                     nativeEvent.leftButtonDown &&
                     !lastNativeEvent.leftButtonDown,
 
+                rightButtonClicked:
+                    nativeEvent.rightButtonDown &&
+                    !lastNativeEvent.rightButtonDown,
+
                 consumed: false,
             }
 
@@ -82,6 +89,10 @@ export function EventHandler() {
         canvas.addEventListener("pointerdown", onPointerEvent)
         canvas.addEventListener("pointermove", onPointerEvent)
         canvas.addEventListener("pointerup", onPointerEvent)
+
+        canvas.addEventListener("contextmenu", event => {
+            event.preventDefault()
+        })
 
         return () => {
             canvas.removeEventListener("pointerdown", onPointerEvent)

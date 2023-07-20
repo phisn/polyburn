@@ -24,7 +24,7 @@ function IterateInReverseOrder(
 }
 
 export class MutatableShapeGeometry extends BufferGeometry {
-    update(vertices: Vector2[]) {
+    update(vertices: Vector2[], colors: number[]) {
         // check direction of vertices
         const iterate = ShapeUtils.isClockWise(vertices)
             ? IterateInOrder
@@ -48,14 +48,14 @@ export class MutatableShapeGeometry extends BufferGeometry {
         const bufferUvs = new Float32Array(vertices.length * 2)
 
         iterate(vertices, (i, vertex) => {
-            buffer[i * 3] = vertices[i].x
-            buffer[i * 3 + 1] = vertices[i].y
+            buffer[i * 3] = vertex.x
+            buffer[i * 3 + 1] = vertex.y
             buffer[i * 3 + 2] = 0
 
             bufferNormals[i * 3] = 0
             bufferNormals[i * 3 + 1] = 0
 
-            bufferUvs[i * 2] = vertices[i].x
+            bufferUvs[i * 2] = vertex.x
             bufferUvs[i * 2 + 1] = vertices[i].y
         })
 
@@ -68,6 +68,17 @@ export class MutatableShapeGeometry extends BufferGeometry {
         )
         this.setAttribute("uv", new Float32BufferAttribute(bufferUvs, 2))
 
+        const bufferColors = new Float32Array(vertices.length * 3)
+
+        iterate(vertices, (i, vertex) => {
+            bufferColors[i * 3] = (colors[i] >> 16) / 255
+            bufferColors[i * 3 + 1] = ((colors[i] >> 8) & 0xff) / 255
+            bufferColors[i * 3 + 2] = (colors[i] & 0xff) / 255
+        })
+
+        this.setAttribute("color", new Float32BufferAttribute(bufferColors, 3))
+
+        this.attributes.color.needsUpdate = true
         this.attributes.position.needsUpdate = true
     }
 }

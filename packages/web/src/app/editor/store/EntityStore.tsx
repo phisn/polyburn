@@ -5,12 +5,12 @@ import { RocketState } from "./RocketState"
 
 export type EntityState = ShapeState | RocketState | LevelState
 
-interface Mutation {
+export interface Mutation {
     mutates: number[]
     removeOrCreate: boolean
 
-    do: () => void
-    undo: () => void
+    do: (store: EntityStore) => void
+    undo: (store: EntityStore) => void
 }
 
 interface EntityStore {
@@ -72,4 +72,3 @@ export function useEntity<T>(entity: number) {
 export function useMutationDispatch() {
     return useContext(Context).mutation
 }
-

@@ -19,24 +19,46 @@ export function Editor() {
                     id: 1,
                     position: new Vector3(0, 0),
                     vertices: [
-                        new Vector2(0, 0),
-                        new Vector2(5, 0),
-                        new Vector2(5, 5),
-                        new Vector2(0, 5),
+                        {
+                            position: new Vector2(0, 0),
+                            color: { r: 255, g: 0, b: 0 },
+                        },
+                        {
+                            position: new Vector2(5, 0),
+                            color: { r: 0, g: 255, b: 0 },
+                        },
+                        {
+                            position: new Vector2(5, 5),
+                            color: { r: 0, g: 0, b: 255 },
+                        },
+                        {
+                            position: new Vector2(0, 5),
+                            color: { r: 255, g: 0, b: 0 },
+                        },
                     ],
-                    colors: [0xff0000, 0x00ff00, 0x0000ff, 0xff0000],
                 },
                 {
                     type: EntityType.Shape,
                     id: 2,
                     position: new Vector3(0, 0),
                     vertices: [
-                        new Vector2(5, 5),
-                        new Vector2(10, 5),
-                        new Vector2(10, 10),
-                        new Vector2(5, 10),
+                        {
+                            position: new Vector2(5, 5),
+                            color: { r: 255, g: 0, b: 0 },
+                        },
+                        {
+                            position: new Vector2(10, 5),
+                            color: { r: 0, g: 255, b: 0 },
+                        },
+                        {
+                            position: new Vector2(10, 10),
+                            color: { r: 0, g: 0, b: 255 },
+                        },
+                        {
+                            position: new Vector2(5, 10),
+                            color: { r: 255, g: 0, b: 0 },
+                        },
                     ],
-                    colors: [0xff0000, 0x00ff00, 0x0000ff, 0xff0000],
                 },
             ]}
         >

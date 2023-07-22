@@ -141,6 +141,9 @@ importers:
       react:
         specifier: 0.0.0-experimental-546fe4681-20230713
         version: 0.0.0-experimental-546fe4681-20230713
+      react-colorful:
+        specifier: ^5.6.1
+        version: 5.6.1(react-dom@0.0.0-experimental-546fe4681-20230713)(react@0.0.0-experimental-546fe4681-20230713)
       react-device-detect:
         specifier: ^2.2.3
         version: 2.2.3(react-dom@0.0.0-experimental-546fe4681-20230713)(react@0.0.0-experimental-546fe4681-20230713)
@@ -5543,6 +5546,16 @@ packages:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
     dev: true
+
+  /react-colorful@5.6.1(react-dom@0.0.0-experimental-546fe4681-20230713)(react@0.0.0-experimental-546fe4681-20230713):
+    resolution: {integrity: sha512-1exovf0uGTGyq5mXQT0zgQ80uvj2PCwvF8zY1RN9/vbJVSjSo3fsB/4L3ObbF7u70NduSiK4xu4Y6q1MHoUGEw==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    dependencies:
+      react: 0.0.0-experimental-546fe4681-20230713
+      react-dom: 0.0.0-experimental-546fe4681-20230713(react@0.0.0-experimental-546fe4681-20230713)
+    dev: false
 
   /react-composer@5.0.3(react@0.0.0-experimental-546fe4681-20230713):
     resolution: {integrity: sha512-1uWd07EME6XZvMfapwZmc7NgCZqDemcvicRi3wMJzXsQLvZ3L7fTHVyPy1bZdnWXM4iPjYuNE+uJ41MLKeTtnA==}

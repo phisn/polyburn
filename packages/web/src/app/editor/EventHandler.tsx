@@ -9,15 +9,15 @@ export interface NativeEvent {
     leftButtonDown: boolean
     rightButtonDown: boolean
 
+    leftButtonClicked: boolean
+    rightButtonClicked: boolean
+
     shiftKey: boolean
     ctrlKey: boolean
 }
 
 export interface EditorEvent extends NativeEvent {
     position: Vector3
-
-    leftButtonClicked: boolean
-    rightButtonClicked: boolean
 
     consumed: boolean
 }
@@ -50,8 +50,14 @@ export function EventHandler() {
         const onPointerEvent = (event: PointerEvent) => {
             onEditorInputChanged({
                 positionInWindow: { x: event.clientX, y: event.clientY },
+
                 leftButtonDown: (event.buttons & 1) === 1,
                 rightButtonDown: (event.buttons & 2) === 2,
+
+                leftButtonClicked:
+                    event.type === "pointerdown" && (event.buttons & 1) === 1,
+                rightButtonClicked:
+                    event.type === "pointerdown" && (event.buttons & 2) === 2,
 
                 shiftKey: event.shiftKey,
                 ctrlKey: event.ctrlKey,
@@ -70,14 +76,6 @@ export function EventHandler() {
                     canvas,
                 ),
 
-                leftButtonClicked:
-                    nativeEvent.leftButtonDown &&
-                    !lastNativeEvent.leftButtonDown,
-
-                rightButtonClicked:
-                    nativeEvent.rightButtonDown &&
-                    !lastNativeEvent.rightButtonDown,
-
                 consumed: false,
             }
 
@@ -90,6 +88,55 @@ export function EventHandler() {
         canvas.addEventListener("pointermove", onPointerEvent)
         canvas.addEventListener("pointerup", onPointerEvent)
 
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (lastNativeEventRef.current === undefined) {
+                return
+            }
+
+            switch (event.code) {
+                case "ShiftLeft":
+                    onEditorInputChanged({
+                        ...lastNativeEventRef.current,
+                        shiftKey: true,
+                    })
+
+                    break
+
+                case "ControlLeft":
+                    onEditorInputChanged({
+                        ...lastNativeEventRef.current,
+                        ctrlKey: true,
+                    })
+
+                    break
+            }
+        }
+
+        const onKeyUp = (event: KeyboardEvent) => {
+            if (lastNativeEventRef.current === undefined) {
+                return
+            }
+
+            switch (event.code) {
+                case "ShiftLeft":
+                    onEditorInputChanged({
+                        ...lastNativeEventRef.current,
+                        shiftKey: false,
+                    })
+
+                    break
+
+                case "ControlLeft":
+                    onEditorInputChanged({
+                        ...lastNativeEventRef.current,
+                        ctrlKey: false,
+                    })
+            }
+        }
+
+        window.addEventListener("keydown", onKeyDown)
+        window.addEventListener("keyup", onKeyUp)
+
         canvas.addEventListener("contextmenu", event => {
             event.preventDefault()
         })
@@ -98,6 +145,9 @@ export function EventHandler() {
             canvas.removeEventListener("pointerdown", onPointerEvent)
             canvas.removeEventListener("pointermove", onPointerEvent)
             canvas.removeEventListener("pointerup", onPointerEvent)
+
+            window.removeEventListener("keydown", onKeyDown)
+            window.removeEventListener("keyup", onKeyUp)
         }
     })
 

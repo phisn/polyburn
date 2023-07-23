@@ -3,6 +3,7 @@ import { EntityType } from "runtime/src/core/common/EntityType"
 import { Vector2, Vector3 } from "three"
 import { EventHandler } from "./EventHandler"
 import { editorTunnel } from "./Tunnel"
+import { Background } from "./components/Background"
 import { Camera } from "./components/Camera"
 import { Level } from "./entities/Level"
 import { Rocket } from "./entities/Rocket"
@@ -69,6 +70,8 @@ export function Editor() {
 
                         <Entities />
                         <EventHandler />
+
+                        <Background />
                     </Canvas>
 
                     <editorTunnel.Out />

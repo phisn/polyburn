@@ -78,7 +78,7 @@ export function Shape(props: { id: number }) {
                 break
 
             case "vertexContextMenu":
-                if (event.leftButtonClicked) {
+                if (event.leftButtonClicked || event.rightButtonClicked) {
                     setMode({ type: "selected" })
                 }
 

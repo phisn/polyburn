@@ -1,6 +1,7 @@
 import { EntityType } from "runtime/src/core/common/EntityType"
 import { Vector2, Vector3 } from "three"
 import { Point } from "../../../../../../runtime/src/model/world/Point"
+import { BaseEntityState } from "../../store/BaseEntityState"
 
 export interface ShapeVertexColor {
     r: number
@@ -40,9 +41,8 @@ export interface ShapeVertex {
     color: ShapeVertexColor
 }
 
-export interface ShapeState {
+export interface ShapeState extends BaseEntityState {
     type: EntityType.Shape
-    id: number
 
     position: Vector3
     vertices: ShapeVertex[]

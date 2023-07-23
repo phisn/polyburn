@@ -53,6 +53,13 @@ function Game(props: { world: WorldModel }) {
                         WebkitUserSelect: "none",
                         WebkitTapHighlightColor: "rgba(255,255,255,0)",
                     }}
+                    onClick={async e => {
+                        const target = e.target as HTMLCanvasElement
+
+                        if (document.pointerLockElement !== target) {
+                            target.requestPointerLock()
+                        }
+                    }}
                 >
                     <Suspense>
                         <GameInThree stack={stack} />
@@ -98,4 +105,3 @@ function GameInThree(props: { stack: RuntimeSystemStack }) {
 }
 
 export default Game
-

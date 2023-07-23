@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo, useSyncExternalStore } from "react"
 import { LevelState } from "../entities/LevelState"
+import { RocketState } from "../entities/RocketState"
 import { ShapeState } from "../entities/shape/ShapeState"
-import { RocketState } from "./RocketState"
 
 export type EntityState = ShapeState | RocketState | LevelState
 
@@ -72,3 +72,5 @@ export function useEntity<T>(entity: number) {
 export function useMutationDispatch() {
     return useContext(Context).mutation
 }
+
+export function useGamemodes() {}

@@ -48,6 +48,12 @@ export function EventHandler() {
 
     useEffect(() => {
         const onPointerEvent = (event: PointerEvent) => {
+            if (event.type === "pointerdown") {
+                canvas.setPointerCapture(event.pointerId)
+            } else if (event.type === "pointerup") {
+                canvas.releasePointerCapture(event.pointerId)
+            }
+
             onEditorInputChanged({
                 positionInWindow: { x: event.clientX, y: event.clientY },
 

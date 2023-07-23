@@ -5,6 +5,7 @@ import { EventHandler } from "./EventHandler"
 import { editorTunnel } from "./Tunnel"
 import { Background } from "./components/Background"
 import { Camera } from "./components/Camera"
+import { GamemodeSelect } from "./components/GamemodeSelect"
 import { Level } from "./entities/Level"
 import { Rocket } from "./entities/Rocket"
 import { Shape } from "./entities/shape/Shape"
@@ -75,6 +76,8 @@ export function Editor() {
                     </Canvas>
 
                     <editorTunnel.Out />
+
+                    <GamemodeSelect />
                 </div>
             </ProvideEventStore>
         </ProvideEntityStore>

@@ -1,11 +1,10 @@
 import { EntityType } from "runtime/src/core/common/EntityType"
+import { BaseEntityState } from "../store/BaseEntityState"
 
-export interface RocketState {
+export interface RocketState extends BaseEntityState {
     type: EntityType.Rocket
-    id: number
     selected: boolean
 
     position: { x: number; y: number }
     rotation: number
 }
-

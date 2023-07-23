@@ -2,7 +2,7 @@
 
 import { BrowserView } from "react-device-detect"
 import { Link } from "react-router-dom"
-import { Pencil } from "../common/inline-svg/Pencil"
+import { PencilSquare } from "../common/inline-svg/PencilSquare"
 import { Person } from "../common/inline-svg/Person"
 
 export function NavbarUtility() {
@@ -14,7 +14,7 @@ export function NavbarUtility() {
                     className="btn btn-ghost hidden text-zinc-500 sm:flex"
                 >
                     Editor
-                    <Pencil width="24" height="24" />
+                    <PencilSquare width="24" height="24" />
                 </Link>
             </BrowserView>
             <div className="btn btn-ghost btn-square text-lg text-zinc-300">
@@ -23,4 +23,3 @@ export function NavbarUtility() {
         </>
     )
 }
-

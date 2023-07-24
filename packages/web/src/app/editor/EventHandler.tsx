@@ -45,10 +45,16 @@ export function EventHandler() {
 
     useEffect(() => {
         const onPointerEvent = (raw: PointerEvent) => {
-            if (raw.type === "pointerdown") {
-                canvas.setPointerCapture(raw.pointerId)
-            } else if (raw.type === "pointerup") {
-                canvas.releasePointerCapture(raw.pointerId)
+            let consumed = true
+
+            if (raw.target instanceof Node && canvas.contains(raw.target)) {
+                if (raw.type === "pointerdown") {
+                    canvas.setPointerCapture(raw.pointerId)
+                } else if (raw.type === "pointerup") {
+                    canvas.releasePointerCapture(raw.pointerId)
+                }
+
+                consumed = false
             }
 
             const event: EditorEvent = {
@@ -70,9 +76,7 @@ export function EventHandler() {
                 shiftKey: raw.shiftKey,
                 ctrlKey: raw.ctrlKey,
 
-                consumed: !(
-                    raw.target instanceof Node && canvas.contains(raw.target)
-                ),
+                consumed,
             }
 
             lastNativeEventRef.current = event
@@ -147,9 +151,9 @@ export function EventHandler() {
         })
 
         return () => {
-            canvas.removeEventListener("pointerdown", onPointerEvent)
-            canvas.removeEventListener("pointermove", onPointerEvent)
-            canvas.removeEventListener("pointerup", onPointerEvent)
+            window.removeEventListener("pointerdown", onPointerEvent)
+            window.removeEventListener("pointermove", onPointerEvent)
+            window.removeEventListener("pointerup", onPointerEvent)
 
             window.removeEventListener("keydown", onKeyDown)
             window.removeEventListener("keyup", onKeyUp)

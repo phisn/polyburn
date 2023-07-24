@@ -70,8 +70,9 @@ export function EventHandler() {
                 shiftKey: raw.shiftKey,
                 ctrlKey: raw.ctrlKey,
 
-                consumed:
-                    raw.target instanceof Node && canvas.contains(raw.target),
+                consumed: !(
+                    raw.target instanceof Node && canvas.contains(raw.target)
+                ),
             }
 
             lastNativeEventRef.current = event

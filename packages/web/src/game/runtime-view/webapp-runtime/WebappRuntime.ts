@@ -5,6 +5,7 @@ import { Gamemode } from "runtime/src/gamemode/Gamemode"
 import { WorldModel } from "runtime/src/model/world/WorldModel"
 
 import { RuntimeSystemContext } from "runtime/src/core/RuntimeSystemStack"
+import { defaultConfig } from "../../../../../runtime/src/core/RuntimeConfig"
 import { WebappComponents } from "./WebappComponents"
 import { WebappFactoryContext } from "./WebappFactoryContext"
 import { newRegisterGraphicsSystem } from "./graphic/RegisterGraphicsSystem"
@@ -38,6 +39,7 @@ export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
     const contextExtended: WebappFactoryContext = {
         ...context,
         particlePhysics,
+        config: defaultConfig,
     }
 
     const stackExtended: SystemStack<

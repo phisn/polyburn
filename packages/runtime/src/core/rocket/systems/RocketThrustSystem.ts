@@ -27,7 +27,7 @@ export const newRocketThrustSystem: RuntimeSystemFactory = ({
                 rocketGroundRay(
                     physics,
                     rocket.components.rigidBody,
-                    config.thrustValue,
+                    config.thrustDistance,
                 )
             ) {
                 force.x *= config.thrustGroundMultiplier

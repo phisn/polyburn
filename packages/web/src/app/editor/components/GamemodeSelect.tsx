@@ -203,6 +203,28 @@ function GamemodeOption(props: {
                             <li className="w-full">
                                 <label className="label flex w-full cursor-pointer">
                                     <span className="label-text mr-3 flex w-full overflow-hidden">
+                                        Normal Shapes
+                                    </span>
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox checkbox-success checkbox-sm border-zinc-400"
+                                    />
+                                </label>
+                            </li>
+                            <li className="w-full">
+                                <label className="label flex w-full cursor-pointer">
+                                    <span className="label-text mr-3 flex w-full overflow-hidden">
+                                        Normal Flags
+                                    </span>
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox checkbox-success checkbox-sm border-zinc-400"
+                                    />
+                                </label>
+                            </li>
+                            <li className="w-full">
+                                <label className="label flex w-full cursor-pointer">
+                                    <span className="label-text mr-3 flex w-full overflow-hidden">
                                         Reverse Flags
                                     </span>
                                     <input

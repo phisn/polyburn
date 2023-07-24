@@ -9,6 +9,7 @@ import tunnel from "tunnel-rat"
 import { shallow } from "zustand/shallow"
 
 import { WorldModel } from "runtime/src/model/world/WorldModel"
+import { normalGamemode } from "../../../runtime/src/gamemode/NormalGamemode"
 import Overlay from "./overlay/Overlay"
 import { useWebappRuntime } from "./runtime-runner/useWebappRuntime"
 import { RuntimeView } from "./runtime-view/RuntimeView"
@@ -22,7 +23,7 @@ function Game(props: { world: WorldModel }) {
     use(rapierInit)
 
     const world = JSON.parse(JSON.stringify(props.world)) // dirty hack to prototype for now. fix later
-    const { context, stack } = newWebappRuntime(null!, world)
+    const { context, stack } = newWebappRuntime(normalGamemode, world)
 
     return (
         <ProvideGameStore systemContext={context}>
@@ -53,6 +54,7 @@ function Game(props: { world: WorldModel }) {
                         WebkitUserSelect: "none",
                         WebkitTapHighlightColor: "rgba(255,255,255,0)",
                     }}
+                    /*
                     onClick={async e => {
                         const target = e.target as HTMLCanvasElement
 
@@ -60,6 +62,7 @@ function Game(props: { world: WorldModel }) {
                             target.requestPointerLock()
                         }
                     }}
+                    */
                 >
                     <Suspense>
                         <GameInThree stack={stack} />

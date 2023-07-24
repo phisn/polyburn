@@ -3,7 +3,8 @@ import { useEffect, useRef } from "react"
 import { Camera, Vector3 } from "three"
 import { useEventDispatch } from "./store/EventStore"
 
-export interface NativeEvent {
+export interface EditorEvent {
+    position: Vector3
     positionInWindow: { x: number; y: number }
 
     leftButtonDown: boolean
@@ -14,10 +15,6 @@ export interface NativeEvent {
 
     shiftKey: boolean
     ctrlKey: boolean
-}
-
-export interface EditorEvent extends NativeEvent {
-    position: Vector3
 
     consumed: boolean
 }
@@ -39,7 +36,7 @@ function canvasToWorld(
 }
 
 export function EventHandler() {
-    const lastNativeEventRef = useRef<NativeEvent | undefined>()
+    const lastNativeEventRef = useRef<EditorEvent | undefined>()
 
     const canvas = useThree(state => state.gl.domElement)
     const camera = useThree(state => state.camera)
@@ -47,52 +44,43 @@ export function EventHandler() {
     const dispatchEvent = useEventDispatch()
 
     useEffect(() => {
-        const onPointerEvent = (event: PointerEvent) => {
-            if (event.type === "pointerdown") {
-                canvas.setPointerCapture(event.pointerId)
-            } else if (event.type === "pointerup") {
-                canvas.releasePointerCapture(event.pointerId)
+        const onPointerEvent = (raw: PointerEvent) => {
+            if (raw.type === "pointerdown") {
+                canvas.setPointerCapture(raw.pointerId)
+            } else if (raw.type === "pointerup") {
+                canvas.releasePointerCapture(raw.pointerId)
             }
 
-            onEditorInputChanged({
-                positionInWindow: { x: event.clientX, y: event.clientY },
-
-                leftButtonDown: (event.buttons & 1) === 1,
-                rightButtonDown: (event.buttons & 2) === 2,
-
-                leftButtonClicked:
-                    event.type === "pointerdown" && (event.buttons & 1) === 1,
-                rightButtonClicked:
-                    event.type === "pointerdown" && (event.buttons & 2) === 2,
-
-                shiftKey: event.shiftKey,
-                ctrlKey: event.ctrlKey,
-            })
-        }
-
-        const onEditorInputChanged = (nativeEvent: NativeEvent) => {
-            const lastNativeEvent = lastNativeEventRef.current ?? nativeEvent
-
             const event: EditorEvent = {
-                ...nativeEvent,
-
                 position: canvasToWorld(
-                    nativeEvent.positionInWindow,
+                    { x: raw.clientX, y: raw.clientY },
                     camera,
                     canvas,
                 ),
+                positionInWindow: { x: raw.clientX, y: raw.clientY },
 
-                consumed: false,
+                leftButtonDown: (raw.buttons & 1) === 1,
+                rightButtonDown: (raw.buttons & 2) === 2,
+
+                leftButtonClicked:
+                    raw.type === "pointerdown" && (raw.buttons & 1) === 1,
+                rightButtonClicked:
+                    raw.type === "pointerdown" && (raw.buttons & 2) === 2,
+
+                shiftKey: raw.shiftKey,
+                ctrlKey: raw.ctrlKey,
+
+                consumed:
+                    raw.target instanceof Node && canvas.contains(raw.target),
             }
 
-            lastNativeEventRef.current = nativeEvent
-
+            lastNativeEventRef.current = event
             dispatchEvent(event)
         }
 
-        canvas.addEventListener("pointerdown", onPointerEvent)
-        canvas.addEventListener("pointermove", onPointerEvent)
-        canvas.addEventListener("pointerup", onPointerEvent)
+        window.addEventListener("pointerdown", onPointerEvent)
+        window.addEventListener("pointermove", onPointerEvent)
+        window.addEventListener("pointerup", onPointerEvent)
 
         const onKeyDown = (event: KeyboardEvent) => {
             if (lastNativeEventRef.current === undefined) {
@@ -101,18 +89,22 @@ export function EventHandler() {
 
             switch (event.code) {
                 case "ShiftLeft":
-                    onEditorInputChanged({
-                        ...lastNativeEventRef.current,
-                        shiftKey: true,
-                    })
+                    dispatchEvent(
+                        (lastNativeEventRef.current = {
+                            ...lastNativeEventRef.current,
+                            shiftKey: true,
+                        }),
+                    )
 
                     break
 
                 case "ControlLeft":
-                    onEditorInputChanged({
-                        ...lastNativeEventRef.current,
-                        ctrlKey: true,
-                    })
+                    dispatchEvent(
+                        (lastNativeEventRef.current = {
+                            ...lastNativeEventRef.current,
+                            ctrlKey: true,
+                        }),
+                    )
 
                     break
             }
@@ -125,18 +117,24 @@ export function EventHandler() {
 
             switch (event.code) {
                 case "ShiftLeft":
-                    onEditorInputChanged({
-                        ...lastNativeEventRef.current,
-                        shiftKey: false,
-                    })
+                    dispatchEvent(
+                        (lastNativeEventRef.current = {
+                            ...lastNativeEventRef.current,
+                            shiftKey: false,
+                        }),
+                    )
 
                     break
 
                 case "ControlLeft":
-                    onEditorInputChanged({
-                        ...lastNativeEventRef.current,
-                        ctrlKey: false,
-                    })
+                    dispatchEvent(
+                        (lastNativeEventRef.current = {
+                            ...lastNativeEventRef.current,
+                            ctrlKey: false,
+                        }),
+                    )
+
+                    break
             }
         }
 

@@ -1,16 +1,10 @@
-import { Mutation } from "../../../store/EntityStore"
+import { Mutation } from "../../../store/WorldStore"
 import { ShapeState } from "../ShapeState"
 
-export const shapeChangeVertices = (
-    state: ShapeState,
-    vertexIndex: number,
-): Mutation => {
+export const shapeRemoveVertex = (state: ShapeState, vertexIndex: number): Mutation => {
     const vertex = state.vertices[vertexIndex]
 
     return {
-        mutates: [state.id],
-        removeOrCreate: false,
-
         do() {
             state.vertices.splice(vertexIndex, 1)
         },

@@ -26,9 +26,7 @@ export function VertexContext(props: {
     state: ShapeState
     vertexIndex: number
 }) {
-    const [color, setColor] = useState(
-        props.state.vertices[props.vertexIndex].color,
-    )
+    const [color, setColor] = useState(props.state.vertices[props.vertexIndex].color)
 
     useEffect(() => {
         setColor(props.state.vertices[props.vertexIndex].color)
@@ -36,7 +34,7 @@ export function VertexContext(props: {
 
     useEffect(() => {
         props.state.vertices[props.vertexIndex].color = color
-        props.geometryRef.current.update(props.state)
+        props.geometryRef.current.update(props.state.vertices)
     }, [color])
 
     useEffect(() => {
@@ -52,10 +50,7 @@ export function VertexContext(props: {
                         navigator.clipboard.readText().then(text => {
                             const trimmed = text.trim()
 
-                            if (
-                                trimmed.length === 7 &&
-                                trimmed.startsWith("#")
-                            ) {
+                            if (trimmed.length === 7 && trimmed.startsWith("#")) {
                                 setColor(hexToColor(trimmed))
                             }
                         })
@@ -76,10 +71,8 @@ export function VertexContext(props: {
                 as="div"
                 position={
                     new Vector3(
-                        props.state.vertices[props.vertexIndex].position.x +
-                            props.state.position.x,
-                        props.state.vertices[props.vertexIndex].position.y +
-                            props.state.position.y,
+                        props.state.vertices[props.vertexIndex].position.x + props.state.position.x,
+                        props.state.vertices[props.vertexIndex].position.y + props.state.position.y,
                     )
                 }
             >

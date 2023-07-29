@@ -7,9 +7,9 @@ import { Entity } from "runtime-framework"
 import { EntityType } from "runtime/src/core/common/EntityType"
 import { changeAnchor } from "runtime/src/model/changeAnchor"
 import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry"
-import { entityGraphicRegistry } from "../../../common/graphic/EntityGraphicRegistry"
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
+import { entityGraphicRegistry } from "./EntityGraphicRegistry"
 
 export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
     if (!props.entity.has(...RocketEntityComponents)) {

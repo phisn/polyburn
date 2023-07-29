@@ -1,8 +1,8 @@
 import { OrthographicCamera } from "three"
 import { shallow } from "zustand/shallow"
 
-import { ZoomInSvg } from "../../common/inline-svg/ZoomIn"
-import { ZoomOutSvg } from "../../common/inline-svg/ZoomOut"
+import { ZoomInSvg } from "../../common/components/inline-svg/ZoomIn"
+import { ZoomOutSvg } from "../../common/components/inline-svg/ZoomOut"
 import { useGameStore } from "../store/GameStore"
 import { canZoomIn, canZoomOut } from "../store/ZoomSteps"
 import Map from "./Map"

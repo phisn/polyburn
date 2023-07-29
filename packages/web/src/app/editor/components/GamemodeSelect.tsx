@@ -1,9 +1,9 @@
 import { Transition } from "@headlessui/react"
 import { useEffect, useRef, useState } from "react"
-import { ListTask } from "../../../common/inline-svg/ListTask"
-import { Pencil } from "../../../common/inline-svg/Pencil"
-import { PencilSquare } from "../../../common/inline-svg/PencilSquare"
-import { X } from "../../../common/inline-svg/X"
+import { ListTask } from "../../../common/components/inline-svg/ListTask"
+import { Pencil } from "../../../common/components/inline-svg/Pencil"
+import { PencilSquare } from "../../../common/components/inline-svg/PencilSquare"
+import { X } from "../../../common/components/inline-svg/X"
 
 export function GamemodeSelect() {
     const [gamemodes, setGamemodes] = useState<string[]>([

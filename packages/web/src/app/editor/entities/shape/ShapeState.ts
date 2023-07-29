@@ -9,10 +9,7 @@ export interface ShapeVertexColor {
     b: number
 }
 
-export function averageColor(
-    a: ShapeVertexColor,
-    b: ShapeVertexColor,
-): ShapeVertexColor {
+export function averageColor(a: ShapeVertexColor, b: ShapeVertexColor): ShapeVertexColor {
     return {
         r: Math.round((a.r + b.r) / 2),
         g: Math.round((a.g + b.g) / 2),
@@ -48,11 +45,7 @@ export interface ShapeState extends BaseEntityState {
     vertices: ShapeVertex[]
 }
 
-export function resolveIntersection(
-    vertexIndex: number,
-    moveTo: Point,
-    shape: ShapeState,
-) {
+export function findIntersection(firstIndex: number, secondIndex: number, vertices: ShapeVertex[]) {
     function ccw(a: Point, b: Point, c: Point) {
         return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
     }
@@ -61,85 +54,86 @@ export function resolveIntersection(
         return ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d)
     }
 
-    for (let i = 0; i < shape.vertices.length; ++i) {
-        const j = (i + 1) % shape.vertices.length
-
-        if (i === vertexIndex || j === vertexIndex) {
-            continue
-        }
-
-        const left =
-            (vertexIndex - 1 + shape.vertices.length) % shape.vertices.length
-
-        const right = (vertexIndex + 1) % shape.vertices.length
+    for (let i = 0; i < vertices.length; ++i) {
+        const j = (i + 1) % vertices.length
 
         if (
-            (i !== right &&
-                j !== right &&
-                intersects(
-                    moveTo,
-                    shape.vertices[right].position,
-                    shape.vertices[i].position,
-                    shape.vertices[j].position,
-                )) ||
-            (i !== left &&
-                j !== left &&
-                intersects(
-                    moveTo,
-                    shape.vertices[left].position,
-                    shape.vertices[i].position,
-                    shape.vertices[j].position,
-                ))
-        ) {
-            shape.vertices.splice(i + 1, 0, shape.vertices[vertexIndex])
-            shape.vertices.splice(
-                vertexIndex < i ? vertexIndex : vertexIndex + 1,
-                1,
+            i !== firstIndex &&
+            j !== firstIndex &&
+            i !== secondIndex &&
+            j !== secondIndex &&
+            intersects(
+                vertices[firstIndex].position,
+                vertices[secondIndex].position,
+                vertices[i].position,
+                vertices[j].position,
             )
-
-            return vertexIndex < i ? i : i + 1
+        ) {
+            console.warn(
+                `intersection found at ${JSON.stringify([
+                    i,
+                    j,
+                ])}, where firstIndex = ${firstIndex} and secondIndex = ${secondIndex}`,
+            )
+            return [i, j]
         }
     }
 
     return null
 }
 
-export function findIntersection(
-    fromIndex: number,
-    to: Point,
-    shape: ShapeState,
-) {
-    const numVertices = shape.vertices.length
+// resolving intersections can be very complex. to prevent undesired results we only try to resolve intersections once
+export function resolveIntersectionAround(vertexIndex: number, vertices: ShapeVertex[]) {
+    const left = (vertexIndex - 1 + vertices.length) % vertices.length
+    const right = (vertexIndex + 1) % vertices.length
 
-    let j = numVertices - 1
+    const intersection =
+        findIntersection(vertexIndex, right, vertices) ??
+        findIntersection(vertexIndex, left, vertices)
 
-    const from = shape.vertices[fromIndex]
+    if (intersection) {
+        console.warn(
+            `intersection found at ${JSON.stringify(
+                intersection,
+            )}, where left = ${left} and right = ${right} and vertexIndex = ${vertexIndex}`,
+        )
 
-    function ccw(a: Point, b: Point, c: Point) {
-        return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
-    }
+        const [newLeft, newRight] =
+            intersection[0] < vertexIndex ? [left + 1, right] : [left, right - 1]
 
-    for (let i = 0; i < numVertices; i++) {
-        if (j === fromIndex || i === fromIndex) {
-            continue
+        // when vertex is moved from left to right of left intersection boundary
+        if (intersection[0] > vertexIndex) {
+            intersection[0] -= 1
         }
 
-        const from2 = shape.vertices[j]
-        const to2 = shape.vertices[i]
+        // when vertex is moved from right to left of right intersection boundary
+        if (intersection[1] < vertexIndex) {
+            intersection[1] += 1
+        }
+
+        const vertex = vertices[vertexIndex]
+        const newVertexIndex = intersection[0] + 1
+
+        vertices.splice(vertexIndex, 1)
+        vertices.splice(newVertexIndex, 0, vertex)
 
         if (
-            ccw(from.position, from2.position, to2.position) !==
-                ccw(to, from2.position, to2.position) &&
-            ccw(from.position, to, from2.position) !==
-                ccw(from.position, to, to2.position)
+            // ensure no intersection in new target location
+            findIntersection(intersection[0], newVertexIndex, vertices) ??
+            findIntersection(newVertexIndex, intersection[1], vertices) ??
+            // ensure no intersection on old location
+            findIntersection(newLeft, newRight, vertices)
         ) {
-            return i
+            // not able to resolve intersection
+            return null
         }
 
-        j = i
+        // intersection successfully resolved
+        return newVertexIndex
     }
 
-    return null
+    // no intersection found. vertices stay the same
+    return vertexIndex
 }
 
 export function isPointInsideShape(point: Point, shape: ShapeState): boolean {
@@ -176,11 +170,7 @@ export function isPointInsideShape(point: Point, shape: ShapeState): boolean {
     return isInside
 }
 
-export function findClosestEdge(
-    shape: ShapeState,
-    point: Point,
-    snapDistance: number,
-) {
+export function findClosestEdge(shape: ShapeState, point: Point, snapDistance: number) {
     let minDistance = Number.MAX_VALUE
     let closestPoint: Point = { x: 0, y: 0 }
     let edgeIndices: [number, number] = [0, 0]
@@ -192,12 +182,8 @@ export function findClosestEdge(
         }
 
         const p2 = {
-            x:
-                shape.vertices[(j + 1) % shape.vertices.length].position.x +
-                shape.position.x,
-            y:
-                shape.vertices[(j + 1) % shape.vertices.length].position.y +
-                shape.position.y,
+            x: shape.vertices[(j + 1) % shape.vertices.length].position.x + shape.position.x,
+            y: shape.vertices[(j + 1) % shape.vertices.length].position.y + shape.position.y,
         }
 
         const closest = getClosestPointOnLine(p1, p2, point)
@@ -217,11 +203,7 @@ export function findClosestEdge(
     return { point: closestPoint, edge: edgeIndices }
 }
 
-export function findClosestVertex(
-    shape: ShapeState,
-    point: Point,
-    snapDistance: number,
-) {
+export function findClosestVertex(shape: ShapeState, point: Point, snapDistance: number) {
     let minDistance = Number.MAX_VALUE
     let closestPoint: Point = { x: 0, y: 0 }
     let vertexIndex = 0

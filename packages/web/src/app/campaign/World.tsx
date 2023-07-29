@@ -1,4 +1,4 @@
-import { LockedSvg } from "../../common/inline-svg/Locked"
+import { LockedSvg } from "../../common/components/inline-svg/Locked"
 
 export interface WorldProgress {
     modes: number

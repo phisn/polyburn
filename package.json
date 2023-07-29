@@ -19,7 +19,7 @@
     "packageManager": "pnpm@7.15.0",
     "name": "rocket-game",
     "prettier": {
-        "printWidth": 80,
+        "printWidth": 100,
         "tabWidth": 4,
         "semi": false,
         "arrowParens": "avoid",

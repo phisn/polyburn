@@ -4,8 +4,6 @@ import { Entity } from "runtime-framework"
 import { LevelEntityComponents } from "runtime/src/core/level/LevelEntity"
 import { Euler } from "three"
 
-import { entityGraphicRegistry } from "../../../common/graphic/EntityGraphicRegistry"
-import { EntityGraphicType } from "../../../common/graphic/EntityGraphicType"
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 
@@ -16,9 +14,12 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
 
     const [unlocked, setUnlocked] = useState(false)
 
+    /*
     const entry = unlocked
         ? entityGraphicRegistry[EntityGraphicType.GreenFlag]
         : entityGraphicRegistry[EntityGraphicType.RedFlag]
+        */
+    const entry: any = null
 
     useGraphicUpdate(() => {
         if (!props.entity.has("level")) {

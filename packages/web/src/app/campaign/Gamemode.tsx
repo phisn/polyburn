@@ -1,6 +1,6 @@
-import { LockedSvg } from "../../common/inline-svg/Locked"
-import { TrophySvg } from "../../common/inline-svg/Trophy"
-import { UnlockedSvg } from "../../common/inline-svg/Unlocked"
+import { LockedSvg } from "../../common/components/inline-svg/Locked"
+import { TrophySvg } from "../../common/components/inline-svg/Trophy"
+import { UnlockedSvg } from "../../common/components/inline-svg/Unlocked"
 
 type Rank = "Diamond" | "Platinum" | "Gold" | "Silver" | "Bronze" | "Iron"
 

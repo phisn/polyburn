@@ -1,15 +1,7 @@
-import {
-    BufferGeometry,
-    Float32BufferAttribute,
-    ShapeUtils,
-    Vector2,
-} from "three"
-import { ShapeState } from "./ShapeState"
+import { BufferGeometry, Float32BufferAttribute, ShapeUtils, Vector2 } from "three"
+import { ShapeVertex } from "./ShapeState"
 
-function IterateInOrder(
-    vertices: Vector2[],
-    callback: (i: number, vertex: Vector2) => void,
-) {
+function IterateInOrder(vertices: Vector2[], callback: (i: number, vertex: Vector2) => void) {
     for (let i = 0; i < vertices.length; i++) {
         callback(i, vertices[i])
     }
@@ -25,13 +17,11 @@ function IterateInReverseOrder(
 }
 
 export class MutatableShapeGeometry extends BufferGeometry {
-    update(shape: ShapeState) {
-        const vertices = shape.vertices.map(vertex => vertex.position)
+    update(shapeVertices: ShapeVertex[]) {
+        const vertices = shapeVertices.map(vertex => vertex.position)
 
         // check direction of vertices
-        const iterate = ShapeUtils.isClockWise(vertices)
-            ? IterateInOrder
-            : IterateInReverseOrder
+        const iterate = ShapeUtils.isClockWise(vertices) ? IterateInOrder : IterateInReverseOrder
 
         const faces = ShapeUtils.triangulateShape(vertices, [])
 
@@ -54,9 +44,9 @@ export class MutatableShapeGeometry extends BufferGeometry {
             buffer[i * 3 + 1] = vertex.y
             buffer[i * 3 + 2] = 0
 
-            bufferColors[i * 3 + 0] = shape.vertices[i].color.r / 255
-            bufferColors[i * 3 + 1] = shape.vertices[i].color.g / 255
-            bufferColors[i * 3 + 2] = shape.vertices[i].color.b / 255
+            bufferColors[i * 3 + 0] = shapeVertices[i].color.r / 255
+            bufferColors[i * 3 + 1] = shapeVertices[i].color.g / 255
+            bufferColors[i * 3 + 2] = shapeVertices[i].color.b / 255
         })
 
         this.setIndex(indices)

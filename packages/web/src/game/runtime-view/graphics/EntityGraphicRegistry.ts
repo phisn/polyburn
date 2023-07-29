@@ -3,7 +3,7 @@ import { changeAnchor } from "runtime/src/model/changeAnchor"
 import { EntityModel } from "runtime/src/model/world/EntityModel"
 import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry"
 import { Point } from "runtime/src/model/world/Point"
-import { baseZoomFactor } from "../Values"
+import { baseZoomFactor } from "../../../common/Values"
 import { EntityGraphicType } from "./EntityGraphicType"
 
 export interface EntityGraphicRegisterEntry {

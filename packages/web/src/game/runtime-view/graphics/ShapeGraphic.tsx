@@ -16,7 +16,7 @@ export function ShapeGraphic(props: { entity: Entity<WebappComponents> }) {
 
     return (
         <>
-            <mesh>
+            <mesh frustumCulled={false}>
                 <shapeGeometry args={[threeShape]} />
                 <meshBasicMaterial color={"#DC5249"} />
             </mesh>

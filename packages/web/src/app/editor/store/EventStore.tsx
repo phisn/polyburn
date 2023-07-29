@@ -1,18 +1,15 @@
-import { OrderedSet } from "js-sdsl"
-import {
-    MutableRefObject,
-    createContext,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-} from "react"
+import { MutableRefObject, createContext, useContext, useEffect, useMemo, useRef } from "react"
 import { EditorEvent } from "../EventHandler"
 
 export const ConsumeEvent = Symbol("ConsumeEvent")
 
+type Callback = (
+    event: EditorEvent,
+    setPriority: (priority: number) => void,
+) => void | typeof ConsumeEvent
+
 interface Listener {
-    callback: (event: EditorEvent) => void | typeof ConsumeEvent
+    callback: Callback
     priority: number
 }
 
@@ -20,30 +17,63 @@ type ListenerRef = MutableRefObject<Listener>
 
 interface EventStore {
     subscribeEvent: (listener: ListenerRef) => () => void
-
     event: (event: EditorEvent) => boolean
 }
 
 const createEventStore = (): EventStore => {
-    const listeners = new OrderedSet<ListenerRef>([], (x, y) => {
-        if (x.current.priority === y.current.priority) {
-            return x.current.callback === y.current.callback ? 0 : -1
+    const listeners: ListenerRef[] = []
+
+    function findPositionToInsert(priority: number) {
+        // binary search to find the right position. we want to insert the listener right
+        // of the last listener with the same or lower priority than the new listener
+
+        let left = 0
+        let right = listeners.length - 1
+
+        while (left < right) {
+            const middle = Math.floor((left + right) / 2)
+
+            if (listeners[middle].current.priority <= priority) {
+                left = middle + 1
+            } else {
+                right = middle
+            }
         }
 
-        return y.current.priority - x.current.priority
-    })
+        return left
+    }
 
     return {
         subscribeEvent: listener => {
-            listeners.insert(listener)
+            if (listeners[listeners.length - 1]?.current.priority <= listener.current.priority) {
+                listeners.push(listener)
+            } else {
+                listeners.splice(findPositionToInsert(listener.current.priority), 0, listener)
+            }
 
             return () => {
-                listeners.eraseElementByKey(listener)
+                const index = listeners.indexOf(listener)
+
+                if (index === -1) {
+                    console.error("listener was not found")
+                } else {
+                    listeners.splice(index, 1)
+                }
             }
         },
         event: event => {
-            for (const listener of listeners) {
-                if (listener.current.callback(event) === ConsumeEvent) {
+            const changePriorites: (() => void)[] = []
+
+            for (let i = listeners.length - 1; i >= 0; i--) {
+                const listener = listeners[i]
+
+                const setPriority = (priority: number) =>
+                    changePriorites.push(() => {
+                        listeners.splice(i, 1)
+                        listeners.splice(findPositionToInsert(priority), 0, listener)
+                    })
+
+                if (listener.current.callback(event, setPriority) === ConsumeEvent) {
                     if (event.consumed) {
                         console.error(
                             "Event was consumed multiple times. This is not allowed.",
@@ -55,7 +85,11 @@ const createEventStore = (): EventStore => {
                 }
             }
 
-            return false
+            for (const change of changePriorites) {
+                change()
+            }
+
+            return event.consumed
         },
     }
 }
@@ -68,10 +102,7 @@ export function ProvideEventStore(props: { children: React.ReactNode }) {
     return <Context.Provider value={store}>{props.children}</Context.Provider>
 }
 
-export function useEventListener(
-    callback: (event: EditorEvent) => void | typeof ConsumeEvent,
-    priority: number,
-) {
+export function useEventListener(callback: Callback, priority: number) {
     const store = useContext(Context)
 
     const listenerRef = useRef<Listener>({

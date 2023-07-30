@@ -45,6 +45,13 @@ export interface ShapeState extends BaseEntityState {
     vertices: ShapeVertex[]
 }
 
+export function canRemoveVertex(vertexIndex: number, vertices: ShapeVertex[]) {
+    const left = (vertexIndex - 1 + vertices.length) % vertices.length
+    const right = (vertexIndex + 1) % vertices.length
+
+    return !findIntersection(left, right, vertices)
+}
+
 export function findIntersection(firstIndex: number, secondIndex: number, vertices: ShapeVertex[]) {
     function ccw(a: Point, b: Point, c: Point) {
         return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
@@ -84,47 +91,47 @@ export function findIntersection(firstIndex: number, secondIndex: number, vertic
 }
 
 // resolving intersections can be very complex. to prevent undesired results we only try to resolve intersections once
-export function resolveIntersectionAround(vertexIndex: number, vertices: ShapeVertex[]) {
+export function resolveConflictsAround(vertexIndex: number, vertices: ShapeVertex[]) {
     const left = (vertexIndex - 1 + vertices.length) % vertices.length
     const right = (vertexIndex + 1) % vertices.length
 
     console.log(`vertices: ${JSON.stringify(vertices)}`)
     console.log(`calling with left = ${left} and right = ${right} and vertexIndex = ${vertexIndex}`)
 
-    const intersection =
+    const conflictTarget =
         findIntersection(vertexIndex, right, vertices) ??
         findIntersection(vertexIndex, left, vertices)
 
-    if (intersection) {
+    if (conflictTarget) {
         console.warn(
             `intersection found at ${JSON.stringify(
-                intersection,
+                conflictTarget,
             )}, where left = ${left} and right = ${right} and vertexIndex = ${vertexIndex}`,
         )
 
         const [newLeft, newRight] =
-            intersection[0] < vertexIndex ? [left + 1, right] : [left, right - 1]
+            conflictTarget[0] < vertexIndex ? [left + 1, right] : [left, right - 1]
 
         // when vertex is moved from left to right of left intersection boundary
-        if (intersection[0] > vertexIndex) {
-            intersection[0] -= 1
+        if (conflictTarget[0] > vertexIndex) {
+            conflictTarget[0] -= 1
         }
 
         // when vertex is moved from right to left of right intersection boundary
-        if (intersection[1] < vertexIndex) {
-            intersection[1] += 1
+        if (conflictTarget[1] < vertexIndex) {
+            conflictTarget[1] += 1
         }
 
         const vertex = vertices[vertexIndex]
-        const newVertexIndex = intersection[0] + 1
+        const newVertexIndex = conflictTarget[0] + 1
 
         vertices.splice(vertexIndex, 1)
         vertices.splice(newVertexIndex, 0, vertex)
 
         if (
             // ensure no intersection in new target location
-            findIntersection(intersection[0], newVertexIndex, vertices) ??
-            findIntersection(newVertexIndex, intersection[1], vertices) ??
+            findIntersection(conflictTarget[0], newVertexIndex, vertices) ??
+            findIntersection(newVertexIndex, conflictTarget[1], vertices) ??
             // ensure no intersection on old location
             findIntersection(newLeft, newRight, vertices)
         ) {
@@ -265,3 +272,4 @@ export function getDistance(a: Point, b: Point) {
     const dy = a.y - b.y
     return Math.sqrt(dx * dx + dy * dy)
 }
+

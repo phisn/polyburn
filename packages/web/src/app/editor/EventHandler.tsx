@@ -50,6 +50,7 @@ export function EventHandler() {
 
     useEffect(() => {
         const onPointerEvent = (raw: PointerEvent) => {
+            console.log("sending event to event handler")
             // cursor is by default "default". other cursors must be a result of this event handler
             if (window.document.body.style.cursor !== "default") {
                 window.document.body.style.cursor = "default"
@@ -62,8 +63,8 @@ export function EventHandler() {
 
                 position,
                 positionInGrid: new Vector3(
-                    Math.round(position.x * 2) * 0.5,
-                    Math.round(position.y * 2) * 0.5,
+                    Math.round(position.x * 4) * 0.25,
+                    Math.round(position.y * 4) * 0.25,
                     0,
                 ),
                 positionInWindow: { x: raw.clientX, y: raw.clientY },
@@ -173,9 +174,9 @@ export function EventHandler() {
         })
 
         return () => {
-            window.removeEventListener("pointerdown", onPointerEvent)
-            window.removeEventListener("pointermove", onPointerEvent)
-            window.removeEventListener("pointerup", onPointerEvent)
+            canvas.removeEventListener("pointerdown", onPointerEvent)
+            canvas.removeEventListener("pointermove", onPointerEvent)
+            canvas.removeEventListener("pointerup", onPointerEvent)
 
             window.removeEventListener("keydown", onKeyDown)
             window.removeEventListener("keyup", onKeyUp)
@@ -184,3 +185,4 @@ export function EventHandler() {
 
     return <></>
 }
+

@@ -3,7 +3,12 @@ import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventSt
 import { useMutationDispatch } from "../../../store/WorldStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
-import { ShapeState, ShapeVertex, resolveIntersectionAround } from "../ShapeState"
+import {
+    ShapeState,
+    ShapeVertex,
+    canRemoveVertex,
+    resolveConflictsAround as resolveIntersectionsAround,
+} from "../ShapeState"
 import { shapeChangeVertices } from "../mutations/shapeChangeVertices"
 
 export interface ShapeModeVertex {
@@ -11,6 +16,9 @@ export interface ShapeModeVertex {
 
     vertexIndex: number
     vertices: ShapeVertex[]
+
+    inBuffer?: ShapeVertex
+    inBufferIndex?: number
 }
 
 export function ShapeInVertex(props: {
@@ -38,38 +46,52 @@ export function ShapeInVertex(props: {
         if (event.leftButtonDown) {
             console.log("position in grid is: ", event.positionInGrid.x, event.positionInGrid.y)
 
+            if (
+                event.positionInGrid.x === props.mode.vertices[props.mode.vertexIndex].position.x &&
+                event.positionInGrid.y === props.mode.vertices[props.mode.vertexIndex].position.y
+            ) {
+                return ConsumeEvent
+            }
+
             props.mode.vertices[props.mode.vertexIndex].position.set(
                 event.positionInGrid.x,
                 event.positionInGrid.y,
             )
 
-            const intersection = resolveIntersectionAround(
-                props.mode.vertexIndex,
-                props.mode.vertices,
+            let duplicateIndex = props.mode.vertices.findIndex(
+                (x, i) =>
+                    x.position.x === props.mode.vertices[props.mode.vertexIndex].position.x &&
+                    x.position.y === props.mode.vertices[props.mode.vertexIndex].position.y &&
+                    i !== props.mode.vertexIndex,
             )
 
-            if (intersection === null) {
-                props.setMode({ type: "selected" })
-                return ConsumeEvent
+            if (duplicateIndex !== -1) {
+                if (!canRemoveVertex(props.mode.vertexIndex, props.mode.vertices)) {
+                    props.setMode({ type: "selected" })
+                    return ConsumeEvent
+                }
+
+                props.mode.inBuffer = props.mode.vertices[duplicateIndex]
+                props.mode.vertices[duplicateIndex] = props.mode.vertices[props.mode.vertexIndex]
+
+                props.mode.vertices.splice(props.mode.vertexIndex, 1)
+                props.mode.vertexIndex =
+                    props.mode.vertexIndex < duplicateIndex ? duplicateIndex - 1 : duplicateIndex
+            } else {
+                const intersection = resolveIntersectionsAround(
+                    props.mode.vertexIndex,
+                    props.mode.vertices,
+                )
+
+                if (intersection === null) {
+                    props.setMode({ type: "selected" })
+                    return ConsumeEvent
+                }
+
+                if (intersection !== props.mode.vertexIndex) {
+                    props.mode.vertexIndex = intersection
+                }
             }
-
-            if (intersection !== props.mode.vertexIndex) {
-                /*
-                const temp = verticesRef.current[intersection]
-                verticesRef.current[intersection] = verticesRef.current[props.mode.vertexIndex]
-                verticesRef.current[props.mode.vertexIndex] = temp
-                */
-
-                props.mode.vertexIndex = intersection
-            }
-
-            /*
-            verticesRef.current[props.mode.vertexIndex].position.set(
-                props.mode.vertices[props.mode.vertexIndex].position.x + props.state.position.x,
-                props.mode.vertices[props.mode.vertexIndex].position.y + props.state.position.y,
-                Priority.Action,
-            )
-            */
 
             console.log("update vertices: ", JSON.stringify(props.mode.vertices, null, 2))
 
@@ -97,3 +119,4 @@ export function ShapeInVertex(props: {
         </>
     )
 }
+

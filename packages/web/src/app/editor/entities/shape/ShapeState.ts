@@ -69,11 +69,12 @@ export function findIntersection(firstIndex: number, secondIndex: number, vertic
                 vertices[j].position,
             )
         ) {
-            console.warn(
-                `intersection found at ${JSON.stringify([
-                    i,
-                    j,
-                ])}, where firstIndex = ${firstIndex} and secondIndex = ${secondIndex}`,
+            console.log(
+                `found intersection between i: ${i} and j: ${j}, where firstIndex = ${firstIndex} and secondIndex = ${secondIndex} for the positions f${JSON.stringify(
+                    vertices[firstIndex].position,
+                )}, s${JSON.stringify(vertices[secondIndex].position)}, i${JSON.stringify(
+                    vertices[i].position,
+                )}, j${JSON.stringify(vertices[j].position)}`,
             )
             return [i, j]
         }
@@ -86,6 +87,9 @@ export function findIntersection(firstIndex: number, secondIndex: number, vertic
 export function resolveIntersectionAround(vertexIndex: number, vertices: ShapeVertex[]) {
     const left = (vertexIndex - 1 + vertices.length) % vertices.length
     const right = (vertexIndex + 1) % vertices.length
+
+    console.log(`vertices: ${JSON.stringify(vertices)}`)
+    console.log(`calling with left = ${left} and right = ${right} and vertexIndex = ${vertexIndex}`)
 
     const intersection =
         findIntersection(vertexIndex, right, vertices) ??

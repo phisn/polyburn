@@ -22,7 +22,6 @@ export function ShapeInVertex(props: {
 
     useEffect(() => {
         geometryRef.current.update(props.mode.vertices)
-        console.log("vertices: ", JSON.stringify(props.mode.vertices, null, 2))
     })
 
     const dispatchMutation = useMutationDispatch()
@@ -37,9 +36,11 @@ export function ShapeInVertex(props: {
         }
 
         if (event.leftButtonDown) {
+            console.log("position in grid is: ", event.positionInGrid.x, event.positionInGrid.y)
+
             props.mode.vertices[props.mode.vertexIndex].position.set(
-                event.positionInGrid.x - props.state.position.x,
-                event.positionInGrid.y - props.state.position.y,
+                event.positionInGrid.x,
+                event.positionInGrid.y,
             )
 
             const intersection = resolveIntersectionAround(

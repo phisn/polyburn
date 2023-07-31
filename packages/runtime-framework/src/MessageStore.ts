@@ -7,10 +7,7 @@ import {
 } from "./MessageWithTarget"
 import { NarrowProperties } from "./NarrowProperties"
 
-export interface MessageStore<
-    Components extends object,
-    Messages extends object,
-> {
+export interface MessageStore<Components extends object, Messages extends object> {
     publish<T extends keyof WithoutTarget<Messages, Components>>(
         messageName: T,
         message: WithoutTarget<Messages, Components>[T],
@@ -20,13 +17,10 @@ export interface MessageStore<
         message: WithTarget<Messages, Components>[T],
     ): this
 
-    collect<T extends keyof Messages>(
-        messageName: T,
-    ): MessageCollector<Required<Messages>[T]>
+    collect<T extends keyof Messages>(messageName: T): MessageCollector<Required<Messages>[T]>
     collectTarget<
         T extends keyof WithTarget<Messages, Components>,
-        K extends (keyof Components &
-            keyof InferTargetComponents<Messages[T]>)[],
+        K extends (keyof Components & keyof InferTargetComponents<Messages[T]>)[],
     >(
         messageName: T,
         ...components: [...K]
@@ -61,8 +55,7 @@ export const createMessageStore = <
             messageName: T,
             message: WithoutTarget<Messages, Components>[T],
         ) {
-            for (const callback of listenerMap.get(messageName.toString()) ??
-                []) {
+            for (const callback of listenerMap.get(messageName.toString()) ?? []) {
                 callback(message)
             }
 
@@ -80,16 +73,13 @@ export const createMessageStore = <
                 }
             }
 
-            for (const callback of listenerMap.get(messageName.toString()) ??
-                []) {
+            for (const callback of listenerMap.get(messageName.toString()) ?? []) {
                 callback(message)
             }
 
             return this
         },
-        collect<T extends keyof Messages>(
-            messageName: T,
-        ): MessageCollector<Required<Messages>[T]> {
+        collect<T extends keyof Messages>(messageName: T): MessageCollector<Required<Messages>[T]> {
             let listeners = listenerMap.get(messageName.toString())
 
             if (listeners === undefined) {
@@ -99,8 +89,7 @@ export const createMessageStore = <
 
             let messages = [] as Messages[keyof Messages][]
 
-            const listener = (message: Messages[keyof Messages]) =>
-                messages.push(message)
+            const listener = (message: Messages[keyof Messages]) => messages.push(message)
 
             listeners.add(listener)
 
@@ -116,8 +105,7 @@ export const createMessageStore = <
         },
         collectTarget<
             T extends keyof WithTarget<Messages, Components>,
-            K extends (keyof Components &
-                keyof InferTargetComponents<Messages[T]>)[],
+            K extends (keyof Components & keyof InferTargetComponents<Messages[T]>)[],
         >(
             messageName: T,
             ...components: [...K]
@@ -137,9 +125,7 @@ export const createMessageStore = <
 
             let messages = [] as MessageWithTarget<Partial<Components>>[]
 
-            const listener = (
-                message: MessageWithTarget<Partial<Components>>,
-            ) => {
+            const listener = (message: MessageWithTarget<Partial<Components>>) => {
                 if (message.target.has(...components)) {
                     messages.push(message)
                 }
@@ -175,14 +161,8 @@ export const createMessageStore = <
                 listenerMap.set(messageName.toString(), listeners)
             }
 
-            listeners.add(
-                callback as (message: Messages[keyof Messages]) => void,
-            )
-            return () =>
-                listeners?.delete(
-                    callback as (message: Messages[keyof Messages]) => void,
-                )
+            listeners.add(callback as (message: Messages[keyof Messages]) => void)
+            return () => listeners?.delete(callback as (message: Messages[keyof Messages]) => void)
         },
     }
 }
-

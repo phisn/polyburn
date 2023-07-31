@@ -1,13 +1,7 @@
 import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 
-export const newRocketCollisionSystem: RuntimeSystemFactory = ({
-    messageStore,
-}) => {
-    const collisions = messageStore.collectTarget(
-        "collision",
-        "rocket",
-        "rigidBody",
-    )
+export const newRocketCollisionSystem: RuntimeSystemFactory = ({ messageStore }) => {
+    const collisions = messageStore.collectTarget("collision", "rocket", "rigidBody")
 
     return context => {
         for (const collision of collisions) {
@@ -23,8 +17,7 @@ export const newRocketCollisionSystem: RuntimeSystemFactory = ({
 
             if (collision.target.components.rocket.collisionCount == 0) {
                 collision.target.components.rocket.rotationWithoutInput =
-                    collision.target.components.rigidBody.rotation() -
-                    context.rotation
+                    collision.target.components.rigidBody.rotation() - context.rotation
             }
         }
     }

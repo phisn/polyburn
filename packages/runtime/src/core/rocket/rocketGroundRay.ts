@@ -36,15 +36,7 @@ export const rocketGroundRayRaw = (
     ray.dir = rayDir
     ray.origin = rayStart
 
-    const cast = physics.castRay(
-        ray,
-        length,
-        false,
-        undefined,
-        0x0001_0002,
-        undefined,
-        rocket,
-    )
+    const cast = physics.castRay(ray, length, false, undefined, 0x0001_0002, undefined, rocket)
 
     return {
         cast,
@@ -54,8 +46,5 @@ export const rocketGroundRayRaw = (
     }
 }
 
-export const rocketGroundRay = (
-    physics: RAPIER.World,
-    rocket: RAPIER.RigidBody,
-    length: number,
-) => rocketGroundRayRaw(physics, rocket, length)?.cast
+export const rocketGroundRay = (physics: RAPIER.World, rocket: RAPIER.RigidBody, length: number) =>
+    rocketGroundRayRaw(physics, rocket, length)?.cast

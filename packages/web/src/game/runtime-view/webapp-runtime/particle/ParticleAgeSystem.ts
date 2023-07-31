@@ -18,11 +18,7 @@ export const newParticleAgeSystem: WebappSystemFactory = ({
                     particle.age++
 
                     if (particle.age >= particle.lifeTime) {
-                        removeParticle(
-                            visualPhysics,
-                            entity.components.particleSource,
-                            i,
-                        )
+                        removeParticle(visualPhysics, entity.components.particleSource, i)
                     }
                 }
             }

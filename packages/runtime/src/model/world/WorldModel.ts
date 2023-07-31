@@ -42,17 +42,11 @@ export interface ValidationError {
 }
 
 export function validate(world: WorldModel): ValidationError | null {
-    if (
-        world.entities.filter(entity => entity.type == EntityType.Level)
-            .length == 0
-    ) {
+    if (world.entities.filter(entity => entity.type == EntityType.Level).length == 0) {
         return { message: "Can not run world without a red flag" }
     }
 
-    if (
-        world.entities.filter(entity => entity.type == EntityType.Rocket)
-            .length == 0
-    ) {
+    if (world.entities.filter(entity => entity.type == EntityType.Rocket).length == 0) {
         return { message: "Can not run world without a rocket" }
     }
 

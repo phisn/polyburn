@@ -8,10 +8,7 @@ import {
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
-export const newLevelCaptureInProgressSystem: RuntimeSystemFactory = ({
-    store,
-    messageStore,
-}) => {
+export const newLevelCaptureInProgressSystem: RuntimeSystemFactory = ({ store, messageStore }) => {
     const entities = store.newSet("levelCapturing", ...RocketEntityComponents)
 
     return () => {
@@ -21,10 +18,7 @@ export const newLevelCaptureInProgressSystem: RuntimeSystemFactory = ({
             if (entity.components.levelCapturing.timeToCapture <= 0) {
                 const velocity = entity.components.rigidBody.linvel()
 
-                if (
-                    Math.abs(velocity.x) > 0.0001 ||
-                    Math.abs(velocity.y) > 0.0001
-                ) {
+                if (Math.abs(velocity.x) > 0.0001 || Math.abs(velocity.y) > 0.0001) {
                     entity.components.levelCapturing.timeToCapture = 100
                     continue
                 }

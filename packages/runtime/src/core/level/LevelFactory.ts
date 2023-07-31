@@ -23,9 +23,7 @@ export const newLevel = (
         flagRotation: flag.rotation,
     }
 
-    const body = factoryContext.physics.createRigidBody(
-        RAPIER.RigidBodyDesc.fixed(),
-    )
+    const body = factoryContext.physics.createRigidBody(RAPIER.RigidBodyDesc.fixed())
 
     const colliderDesc = RAPIER.ColliderDesc.polyline(
         new Float32Array([
@@ -46,19 +44,13 @@ export const newLevel = (
         throw new Error("Failed to create collider")
     }
 
-    const boundsCollider = factoryContext.physics.createCollider(
-        colliderDesc,
-        body,
-    )
+    const boundsCollider = factoryContext.physics.createCollider(colliderDesc, body)
 
     boundsCollider.setSensor(true)
 
     const { size, transformed } = captureBox(flag)
 
-    const captureColliderDesc = RAPIER.ColliderDesc.cuboid(
-        size.width,
-        size.height,
-    )
+    const captureColliderDesc = RAPIER.ColliderDesc.cuboid(size.width, size.height)
         .setTranslation(transformed.x, transformed.y)
         .setRotation(flag.rotation)
         .setSensor(true)
@@ -67,10 +59,7 @@ export const newLevel = (
         throw new Error("Failed to create collider")
     }
 
-    const captureCollider = factoryContext.physics.createCollider(
-        captureColliderDesc,
-        body,
-    )
+    const captureCollider = factoryContext.physics.createCollider(captureColliderDesc, body)
 
     return factoryContext.store.create({
         level: {

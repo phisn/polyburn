@@ -14,5 +14,7 @@ export interface RuntimeFactoryContext<Components extends RuntimeComponents> {
     queue: RAPIER.EventQueue
 }
 
-export type RuntimeFactoryContextBooting<Components extends RuntimeComponents> =
-    Omit<RuntimeFactoryContext<Components>, "config">
+export type RuntimeFactoryContextBooting<Components extends RuntimeComponents> = Omit<
+    RuntimeFactoryContext<Components>,
+    "config"
+>

@@ -30,18 +30,13 @@ export const spawnParticles = (
 
         // 0.017 was determined by trial and error. it is the amount of velocity applied per physics update.
         const spawnPositionWithOffsetX =
-            config.spawnPosition.x +
-            config.spawnVelocity.x * (offset / amount) * 0.017
+            config.spawnPosition.x + config.spawnVelocity.x * (offset / amount) * 0.017
         const spawnPositionWithOffsetY =
-            config.spawnPosition.y +
-            config.spawnVelocity.y * (offset / amount) * 0.017
+            config.spawnPosition.y + config.spawnVelocity.y * (offset / amount) * 0.017
 
         const body = particlePhysics.createRigidBody(
             RAPIER.RigidBodyDesc.dynamic()
-                .setTranslation(
-                    spawnPositionWithOffsetX,
-                    spawnPositionWithOffsetY,
-                )
+                .setTranslation(spawnPositionWithOffsetX, spawnPositionWithOffsetY)
                 .lockRotations()
                 .setLinvel(
                     config.spawnVelocity.x + config.additionalVelocity.x * 0.5,
@@ -61,8 +56,7 @@ export const spawnParticles = (
             body,
         )
 
-        const nextParticleIndex =
-            (source.latestParticle + 1) % source.bufferAmount
+        const nextParticleIndex = (source.latestParticle + 1) % source.bufferAmount
 
         if (nextParticleIndex >= source.particles.length) {
             source.particles.push(undefined)

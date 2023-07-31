@@ -14,8 +14,7 @@ export function Timer() {
         }
 
         if (store.world.has("world")) {
-            divRef.current.innerText =
-                store.world.components.world.ticks.toString()
+            divRef.current.innerText = store.world.components.world.ticks.toString()
         }
     })
 

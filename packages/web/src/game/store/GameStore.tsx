@@ -22,9 +22,7 @@ export interface GameStore extends GameState {
     declinePerformance(): void
 
     // ticked indicates whether the physics engine ticked since the last frame
-    subscribeGraphicUpdate(
-        listener: React.MutableRefObject<(ticked: boolean) => void>,
-    ): () => void
+    subscribeGraphicUpdate(listener: React.MutableRefObject<(ticked: boolean) => void>): () => void
 
     zoomIn(): void
     zoomOut(): void
@@ -47,10 +45,7 @@ export const createGameStore = (systemContext: WebappFactoryContext) =>
 
         inclinePerformance: () => {
             set(state => ({
-                performance: Math.min(
-                    state.performance + 1,
-                    state.maxPerformance,
-                ),
+                performance: Math.min(state.performance + 1, state.maxPerformance),
             }))
         },
 
@@ -62,18 +57,14 @@ export const createGameStore = (systemContext: WebappFactoryContext) =>
 
         zoomIndex: 0,
 
-        subscribeGraphicUpdate: (
-            listener: React.MutableRefObject<() => void>,
-        ) => {
+        subscribeGraphicUpdate: (listener: React.MutableRefObject<() => void>) => {
             set(state => ({
                 graphicListeners: [...state.graphicListeners, listener],
             }))
 
             return () => {
                 set(state => ({
-                    graphicListeners: state.graphicListeners.filter(
-                        l => l !== listener,
-                    ),
+                    graphicListeners: state.graphicListeners.filter(l => l !== listener),
                 }))
             }
         },
@@ -102,9 +93,7 @@ export const createGameStore = (systemContext: WebappFactoryContext) =>
         },
     }))
 
-const GameStoreContext = createContext<ReturnType<typeof createGameStore>>(
-    null!,
-)
+const GameStoreContext = createContext<ReturnType<typeof createGameStore>>(null!)
 
 export const ProvideGameStore = (props: {
     children: React.ReactNode
@@ -112,11 +101,7 @@ export const ProvideGameStore = (props: {
 }) => {
     const store = createGameStore(props.systemContext)
 
-    return (
-        <GameStoreContext.Provider value={store}>
-            {props.children}
-        </GameStoreContext.Provider>
-    )
+    return <GameStoreContext.Provider value={store}>{props.children}</GameStoreContext.Provider>
 }
 
 export const useGameStore = <U,>(

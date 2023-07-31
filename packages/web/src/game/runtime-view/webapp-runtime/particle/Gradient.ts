@@ -5,10 +5,7 @@ export interface GradientEntry {
     time: number
 }
 
-export function colorInGradient(
-    gradient: Gradient,
-    position: number,
-): [number, number, number] {
+export function colorInGradient(gradient: Gradient, position: number): [number, number, number] {
     if (gradient.length == 0) {
         return gradient[0].color
     }
@@ -26,9 +23,7 @@ export function colorInGradient(
             const color1 = gradient[i].color
             const color2 = gradient[i + 1].color
 
-            const ratio =
-                (position - gradient[i].time) /
-                (gradient[i + 1].time - gradient[i].time)
+            const ratio = (position - gradient[i].time) / (gradient[i + 1].time - gradient[i].time)
 
             return [
                 color1[0] + (color2[0] - color1[0]) * ratio,
@@ -50,17 +45,10 @@ export function invertGradient(gradient: Gradient): Gradient {
     })
 }
 
-export function rgpRemixGradient(
-    gradient: Gradient,
-    mix: [number, number, number],
-): Gradient {
+export function rgpRemixGradient(gradient: Gradient, mix: [number, number, number]): Gradient {
     return gradient.map(entry => {
         return {
-            color: [
-                entry.color[mix[0]],
-                entry.color[mix[1]],
-                entry.color[mix[2]],
-            ],
+            color: [entry.color[mix[0]], entry.color[mix[1]], entry.color[mix[2]]],
             time: entry.time,
         }
     })

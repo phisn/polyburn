@@ -3,9 +3,7 @@ import { EntityStore, EntityWith, useEntitySet } from "runtime-framework"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 import { ParticleSourceGraphic } from "./ParticleSourceGraphic"
 
-export default function EntityGraphics(props: {
-    store: EntityStore<WebappComponents>
-}) {
+export default function EntityGraphics(props: { store: EntityStore<WebappComponents> }) {
     const entities = useEntitySet(props.store, "graphic")
     const particleSources = useEntitySet(props.store, "particleSource")
 
@@ -22,9 +20,7 @@ export default function EntityGraphics(props: {
     )
 }
 
-function EntityGraphic(props: {
-    entity: EntityWith<WebappComponents, "graphic">
-}) {
+function EntityGraphic(props: { entity: EntityWith<WebappComponents, "graphic"> }) {
     return (
         <>
             <props.entity.components.graphic entity={props.entity} />

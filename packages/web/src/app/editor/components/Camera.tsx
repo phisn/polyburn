@@ -32,12 +32,8 @@ export function Camera() {
                         setMode({
                             type: "moving",
                             start: {
-                                x:
-                                    cameraRef.current.position.x +
-                                    event.positionInWindow.x / zoom,
-                                y:
-                                    cameraRef.current.position.y -
-                                    event.positionInWindow.y / zoom,
+                                x: cameraRef.current.position.x + event.positionInWindow.x / zoom,
+                                y: cameraRef.current.position.y - event.positionInWindow.y / zoom,
                             },
                         })
                         return
@@ -64,12 +60,6 @@ export function Camera() {
     )
 
     return (
-        <OrthographicCamera
-            ref={cameraRef}
-            position={[0, 0, 100]}
-            makeDefault
-            manual
-            zoom={50}
-        />
+        <OrthographicCamera ref={cameraRef} position={[0, 0, 100]} makeDefault manual zoom={50} />
     )
 }

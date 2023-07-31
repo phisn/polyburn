@@ -14,8 +14,7 @@ export const newCaptureParticleSpawnSystem: WebappSystemFactory = ({
 }) => {
     injectParticleSource(
         store,
-        entity =>
-            newParticleSourceComponent(1000, newCaptureParticleFactory(entity)),
+        entity => newParticleSourceComponent(1000, newCaptureParticleFactory(entity)),
         ...LevelEntityComponents,
     )
 
@@ -25,10 +24,7 @@ export const newCaptureParticleSpawnSystem: WebappSystemFactory = ({
 
     return () => {
         for (const capture of captures) {
-            if (
-                capture.level.extend<WebappComponents>() &&
-                capture.level.has("particleSource")
-            ) {
+            if (capture.level.extend<WebappComponents>() && capture.level.has("particleSource")) {
                 spawnParticles(
                     particlePhysics,
                     capture.level.components.particleSource,

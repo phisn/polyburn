@@ -9,10 +9,7 @@ export function NavbarUtility() {
     return (
         <>
             <BrowserView>
-                <Link
-                    to="/editor"
-                    className="btn btn-ghost hidden text-zinc-500 sm:flex"
-                >
+                <Link to="/editor" className="btn btn-ghost hidden text-zinc-500 sm:flex">
                     Editor
                     <PencilSquare width="24" height="24" />
                 </Link>

@@ -10,7 +10,14 @@ import {
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
-import { ShapeState, findClosestEdge, findClosestVertex, isPointInsideShape } from "../ShapeState"
+import {
+    ShapeState,
+    ShapeVertex,
+    averageColor,
+    findClosestEdge,
+    findClosestVertex,
+    isPointInsideShape,
+} from "../ShapeState"
 import { Vertex, VertexContext } from "../Vertex"
 
 export interface ShapeModeSelected {
@@ -39,7 +46,7 @@ export function ShapeInSelected(props: {
         markerRef.current.position.set(point.x, point.y, Priority.Selected + 0.001)
     }
 
-    function startVertexMode(vertexIndex: number, position: Point, insert: boolean) {
+    function startVertexMode(vertexIndex: number, vertex: ShapeVertex, insert: boolean) {
         const offset = insert ? 0 : 1
 
         props.setMode({
@@ -47,10 +54,7 @@ export function ShapeInSelected(props: {
             vertexIndex,
             vertices: [
                 ...props.state.vertices.slice(0, vertexIndex),
-                {
-                    ...props.state.vertices[vertexIndex],
-                    position: new Vector2(position.x, position.y),
-                },
+                vertex,
                 ...props.state.vertices.slice(vertexIndex + offset),
             ],
         })
@@ -97,14 +101,14 @@ export function ShapeInSelected(props: {
                 geometryRef.current.update(props.state.vertices)
 
                 window.document.body.style.cursor = "grabbing"
-                startVertexMode(closestVertex.vertexIndex, closestVertex.point, false)
-
-                /*
-                props.setMode({
-                    type: "vertex",
-                    vertexIndex: closestVertex.vertexIndex,
-                })
-                */
+                startVertexMode(
+                    closestVertex.vertexIndex,
+                    {
+                        ...props.state.vertices[closestVertex.vertexIndex],
+                        position: new Vector2(closestVertex.point.x, closestVertex.point.y),
+                    },
+                    false,
+                )
             } else if (event.rightButtonClicked) {
                 setShowVertexDialog({ vertexIndex: closestVertex.vertexIndex })
             } else {
@@ -120,7 +124,17 @@ export function ShapeInSelected(props: {
         if (closestEdge) {
             if (event.leftButtonClicked) {
                 window.document.body.style.cursor = "grabbing"
-                startVertexMode(closestEdge.edge[1], closestEdge.point, true)
+                startVertexMode(
+                    closestEdge.edge[1],
+                    {
+                        position: new Vector2(closestEdge.point.x, closestEdge.point.y),
+                        color: averageColor(
+                            props.state.vertices[closestEdge.edge[0]].color,
+                            props.state.vertices[closestEdge.edge[1]].color,
+                        ),
+                    },
+                    true,
+                )
             } else if (!event.ctrlKey) {
                 window.document.body.style.cursor = "pointer"
                 showMarker(closestEdge.point, highlightColor)
@@ -188,4 +202,3 @@ export function ShapeInSelected(props: {
         </>
     )
 }
-

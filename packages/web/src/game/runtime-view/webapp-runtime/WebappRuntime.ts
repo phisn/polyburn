@@ -18,9 +18,7 @@ import { newParticleStepSystem } from "./particle/ParticleStepSystem"
 export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
     const { context, stack } = newRuntime<WebappComponents>(gamemode, world)
 
-    const particlePhysics = RAPIER.World.restoreSnapshot(
-        context.physics.takeSnapshot(),
-    )
+    const particlePhysics = RAPIER.World.restoreSnapshot(context.physics.takeSnapshot())
 
     particlePhysics.forEachRigidBody(body => {
         if (body.isFixed() === false) {
@@ -42,10 +40,7 @@ export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
         config: defaultConfig,
     }
 
-    const stackExtended: SystemStack<
-        WebappFactoryContext,
-        RuntimeSystemContext
-    > = stack.extend({
+    const stackExtended: SystemStack<WebappFactoryContext, RuntimeSystemContext> = stack.extend({
         particlePhysics,
     })
 

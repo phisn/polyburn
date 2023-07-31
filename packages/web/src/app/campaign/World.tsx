@@ -17,9 +17,7 @@ export interface WorldProps extends WorldInfo {
 
 export function World(props: WorldProps) {
     return (
-        <div
-            className={`relative isolate flex aspect-[7/4] max-w-[28rem] rounded-2xl`}
-        >
+        <div className={`relative isolate flex aspect-[7/4] max-w-[28rem] rounded-2xl`}>
             <div className="absolute bottom-0 left-0 right-0 top-0 isolate">
                 <div className="w-fit rounded-2xl bg-zinc-800 p-3 px-8 text-xl text-zinc-200">
                     {props.name}
@@ -28,16 +26,9 @@ export function World(props: WorldProps) {
                 <div className="absolute bottom-0 right-0 rounded-2xl bg-zinc-800">
                     <div className="grid">
                         <div className="steps items-center py-2">
-                            {Array.from(
-                                { length: props.maxProgress },
-                                (_, i) => (
-                                    <WorldProgressStep
-                                        key={i}
-                                        index={i}
-                                        progress={props.progress}
-                                    />
-                                ),
-                            )}
+                            {Array.from({ length: props.maxProgress }, (_, i) => (
+                                <WorldProgressStep key={i} index={i} progress={props.progress} />
+                            ))}
                         </div>
                     </div>
                 </div>
@@ -47,10 +38,7 @@ export function World(props: WorldProps) {
                 onClick={props.onClick}
             ></div>
             <div className="flex p-3">
-                <img
-                    className="w-full rounded-2xl"
-                    src="/static/background.png"
-                />
+                <img className="w-full rounded-2xl" src="/static/background.png" />
             </div>
             {!props.progress && <LockedOverlay />}
         </div>
@@ -73,16 +61,11 @@ function LockedOverlay() {
     )
 }
 
-function WorldProgressStep(props: {
-    index: number
-    progress: WorldProgress | undefined
-}) {
+function WorldProgressStep(props: { index: number; progress: WorldProgress | undefined }) {
     return (
         <div
             data-content=""
-            className={`step ${
-                (props.progress?.modes ?? 0) > props.index && "step-secondary"
-            }`}
+            className={`step ${(props.progress?.modes ?? 0) > props.index && "step-secondary"}`}
         ></div>
     )
 }

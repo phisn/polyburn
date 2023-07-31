@@ -3,7 +3,4 @@ import { RuntimeSystemContext } from "runtime/src/core/RuntimeSystemStack"
 
 import { WebappFactoryContext } from "./WebappFactoryContext"
 
-export type WebappSystemFactory = SystemFactory<
-    WebappFactoryContext,
-    RuntimeSystemContext
->
+export type WebappSystemFactory = SystemFactory<WebappFactoryContext, RuntimeSystemContext>

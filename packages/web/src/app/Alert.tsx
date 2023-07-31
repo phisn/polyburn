@@ -78,9 +78,7 @@ function Alert(props: AlertProps) {
 
     return (
         <div className="relative">
-            <div
-                className={`alert ${alertClassName(props.type)} bg-clip-border`}
-            >
+            <div className={`alert ${alertClassName(props.type)} bg-clip-border`}>
                 {/*
                 <Transition
                     appear={true} show={true}

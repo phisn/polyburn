@@ -17,8 +17,10 @@ export interface ShapeModeVertex {
     vertexIndex: number
     vertices: ShapeVertex[]
 
-    inBuffer?: ShapeVertex
-    inBufferIndex?: number
+    duplicate?: {
+        vertex: ShapeVertex
+        otherIndex: number
+    }
 }
 
 export function ShapeInVertex(props: {
@@ -53,6 +55,16 @@ export function ShapeInVertex(props: {
                 return ConsumeEvent
             }
 
+            if (props.mode.duplicate) {
+                const other = props.mode.vertices[props.mode.vertexIndex]
+                props.mode.vertices[props.mode.vertexIndex] = props.mode.duplicate.vertex
+
+                props.mode.vertices.splice(props.mode.duplicate.otherIndex, 0, other)
+                props.mode.vertexIndex = props.mode.duplicate.otherIndex
+
+                props.mode.duplicate = undefined
+            }
+
             props.mode.vertices[props.mode.vertexIndex].position.set(
                 event.positionInGrid.x,
                 event.positionInGrid.y,
@@ -71,7 +83,11 @@ export function ShapeInVertex(props: {
                     return ConsumeEvent
                 }
 
-                props.mode.inBuffer = props.mode.vertices[duplicateIndex]
+                props.mode.duplicate = {
+                    vertex: props.mode.vertices[duplicateIndex],
+                    otherIndex: props.mode.vertexIndex,
+                }
+
                 props.mode.vertices[duplicateIndex] = props.mode.vertices[props.mode.vertexIndex]
 
                 props.mode.vertices.splice(props.mode.vertexIndex, 1)
@@ -119,4 +135,3 @@ export function ShapeInVertex(props: {
         </>
     )
 }
-

@@ -81,4 +81,3 @@ export function ShapeInNone(props: {
         return "white"
     }
 }
-

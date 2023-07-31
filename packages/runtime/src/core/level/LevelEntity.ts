@@ -4,16 +4,9 @@ import { EntityWith } from "runtime-framework/src/NarrowProperties"
 import { CollisionMessage } from "../collision/CollisionMessage"
 import { RuntimeComponents } from "../RuntimeComponents"
 
-export const LevelEntityComponents = [
-    "level",
-    "entityType",
-    "rigidBody",
-] as const
+export const LevelEntityComponents = ["level", "entityType", "rigidBody"] as const
 
-export type LevelEntity = EntityWith<
-    RuntimeComponents,
-    (typeof LevelEntityComponents)[number]
->
+export type LevelEntity = EntityWith<RuntimeComponents, (typeof LevelEntityComponents)[number]>
 
 export function isCollisionWithCapture(
     collision: CollisionMessage,

@@ -6,9 +6,7 @@ import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 import { colorInGradient } from "../webapp-runtime/particle/Gradient"
 
-export function ParticleSourceGraphic(props: {
-    entity: Entity<WebappComponents>
-}) {
+export function ParticleSourceGraphic(props: { entity: Entity<WebappComponents> }) {
     if (!props.entity.has("particleSource")) {
         throw new Error("Got invalid entity graphic type")
     }
@@ -58,9 +56,7 @@ export function ParticleSourceGraphic(props: {
                 i++
             }
 
-            j =
-                (j - 1 + particleSource.particles.length) %
-                particleSource.particles.length
+            j = (j - 1 + particleSource.particles.length) % particleSource.particles.length
         }
 
         instanceMeshRef.current.instanceMatrix.needsUpdate = true
@@ -82,11 +78,7 @@ export function ParticleSourceGraphic(props: {
         <>
             <instancedMesh
                 ref={instanceMeshRef}
-                args={[
-                    undefined,
-                    undefined,
-                    entity.components.particleSource.bufferAmount,
-                ]}
+                args={[undefined, undefined, entity.components.particleSource.bufferAmount]}
             >
                 <planeGeometry args={[1, 1]} />
                 <meshBasicMaterial opacity={0.8} transparent />

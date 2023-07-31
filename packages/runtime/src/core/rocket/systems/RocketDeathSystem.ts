@@ -9,11 +9,7 @@ import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { respawnRocket } from "../respawnRocket"
 import { RocketEntityComponents } from "../RocketEntity"
 
-export const newRocketDeathSystem: RuntimeSystemFactory = ({
-    config,
-    store,
-    physics,
-}) => {
+export const newRocketDeathSystem: RuntimeSystemFactory = ({ config, store, physics }) => {
     const rockets = store.newSet(...RocketEntityComponents)
 
     return () => {
@@ -22,15 +18,8 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({
                 continue
             }
 
-            for (
-                let i = 0;
-                i < entity.components.rigidBody.numColliders();
-                ++i
-            ) {
-                handleRocketCollider(
-                    entity.components.rigidBody.collider(i),
-                    entity,
-                )
+            for (let i = 0; i < entity.components.rigidBody.numColliders(); ++i) {
+                handleRocketCollider(entity.components.rigidBody.collider(i), entity)
             }
         }
     }
@@ -60,9 +49,7 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({
             y: cos(rocket.components.rigidBody.rotation()),
         }
 
-        const otherNormal = flipped
-            ? contact.localNormal1()
-            : contact.localNormal2()
+        const otherNormal = flipped ? contact.localNormal1() : contact.localNormal2()
 
         const otherNormalLength = sqrt(
             otherNormal.x * otherNormal.x + otherNormal.y * otherNormal.y,

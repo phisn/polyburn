@@ -13,8 +13,7 @@ export function isPointInsideShape(point: Point, shape: ShapeModel): boolean {
         if (
             shape.vertices[i].y > point.y !== shape.vertices[j].y > point.y &&
             point.x <
-                ((shape.vertices[j].x - shape.vertices[i].x) *
-                    (point.y - shape.vertices[i].y)) /
+                ((shape.vertices[j].x - shape.vertices[i].x) * (point.y - shape.vertices[i].y)) /
                     (shape.vertices[j].y - shape.vertices[i].y) +
                     shape.vertices[i].x
         ) {
@@ -27,11 +26,7 @@ export function isPointInsideShape(point: Point, shape: ShapeModel): boolean {
     return isInside
 }
 
-export function findClosestEdge(
-    shapes: ShapeModel[],
-    point: Point,
-    snapDistance: number,
-) {
+export function findClosestEdge(shapes: ShapeModel[], point: Point, snapDistance: number) {
     let minDistance = Number.MAX_VALUE
     let closestPoint: Point = { x: 0, y: 0 }
     let shapeIndex = 0
@@ -62,11 +57,7 @@ export function findClosestEdge(
     return { point: closestPoint, shapeIndex: shapeIndex, edge: edgeIndices }
 }
 
-export function findClosestVertex(
-    shapes: ShapeModel[],
-    point: Point,
-    snapDistance: number,
-) {
+export function findClosestVertex(shapes: ShapeModel[], point: Point, snapDistance: number) {
     let minDistance = Number.MAX_VALUE
     let closestPoint: Point = { x: 0, y: 0 }
     let shapeIndex = 0

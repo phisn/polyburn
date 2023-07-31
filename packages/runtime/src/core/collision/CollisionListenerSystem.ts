@@ -15,11 +15,7 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({
     const entityToBodyHandle = new BiMap<number, number>()
 
     store.listenTo(
-        entity =>
-            entityToBodyHandle.set(
-                entity.id,
-                entity.components.rigidBody.handle,
-            ),
+        entity => entityToBodyHandle.set(entity.id, entity.components.rigidBody.handle),
         entity => entityToBodyHandle.delete(entity.id),
         "rigidBody",
     )
@@ -37,22 +33,8 @@ export const newCollisionEventListenerSystem: RuntimeSystemFactory = ({
                 return
             }
 
-            handleCollisionEvent(
-                entity1,
-                collider1,
-                entity2,
-                collider2,
-                started,
-                messageStore,
-            )
-            handleCollisionEvent(
-                entity2,
-                collider2,
-                entity1,
-                collider1,
-                started,
-                messageStore,
-            )
+            handleCollisionEvent(entity1, collider1, entity2, collider2, started, messageStore)
+            handleCollisionEvent(entity2, collider2, entity1, collider1, started, messageStore)
         })
     }
 

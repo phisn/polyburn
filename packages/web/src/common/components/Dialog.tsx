@@ -10,11 +10,7 @@ interface DialogProps {
 function Dialog(props: DialogProps) {
     return (
         <Transition show={props.open} as={Fragment}>
-            <NativeDialog
-                onClose={() => props.closeDialog()}
-                as="div"
-                className="relative z-10"
-            >
+            <NativeDialog onClose={() => props.closeDialog()} as="div" className="relative z-10">
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-200"

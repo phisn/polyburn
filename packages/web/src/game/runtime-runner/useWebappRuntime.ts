@@ -13,8 +13,7 @@ export function useWebappRuntime(stack: RuntimeSystemStack) {
     const { store } = useGameStore(store => store.systemContext)
     const [started, start] = useGameStore(store => [store.started, store.start])
 
-    const { updateInterpolation, updateGraphics } =
-        useWebappUpdateDispatcher(store)
+    const { updateInterpolation, updateGraphics } = useWebappUpdateDispatcher(store)
 
     useGameLoop(
         {

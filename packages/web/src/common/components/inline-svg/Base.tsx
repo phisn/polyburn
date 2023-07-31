@@ -1,10 +1,5 @@
 export function newSvgFrom(children: JSX.Element) {
-    function Svg(props: {
-        className?: string
-        width: string
-        height: string
-        fill?: string
-    }) {
+    function Svg(props: { className?: string; width: string; height: string; fill?: string }) {
         return (
             <svg
                 xmlns="http://www.w3.org/2000/svg"

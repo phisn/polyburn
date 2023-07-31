@@ -19,27 +19,19 @@ export interface EntityStoreState<Components extends object> {
     ): EntitySet<NarrowProperties<Components, T[number]>>
 
     listenToNew<T extends (keyof Components)[]>(
-        set?: (
-            entity: Entity<NarrowProperties<Components, T[number]>>,
-            isNew: boolean,
-        ) => void,
+        set?: (entity: Entity<NarrowProperties<Components, T[number]>>, isNew: boolean) => void,
         del?: (entity: Entity<NarrowProperties<Components, T[number]>>) => void,
         ...components: [...T]
     ): () => void
 
     listenTo<T extends (keyof Components)[]>(
-        set?: (
-            entity: Entity<NarrowProperties<Components, T[number]>>,
-            isNew: boolean,
-        ) => void,
+        set?: (entity: Entity<NarrowProperties<Components, T[number]>>, isNew: boolean) => void,
         del?: (entity: Entity<NarrowProperties<Components, T[number]>>) => void,
         ...components: [...T]
     ): () => void
 }
 
-export const createEntityStore = <
-    Components extends object,
->(): EntityStoreState<Components> => {
+export const createEntityStore = <Components extends object>(): EntityStoreState<Components> => {
     let nextEntityId = 0
 
     const entities = new Map<EntityId, Entity<Components>>()
@@ -81,9 +73,7 @@ export const createEntityStore = <
             }
 
             for (const key of Object.keys(entity.components)) {
-                for (const callback of componentDelListeners.get(
-                    key as keyof Components,
-                ) ?? []) {
+                for (const callback of componentDelListeners.get(key as keyof Components) ?? []) {
                     callback(entity)
                 }
             }
@@ -101,15 +91,10 @@ export const createEntityStore = <
 
             if (setCached) {
                 setCached.referenceCounter++
-                return setCached.set as EntitySet<
-                    NarrowProperties<Components, T[number]>
-                >
+                return setCached.set as EntitySet<NarrowProperties<Components, T[number]>>
             }
 
-            const newSet = new Map<
-                EntityId,
-                EntityWith<Components, T[number]>
-            >()
+            const newSet = new Map<EntityId, EntityWith<Components, T[number]>>()
 
             this.listenTo(
                 (entity, isNew) => {
@@ -121,9 +106,7 @@ export const createEntityStore = <
                 ...components,
             )
 
-            const entitySet: EntitySet<
-                NarrowProperties<Components, T[number]>
-            > = {
+            const entitySet: EntitySet<NarrowProperties<Components, T[number]>> = {
                 [Symbol.iterator]() {
                     return newSet.values()
                 },
@@ -149,13 +132,8 @@ export const createEntityStore = <
             return entitySet
         },
         listenToNew<T extends (keyof Components)[]>(
-            set?: (
-                entity: Entity<NarrowProperties<Components, T[number]>>,
-                isNew: boolean,
-            ) => void,
-            del?: (
-                entity: Entity<NarrowProperties<Components, T[number]>>,
-            ) => void,
+            set?: (entity: Entity<NarrowProperties<Components, T[number]>>, isNew: boolean) => void,
+            del?: (entity: Entity<NarrowProperties<Components, T[number]>>) => void,
             ...components: [...T]
         ): () => void {
             if (set === undefined && del === undefined) {
@@ -167,27 +145,14 @@ export const createEntityStore = <
                     set === undefined
                         ? undefined
                         : entity =>
-                              set(
-                                  entity as Entity<
-                                      NarrowProperties<Components, T[number]>
-                                  >,
-                                  true,
-                              ),
+                              set(entity as Entity<NarrowProperties<Components, T[number]>>, true),
                     del === undefined
                         ? undefined
-                        : entity =>
-                              del(
-                                  entity as Entity<
-                                      NarrowProperties<Components, T[number]>
-                                  >,
-                              ),
+                        : entity => del(entity as Entity<NarrowProperties<Components, T[number]>>),
                 )
             }
 
-            let setListener: (
-                entity: Entity<Components>,
-                isNew: boolean,
-            ) => void
+            let setListener: (entity: Entity<Components>, isNew: boolean) => void
             let delListener: (entity: Entity<Components>) => void
 
             if (set) {
@@ -221,8 +186,7 @@ export const createEntityStore = <
             return () => {
                 if (setListener) {
                     components.forEach(component => {
-                        const listeners =
-                            componentSetListeners.get(component) ?? []
+                        const listeners = componentSetListeners.get(component) ?? []
                         listeners.splice(listeners.indexOf(setListener), 1)
                         componentSetListeners.set(component, listeners)
                     })
@@ -230,8 +194,7 @@ export const createEntityStore = <
 
                 if (delListener) {
                     components.forEach(component => {
-                        const listeners =
-                            componentDelListeners.get(component) ?? []
+                        const listeners = componentDelListeners.get(component) ?? []
                         listeners.splice(listeners.indexOf(delListener), 1)
                         componentDelListeners.set(component, listeners)
                     })
@@ -239,13 +202,8 @@ export const createEntityStore = <
             }
         },
         listenTo<T extends (keyof Components)[]>(
-            set?: (
-                entity: Entity<NarrowProperties<Components, T[number]>>,
-                isNew: boolean,
-            ) => void,
-            del?: (
-                entity: Entity<NarrowProperties<Components, T[number]>>,
-            ) => void,
+            set?: (entity: Entity<NarrowProperties<Components, T[number]>>, isNew: boolean) => void,
+            del?: (entity: Entity<NarrowProperties<Components, T[number]>>) => void,
             ...components: [...T]
         ) {
             const free = this.listenToNew(set, del, ...components)
@@ -309,37 +267,31 @@ export const createEntityStore = <
         const entityId = nextEntityId++
 
         // assuming in type assertion that L is never if base is undefined
-        const entityComponents = new Proxy(
-            base ?? ({} as NarrowProperties<Components, L>),
-            {
-                set(target, prop, value) {
-                    const isNew = prop in target === false
+        const entityComponents = new Proxy(base ?? ({} as NarrowProperties<Components, L>), {
+            set(target, prop, value) {
+                const isNew = prop in target === false
 
-                    target[prop as L] = value
+                target[prop as L] = value
 
-                    for (const callback of componentSetListeners.get(
-                        prop as keyof Components,
-                    ) ?? []) {
-                        callback(entity, isNew)
-                    }
+                for (const callback of componentSetListeners.get(prop as keyof Components) ?? []) {
+                    callback(entity, isNew)
+                }
 
-                    return true
-                },
-                deleteProperty(target, prop) {
-                    if (prop in target) {
-                        for (const callback of componentDelListeners.get(
-                            prop as keyof Components,
-                        ) ?? []) {
-                            callback(entity)
-                        }
-
-                        return delete target[prop as L]
-                    }
-
-                    return false
-                },
+                return true
             },
-        )
+            deleteProperty(target, prop) {
+                if (prop in target) {
+                    for (const callback of componentDelListeners.get(prop as keyof Components) ??
+                        []) {
+                        callback(entity)
+                    }
+
+                    return delete target[prop as L]
+                }
+
+                return false
+            },
+        })
 
         const entity: Entity<NarrowProperties<Components, L>> = {
             get components() {
@@ -350,9 +302,7 @@ export const createEntityStore = <
             },
 
             has<T extends (keyof Components)[]>(...components: [...T]) {
-                return components.every(
-                    component => component in entityComponents,
-                )
+                return components.every(component => component in entityComponents)
             },
             extend() {
                 return true
@@ -362,9 +312,7 @@ export const createEntityStore = <
         entities.set(entityId, entity)
 
         for (const key of Object.keys(entity.components)) {
-            for (const callback of componentSetListeners.get(
-                key as keyof Components,
-            ) ?? []) {
+            for (const callback of componentSetListeners.get(key as keyof Components) ?? []) {
                 callback(entity, true)
             }
         }
@@ -377,5 +325,4 @@ export const createEntityStore = <
     }
 }
 
-export type EntityStore<Components extends object> =
-    EntityStoreState<Components>
+export type EntityStore<Components extends object> = EntityStoreState<Components>

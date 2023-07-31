@@ -38,46 +38,39 @@ const mixed = [
 
 console.log(`choosen gradient: ${mixedIndex}`)
 
-export const newThrustParticleFactory =
-    (rocket: RocketEntity) => (): ParticleConfiguration => {
-        const rocketEntry = entityModelRegistry[EntityType.Rocket]
+export const newThrustParticleFactory = (rocket: RocketEntity) => (): ParticleConfiguration => {
+    const rocketEntry = entityModelRegistry[EntityType.Rocket]
 
-        const rigidBody = rocket.components.rigidBody
-        const rocketRotation = rigidBody.rotation()
+    const rigidBody = rocket.components.rigidBody
+    const rocketRotation = rigidBody.rotation()
 
-        const spawnPosition = changeAnchor(
-            rigidBody.translation(),
-            rocketRotation,
-            rocketEntry,
-            { x: 0.5, y: 0.5 },
-            { x: 0.5, y: 0.3 },
-        )
+    const spawnPosition = changeAnchor(
+        rigidBody.translation(),
+        rocketRotation,
+        rocketEntry,
+        { x: 0.5, y: 0.5 },
+        { x: 0.5, y: 0.3 },
+    )
 
-        console.log(
-            `rigidbody is at ${JSON.stringify(
-                rigidBody.translation(),
-            )}, spawnPosition is ${JSON.stringify(spawnPosition)}`,
-        )
+    const randomAngle = randomValueBetween(minAngle, maxAngle)
 
-        const randomAngle = randomValueBetween(minAngle, maxAngle)
-
-        const spawnVelocity = {
-            x: velocity * Math.sin(rocketRotation + randomAngle),
-            y: velocity * Math.cos(rocketRotation + randomAngle) * -1,
-        }
-
-        return {
-            spawnPosition,
-
-            spawnVelocity,
-            additionalVelocity: rigidBody.linvel(),
-
-            size: randomValueBetween(minSize, maxSize),
-            lifeTime: Math.round(randomValueBetween(minLifetime, maxLifetime)),
-
-            gradientOverTime: mixed,
-        }
+    const spawnVelocity = {
+        x: velocity * Math.sin(rocketRotation + randomAngle),
+        y: velocity * Math.cos(rocketRotation + randomAngle) * -1,
     }
+
+    return {
+        spawnPosition,
+
+        spawnVelocity,
+        additionalVelocity: rigidBody.linvel(),
+
+        size: randomValueBetween(minSize, maxSize),
+        lifeTime: Math.round(randomValueBetween(minLifetime, maxLifetime)),
+
+        gradientOverTime: mixed,
+    }
+}
 
 function randomValueBetween(min: number, max: number) {
     return min + Math.random() * (max - min)

@@ -11,8 +11,7 @@ export const newRocketRotationSystem: RuntimeSystemFactory = ({ store }) => {
             }
 
             entity.components.rigidBody.setRotation(
-                entity.components.rocket.rotationWithoutInput +
-                    context.rotation,
+                entity.components.rocket.rotationWithoutInput + context.rotation,
                 true,
             )
         }

@@ -16,27 +16,26 @@ const gradient: Gradient = [
     { color: [0 / 255, 51 / 255, 0 / 255], time: 1.0 }, // 0.000 },
 ]
 
-export const newCaptureParticleFactory =
-    (level: LevelEntity) => (): ParticleConfiguration => {
-        const randomAngle = randomValueBetween(0, 2 * Math.PI)
+export const newCaptureParticleFactory = (level: LevelEntity) => (): ParticleConfiguration => {
+    const randomAngle = randomValueBetween(0, 2 * Math.PI)
 
-        const spawnVelocity = {
-            x: velocity * Math.sin(randomAngle),
-            y: velocity * Math.cos(randomAngle),
-        }
-
-        return {
-            spawnPosition: level.components.level.flag,
-
-            spawnVelocity,
-            additionalVelocity: { x: 0, y: 0 },
-
-            size: randomValueBetween(minSize, maxSize),
-            lifeTime: Math.round(randomValueBetween(minLifetime, maxLifetime)),
-
-            gradientOverTime: gradient,
-        }
+    const spawnVelocity = {
+        x: velocity * Math.sin(randomAngle),
+        y: velocity * Math.cos(randomAngle),
     }
+
+    return {
+        spawnPosition: level.components.level.flag,
+
+        spawnVelocity,
+        additionalVelocity: { x: 0, y: 0 },
+
+        size: randomValueBetween(minSize, maxSize),
+        lifeTime: Math.round(randomValueBetween(minLifetime, maxLifetime)),
+
+        gradientOverTime: gradient,
+    }
+}
 
 function randomValueBetween(min: number, max: number) {
     return min + Math.random() * (max - min)

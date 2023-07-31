@@ -86,9 +86,7 @@ export function useControls() {
                         ) {
                             controlsRef.current.rotation =
                                 state.rotatePointer.startRotation -
-                                (event.clientX -
-                                    state.rotatePointer.startPointerX) *
-                                    0.005
+                                (event.clientX - state.rotatePointer.startPointerX) * 0.005
                         }
 
                         break
@@ -117,8 +115,7 @@ export function useControls() {
                 if ((event.buttons & 1) === 1) {
                     if (wasPointerDown) {
                         controlsRef.current.rotation =
-                            startRotation -
-                            (event.clientX - startPointerX) * 0.005
+                            startRotation - (event.clientX - startPointerX) * 0.005
                     } else {
                         startPointerX = event.clientX
                         wasPointerDown = true

@@ -23,28 +23,21 @@ export const newGamemode =
 
         context.physics.gravity = new RAPIER.Vector2(0, -20)
 
-        const rocketModel = world.entities.find(
-            entity => entity.type === EntityType.Rocket,
-        )
+        const rocketModel = world.entities.find(entity => entity.type === EntityType.Rocket)
 
         if (rocketModel === undefined) {
             throw new Error("No rocket found in world")
         }
 
         world.entities
-            .filter(
-                (entity): entity is FlagEntityModel =>
-                    entity.type === EntityType.Level,
-            )
+            .filter((entity): entity is FlagEntityModel => entity.type === EntityType.Level)
             .forEach(entity => {
                 newLevel(context, entity)
             })
 
         const rocket = newRocket(context, rocketModel as RocketEntityModel)
 
-        rocket.components.rocket.currentLevel.components.level.boundsCollider.setSensor(
-            false,
-        )
+        rocket.components.rocket.currentLevel.components.level.boundsCollider.setSensor(false)
         rocket.components.rocket.currentLevel.components.level.captured = true
         rocket.components.rocket.currentLevel.components.level.hideFlag = true
         7
@@ -58,8 +51,7 @@ export const newGamemode =
             finished: false,
         }
 
-        return new SystemStack<
-            RuntimeFactoryContext<RuntimeComponents>,
-            RuntimeSystemContext
-        >(context).add(...runtimeSystemFactories)
+        return new SystemStack<RuntimeFactoryContext<RuntimeComponents>, RuntimeSystemContext>(
+            context,
+        ).add(...runtimeSystemFactories)
     }

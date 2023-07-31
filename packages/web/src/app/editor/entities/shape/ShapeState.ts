@@ -53,12 +53,23 @@ export function canRemoveVertex(vertexIndex: number, vertices: ShapeVertex[]) {
 }
 
 export function findIntersection(firstIndex: number, secondIndex: number, vertices: ShapeVertex[]) {
-    function ccw(a: Point, b: Point, c: Point) {
-        return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
-    }
-
     function intersects(a: Point, b: Point, c: Point, d: Point) {
-        return ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d)
+        const lacd = (d.y - a.y) * (c.x - a.x)
+        const racd = (c.y - a.y) * (d.x - a.x)
+
+        const lbcd = (d.y - b.y) * (c.x - b.x)
+        const rbcd = (c.y - b.y) * (d.x - b.x)
+
+        const labc = (c.y - a.y) * (b.x - a.x)
+        const rabc = (b.y - a.y) * (c.x - a.x)
+
+        const labd = (d.y - a.y) * (b.x - a.x)
+        const rabd = (b.y - a.y) * (d.x - a.x)
+
+        return (
+            (lacd > racd !== lbcd > rbcd && labc > rabc !== labd > rabd) ||
+            (lacd >= racd !== lbcd >= rbcd && labc >= rabc !== labd >= rabd)
+        )
     }
 
     for (let i = 0; i < vertices.length; ++i) {
@@ -272,4 +283,3 @@ export function getDistance(a: Point, b: Point) {
     const dy = a.y - b.y
     return Math.sqrt(dx * dx + dy * dy)
 }
-

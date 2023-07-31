@@ -5,9 +5,7 @@ import { ParticleSourceComponent } from "./ParticleSource"
 
 export const injectParticleSource = <T extends (keyof WebappComponents)[]>(
     store: EntityStore<WebappComponents>,
-    particleSource: (
-        entity: EntityWith<WebappComponents, T[number]>,
-    ) => ParticleSourceComponent,
+    particleSource: (entity: EntityWith<WebappComponents, T[number]>) => ParticleSourceComponent,
     ...components: [...T]
 ) => {
     store.listenTo(
@@ -17,8 +15,7 @@ export const injectParticleSource = <T extends (keyof WebappComponents)[]>(
             )
         },
         entity => {
-            delete (entity as Entity<WebappComponents>).components
-                .particleSource
+            delete (entity as Entity<WebappComponents>).components.particleSource
         },
         ...components,
     )

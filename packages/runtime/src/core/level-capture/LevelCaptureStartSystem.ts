@@ -5,13 +5,8 @@ import { RocketEntity, RocketEntityComponents } from "../rocket/RocketEntity"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeSystemFactory } from "../RuntimeSystemFactory"
 
-export const newLevelCaptureStartSystem: RuntimeSystemFactory = ({
-    messageStore,
-}) => {
-    const collisions = messageStore.collectTarget(
-        "collision",
-        ...RocketEntityComponents,
-    )
+export const newLevelCaptureStartSystem: RuntimeSystemFactory = ({ messageStore }) => {
+    const collisions = messageStore.collectTarget("collision", ...RocketEntityComponents)
 
     return () => {
         for (const collision of collisions) {
@@ -39,7 +34,6 @@ function stopCapture(rocketEntity: RocketEntity, level: LevelEntity) {
     if (rocketEntity.has("levelCapturing")) {
         level.components.level.inCapture = false
 
-        delete (rocketEntity as Entity<RuntimeComponents>).components
-            .levelCapturing
+        delete (rocketEntity as Entity<RuntimeComponents>).components.levelCapturing
     }
 }

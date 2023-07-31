@@ -6,6 +6,8 @@ import { Euler } from "three"
 
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
+import { entityGraphicRegistry } from "./EntityGraphicRegistry"
+import { EntityGraphicType } from "./EntityGraphicType"
 
 export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
     if (!props.entity.has(...LevelEntityComponents)) {
@@ -14,12 +16,9 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
 
     const [unlocked, setUnlocked] = useState(false)
 
-    /*
     const entry = unlocked
         ? entityGraphicRegistry[EntityGraphicType.GreenFlag]
         : entityGraphicRegistry[EntityGraphicType.RedFlag]
-        */
-    const entry: any = null
 
     useGraphicUpdate(() => {
         if (!props.entity.has("level")) {
@@ -27,8 +26,7 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
         }
 
         const showUnlocked =
-            props.entity.components.level.captured ||
-            props.entity.components.level.inCapture
+            props.entity.components.level.captured || props.entity.components.level.inCapture
 
         if (showUnlocked !== unlocked) {
             setUnlocked(showUnlocked)
@@ -47,13 +45,7 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
                             props.entity.components.level.flag.y,
                             0,
                         ]}
-                        rotation={
-                            new Euler(
-                                0,
-                                0,
-                                props.entity.components.level.flagRotation,
-                            )
-                        }
+                        rotation={new Euler(0, 0, props.entity.components.level.flagRotation)}
                     />
                 </Suspense>
             )}

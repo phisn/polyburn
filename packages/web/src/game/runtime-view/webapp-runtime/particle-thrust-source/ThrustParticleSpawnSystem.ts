@@ -6,14 +6,10 @@ import { newParticleSourceComponent } from "../particle/ParticleSource"
 import { WebappSystemFactory } from "../WebappSystemFactory"
 import { newThrustParticleFactory } from "./ThrustParticleFactory"
 
-export const newThrustParticleSpawnSystem: WebappSystemFactory = ({
-    store,
-    particlePhysics,
-}) => {
+export const newThrustParticleSpawnSystem: WebappSystemFactory = ({ store, particlePhysics }) => {
     injectParticleSource(
         store,
-        entity =>
-            newParticleSourceComponent(300, newThrustParticleFactory(entity)),
+        entity => newParticleSourceComponent(300, newThrustParticleFactory(entity)),
         ...RocketEntityComponents,
     )
 
@@ -25,11 +21,7 @@ export const newThrustParticleSpawnSystem: WebappSystemFactory = ({
     return context => {
         if (context.thrust) {
             for (const rocket of rockets) {
-                spawnParticles(
-                    particlePhysics,
-                    rocket.components.particleSource,
-                    particlePerFrame,
-                )
+                spawnParticles(particlePhysics, rocket.components.particleSource, particlePerFrame)
             }
             /*
             aggregate += particlePerFrame

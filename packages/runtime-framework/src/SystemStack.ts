@@ -14,9 +14,7 @@ export class SystemStack<FactoryContext extends object, Context> {
         this.systems.push(
             ...systemFactories
                 .map(factory => factory(this.factoryContext))
-                .filter(
-                    (system): system is System<Context> => system !== undefined,
-                ),
+                .filter((system): system is System<Context> => system !== undefined),
         )
 
         return this
@@ -25,10 +23,7 @@ export class SystemStack<FactoryContext extends object, Context> {
     public extend<ExtensionFactoryContext>(
         extension: ExtensionFactoryContext,
     ): SystemStack<FactoryContext & ExtensionFactoryContext, Context> {
-        const newStack = new SystemStack<
-            FactoryContext & ExtensionFactoryContext,
-            Context
-        >({
+        const newStack = new SystemStack<FactoryContext & ExtensionFactoryContext, Context>({
             ...this.factoryContext,
             ...extension,
         })

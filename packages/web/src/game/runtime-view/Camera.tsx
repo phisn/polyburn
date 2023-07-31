@@ -13,19 +13,13 @@ import { useGraphicUpdate } from "../store/useGraphicUpdate"
 import { WebappComponents } from "./webapp-runtime/WebappComponents"
 
 export function Camera(props: { store: EntityStore<WebappComponents> }) {
-    const [rocket] = props.store.find(
-        "interpolation",
-        ...RocketEntityComponents,
-    )
+    const [rocket] = props.store.find("interpolation", ...RocketEntityComponents)
 
     return <CameraWithEntities rocket={rocket} />
 }
 
 export function CameraWithEntities(props: {
-    rocket: EntityWith<
-        WebappComponents,
-        "interpolation" | (typeof RocketEntityComponents)[number]
-    >
+    rocket: EntityWith<WebappComponents, "interpolation" | (typeof RocketEntityComponents)[number]>
 }) {
     const cameraRef = useRef<ThreeOrthographicCamera>(null!)
 
@@ -73,18 +67,11 @@ export function CameraWithEntities(props: {
     }, [cameraBounds])
 
     useGraphicUpdate(() => {
-        previousRocketPosition.current =
-            props.rocket.components.interpolation.position
+        previousRocketPosition.current = props.rocket.components.interpolation.position
 
-        if (
-            props.rocket.components.rocket.currentLevel.components.level
-                .camera !== cameraBounds
-        ) {
+        if (props.rocket.components.rocket.currentLevel.components.level.camera !== cameraBounds) {
             animating.current = true
-            setCameraBounds(
-                props.rocket.components.rocket.currentLevel.components.level
-                    .camera,
-            )
+            setCameraBounds(props.rocket.components.rocket.currentLevel.components.level.camera)
         }
 
         updateCameraPosition()
@@ -169,11 +156,7 @@ export function CameraWithEntities(props: {
         const heightDiff = Math.abs(cameraTargetSize.current!.y - currentHeight)
 
         if (widthDiff > heightDiff) {
-            const approx = moveTo(
-                distance,
-                currentWidth,
-                cameraTargetSize.current!.x,
-            )
+            const approx = moveTo(distance, currentWidth, cameraTargetSize.current!.x)
 
             return {
                 newWidth: approx.result,
@@ -181,11 +164,7 @@ export function CameraWithEntities(props: {
                 overflow: approx.overflow,
             }
         } else {
-            const approx = moveTo(
-                distance,
-                currentHeight,
-                cameraTargetSize.current!.y,
-            )
+            const approx = moveTo(distance, currentHeight, cameraTargetSize.current!.y)
 
             return {
                 newWidth: (approx.result / currentHeight) * currentWidth,

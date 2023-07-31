@@ -51,9 +51,7 @@ export default function Replay() {
         <>
             {finished && (
                 <Dialog open={finished} closeDialog={() => setFinished(false)}>
-                    <div className="text-xl text-white">
-                        Export world as base64
-                    </div>
+                    <div className="text-xl text-white">Export world as base64</div>
 
                     <textarea
                         readOnly
@@ -67,10 +65,7 @@ export default function Replay() {
                         <button className="btn" onClick={onCopy}>
                             Copy
                         </button>
-                        <button
-                            className="btn btn-ghost"
-                            onClick={() => setFinished(false)}
-                        >
+                        <button className="btn btn-ghost" onClick={() => setFinished(false)}>
                             Cancel
                         </button>
                     </div>

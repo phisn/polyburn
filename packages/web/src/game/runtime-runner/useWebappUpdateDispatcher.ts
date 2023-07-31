@@ -8,13 +8,8 @@ import {
 import { WebappComponents } from "../runtime-view/webapp-runtime/WebappComponents"
 import { useGameStore } from "../store/GameStore"
 
-export function useWebappUpdateDispatcher(
-    store: EntityStore<WebappComponents>,
-) {
-    const entities = useMemo(
-        () => store.newSet("interpolation", "rigidBody"),
-        [store],
-    )
+export function useWebappUpdateDispatcher(store: EntityStore<WebappComponents>) {
+    const entities = useMemo(() => store.newSet("interpolation", "rigidBody"), [store])
 
     const listeners = useGameStore(store => store.graphicListeners)
 

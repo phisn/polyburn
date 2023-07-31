@@ -81,22 +81,13 @@ function GameInThree(props: { stack: RuntimeSystemStack }) {
     const camera = useThree(state => state.camera) as THREE.OrthographicCamera
 
     const [incline, decline, max] = useGameStore(
-        state => [
-            state.inclinePerformance,
-            state.declinePerformance,
-            state.maxPerformance,
-        ],
+        state => [state.inclinePerformance, state.declinePerformance, state.maxPerformance],
         shallow,
     )
 
     return (
         <>
-            <PerformanceMonitor
-                onIncline={incline}
-                onDecline={decline}
-                factor={1}
-                step={1 / max}
-            />
+            <PerformanceMonitor onIncline={incline} onDecline={decline} factor={1} step={1 / max} />
 
             <overlay.In>
                 <Overlay camera={camera} />

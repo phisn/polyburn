@@ -37,37 +37,13 @@ export function entityRect(entity: EntityModel) {
     const entry = entityGraphicRegistry[entity.type]
 
     // Compute the position and size of the entity's bounding box
-    const topLeft = changeAnchor(
-        position,
-        rotation,
-        entry.size,
-        { x: 0, y: 1 },
-        { x: 0, y: 0 },
-    )
+    const topLeft = changeAnchor(position, rotation, entry.size, { x: 0, y: 1 }, { x: 0, y: 0 })
 
-    const bottomRight = changeAnchor(
-        position,
-        rotation,
-        entry.size,
-        { x: 0, y: 1 },
-        { x: 1, y: 1 },
-    )
+    const bottomRight = changeAnchor(position, rotation, entry.size, { x: 0, y: 1 }, { x: 1, y: 1 })
 
-    const topRight = changeAnchor(
-        position,
-        rotation,
-        entry.size,
-        { x: 0, y: 1 },
-        { x: 1, y: 0 },
-    )
+    const topRight = changeAnchor(position, rotation, entry.size, { x: 0, y: 1 }, { x: 1, y: 0 })
 
-    const bottomLeft = changeAnchor(
-        position,
-        rotation,
-        entry.size,
-        { x: 0, y: 1 },
-        { x: 0, y: 1 },
-    )
+    const bottomLeft = changeAnchor(position, rotation, entry.size, { x: 0, y: 1 }, { x: 0, y: 1 })
 
     return {
         topLeft,
@@ -82,12 +58,7 @@ export function isPointInsideEntity(point: Point, entity: EntityModel) {
 
     const triangleArea = (a: Point, b: Point, c: Point) => {
         return (
-            Math.abs(
-                b.x * a.y -
-                    a.x * b.y +
-                    (c.x * b.y - b.x * c.y) +
-                    (a.x * c.y - c.x * a.y),
-            ) / 2
+            Math.abs(b.x * a.y - a.x * b.y + (c.x * b.y - b.x * c.y) + (a.x * c.y - c.x * a.y)) / 2
         )
     }
 

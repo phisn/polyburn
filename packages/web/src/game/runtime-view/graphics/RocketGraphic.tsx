@@ -44,11 +44,7 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
         )
 
         svgRef.current.position.set(positionAnchored.x, positionAnchored.y, 1)
-        svgRef.current.rotation.set(
-            0,
-            0,
-            props.entity.components.interpolation.rotation,
-        )
+        svgRef.current.rotation.set(0, 0, props.entity.components.interpolation.rotation)
 
         /*
         const positionMidAnchored = changeAnchor(
@@ -76,11 +72,7 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
 
     return (
         <Suspense>
-            <Svg
-                ref={svgRef as any}
-                src={graphicEntry.src}
-                scale={graphicEntry.scale}
-            />
+            <Svg ref={svgRef as any} src={graphicEntry.src} scale={graphicEntry.scale} />
             {/*
             <line ref={lineRef}>
                 <bufferGeometry />

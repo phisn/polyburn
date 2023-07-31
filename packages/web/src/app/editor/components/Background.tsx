@@ -43,10 +43,7 @@ export function Background() {
 
     if (mode.type === "contextMenu") {
         return (
-            <Html
-                as="div"
-                position={[mode.position.x, mode.position.y, priority]}
-            >
+            <Html as="div" position={[mode.position.x, mode.position.y, priority]}>
                 <ul
                     className="menu bg-base-200 rounded-box absolute left-2 top-2 w-56"
                     onContextMenu={e => e.preventDefault()}

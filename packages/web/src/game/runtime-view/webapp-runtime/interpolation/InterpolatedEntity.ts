@@ -3,10 +3,7 @@ import { MathUtils } from "three"
 
 import { WebappComponents } from "../WebappComponents"
 
-export type InterpolatedEntity = EntityWith<
-    WebappComponents,
-    "interpolation" | "rigidBody"
->
+export type InterpolatedEntity = EntityWith<WebappComponents, "interpolation" | "rigidBody">
 
 export function interpolateEntity(entity: InterpolatedEntity, delta: number) {
     entity.components.interpolation.position.set(
@@ -30,10 +27,7 @@ export function interpolateEntity(entity: InterpolatedEntity, delta: number) {
     )
 }
 
-export function updateInterpolatedEntity(
-    entity: InterpolatedEntity,
-    delta: number,
-) {
+export function updateInterpolatedEntity(entity: InterpolatedEntity, delta: number) {
     if (entity.components.rigidBody.isSleeping()) {
         return
     }
@@ -43,14 +37,12 @@ export function updateInterpolatedEntity(
         entity.components.interpolation.newPosition.y,
         0,
     )
-    entity.components.interpolation.previousRotation =
-        entity.components.interpolation.newRotation
+    entity.components.interpolation.previousRotation = entity.components.interpolation.newRotation
 
     const position = entity.components.rigidBody.translation()
 
     entity.components.interpolation.newPosition.set(position.x, position.y, 0)
-    entity.components.interpolation.newRotation =
-        entity.components.rigidBody.rotation()
+    entity.components.interpolation.newRotation = entity.components.rigidBody.rotation()
 
     interpolateEntity(entity, delta)
 }

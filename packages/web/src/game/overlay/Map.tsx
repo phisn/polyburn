@@ -8,10 +8,7 @@ import { useGraphicUpdate } from "../store/useGraphicUpdate"
 export default function Map(props: { camera: OrthographicCamera }) {
     const { store } = useGameStore(state => state.systemContext)
 
-    const rockets = useMemo(
-        () => store.newSet(...RocketEntityComponents),
-        [store],
-    )
+    const rockets = useMemo(() => store.newSet(...RocketEntityComponents), [store])
 
     const containerDivRef = useRef<HTMLDivElement>(null!)
     const backgroundDivRef = useRef<HTMLDivElement>(null!)
@@ -34,20 +31,15 @@ export default function Map(props: { camera: OrthographicCamera }) {
 
         const levelSize = {
             x:
-                rocket.components.rocket.currentLevel.components.level.camera
-                    .topLeft.x -
-                rocket.components.rocket.currentLevel.components.level.camera
-                    .bottomRight.x,
+                rocket.components.rocket.currentLevel.components.level.camera.topLeft.x -
+                rocket.components.rocket.currentLevel.components.level.camera.bottomRight.x,
             y:
-                rocket.components.rocket.currentLevel.components.level.camera
-                    .topLeft.y -
-                rocket.components.rocket.currentLevel.components.level.camera
-                    .bottomRight.y,
+                rocket.components.rocket.currentLevel.components.level.camera.topLeft.y -
+                rocket.components.rocket.currentLevel.components.level.camera.bottomRight.y,
         }
 
         const top =
-            rocket.components.rocket.currentLevel.components.level.camera
-                .topLeft.y -
+            rocket.components.rocket.currentLevel.components.level.camera.topLeft.y -
             (props.camera.position.y + props.camera.top)
 
         const topPercent = top / levelSize.y
@@ -55,14 +47,12 @@ export default function Map(props: { camera: OrthographicCamera }) {
         const bottom =
             props.camera.position.y +
             props.camera.bottom -
-            rocket.components.rocket.currentLevel.components.level.camera
-                .bottomRight.y
+            rocket.components.rocket.currentLevel.components.level.camera.bottomRight.y
 
         const bottomPercent = bottom / levelSize.y
 
         const left =
-            rocket.components.rocket.currentLevel.components.level.camera
-                .topLeft.x -
+            rocket.components.rocket.currentLevel.components.level.camera.topLeft.x -
             (props.camera.position.x + props.camera.left)
 
         const leftPercent = left / levelSize.x
@@ -70,8 +60,7 @@ export default function Map(props: { camera: OrthographicCamera }) {
         const right =
             props.camera.position.x +
             props.camera.right -
-            rocket.components.rocket.currentLevel.components.level.camera
-                .bottomRight.x
+            rocket.components.rocket.currentLevel.components.level.camera.bottomRight.x
 
         const rightPercent = right / levelSize.x
 
@@ -84,15 +73,9 @@ export default function Map(props: { camera: OrthographicCamera }) {
     return (
         <>
             <div ref={containerDivRef} className="relative m-2 overflow-hidden">
-                <div
-                    ref={backgroundDivRef}
-                    className="absolute bg-white opacity-20"
-                ></div>
+                <div ref={backgroundDivRef} className="absolute bg-white opacity-20"></div>
 
-                <div
-                    ref={cameraDivRef}
-                    className="absolute bg-white opacity-70"
-                ></div>
+                <div ref={cameraDivRef} className="absolute bg-white opacity-70"></div>
             </div>
         </>
     )

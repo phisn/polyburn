@@ -108,15 +108,10 @@ export default function Campaign() {
                             <div
                                 key={i}
                                 className={`justify-self-center ${
-                                    i % 2 === 0
-                                        ? "sm:justify-self-end"
-                                        : "sm:justify-self-start"
+                                    i % 2 === 0 ? "sm:justify-self-end" : "sm:justify-self-start"
                                 }`}
                             >
-                                <World
-                                    {...world}
-                                    onClick={() => onWorldSelected(world)}
-                                />
+                                <World {...world} onClick={() => onWorldSelected(world)} />
                             </div>
                         ))}
                     </div>
@@ -155,16 +150,12 @@ export default function Campaign() {
                                     <div className="justify-self-center">
                                         <BackArrowSvg height="40" width="40" />
                                     </div>
-                                    <div className="text-xl text-white">
-                                        {worldSelected?.name}
-                                    </div>
+                                    <div className="text-xl text-white">{worldSelected?.name}</div>
                                 </div>
                                 {modes.map((gamemode, i) => (
                                     <Gamemode
                                         key={i}
-                                        onClick={() =>
-                                            onGamemodeSelected(gamemode)
-                                        }
+                                        onClick={() => onGamemodeSelected(gamemode)}
                                         {...gamemode}
                                     />
                                 ))}

@@ -6,19 +6,14 @@ import { PencilSquare } from "../../../common/components/inline-svg/PencilSquare
 import { X } from "../../../common/components/inline-svg/X"
 
 export function GamemodeSelect() {
-    const [gamemodes, setGamemodes] = useState<string[]>([
-        "Normal",
-        "Hard",
-        "Reverse",
-    ])
+    const [gamemodes, setGamemodes] = useState<string[]>(["Normal", "Hard", "Reverse"])
 
     interface CreatingGamemode {
         previousSelected: number
     }
 
     const [selected, setSelected] = useState<number>(0)
-    const [creatingGamemode, setCreatingGamemode] =
-        useState<CreatingGamemode | null>(null)
+    const [creatingGamemode, setCreatingGamemode] = useState<CreatingGamemode | null>(null)
 
     return (
         <div className="absolute right-8 top-8">
@@ -32,9 +27,7 @@ export function GamemodeSelect() {
                         onSelect={() => setSelected(i)}
                         onRename={name => {
                             setGamemodes(
-                                gamemodes.map((gamemode, j) =>
-                                    j === i ? name : gamemode,
-                                ),
+                                gamemodes.map((gamemode, j) => (j === i ? name : gamemode)),
                             )
                         }}
                     />
@@ -101,18 +94,14 @@ function GamemodeOption(props: {
     useEffect(() => {
         if (mode !== GamemodeOptionType.Context) {
             const listener = (e: PointerEvent) => {
-                if (
-                    e.target instanceof Node &&
-                    !ref.current?.contains(e.target)
-                ) {
+                if (e.target instanceof Node && !ref.current?.contains(e.target)) {
                     setMode(GamemodeOptionType.None)
                 }
             }
 
             window.addEventListener("pointerdown", listener)
 
-            return () =>
-                void window.removeEventListener("pointerdown", listener)
+            return () => void window.removeEventListener("pointerdown", listener)
         }
     }, [])
 
@@ -263,9 +252,7 @@ function GamemodeOption(props: {
     )
 }
 
-function GamemodeOptionSelection(props: {
-    onType: (type: GamemodeOptionType) => void
-}) {
+function GamemodeOptionSelection(props: { onType: (type: GamemodeOptionType) => void }) {
     return (
         <ul className="menu relative mr-2 p-0 py-2">
             <li className="w-full">
@@ -277,11 +264,7 @@ function GamemodeOptionSelection(props: {
                                 props.onType(GamemodeOptionType.Groups)
                             }}
                         >
-                            <ListTask
-                                width="16"
-                                height="16"
-                                className="mt-0.5 rounded-none"
-                            />
+                            <ListTask width="16" height="16" className="mt-0.5 rounded-none" />
                             <div>Groups</div>
                         </a>
                     </li>
@@ -292,21 +275,13 @@ function GamemodeOptionSelection(props: {
                                 props.onType(GamemodeOptionType.Rename)
                             }}
                         >
-                            <PencilSquare
-                                width="16"
-                                height="16"
-                                className="mt-0.5 rounded-none"
-                            />
+                            <PencilSquare width="16" height="16" className="mt-0.5 rounded-none" />
                             <div>Rename</div>
                         </a>
                     </li>
                     <li>
                         <a className="space-x-1 pl-3">
-                            <X
-                                width="16"
-                                height="16"
-                                className="mt-0.5 scale-150 transform"
-                            />
+                            <X width="16" height="16" className="mt-0.5 scale-150 transform" />
                             <div>Remove</div>
                         </a>
                     </li>
@@ -344,17 +319,11 @@ function GamemodeRenamer(props: {
                 autoFocus
                 type="text"
                 className={`input input-success bg-success relative w-full text-black ${
-                    props.first
-                        ? "rounded-b-none rounded-r-none"
-                        : "rounded-none"
+                    props.first ? "rounded-b-none rounded-r-none" : "rounded-none"
                 }`}
                 onChange={e => setGamemode(e.target.value)}
                 onKeyDown={e => {
-                    if (
-                        e.key === "Enter" &&
-                        gamemode.length > 0 &&
-                        gamemode.length <= 14
-                    ) {
+                    if (e.key === "Enter" && gamemode.length > 0 && gamemode.length <= 14) {
                         if (props.gamemode === gamemode) {
                             props.onCancel()
                         } else {
@@ -366,9 +335,7 @@ function GamemodeRenamer(props: {
             ></input>
             <button
                 className={`btn btn-square bg-opacity-20 text-zinc-50 ${
-                    props.first
-                        ? "rounded-b-none rounded-l-none"
-                        : "rounded-none"
+                    props.first ? "rounded-b-none rounded-l-none" : "rounded-none"
                 }`}
                 disabled={gamemode.length === 0 || gamemode.length > 14}
                 onClick={() => {

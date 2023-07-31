@@ -1,12 +1,9 @@
 #Unclickable > * {
+    mstouchaction: "manipulation";
+    touchaction: "none" f;
+    userselect: "none";
 
-    msTouchAction: "manipulation",
-    touchAction: "none",
-    userSelect: "none",
-
-    // Prevent canvas selection on ios
-    // https://github.com/playcanvas/editor/issues/160
-    WebkitTouchCallout: "none",
-    WebkitUserSelect: "none",
-    WebkitTapHighlightColor: "rgba(255,255,255,0)",
+    webkittouchcallout: "none";
+    webkituserselect: "none";
+    webkittaphighlightcolor: "rgba(255,255,255,0)";
 }

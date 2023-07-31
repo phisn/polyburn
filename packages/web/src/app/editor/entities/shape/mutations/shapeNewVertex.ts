@@ -1,4 +1,4 @@
-import { Mutation } from "../../../store/WorldStore"
+import { Mutation } from "../../../store/EditorStore"
 import { ShapeState, ShapeVertex } from "../ShapeState"
 
 export const shapeNewVertex = (

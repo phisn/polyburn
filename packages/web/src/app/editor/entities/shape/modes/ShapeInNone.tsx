@@ -24,12 +24,10 @@ export function ShapeInNone(props: {
     useEventListener(event => {
         if (event.consumed) {
             setHovered(false)
-            console.log("event was consumed")
             return
         }
 
         const isPointInside = isPointInsideShape(event.position, props.state)
-        console.log("is point inside", isPointInside, event.position, event.type)
 
         if (event.leftButtonClicked) {
             if (isPointInside) {
@@ -42,7 +40,6 @@ export function ShapeInNone(props: {
                         },
                     })
                 } else {
-                    console.log("consume event of type", event.type)
                     props.setMode({ type: "selected" })
                 }
 

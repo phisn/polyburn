@@ -1,15 +1,17 @@
-import { Mutation } from "../../../store/WorldStore"
+import { Mutation } from "../../../store/EditorStore"
 import { ShapeState } from "../ShapeState"
 
 export const shapeRemoveVertex = (state: ShapeState, vertexIndex: number): Mutation => {
     const vertex = state.vertices[vertexIndex]
 
     return {
-        do() {
-            state.vertices.splice(vertexIndex, 1)
+        do(world) {
+            const shape = world.entities.get(state.id) as ShapeState
+            shape.vertices.splice(vertexIndex, 1)
         },
-        undo() {
-            state.vertices[vertexIndex] = vertex
+        undo(world) {
+            const shape = world.entities.get(state.id) as ShapeState
+            shape.vertices.splice(vertexIndex, 0, vertex)
         },
     }
 }

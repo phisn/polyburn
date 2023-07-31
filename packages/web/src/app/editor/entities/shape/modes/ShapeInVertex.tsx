@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"
+import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
-import { useMutationDispatch } from "../../../store/WorldStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import {
@@ -34,7 +34,7 @@ export function ShapeInVertex(props: {
         geometryRef.current.update(props.mode.vertices)
     })
 
-    const dispatchMutation = useMutationDispatch()
+    const dispatch = useEditorStore(store => store.mutation)
 
     useEventListener(event => {
         if (event.consumed) {
@@ -46,12 +46,16 @@ export function ShapeInVertex(props: {
         }
 
         if (event.leftButtonDown) {
-            console.log("position in grid is: ", event.positionInGrid.x, event.positionInGrid.y)
+            const newPosition = {
+                x: event.positionInGrid.x + props.state.position.x,
+                y: event.positionInGrid.y + props.state.position.y,
+            }
 
             if (
-                event.positionInGrid.x === props.mode.vertices[props.mode.vertexIndex].position.x &&
-                event.positionInGrid.y === props.mode.vertices[props.mode.vertexIndex].position.y
+                newPosition.x === props.mode.vertices[props.mode.vertexIndex].position.x &&
+                newPosition.y === props.mode.vertices[props.mode.vertexIndex].position.y
             ) {
+                window.document.body.style.cursor = "grabbing"
                 return ConsumeEvent
             }
 
@@ -65,10 +69,7 @@ export function ShapeInVertex(props: {
                 props.mode.duplicate = undefined
             }
 
-            props.mode.vertices[props.mode.vertexIndex].position.set(
-                event.positionInGrid.x,
-                event.positionInGrid.y,
-            )
+            props.mode.vertices[props.mode.vertexIndex].position.set(newPosition.x, newPosition.y)
 
             let duplicateIndex = props.mode.vertices.findIndex(
                 (x, i) =>
@@ -109,13 +110,11 @@ export function ShapeInVertex(props: {
                 }
             }
 
-            console.log("update vertices: ", JSON.stringify(props.mode.vertices, null, 2))
-
             geometryRef.current.update(props.mode.vertices)
             window.document.body.style.cursor = "grabbing"
         } else {
-            console.log("ShapeInVertex: left button up")
-            dispatchMutation(shapeChangeVertices(props.state, props.mode.vertices))
+            dispatch(shapeChangeVertices(props.state, props.mode.vertices))
+
             props.setMode({ type: "selected" })
             window.document.body.style.cursor = "grab"
         }

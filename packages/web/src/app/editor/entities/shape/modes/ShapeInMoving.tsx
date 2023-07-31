@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 import { Mesh } from "three"
+import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
-import { useMutationDispatch } from "../../../store/WorldStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import { ShapeState } from "../ShapeState"
@@ -28,7 +28,7 @@ export function ShapeInMoving(props: {
         document.body.style.cursor = "grabbing"
     })
 
-    const dispatchMutation = useMutationDispatch()
+    const dispatchMutation = useEditorStore(store => store.mutation)
 
     useEventListener(event => {
         if (event.consumed) {

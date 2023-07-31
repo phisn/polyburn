@@ -10,13 +10,13 @@ import { PrimaryBar } from "./components/PrimaryBar"
 import { Level } from "./entities/Level"
 import { Rocket } from "./entities/Rocket"
 import { Shape } from "./entities/shape/Shape"
+import { ProvideWorldStore, useEditorStore } from "./store/EditorStore"
 import { ProvideEventStore } from "./store/EventStore"
-import { ProvideWorldStore, useWorldStore } from "./store/WorldStore"
 
 export function Editor() {
     return (
         <ProvideWorldStore
-            default={{
+            world={{
                 entities: new Map([
                     [
                         1,
@@ -96,7 +96,9 @@ export function Editor() {
 }
 
 function Entities() {
-    const entities = useWorldStore().entities
+    const entities = useEditorStore(store => store.state).world.entities
+
+    console.log("render entities")
 
     return (
         <>

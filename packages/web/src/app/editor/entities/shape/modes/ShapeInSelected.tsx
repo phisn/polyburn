@@ -7,18 +7,20 @@ import {
     highlightDeleteColor,
     snapDistance,
 } from "../../../../../common/Values"
+import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import {
     ShapeState,
-    ShapeVertex,
+    ShapeVertexColor,
     averageColor,
     findClosestEdge,
     findClosestVertex,
     isPointInsideShape,
 } from "../ShapeState"
 import { Vertex, VertexContext } from "../Vertex"
+import { shapeRemoveVertex } from "../mutations/shapeRemoveVertex"
 
 export interface ShapeModeSelected {
     type: "selected"
@@ -36,6 +38,8 @@ export function ShapeInSelected(props: {
 
     const geometryRef = useRef<MutatableShapeGeometry>(new MutatableShapeGeometry())
 
+    const dispatch = useEditorStore(store => store.mutation)
+
     useEffect(() => {
         geometryRef.current.update(props.state.vertices)
     })
@@ -46,7 +50,12 @@ export function ShapeInSelected(props: {
         markerRef.current.position.set(point.x, point.y, Priority.Selected + 0.001)
     }
 
-    function startVertexMode(vertexIndex: number, vertex: ShapeVertex, insert: boolean) {
+    function startVertexMode(
+        vertexIndex: number,
+        position: Point,
+        color: ShapeVertexColor,
+        insert: boolean,
+    ) {
         const offset = insert ? 0 : 1
 
         props.setMode({
@@ -54,7 +63,13 @@ export function ShapeInSelected(props: {
             vertexIndex,
             vertices: [
                 ...props.state.vertices.slice(0, vertexIndex),
-                vertex,
+                {
+                    position: new Vector2(
+                        position.x + props.state.position.x,
+                        position.y + props.state.position.y,
+                    ),
+                    color,
+                },
                 ...props.state.vertices.slice(vertexIndex + offset),
             ],
         })
@@ -82,9 +97,9 @@ export function ShapeInSelected(props: {
             if (event.ctrlKey) {
                 window.document.body.style.cursor = "pointer"
 
-                if (event.leftButtonDown) {
-                    props.state.vertices.splice(closestVertex.vertexIndex, 1)
-                    geometryRef.current.update(props.state.vertices)
+                if (event.leftButtonClicked) {
+                    console.log("remove vertex dispatch here")
+                    dispatch(shapeRemoveVertex(props.state, closestVertex.vertexIndex))
                 } else {
                     showMarker(closestVertex.point, highlightDeleteColor)
                 }
@@ -103,10 +118,8 @@ export function ShapeInSelected(props: {
                 window.document.body.style.cursor = "grabbing"
                 startVertexMode(
                     closestVertex.vertexIndex,
-                    {
-                        ...props.state.vertices[closestVertex.vertexIndex],
-                        position: new Vector2(closestVertex.point.x, closestVertex.point.y),
-                    },
+                    closestVertex.point,
+                    props.state.vertices[closestVertex.vertexIndex].color,
                     false,
                 )
             } else if (event.rightButtonClicked) {
@@ -126,13 +139,11 @@ export function ShapeInSelected(props: {
                 window.document.body.style.cursor = "grabbing"
                 startVertexMode(
                     closestEdge.edge[1],
-                    {
-                        position: new Vector2(closestEdge.point.x, closestEdge.point.y),
-                        color: averageColor(
-                            props.state.vertices[closestEdge.edge[0]].color,
-                            props.state.vertices[closestEdge.edge[1]].color,
-                        ),
-                    },
+                    closestEdge.point,
+                    averageColor(
+                        props.state.vertices[closestEdge.edge[0]].color,
+                        props.state.vertices[closestEdge.edge[1]].color,
+                    ),
                     true,
                 )
             } else if (!event.ctrlKey) {

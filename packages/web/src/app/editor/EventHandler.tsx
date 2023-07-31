@@ -50,7 +50,6 @@ export function EventHandler() {
 
     useEffect(() => {
         const onPointerEvent = (raw: PointerEvent) => {
-            console.log("sending event to event handler")
             // cursor is by default "default". other cursors must be a result of this event handler
             if (window.document.body.style.cursor !== "default") {
                 window.document.body.style.cursor = "default"

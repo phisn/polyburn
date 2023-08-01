@@ -58,16 +58,18 @@ export function ShapeInSelected(props: {
     ) {
         const offset = insert ? 0 : 1
 
+        const vector = new Vector2(
+            position.x + props.state.position.x,
+            position.y + props.state.position.y,
+        )
+
         props.setMode({
             type: "vertex",
             vertexIndex,
             vertices: [
                 ...props.state.vertices.slice(0, vertexIndex),
                 {
-                    position: new Vector2(
-                        position.x + props.state.position.x,
-                        position.y + props.state.position.y,
-                    ),
+                    position: vector,
                     color,
                 },
                 ...props.state.vertices.slice(vertexIndex + offset),
@@ -118,7 +120,7 @@ export function ShapeInSelected(props: {
                 window.document.body.style.cursor = "grabbing"
                 startVertexMode(
                     closestVertex.vertexIndex,
-                    closestVertex.point,
+                    event.positionInGrid,
                     props.state.vertices[closestVertex.vertexIndex].color,
                     false,
                 )
@@ -139,7 +141,7 @@ export function ShapeInSelected(props: {
                 window.document.body.style.cursor = "grabbing"
                 startVertexMode(
                     closestEdge.edge[1],
-                    closestEdge.point,
+                    event.positionInGrid,
                     averageColor(
                         props.state.vertices[closestEdge.edge[0]].color,
                         props.state.vertices[closestEdge.edge[1]].color,

@@ -4,9 +4,11 @@ export const baseZoomFactor = 1 / baseZoom
 export const snapDistance = 20 * baseZoomFactor
 
 export const highlightColor = "#aaffff"
+export const highlightDeleteColor = "#ff2222"
+export const highlightOverrideColor = "#ff5500"
+
 export const highlightVertexColor = "#ffffff"
 export const highlightObjectColor = "#ffff00"
-export const highlightDeleteColor = "#ff2222"
 export const highlightMoveColor = "#00aaaa"
 
 export const selectObjectColor = "#44ff44"

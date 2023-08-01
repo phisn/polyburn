@@ -56,24 +56,19 @@ export function ShapeInSelected(props: {
         color: ShapeVertexColor,
         insert: boolean,
     ) {
-        const offset = insert ? 0 : 1
-
         const vector = new Vector2(
-            position.x + props.state.position.x,
-            position.y + props.state.position.y,
+            position.x - props.state.position.x,
+            position.y - props.state.position.y,
         )
 
         props.setMode({
             type: "vertex",
             vertexIndex,
-            vertices: [
-                ...props.state.vertices.slice(0, vertexIndex),
-                {
-                    position: vector,
-                    color,
-                },
-                ...props.state.vertices.slice(vertexIndex + offset),
-            ],
+            vertex: {
+                position: vector,
+                color,
+            },
+            insert,
         })
     }
 
@@ -110,17 +105,12 @@ export function ShapeInSelected(props: {
             }
 
             if (event.leftButtonClicked) {
-                props.state.vertices[closestVertex.vertexIndex].position.x =
-                    event.positionInGrid.x - props.state.position.x
-                props.state.vertices[closestVertex.vertexIndex].position.y =
-                    event.positionInGrid.y - props.state.position.y
-
                 geometryRef.current.update(props.state.vertices)
 
                 window.document.body.style.cursor = "grabbing"
                 startVertexMode(
                     closestVertex.vertexIndex,
-                    event.positionInGrid,
+                    closestVertex.point,
                     props.state.vertices[closestVertex.vertexIndex].color,
                     false,
                 )
@@ -141,7 +131,7 @@ export function ShapeInSelected(props: {
                 window.document.body.style.cursor = "grabbing"
                 startVertexMode(
                     closestEdge.edge[1],
-                    event.positionInGrid,
+                    closestEdge.point,
                     averageColor(
                         props.state.vertices[closestEdge.edge[0]].color,
                         props.state.vertices[closestEdge.edge[1]].color,

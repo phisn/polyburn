@@ -30,43 +30,47 @@ export function ShapeInMoving(props: {
 
     const dispatchMutation = useEditorStore(store => store.mutation)
 
-    useEventListener(event => {
-        if (event.consumed) {
-            if (event.leftButtonClicked || event.rightButtonClicked) {
-                props.setMode({ type: "none" })
+    useEventListener(
+        event => {
+            if (event.consumed) {
+                if (event.leftButtonClicked || event.rightButtonClicked) {
+                    props.setMode({ type: "none" })
+                }
+
+                return
             }
 
-            return
-        }
-
-        if (props.mode.dead) {
-            return
-        }
-
-        if (event.leftButtonDown && event.shiftKey) {
-            positionRef.current.x = props.mode.offsetPosition.x + event.positionInGrid.x
-            positionRef.current.y = props.mode.offsetPosition.y + event.positionInGrid.y
-
-            meshRef.current.position.set(
-                positionRef.current.x,
-                positionRef.current.y,
-                Priority.Action,
-            )
-
-            window.document.body.style.cursor = "grabbing"
-        } else {
-            props.mode.dead = true
-
-            if (event.shiftKey) {
-                window.document.body.style.cursor = "grab"
+            if (props.mode.dead) {
+                return
             }
 
-            dispatchMutation(shapeMove(props.state, positionRef.current))
-            props.setMode({ type: "selected" })
-        }
+            if (event.leftButtonDown && event.shiftKey) {
+                positionRef.current.x = props.mode.offsetPosition.x + event.positionInGrid.x
+                positionRef.current.y = props.mode.offsetPosition.y + event.positionInGrid.y
 
-        return ConsumeEvent
-    }, Priority.Action)
+                meshRef.current.position.set(
+                    positionRef.current.x,
+                    positionRef.current.y,
+                    Priority.Action,
+                )
+
+                window.document.body.style.cursor = "grabbing"
+            } else {
+                props.mode.dead = true
+
+                if (event.shiftKey) {
+                    window.document.body.style.cursor = "grab"
+                }
+
+                dispatchMutation(shapeMove(props.state, positionRef.current))
+                props.setMode({ type: "selected" })
+            }
+
+            return ConsumeEvent
+        },
+        Priority.Action,
+        true,
+    )
 
     return (
         <>

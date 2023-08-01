@@ -22,14 +22,9 @@ export interface ShapeModeVertex {
     type: "vertex"
 
     vertexIndex: number
-    vertices: ShapeVertex[]
+    vertex: ShapeVertex
 
-    duplicate?: {
-        vertex: ShapeVertex
-        otherIndex: number
-    }
-
-    dead?: boolean
+    insert: boolean
 }
 
 export function ShapeInVertex(props: {
@@ -37,10 +32,23 @@ export function ShapeInVertex(props: {
     mode: ShapeModeVertex
     setMode: (mode: ShapeMode) => void
 }) {
+    interface Duplicate {
+        vertex: ShapeVertex
+        otherIndex: number
+    }
+
+    const vertexIndexRef = useRef(props.mode.vertexIndex)
+    const duplicateRef = useRef<Duplicate | undefined>(undefined)
+    const verticesRef = useRef<ShapeVertex[]>([
+        ...props.state.vertices.slice(0, props.mode.vertexIndex),
+        props.mode.vertex,
+        ...props.state.vertices.slice(props.mode.vertexIndex + (props.mode.insert ? 0 : 1)),
+    ])
+
     const geometryRef = useRef<MutatableShapeGeometry>(new MutatableShapeGeometry())
 
     useEffect(() => {
-        geometryRef.current.update(props.mode.vertices)
+        geometryRef.current.update(verticesRef.current)
     })
 
     const dispatch = useEditorStore(store => store.mutation)
@@ -50,110 +58,131 @@ export function ShapeInVertex(props: {
 
     function handlePoint(position: Point) {
         if (
-            position.x === props.mode.vertices[props.mode.vertexIndex].position.x &&
-            position.y === props.mode.vertices[props.mode.vertexIndex].position.y
+            position.x === verticesRef.current[props.mode.vertexIndex].position.x &&
+            position.y === verticesRef.current[props.mode.vertexIndex].position.y
         ) {
             window.document.body.style.cursor = "grabbing"
-            return ConsumeEvent
+            return
         }
 
-        if (props.mode.duplicate) {
-            const other = props.mode.vertices[props.mode.vertexIndex]
-            props.mode.vertices[props.mode.vertexIndex] = props.mode.duplicate.vertex
+        if (duplicateRef.current) {
+            const other = verticesRef.current[props.mode.vertexIndex]
+            verticesRef.current[props.mode.vertexIndex] = duplicateRef.current.vertex
 
-            props.mode.vertices.splice(props.mode.duplicate.otherIndex, 0, other)
-            props.mode.vertexIndex = props.mode.duplicate.otherIndex
+            verticesRef.current.splice(duplicateRef.current.otherIndex, 0, other)
+            vertexIndexRef.current = duplicateRef.current.otherIndex
 
-            props.mode.duplicate = undefined
+            duplicateRef.current = undefined
         }
 
-        props.mode.vertices[props.mode.vertexIndex].position.set(position.x, position.y)
+        const previous = {
+            x: verticesRef.current[props.mode.vertexIndex].position.x,
+            y: verticesRef.current[props.mode.vertexIndex].position.y,
+        }
+
+        verticesRef.current[props.mode.vertexIndex].position.set(position.x, position.y)
+
         markerRef.current.position.set(
             position.x + props.state.position.x,
             position.y + props.state.position.y,
             Priority.Action,
         )
 
-        let duplicateIndex = props.mode.vertices.findIndex(
+        let duplicateIndex = verticesRef.current.findIndex(
             (x, i) =>
-                x.position.x === props.mode.vertices[props.mode.vertexIndex].position.x &&
-                x.position.y === props.mode.vertices[props.mode.vertexIndex].position.y &&
+                x.position.x === verticesRef.current[props.mode.vertexIndex].position.x &&
+                x.position.y === verticesRef.current[props.mode.vertexIndex].position.y &&
                 i !== props.mode.vertexIndex,
         )
 
         if (duplicateIndex !== -1) {
             markerMaterialRef.current.color.set(highlightOverrideColor)
 
-            if (!canRemoveVertex(props.mode.vertexIndex, props.mode.vertices)) {
-                props.setMode({ type: "selected" })
-                return ConsumeEvent
+            console.log(`got duplicate duplicateIndex: ${duplicateIndex}`)
+
+            if (!canRemoveVertex(props.mode.vertexIndex, verticesRef.current)) {
+                verticesRef.current[props.mode.vertexIndex].position.set(previous.x, previous.y)
+
+                markerRef.current.position.set(
+                    previous.x + props.state.position.x,
+                    previous.y + props.state.position.y,
+                    Priority.Action,
+                )
+
+                document.body.style.cursor = "not-allowed"
+
+                return
             }
 
-            props.mode.duplicate = {
-                vertex: props.mode.vertices[duplicateIndex],
+            duplicateRef.current = {
+                vertex: verticesRef.current[duplicateIndex],
                 otherIndex: props.mode.vertexIndex,
             }
 
-            props.mode.vertices[duplicateIndex] = props.mode.vertices[props.mode.vertexIndex]
+            verticesRef.current[duplicateIndex] = verticesRef.current[props.mode.vertexIndex]
 
-            props.mode.vertices.splice(props.mode.vertexIndex, 1)
-            props.mode.vertexIndex =
+            verticesRef.current.splice(props.mode.vertexIndex, 1)
+            vertexIndexRef.current =
                 props.mode.vertexIndex < duplicateIndex ? duplicateIndex - 1 : duplicateIndex
         } else {
             markerMaterialRef.current.color.set(highlightColor)
 
             const intersection = resolveIntersectionsAround(
                 props.mode.vertexIndex,
-                props.mode.vertices,
+                verticesRef.current,
             )
 
             if (intersection === null) {
-                props.setMode({ type: "selected" })
-                return ConsumeEvent
+                verticesRef.current[props.mode.vertexIndex].position.set(previous.x, previous.y)
+
+                markerRef.current.position.set(
+                    previous.x + props.state.position.x,
+                    previous.y + props.state.position.y,
+                    Priority.Action,
+                )
+
+                document.body.style.cursor = "not-allowed"
+
+                return
             }
 
             if (intersection !== props.mode.vertexIndex) {
-                props.mode.vertexIndex = intersection
+                console.log(`resolving intersection at ${intersection}`)
+                vertexIndexRef.current = intersection
             }
         }
 
-        geometryRef.current.update(props.mode.vertices)
+        geometryRef.current.update(verticesRef.current)
         window.document.body.style.cursor = "grabbing"
     }
 
-    useEventListener(event => {
-        if (event.consumed) {
-            if (event.leftButtonClicked || event.rightButtonClicked) {
-                props.setMode({ type: "none" })
+    useEventListener(
+        event => {
+            if (event.consumed) {
+                if (event.leftButtonClicked || event.rightButtonClicked) {
+                    props.setMode({ type: "none" })
+                }
+
+                return
             }
 
-            return
-        }
+            if (event.leftButtonDown) {
+                handlePoint({
+                    x: event.positionInGrid.x - props.state.position.x,
+                    y: event.positionInGrid.y - props.state.position.y,
+                })
+            } else {
+                dispatch(shapeChangeVertices(props.state, verticesRef.current))
 
-        if (props.mode.dead) {
-            return
-        }
+                props.setMode({ type: "selected" })
+                window.document.body.style.cursor = "grab"
+            }
 
-        if (event.leftButtonDown) {
-            handlePoint({
-                x: event.positionInGrid.x + props.state.position.x,
-                y: event.positionInGrid.y + props.state.position.y,
-            })
-        } else {
-            props.mode.dead = true
-
-            dispatch(shapeChangeVertices(props.state, props.mode.vertices))
-
-            props.setMode({ type: "selected" })
-            window.document.body.style.cursor = "grab"
-        }
-
-        return ConsumeEvent
-    }, Priority.Action)
-
-    useEffect(() => {
-        handlePoint(props.mode.vertices[props.mode.vertexIndex].position)
-    })
+            return ConsumeEvent
+        },
+        Priority.Action,
+        true,
+    )
 
     return (
         <>
@@ -167,8 +196,8 @@ export function ShapeInVertex(props: {
 
             <mesh
                 position={[
-                    props.mode.vertices[props.mode.vertexIndex].position.x + props.state.position.x,
-                    props.mode.vertices[props.mode.vertexIndex].position.y + props.state.position.y,
+                    verticesRef.current[props.mode.vertexIndex].position.x + props.state.position.x,
+                    verticesRef.current[props.mode.vertexIndex].position.y + props.state.position.y,
                     Priority.Action,
                 ]}
                 ref={markerRef}

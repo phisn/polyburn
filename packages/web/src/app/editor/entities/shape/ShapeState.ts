@@ -87,13 +87,6 @@ export function findIntersection(firstIndex: number, secondIndex: number, vertic
                 vertices[j].position,
             )
         ) {
-            console.log(
-                `found intersection between i: ${i} and j: ${j}, where firstIndex = ${firstIndex} and secondIndex = ${secondIndex} for the positions f${JSON.stringify(
-                    vertices[firstIndex].position,
-                )}, s${JSON.stringify(vertices[secondIndex].position)}, i${JSON.stringify(
-                    vertices[i].position,
-                )}, j${JSON.stringify(vertices[j].position)}`,
-            )
             return [i, j]
         }
     }
@@ -106,20 +99,11 @@ export function resolveConflictsAround(vertexIndex: number, vertices: ShapeVerte
     const left = (vertexIndex - 1 + vertices.length) % vertices.length
     const right = (vertexIndex + 1) % vertices.length
 
-    console.log(`vertices: ${JSON.stringify(vertices)}`)
-    console.log(`calling with left = ${left} and right = ${right} and vertexIndex = ${vertexIndex}`)
-
     const conflictTarget =
         findIntersection(vertexIndex, right, vertices) ??
         findIntersection(vertexIndex, left, vertices)
 
     if (conflictTarget) {
-        console.warn(
-            `intersection found at ${JSON.stringify(
-                conflictTarget,
-            )}, where left = ${left} and right = ${right} and vertexIndex = ${vertexIndex}`,
-        )
-
         const [newLeft, newRight] =
             conflictTarget[0] < vertexIndex ? [left + 1, right] : [left, right - 1]
 
@@ -146,6 +130,10 @@ export function resolveConflictsAround(vertexIndex: number, vertices: ShapeVerte
             // ensure no intersection on old location
             findIntersection(newLeft, newRight, vertices)
         ) {
+            // undo changes
+            vertices.splice(newVertexIndex, 1)
+            vertices.splice(vertexIndex, 0, vertex)
+
             // not able to resolve intersection
             return null
         }

@@ -3,10 +3,7 @@ import { EditorEvent } from "../EventHandler"
 
 export const ConsumeEvent = Symbol("ConsumeEvent")
 
-type Callback = (
-    event: EditorEvent,
-    setPriority: (priority: number) => void,
-) => void | typeof ConsumeEvent
+type Callback = (event: EditorEvent) => void | typeof ConsumeEvent
 
 interface Listener {
     callback: Callback
@@ -16,12 +13,13 @@ interface Listener {
 type ListenerRef = MutableRefObject<Listener>
 
 interface EventStore {
-    subscribeEvent: (listener: ListenerRef) => () => void
+    subscribeEvent: (listener: ListenerRef, triggerPrevious?: boolean) => () => void
     event: (event: EditorEvent) => boolean
 }
 
 const createEventStore = (): EventStore => {
     const listeners: ListenerRef[] = []
+    let previousEvent: EditorEvent | undefined
 
     function findPositionToInsert(priority: number) {
         // binary search to find the right position. we want to insert the listener right
@@ -44,11 +42,17 @@ const createEventStore = (): EventStore => {
     }
 
     return {
-        subscribeEvent: listener => {
+        subscribeEvent: (listener, triggerPrevious) => {
             if (listeners[listeners.length - 1]?.current.priority <= listener.current.priority) {
                 listeners.push(listener)
             } else {
                 listeners.splice(findPositionToInsert(listener.current.priority), 0, listener)
+            }
+
+            if (previousEvent && triggerPrevious) {
+                console.log("dispatching previous event", previousEvent)
+                previousEvent.consumed = false
+                listener.current.callback(previousEvent)
             }
 
             return () => {
@@ -62,18 +66,12 @@ const createEventStore = (): EventStore => {
             }
         },
         event: event => {
-            const changePriorites: (() => void)[] = []
+            previousEvent = event
 
             for (let i = listeners.length - 1; i >= 0; i--) {
                 const listener = listeners[i]
 
-                const setPriority = (priority: number) =>
-                    changePriorites.push(() => {
-                        listeners.splice(i, 1)
-                        listeners.splice(findPositionToInsert(priority), 0, listener)
-                    })
-
-                if (listener.current.callback(event, setPriority) === ConsumeEvent) {
+                if (listener.current.callback(event) === ConsumeEvent) {
                     if (event.consumed) {
                         console.error(
                             "Event was consumed multiple times. This is not allowed.",
@@ -83,10 +81,6 @@ const createEventStore = (): EventStore => {
 
                     event.consumed = true
                 }
-            }
-
-            for (const change of changePriorites) {
-                change()
             }
 
             return event.consumed
@@ -102,7 +96,7 @@ export function ProvideEventStore(props: { children: React.ReactNode }) {
     return <Context.Provider value={store}>{props.children}</Context.Provider>
 }
 
-export function useEventListener(callback: Callback, priority: number) {
+export function useEventListener(callback: Callback, priority: number, triggerPrevious?: boolean) {
     const store = useContext(Context)
 
     const listenerRef = useRef<Listener>({
@@ -115,7 +109,7 @@ export function useEventListener(callback: Callback, priority: number) {
         listenerRef.current.priority = priority
     }, [callback, priority])
 
-    useEffect(() => store.subscribeEvent(listenerRef), [store, priority])
+    useEffect(() => store.subscribeEvent(listenerRef, triggerPrevious), [store, priority])
 }
 
 export function useEventDispatch() {

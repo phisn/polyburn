@@ -175,80 +175,101 @@ function GamemodeOption(props: {
                 leaveTo="max-h-0"
                 appear
             >
-                <ul className="menu relative mr-2 p-0 py-2">
-                    <li className="w-full">
-                        <ul className="w-full space-y-1 pr-4">
-                            <li className="w-full">
-                                <label className="label flex w-full cursor-pointer">
-                                    <span className="label-text mr-3 flex w-full overflow-hidden">
-                                        Normal
-                                    </span>
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox checkbox-success checkbox-sm border-zinc-400"
-                                    />
-                                </label>
-                            </li>
-                            <li className="w-full">
-                                <label className="label flex w-full cursor-pointer">
-                                    <span className="label-text mr-3 flex w-full overflow-hidden">
-                                        Normal Shapes
-                                    </span>
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox checkbox-success checkbox-sm border-zinc-400"
-                                    />
-                                </label>
-                            </li>
-                            <li className="w-full">
-                                <label className="label flex w-full cursor-pointer">
-                                    <span className="label-text mr-3 flex w-full overflow-hidden">
-                                        Normal Flags
-                                    </span>
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox checkbox-success checkbox-sm border-zinc-400"
-                                    />
-                                </label>
-                            </li>
-                            <li className="w-full">
-                                <label className="label flex w-full cursor-pointer">
-                                    <span className="label-text mr-3 flex w-full overflow-hidden">
-                                        Reverse Flags
-                                    </span>
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox checkbox-success checkbox-sm border-zinc-400"
-                                    />
-                                </label>
-                            </li>
-                            <li className="w-full">
-                                <label className="label flex w-full cursor-pointer">
-                                    <span className="label-text mr-3 flex w-full overflow-hidden">
-                                        Hard Flags
-                                    </span>
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox checkbox-success checkbox-sm border-zinc-400"
-                                    />
-                                </label>
-                            </li>
-                            <li className="w-full">
-                                <label className="label flex w-full cursor-pointer">
-                                    <span className="label-text mr-3 flex w-full overflow-hidden">
-                                        Hard Shortcut
-                                    </span>
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox checkbox-success checkbox-sm border-zinc-400"
-                                    />
-                                </label>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+                <GamemodeOptionGroups gamemode={props.gamemode} />
             </Transition>
         </div>
+    )
+}
+
+function GamemodeOptionGroups(props: { gamemode: string }) {
+    return (
+        <ul className="menu relative mr-2 p-0 py-2">
+            <li className="w-full">
+                <ul className="w-full space-y-1 pr-4">
+                    <Group name="Normal" gamemode={props.gamemode} />
+                    <Group name="Normal Shapes" gamemode={props.gamemode} />
+                    <Group name="Normal Flags" gamemode={props.gamemode} />
+                    <Group name="Reverse Flags" gamemode={props.gamemode} />
+                    <Group name="Hard flags" gamemode={props.gamemode} />
+                    <Group name="Hard shortcut" gamemode={props.gamemode} />
+                </ul>
+            </li>
+            <GroupCreator />
+        </ul>
+    )
+}
+
+function GroupCreator() {
+    const [creating, setCreating] = useState(false)
+    const [name, setName] = useState("")
+
+    const ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (creating) {
+            const listener = (e: PointerEvent) => {
+                if (e.target instanceof Node && !ref.current?.contains(e.target)) {
+                    setCreating(false)
+                }
+            }
+
+            window.addEventListener("pointerdown", listener)
+
+            return () => void window.removeEventListener("pointerdown", listener)
+        }
+    }, [creating])
+
+    return (
+        <>
+            {!creating && (
+                <li className="w-full">
+                    <label className="label flex w-full cursor-pointer">
+                        <button
+                            className="btn-block bg-white bg-opacity-5 py-1"
+                            onClick={() => setCreating(true)}
+                        >
+                            + GROUP
+                        </button>
+                    </label>
+                </li>
+            )}
+            {creating && (
+                <div className="join join-horizontal w-full p-2" ref={ref}>
+                    <input
+                        autoFocus
+                        type="text"
+                        className="input join-item relative w-full bg-white bg-opacity-80 text-black"
+                        onChange={e => setName(e.target.value)}
+                        onKeyDown={e => {
+                            if (e.key === "Enter" && name.length > 0 && name.length <= 14) {
+                            }
+                        }}
+                        placeholder="Group name"
+                    ></input>
+                    <button
+                        className="btn join-item btn-square bg-opacity-20 text-zinc-50"
+                        disabled={name.length === 0 || name.length > 14}
+                        onClick={() => {}}
+                    >
+                        <PencilSquare width="16" height="16" className="rounded-none" />
+                    </button>
+                </div>
+            )}
+        </>
+    )
+}
+
+function Group(props: { name: string; gamemode: string }) {
+    return (
+        <li className="w-full">
+            <label className="label flex w-full cursor-pointer">
+                <span className="label-text mr-3 flex w-full overflow-hidden">{props.name}</span>
+                <input
+                    type="checkbox"
+                    className="checkbox checkbox-success checkbox-sm border-zinc-400"
+                />
+            </label>
+        </li>
     )
 }
 

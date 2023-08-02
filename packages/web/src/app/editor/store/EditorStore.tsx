@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react"
 import { StoreApi, UseBoundStore, create, useStore } from "zustand"
-import { WorldState } from "../models/WorldState"
+import { GamemodeState, WorldState } from "../models/WorldState"
 
 interface State {
     world: WorldState
@@ -15,6 +15,8 @@ export interface Mutation {
 }
 
 interface WorldStore {
+    gamemode?: GamemodeState
+
     state: State
     canUndo: boolean
     canRedo: boolean
@@ -22,6 +24,8 @@ interface WorldStore {
     mutation: (mutation: Mutation) => void
     redo: () => void
     undo: () => void
+
+    selectGamemode: (gamemode: GamemodeState) => void
 }
 
 const createEditorStore = (world: WorldState) =>
@@ -75,6 +79,11 @@ const createEditorStore = (world: WorldState) =>
                 canRedo: true,
                 canUndo: store.state.done.length > 1,
             }))
+        },
+
+        selectGamemode(gamemode: GamemodeState) {
+            console.log("select gamemode", gamemode.name)
+            set({ gamemode })
         },
     }))
 

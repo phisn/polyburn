@@ -1,19 +1,25 @@
 import { Transition } from "@headlessui/react"
-import { useEffect, useRef, useState } from "react"
-import { ListTask } from "../../../common/components/inline-svg/ListTask"
-import { Pencil } from "../../../common/components/inline-svg/Pencil"
-import { PencilSquare } from "../../../common/components/inline-svg/PencilSquare"
-import { X } from "../../../common/components/inline-svg/X"
+import { RefObject, useEffect, useRef, useState } from "react"
+import { ListTask } from "../../../../common/components/inline-svg/ListTask"
+import { Pencil } from "../../../../common/components/inline-svg/Pencil"
+import { PencilSquare } from "../../../../common/components/inline-svg/PencilSquare"
+import { X } from "../../../../common/components/inline-svg/X"
+import { GamemodeState } from "../../models/WorldState"
+import { useEditorStore } from "../../store/EditorStore"
+import { gamemodeNew } from "./mutations/gamemodeNew"
+import { gamemodeRename } from "./mutations/gamemodeRename"
 
 export function GamemodeSelect() {
-    const [gamemodes, setGamemodes] = useState<string[]>(["Normal", "Hard", "Reverse"])
+    const gamemodes = useEditorStore(store => store.state).world.gamemodes
 
     interface CreatingGamemode {
         previousSelected: number
     }
 
-    const [selected, setSelected] = useState<number>(0)
     const [creatingGamemode, setCreatingGamemode] = useState<CreatingGamemode | null>(null)
+
+    const dispatch = useEditorStore(store => store.mutation)
+    const selected = useEditorStore(store => store.gamemode)
 
     return (
         <div className="absolute right-8 top-8">
@@ -23,13 +29,7 @@ export function GamemodeSelect() {
                         first={i === 0}
                         key={i}
                         gamemode={gamemode}
-                        selected={i === selected}
-                        onSelect={() => setSelected(i)}
-                        onRename={name => {
-                            setGamemodes(
-                                gamemodes.map((gamemode, j) => (j === i ? name : gamemode)),
-                            )
-                        }}
+                        selected={gamemode === selected && !creatingGamemode}
                     />
                 ))}
 
@@ -48,12 +48,10 @@ export function GamemodeSelect() {
                         first={false}
                         gamemode=""
                         onRename={gamemode => {
-                            setGamemodes([...gamemodes, gamemode])
-                            setSelected(gamemodes.length)
+                            dispatch(gamemodeNew(gamemode))
                             setCreatingGamemode(null)
                         }}
                         onCancel={() => {
-                            setSelected(creatingGamemode?.previousSelected ?? 0)
                             setCreatingGamemode(null)
                         }}
                     />
@@ -61,8 +59,7 @@ export function GamemodeSelect() {
                 <button
                     className="join-item btn w-full !bg-opacity-20 text-zinc-50"
                     onClick={() => {
-                        setCreatingGamemode({ previousSelected: selected })
-                        setSelected(gamemodes.length)
+                        setCreatingGamemode({ previousSelected: 0 })
                     }}
                 >
                     + Gamemode
@@ -80,13 +77,7 @@ export enum GamemodeOptionType {
     Remove,
 }
 
-function GamemodeOption(props: {
-    first: boolean
-    gamemode: string
-    selected: boolean
-    onSelect: () => void
-    onRename: (name: string) => void
-}) {
+function GamemodeOption(props: { first: boolean; gamemode: GamemodeState; selected: boolean }) {
     const [mode, setMode] = useState(GamemodeOptionType.None)
 
     const ref = useRef<HTMLDivElement>(null)
@@ -105,14 +96,17 @@ function GamemodeOption(props: {
         }
     }, [])
 
+    const dispatch = useEditorStore(store => store.mutation)
+    const selectGamemode = useEditorStore(store => store.selectGamemode)
+
     return (
         <div ref={ref} className="join-item">
             {mode === GamemodeOptionType.Rename && (
                 <GamemodeRenamer
                     first={props.first}
-                    gamemode={props.gamemode}
+                    gamemode={props.gamemode.name}
                     onRename={gamemode => {
-                        props.onRename(gamemode)
+                        dispatch(gamemodeRename(props.gamemode, gamemode))
                         setMode(GamemodeOptionType.None)
                     }}
                     onCancel={() => {
@@ -133,9 +127,11 @@ function GamemodeOption(props: {
                                 ? "btn-disabled !btn-active !btn-success relative z-10" // z-10 to prevent overlap with other buttons
                                 : ""
                         }`}
-                        onClick={props.onSelect}
+                        onClick={() => {
+                            selectGamemode(props.gamemode)
+                        }}
                     >
-                        {props.gamemode}
+                        {props.gamemode.name}
                     </button>
                 </div>
             )}
@@ -157,8 +153,10 @@ function GamemodeOption(props: {
                             type !== GamemodeOptionType.Context &&
                             !props.selected
                         ) {
-                            props.onSelect()
+                            selectGamemode(props.gamemode)
                         }
+
+                        console.log(type)
 
                         setMode(type)
                     }}
@@ -181,9 +179,9 @@ function GamemodeOption(props: {
     )
 }
 
-function GamemodeOptionGroups(props: { gamemode: string }) {
+function GamemodeOptionGroups(props: { gamemode: GamemodeState }) {
     return (
-        <ul className="menu relative mr-2 p-0 py-2">
+        <ul className="menu relative mr-2 w-full p-0 py-2">
             <li className="w-full">
                 <ul className="w-full space-y-1 pr-4">
                     <Group name="Normal" gamemode={props.gamemode} />
@@ -259,17 +257,69 @@ function GroupCreator() {
     )
 }
 
-function Group(props: { name: string; gamemode: string }) {
+function Group(props: { name: string; gamemode: GamemodeState }) {
+    const [editing, setEditing] = useState(false)
+    const [name, setName] = useState(props.name)
+
+    const ref = useRef<HTMLDivElement>(null)
+
+    useUnclick(
+        ref,
+        () => {
+            setEditing(false)
+            setName(props.name)
+        },
+        editing,
+    )
+
     return (
-        <li className="w-full">
-            <label className="label flex w-full cursor-pointer">
-                <span className="label-text mr-3 flex w-full overflow-hidden">{props.name}</span>
-                <input
-                    type="checkbox"
-                    className="checkbox checkbox-success checkbox-sm border-zinc-400"
-                />
-            </label>
-        </li>
+        <>
+            {!editing && (
+                <li className="h-9 w-full">
+                    <label
+                        className="label flex w-full cursor-pointer"
+                        onContextMenu={e => {
+                            setEditing(true)
+                            e.preventDefault()
+                        }}
+                    >
+                        <span className="label-text mr-3 flex w-full overflow-hidden">{name}</span>
+                        <input
+                            type="checkbox"
+                            className="checkbox checkbox-success checkbox-sm border-zinc-400"
+                        />
+                    </label>
+                </li>
+            )}
+            {editing && (
+                <div
+                    className="join join-horizontal ml-[0.2rem] flex h-9 pl-0 pr-2.5 pt-0.5"
+                    ref={ref}
+                >
+                    <input
+                        autoFocus
+                        type="text"
+                        className="input join-item input-sm w-full bg-zinc-950 bg-opacity-70 text-white !outline-none"
+                        onChange={e => setName(e.target.value)}
+                        onKeyDown={e => {
+                            if (e.key === "Enter" && name.length > 0 && name.length <= 14) {
+                                setEditing(false)
+                            }
+                        }}
+                        value={name}
+                    />
+                    <button
+                        className="btn btn-sm join-item btn-square border-none bg-zinc-950 bg-opacity-100 text-zinc-50"
+                        disabled={name.length === 0 || name.length > 14}
+                        onClick={() => {
+                            setEditing(false)
+                        }}
+                    >
+                        <Pencil width="16" height="16" className="rounded-none" />
+                    </button>
+                </div>
+            )}
+        </>
     )
 }
 
@@ -371,4 +421,26 @@ function GamemodeRenamer(props: {
             </button>
         </div>
     )
+}
+
+function useUnclick(ref: RefObject<HTMLElement>, onUnclick: () => void, condition: boolean = true) {
+    const onUnclickRef = useRef(onUnclick)
+
+    useEffect(() => {
+        onUnclickRef.current = onUnclick
+    }, [onUnclick])
+
+    useEffect(() => {
+        if (condition) {
+            const listener = (e: PointerEvent) => {
+                if (e.target instanceof Node && !ref.current?.contains(e.target)) {
+                    onUnclickRef.current()
+                }
+            }
+
+            window.addEventListener("pointerdown", listener)
+
+            return () => void window.removeEventListener("pointerdown", listener)
+        }
+    }, [condition])
 }

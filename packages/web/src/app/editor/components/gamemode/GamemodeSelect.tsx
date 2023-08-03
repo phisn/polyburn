@@ -6,8 +6,10 @@ import { PencilSquare } from "../../../../common/components/inline-svg/PencilSqu
 import { X } from "../../../../common/components/inline-svg/X"
 import { GamemodeState } from "../../models/WorldState"
 import { useEditorStore } from "../../store/EditorStore"
+import { gamemodeEditGroup } from "./mutations/gamemodeEditGroup"
 import { gamemodeNew } from "./mutations/gamemodeNew"
 import { gamemodeRename } from "./mutations/gamemodeRename"
+import { gamemodeToggleGroup } from "./mutations/gamemodeToggleGroup"
 
 export function GamemodeSelect() {
     const gamemodes = useEditorStore(store => store.state).world.gamemodes
@@ -180,97 +182,59 @@ function GamemodeOption(props: { first: boolean; gamemode: GamemodeState; select
 }
 
 function GamemodeOptionGroups(props: { gamemode: GamemodeState }) {
+    const [creating, setCreating] = useState(false)
+
+    const dispatch = useEditorStore(store => store.mutation)
+
     return (
         <ul className="menu relative mr-2 w-full p-0 py-2">
             <li className="w-full">
                 <ul className="w-full space-y-1 pr-4">
-                    <Group name="Normal" gamemode={props.gamemode} />
-                    <Group name="Normal Shapes" gamemode={props.gamemode} />
-                    <Group name="Normal Flags" gamemode={props.gamemode} />
-                    <Group name="Reverse Flags" gamemode={props.gamemode} />
-                    <Group name="Hard flags" gamemode={props.gamemode} />
-                    <Group name="Hard shortcut" gamemode={props.gamemode} />
+                    {props.gamemode.groups.map((group, i) => (
+                        <Group key={i} name={group} gamemode={props.gamemode} />
+                    ))}
+
+                    {creating && (
+                        <GroupRename
+                            name=""
+                            gamemode={props.gamemode}
+                            onRename={name => {
+                                dispatch(gamemodeToggleGroup(props.gamemode, name))
+                                setCreating(false)
+                            }}
+                            onCancel={() => {
+                                setCreating(false)
+                            }}
+                        />
+                    )}
                 </ul>
             </li>
-            <GroupCreator />
+            <CreateGroupButton onCreate={() => setCreating(true)} />
         </ul>
     )
 }
 
-function GroupCreator() {
-    const [creating, setCreating] = useState(false)
-    const [name, setName] = useState("")
-
-    const ref = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        if (creating) {
-            const listener = (e: PointerEvent) => {
-                if (e.target instanceof Node && !ref.current?.contains(e.target)) {
-                    setCreating(false)
-                }
-            }
-
-            window.addEventListener("pointerdown", listener)
-
-            return () => void window.removeEventListener("pointerdown", listener)
-        }
-    }, [creating])
-
+function CreateGroupButton(props: { onCreate: () => void }) {
     return (
         <>
-            {!creating && (
-                <li className="w-full">
-                    <label className="label flex w-full cursor-pointer">
-                        <button
-                            className="btn-block bg-white bg-opacity-5 py-1"
-                            onClick={() => setCreating(true)}
-                        >
-                            + GROUP
-                        </button>
-                    </label>
-                </li>
-            )}
-            {creating && (
-                <div className="join join-horizontal w-full p-2" ref={ref}>
-                    <input
-                        autoFocus
-                        type="text"
-                        className="input join-item relative w-full bg-white bg-opacity-80 text-black"
-                        onChange={e => setName(e.target.value)}
-                        onKeyDown={e => {
-                            if (e.key === "Enter" && name.length > 0 && name.length <= 14) {
-                            }
-                        }}
-                        placeholder="Group name"
-                    ></input>
+            <li className="w-full">
+                <label className="label flex w-full cursor-pointer">
                     <button
-                        className="btn join-item btn-square bg-opacity-20 text-zinc-50"
-                        disabled={name.length === 0 || name.length > 14}
-                        onClick={() => {}}
+                        className="btn-block bg-white bg-opacity-5 py-1"
+                        onClick={() => props.onCreate()}
                     >
-                        <PencilSquare width="16" height="16" className="rounded-none" />
+                        + GROUP
                     </button>
-                </div>
-            )}
+                </label>
+            </li>
         </>
     )
 }
 
 function Group(props: { name: string; gamemode: GamemodeState }) {
     const [editing, setEditing] = useState(false)
-    const [name, setName] = useState(props.name)
 
-    const ref = useRef<HTMLDivElement>(null)
-
-    useUnclick(
-        ref,
-        () => {
-            setEditing(false)
-            setName(props.name)
-        },
-        editing,
-    )
+    const dispatch = useEditorStore(store => store.mutation)
 
     return (
         <>
@@ -283,43 +247,82 @@ function Group(props: { name: string; gamemode: GamemodeState }) {
                             e.preventDefault()
                         }}
                     >
-                        <span className="label-text mr-3 flex w-full overflow-hidden">{name}</span>
+                        <span className="label-text mr-3 flex w-full overflow-hidden">
+                            {props.name}
+                        </span>
                         <input
                             type="checkbox"
                             className="checkbox checkbox-success checkbox-sm border-zinc-400"
+                            onClick={e => {
+                                dispatch(gamemodeToggleGroup(props.gamemode, props.name))
+                            }}
                         />
                     </label>
                 </li>
             )}
             {editing && (
-                <div
-                    className="join join-horizontal ml-[0.2rem] flex h-9 pl-0 pr-2.5 pt-0.5"
-                    ref={ref}
-                >
-                    <input
-                        autoFocus
-                        type="text"
-                        className="input join-item input-sm w-full bg-zinc-950 bg-opacity-70 text-white !outline-none"
-                        onChange={e => setName(e.target.value)}
-                        onKeyDown={e => {
-                            if (e.key === "Enter" && name.length > 0 && name.length <= 14) {
-                                setEditing(false)
-                            }
-                        }}
-                        value={name}
-                    />
-                    <button
-                        className="btn btn-sm join-item btn-square border-none bg-zinc-950 bg-opacity-100 text-zinc-50"
-                        disabled={name.length === 0 || name.length > 14}
-                        onClick={() => {
-                            setEditing(false)
-                        }}
-                    >
-                        <Pencil width="16" height="16" className="rounded-none" />
-                    </button>
-                </div>
+                <GroupRename
+                    name={props.name}
+                    gamemode={props.gamemode}
+                    onRename={name => {
+                        dispatch(gamemodeEditGroup(props.name, name))
+                        setEditing(false)
+                    }}
+                    onCancel={() => {
+                        setEditing(false)
+                    }}
+                />
             )}
         </>
+    )
+}
+
+function GroupRename(props: {
+    name: string
+    gamemode: GamemodeState
+    onRename: (name: string) => void
+    onCancel: () => void
+}) {
+    const [name, setName] = useState(props.name)
+
+    const ref = useRef<HTMLDivElement>(null)
+
+    useUnclick(ref, () => {
+        props.onCancel()
+    })
+
+    return (
+        <div className="join join-horizontal ml-[0.2rem] flex h-9 pl-0 pr-2.5 pt-0.5" ref={ref}>
+            <input
+                autoFocus
+                type="text"
+                className="input join-item input-sm w-full bg-zinc-950 bg-opacity-70 text-white !outline-none"
+                onChange={e => setName(e.target.value)}
+                onKeyDown={e => {
+                    if (e.key === "Enter" && name.length > 0 && name.length <= 14) {
+                        if (name !== props.name) {
+                            props.onRename(name)
+                        } else {
+                            props.onCancel()
+                        }
+                    }
+                }}
+                value={name}
+            />
+            <button
+                className="btn btn-sm join-item btn-square border-none bg-zinc-950 bg-opacity-100 text-zinc-50"
+                disabled={name.length === 0 || name.length > 14}
+                onClick={() => {
+                    if (name !== props.name) {
+                        props.onRename(name)
+                    } else {
+                        props.onCancel()
+                    }
+                }}
+            >
+                <Pencil width="16" height="16" className="rounded-none" />
+            </button>
+        </div>
     )
 }
 

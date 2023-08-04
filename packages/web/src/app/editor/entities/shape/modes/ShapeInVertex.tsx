@@ -40,9 +40,9 @@ export function ShapeInVertex(props: {
     const vertexIndexRef = useRef(props.mode.vertexIndex)
     const duplicateRef = useRef<Duplicate | undefined>(undefined)
     const verticesRef = useRef<ShapeVertex[]>([
-        ...props.state.vertices.slice(0, props.mode.vertexIndex),
+        ...props.state.vertices.slice(0, vertexIndexRef.current),
         props.mode.vertex,
-        ...props.state.vertices.slice(props.mode.vertexIndex + (props.mode.insert ? 0 : 1)),
+        ...props.state.vertices.slice(vertexIndexRef.current + (props.mode.insert ? 0 : 1)),
     ])
 
     const geometryRef = useRef<MutatableShapeGeometry>(new MutatableShapeGeometry())
@@ -58,16 +58,16 @@ export function ShapeInVertex(props: {
 
     function handlePoint(position: Point) {
         if (
-            position.x === verticesRef.current[props.mode.vertexIndex].position.x &&
-            position.y === verticesRef.current[props.mode.vertexIndex].position.y
+            position.x === verticesRef.current[vertexIndexRef.current].position.x &&
+            position.y === verticesRef.current[vertexIndexRef.current].position.y
         ) {
             window.document.body.style.cursor = "grabbing"
             return
         }
 
         if (duplicateRef.current) {
-            const other = verticesRef.current[props.mode.vertexIndex]
-            verticesRef.current[props.mode.vertexIndex] = duplicateRef.current.vertex
+            const other = verticesRef.current[vertexIndexRef.current]
+            verticesRef.current[vertexIndexRef.current] = duplicateRef.current.vertex
 
             verticesRef.current.splice(duplicateRef.current.otherIndex, 0, other)
             vertexIndexRef.current = duplicateRef.current.otherIndex
@@ -76,11 +76,11 @@ export function ShapeInVertex(props: {
         }
 
         const previous = {
-            x: verticesRef.current[props.mode.vertexIndex].position.x,
-            y: verticesRef.current[props.mode.vertexIndex].position.y,
+            x: verticesRef.current[vertexIndexRef.current].position.x,
+            y: verticesRef.current[vertexIndexRef.current].position.y,
         }
 
-        verticesRef.current[props.mode.vertexIndex].position.set(position.x, position.y)
+        verticesRef.current[vertexIndexRef.current].position.set(position.x, position.y)
 
         markerRef.current.position.set(
             position.x + props.state.position.x,
@@ -90,18 +90,16 @@ export function ShapeInVertex(props: {
 
         let duplicateIndex = verticesRef.current.findIndex(
             (x, i) =>
-                x.position.x === verticesRef.current[props.mode.vertexIndex].position.x &&
-                x.position.y === verticesRef.current[props.mode.vertexIndex].position.y &&
-                i !== props.mode.vertexIndex,
+                x.position.x === verticesRef.current[vertexIndexRef.current].position.x &&
+                x.position.y === verticesRef.current[vertexIndexRef.current].position.y &&
+                i !== vertexIndexRef.current,
         )
 
         if (duplicateIndex !== -1) {
             markerMaterialRef.current.color.set(highlightOverrideColor)
 
-            console.log(`got duplicate duplicateIndex: ${duplicateIndex}`)
-
-            if (!canRemoveVertex(props.mode.vertexIndex, verticesRef.current)) {
-                verticesRef.current[props.mode.vertexIndex].position.set(previous.x, previous.y)
+            if (!canRemoveVertex(vertexIndexRef.current, verticesRef.current)) {
+                verticesRef.current[vertexIndexRef.current].position.set(previous.x, previous.y)
 
                 markerRef.current.position.set(
                     previous.x + props.state.position.x,
@@ -116,24 +114,24 @@ export function ShapeInVertex(props: {
 
             duplicateRef.current = {
                 vertex: verticesRef.current[duplicateIndex],
-                otherIndex: props.mode.vertexIndex,
+                otherIndex: vertexIndexRef.current,
             }
 
-            verticesRef.current[duplicateIndex] = verticesRef.current[props.mode.vertexIndex]
+            verticesRef.current[duplicateIndex] = verticesRef.current[vertexIndexRef.current]
 
-            verticesRef.current.splice(props.mode.vertexIndex, 1)
+            verticesRef.current.splice(vertexIndexRef.current, 1)
             vertexIndexRef.current =
-                props.mode.vertexIndex < duplicateIndex ? duplicateIndex - 1 : duplicateIndex
+                vertexIndexRef.current < duplicateIndex ? duplicateIndex - 1 : duplicateIndex
         } else {
             markerMaterialRef.current.color.set(highlightColor)
 
             const intersection = resolveIntersectionsAround(
-                props.mode.vertexIndex,
+                vertexIndexRef.current,
                 verticesRef.current,
             )
 
             if (intersection === null) {
-                verticesRef.current[props.mode.vertexIndex].position.set(previous.x, previous.y)
+                verticesRef.current[vertexIndexRef.current].position.set(previous.x, previous.y)
 
                 markerRef.current.position.set(
                     previous.x + props.state.position.x,
@@ -146,8 +144,7 @@ export function ShapeInVertex(props: {
                 return
             }
 
-            if (intersection !== props.mode.vertexIndex) {
-                console.log(`resolving intersection at ${intersection}`)
+            if (intersection !== vertexIndexRef.current) {
                 vertexIndexRef.current = intersection
             }
         }
@@ -196,8 +193,8 @@ export function ShapeInVertex(props: {
 
             <mesh
                 position={[
-                    verticesRef.current[props.mode.vertexIndex].position.x + props.state.position.x,
-                    verticesRef.current[props.mode.vertexIndex].position.y + props.state.position.y,
+                    verticesRef.current[vertexIndexRef.current].position.x + props.state.position.x,
+                    verticesRef.current[vertexIndexRef.current].position.y + props.state.position.y,
                     Priority.Action,
                 ]}
                 ref={markerRef}

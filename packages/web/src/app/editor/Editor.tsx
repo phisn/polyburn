@@ -75,15 +75,17 @@ export function Editor() {
             }}
         >
             <ProvideEventStore>
-                <div className="relative h-full w-full">
-                    <Canvas className="">
-                        <Camera />
+                <div className="relative h-max w-full grow">
+                    <div className="absolute bottom-0 left-0 right-0 top-0">
+                        <Canvas className="" style={{}}>
+                            <Camera />
 
-                        <Entities />
-                        <EventHandler />
+                            <Entities />
+                            <EventHandler />
 
-                        <Background />
-                    </Canvas>
+                            <Background />
+                        </Canvas>
+                    </div>
 
                     <editorTunnel.Out />
 

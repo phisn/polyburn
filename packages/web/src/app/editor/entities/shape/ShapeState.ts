@@ -120,6 +120,8 @@ export function resolveConflictsAround(vertexIndex: number, vertices: ShapeVerte
         const vertex = vertices[vertexIndex]
         const newVertexIndex = conflictTarget[0] + 1
 
+        console.warn("resolving intersection")
+
         vertices.splice(vertexIndex, 1)
         vertices.splice(newVertexIndex, 0, vertex)
 
@@ -133,6 +135,8 @@ export function resolveConflictsAround(vertexIndex: number, vertices: ShapeVerte
             // undo changes
             vertices.splice(newVertexIndex, 1)
             vertices.splice(vertexIndex, 0, vertex)
+
+            console.warn("unable to resolve intersection")
 
             // not able to resolve intersection
             return null

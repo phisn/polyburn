@@ -6,7 +6,6 @@ import { Canvas, useThree } from "@react-three/fiber"
 import { Suspense, use } from "react"
 import { RuntimeSystemStack } from "runtime/src/core/RuntimeSystemStack"
 import tunnel from "tunnel-rat"
-import { shallow } from "zustand/shallow"
 
 import { WorldModel } from "runtime/src/model/world/WorldModel"
 import { normalGamemode } from "../../../runtime/src/gamemode/NormalGamemode"
@@ -80,14 +79,11 @@ function GameInThree(props: { stack: RuntimeSystemStack }) {
 
     const camera = useThree(state => state.camera) as THREE.OrthographicCamera
 
-    const [incline, decline, max] = useGameStore(
-        state => [state.inclinePerformance, state.declinePerformance, state.maxPerformance],
-        shallow,
-    )
+    const setPerformance = useGameStore(state => state.setPerformance)
 
     return (
         <>
-            <PerformanceMonitor onIncline={incline} onDecline={decline} factor={1} step={1 / max} />
+            <PerformanceMonitor onChange={api => setPerformance(api.factor)} />
 
             <overlay.In>
                 <Overlay camera={camera} />

@@ -185,13 +185,26 @@ function GamemodeOptionGroups(props: { gamemode: GamemodeState }) {
     const [creating, setCreating] = useState(false)
 
     const dispatch = useEditorStore(store => store.mutation)
+    const world = useEditorStore(store => store.state.world)
+
+    const groups = [
+        ...world.gamemodes.flatMap(gamemode => gamemode.groups),
+        ...[...world.entities.values()]
+            .filter(entity => entity.group)
+            .map(entity => entity.group as string),
+    ].filter((group, i, arr) => arr.indexOf(group) === i)
 
     return (
         <ul className="menu relative mr-2 w-full p-0 py-2">
             <li className="w-full">
                 <ul className="w-full space-y-1 pr-4">
-                    {props.gamemode.groups.map((group, i) => (
-                        <Group key={i} name={group} gamemode={props.gamemode} />
+                    {groups.map((group, i) => (
+                        <Group
+                            key={i}
+                            name={group}
+                            gamemode={props.gamemode}
+                            selected={props.gamemode.groups.includes(group)}
+                        />
                     ))}
 
                     {creating && (
@@ -231,7 +244,7 @@ function CreateGroupButton(props: { onCreate: () => void }) {
     )
 }
 
-function Group(props: { name: string; gamemode: GamemodeState }) {
+function Group(props: { name: string; gamemode: GamemodeState; selected: boolean }) {
     const [editing, setEditing] = useState(false)
 
     const dispatch = useEditorStore(store => store.mutation)
@@ -253,9 +266,10 @@ function Group(props: { name: string; gamemode: GamemodeState }) {
                         <input
                             type="checkbox"
                             className="checkbox checkbox-success checkbox-sm border-zinc-400"
-                            onClick={e => {
+                            onChange={e => {
                                 dispatch(gamemodeToggleGroup(props.gamemode, props.name))
                             }}
+                            checked={props.selected}
                         />
                     </label>
                 </li>

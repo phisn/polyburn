@@ -1,3 +1,4 @@
+import { useFrame, useThree } from "@react-three/fiber"
 import { useEffect, useRef } from "react"
 
 interface ControlsRef {
@@ -34,8 +35,21 @@ interface TouchPointerState {
 
 interface MousePointerState {
     type: PointerStateType.Mouse
+
+    wasPointerDown: boolean
     startPointerX: number
     startRotation: number
+
+    space?: boolean
+    shift?: boolean
+    w?: boolean
+    up?: boolean
+
+    a?: boolean
+    left?: boolean
+
+    d?: boolean
+    right?: boolean
 }
 
 export function useControls() {
@@ -45,123 +59,279 @@ export function useControls() {
         pause: false,
     })
 
-    useEffect(() => {
-        let state: TouchPointerState | MousePointerState | NonePointerState = {
-            type: PointerStateType.None,
+    const stateRef = useRef<TouchPointerState | MousePointerState | NonePointerState>({
+        type: PointerStateType.None,
+    })
+
+    const canvas = useThree(state => state.gl.domElement)
+
+    useFrame((_, delta) => {
+        if (stateRef.current.type === PointerStateType.Mouse) {
+            const hasLeft = stateRef.current.a || stateRef.current.left
+            const hasRight = stateRef.current.d || stateRef.current.right
+
+            if (hasLeft !== hasRight) {
+                if (hasLeft) {
+                    controlsRef.current.rotation += 1.5 * delta
+                } else {
+                    controlsRef.current.rotation -= 1.5 * delta
+                }
+            }
         }
+    })
 
-        let wasPointerDown = false
-        let startPointerX = 0
-        let startRotation = 0
-
+    useEffect(() => {
         const onPointerEvent = (event: PointerEvent) => {
-            if (event.pointerType === "touch") {
-                if (state.type !== PointerStateType.Touch) {
-                    state = {
-                        type: PointerStateType.Touch,
+            if (event.pointerType === "mouse") {
+                if (stateRef.current.type !== PointerStateType.Mouse) {
+                    controlsRef.current.thrust = false
+
+                    stateRef.current = {
+                        type: PointerStateType.Mouse,
+
+                        wasPointerDown: false,
+                        startPointerX: 0,
+                        startRotation: 0,
                     }
                 }
 
-                switch (event.type) {
-                    case "pointerdown":
-                        if (event.clientX > window.innerWidth / 2) {
-                            state.thrustPointer = {
-                                pointerId: event.pointerId,
-                            }
+                if ((event.buttons & 1) === 1) {
+                    if (stateRef.current.wasPointerDown) {
+                        controlsRef.current.rotation =
+                            stateRef.current.startRotation -
+                            (event.clientX - stateRef.current.startPointerX) * 0.005
+                    } else {
+                        stateRef.current.startPointerX = event.clientX
+                        stateRef.current.wasPointerDown = true
+                        stateRef.current.startRotation = controlsRef.current.rotation
+                    }
+                } else {
+                    stateRef.current.wasPointerDown = false
+                }
+            }
+        }
 
-                            controlsRef.current.thrust = true
+        const onTouchEvent = (event: TouchEvent) => {
+            if (stateRef.current.type !== PointerStateType.Touch) {
+                stateRef.current = {
+                    type: PointerStateType.Touch,
+                }
+            }
+
+            for (const touch of event.changedTouches) {
+                switch (event.type) {
+                    case "touchstart":
+                        console.log(
+                            "start with id " + touch.identifier,
+                            " and tpid " + stateRef.current.thrustPointer?.pointerId,
+                            " and rpid " + stateRef.current.rotatePointer?.pointerId,
+                        )
+
+                        if (touch.clientX > window.innerWidth / 2) {
+                            if (stateRef.current.thrustPointer === undefined) {
+                                stateRef.current.thrustPointer = {
+                                    pointerId: touch.identifier,
+                                }
+
+                                controlsRef.current.thrust = true
+
+                                console.log("thrust start")
+                            }
                         } else {
-                            state.rotatePointer = {
-                                pointerId: event.pointerId,
-                                startPointerX: event.clientX,
-                                startRotation: controlsRef.current.rotation,
+                            if (stateRef.current.rotatePointer === undefined) {
+                                stateRef.current.rotatePointer = {
+                                    pointerId: touch.identifier,
+                                    startPointerX: touch.clientX,
+                                    startRotation: controlsRef.current.rotation,
+                                }
                             }
                         }
 
                         break
-                    case "pointermove":
+                    case "touchmove":
                         if (
-                            state.rotatePointer &&
-                            state.rotatePointer.pointerId === event.pointerId
+                            stateRef.current.rotatePointer &&
+                            stateRef.current.rotatePointer.pointerId === touch.identifier
                         ) {
                             controlsRef.current.rotation =
-                                state.rotatePointer.startRotation -
-                                (event.clientX - state.rotatePointer.startPointerX) * 0.005
+                                stateRef.current.rotatePointer.startRotation -
+                                (touch.clientX - stateRef.current.rotatePointer.startPointerX) *
+                                    0.005
                         }
 
                         break
-                    case "pointerup":
-                    case "pointercancel":
+                    case "touchend":
+                    case "touchcancel":
+                        console.log(
+                            "cancel with id " + touch.identifier,
+                            " and tpid " + stateRef.current.thrustPointer?.pointerId,
+                            " and rpid " + stateRef.current.rotatePointer?.pointerId,
+                        )
+
                         if (
-                            state.thrustPointer &&
-                            state.thrustPointer.pointerId === event.pointerId
+                            stateRef.current.thrustPointer &&
+                            stateRef.current.thrustPointer.pointerId === touch.identifier
                         ) {
                             controlsRef.current.thrust = false
-                            state.thrustPointer = undefined
+                            stateRef.current.thrustPointer = undefined
+
+                            console.log("thrust stop")
                         }
 
                         if (
-                            state.rotatePointer &&
-                            state.rotatePointer.pointerId === event.pointerId
+                            stateRef.current.rotatePointer &&
+                            stateRef.current.rotatePointer.pointerId === touch.identifier
                         ) {
-                            state.rotatePointer = undefined
+                            stateRef.current.rotatePointer = undefined
                         }
 
                         break
                     default:
                         console.log(event.type)
                 }
-            } else {
-                if ((event.buttons & 1) === 1) {
-                    if (wasPointerDown) {
-                        controlsRef.current.rotation =
-                            startRotation - (event.clientX - startPointerX) * 0.005
-                    } else {
-                        startPointerX = event.clientX
-                        wasPointerDown = true
-                        startRotation = controlsRef.current.rotation
-                    }
-                } else {
-                    wasPointerDown = false
-                }
             }
+
+            event.preventDefault()
         }
 
         const onKeyDown = (event: KeyboardEvent) => {
+            if (stateRef.current.type !== PointerStateType.Mouse) {
+                controlsRef.current.thrust = false
+
+                stateRef.current = {
+                    type: PointerStateType.Mouse,
+
+                    wasPointerDown: false,
+                    startPointerX: 0,
+                    startRotation: 0,
+                }
+            }
+
             if (event.key === " ") {
+                stateRef.current.space = true
+                controlsRef.current.thrust = true
+            }
+
+            if (event.key === "Shift") {
+                stateRef.current.shift = true
+                controlsRef.current.thrust = true
+            }
+
+            if (event.key === "w") {
+                stateRef.current.w = true
+                controlsRef.current.thrust = true
+            }
+
+            if (event.key === "ArrowUp") {
+                stateRef.current.up = true
                 controlsRef.current.thrust = true
             }
 
             if (event.key == "p") {
                 controlsRef.current.pause = !controlsRef.current.pause
             }
-        }
 
-        const onKeyUp = (event: KeyboardEvent) => {
-            if (event.key === " ") {
-                controlsRef.current.thrust = false
+            if (event.key === "ArrowLeft") {
+                stateRef.current.left = true
+            }
+
+            if (event.key === "ArrowRight") {
+                stateRef.current.right = true
+            }
+
+            if (event.key === "a") {
+                stateRef.current.a = true
+            }
+
+            if (event.key === "d") {
+                stateRef.current.d = true
             }
         }
 
-        /*
-        setTimeout(() => {
-            controlsRef.current.thrust = true
-        }, 2000)
-        */
+        const updateThrustAfterKey = () => {
+            controlsRef.current.thrust =
+                stateRef.current.type === PointerStateType.Mouse &&
+                !!(
+                    stateRef.current.space ||
+                    stateRef.current.shift ||
+                    stateRef.current.w ||
+                    stateRef.current.up
+                )
+        }
 
-        window.addEventListener("pointerdown", onPointerEvent)
-        window.addEventListener("pointerup", onPointerEvent)
-        window.addEventListener("pointermove", onPointerEvent)
-        window.addEventListener("pointercancel", onPointerEvent)
+        const onKeyUp = (event: KeyboardEvent) => {
+            if (stateRef.current.type !== PointerStateType.Mouse) {
+                controlsRef.current.thrust = false
+
+                stateRef.current = {
+                    type: PointerStateType.Mouse,
+
+                    wasPointerDown: false,
+                    startPointerX: 0,
+                    startRotation: 0,
+                }
+            }
+
+            if (event.key === " ") {
+                stateRef.current.space = false
+                updateThrustAfterKey()
+            }
+
+            if (event.key === "Shift") {
+                stateRef.current.shift = false
+                updateThrustAfterKey()
+            }
+
+            if (event.key === "w") {
+                stateRef.current.w = false
+                updateThrustAfterKey()
+            }
+
+            if (event.key === "ArrowUp") {
+                stateRef.current.up = false
+                updateThrustAfterKey()
+            }
+
+            if (event.key === "ArrowLeft") {
+                stateRef.current.left = false
+            }
+
+            if (event.key === "ArrowRight") {
+                stateRef.current.right = false
+            }
+
+            if (event.key === "a") {
+                stateRef.current.a = false
+            }
+
+            if (event.key === "d") {
+                stateRef.current.d = false
+            }
+        }
+
+        canvas.addEventListener("pointerdown", onPointerEvent)
+        canvas.addEventListener("pointerup", onPointerEvent)
+        canvas.addEventListener("pointermove", onPointerEvent)
+        canvas.addEventListener("pointercancel", onPointerEvent)
+
+        canvas.addEventListener("touchstart", onTouchEvent)
+        canvas.addEventListener("touchend", onTouchEvent)
+        canvas.addEventListener("touchmove", onTouchEvent)
+        canvas.addEventListener("touchcancel", onTouchEvent)
 
         window.addEventListener("keydown", onKeyDown)
         window.addEventListener("keyup", onKeyUp)
 
         return () => {
-            window.removeEventListener("pointerdown", onPointerEvent)
-            window.removeEventListener("pointerup", onPointerEvent)
-            window.removeEventListener("pointermove", onPointerEvent)
-            window.removeEventListener("pointercancel", onPointerEvent)
+            canvas.removeEventListener("pointerdown", onPointerEvent)
+            canvas.removeEventListener("pointerup", onPointerEvent)
+            canvas.removeEventListener("pointermove", onPointerEvent)
+            canvas.removeEventListener("pointercancel", onPointerEvent)
+
+            canvas.removeEventListener("touchstart", onTouchEvent)
+            canvas.removeEventListener("touchend", onTouchEvent)
+            canvas.removeEventListener("touchmove", onTouchEvent)
+            canvas.removeEventListener("touchcancel", onTouchEvent)
 
             window.removeEventListener("keydown", onKeyDown)
             window.removeEventListener("keyup", onKeyUp)

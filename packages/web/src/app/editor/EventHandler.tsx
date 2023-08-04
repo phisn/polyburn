@@ -86,7 +86,7 @@ export function EventHandler() {
                 shiftKey: raw.shiftKey,
                 ctrlKey: raw.ctrlKey,
 
-                consumed: false,
+                consumed: raw.type === "pointerleave",
             }
 
             lastNativeEventRef.current = event
@@ -96,6 +96,7 @@ export function EventHandler() {
         canvas.addEventListener("pointerdown", onPointerEvent)
         canvas.addEventListener("pointermove", onPointerEvent)
         canvas.addEventListener("pointerup", onPointerEvent)
+        canvas.addEventListener("pointerleave", onPointerEvent)
 
         const onKeyDown = (event: KeyboardEvent) => {
             if (lastNativeEventRef.current === undefined) {
@@ -176,6 +177,7 @@ export function EventHandler() {
             canvas.removeEventListener("pointerdown", onPointerEvent)
             canvas.removeEventListener("pointermove", onPointerEvent)
             canvas.removeEventListener("pointerup", onPointerEvent)
+            canvas.removeEventListener("pointerleave", onPointerEvent)
 
             window.removeEventListener("keydown", onKeyDown)
             window.removeEventListener("keyup", onKeyUp)

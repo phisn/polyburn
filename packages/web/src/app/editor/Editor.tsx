@@ -71,7 +71,20 @@ export function Editor() {
                         },
                     ],
                 ]),
-                gamemodes: [],
+                gamemodes: [
+                    {
+                        name: "Normal",
+                        groups: ["Normal Shapes", "Normal Flags", "Normal Spawn"],
+                    },
+                    {
+                        name: "Reverse",
+                        groups: ["Normal Shapes", "Reverse Flags", "Reverse Spawn"],
+                    },
+                    {
+                        name: "Hard",
+                        groups: ["Normal Shapes", "Hard Flags", "Normal Spawn"],
+                    },
+                ],
             }}
         >
             <ProvideEventStore>

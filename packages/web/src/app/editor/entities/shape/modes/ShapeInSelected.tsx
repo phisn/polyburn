@@ -84,6 +84,9 @@ export function ShapeInSelected(props: {
             setShowShapeDialog(undefined)
         }
 
+        // marker is invisible by default
+        markerRef.current.visible = false
+
         if (event.consumed) {
             if (event.leftButtonClicked || event.rightButtonClicked) {
                 props.setMode({ type: "none" })
@@ -91,9 +94,6 @@ export function ShapeInSelected(props: {
 
             return
         }
-
-        // marker is invisible by default
-        markerRef.current.visible = false
 
         const closestVertex = findClosestVertex(props.state, event.position, snapDistance)
 
@@ -245,8 +245,11 @@ function ShapeContext(props: { state: ShapeState; position: Point }) {
                     </div>
                     {groups.length > 0 && (
                         <select className="join-item select bg-base-300 min-w-[10rem] bg-opacity-75 !outline-none backdrop-blur-2xl">
+                            <option>None</option>
                             {groups.map(group => (
-                                <option key={group}>{group}</option>
+                                <option key={group} selected={group === props.state.group}>
+                                    {group}
+                                </option>
                             ))}
                         </select>
                     )}

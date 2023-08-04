@@ -1,11 +1,12 @@
 import { Transition } from "@headlessui/react"
-import { RefObject, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ListTask } from "../../../../common/components/inline-svg/ListTask"
 import { Pencil } from "../../../../common/components/inline-svg/Pencil"
 import { PencilSquare } from "../../../../common/components/inline-svg/PencilSquare"
 import { X } from "../../../../common/components/inline-svg/X"
 import { GamemodeState } from "../../models/WorldState"
 import { useEditorStore } from "../../store/EditorStore"
+import { useUnclick } from "../../useUnclick"
 import { gamemodeEditGroup } from "./mutations/gamemodeEditGroup"
 import { gamemodeNew } from "./mutations/gamemodeNew"
 import { gamemodeRename } from "./mutations/gamemodeRename"
@@ -192,7 +193,9 @@ function GamemodeOptionGroups(props: { gamemode: GamemodeState }) {
         ...[...world.entities.values()]
             .filter(entity => entity.group)
             .map(entity => entity.group as string),
-    ].filter((group, i, arr) => arr.indexOf(group) === i)
+    ]
+        .filter((group, i, arr) => arr.indexOf(group) === i)
+        .sort()
 
     return (
         <ul className="menu relative mr-2 w-full p-0 py-2">
@@ -438,26 +441,4 @@ function GamemodeRenamer(props: {
             </button>
         </div>
     )
-}
-
-function useUnclick(ref: RefObject<HTMLElement>, onUnclick: () => void, condition: boolean = true) {
-    const onUnclickRef = useRef(onUnclick)
-
-    useEffect(() => {
-        onUnclickRef.current = onUnclick
-    }, [onUnclick])
-
-    useEffect(() => {
-        if (condition) {
-            const listener = (e: PointerEvent) => {
-                if (e.target instanceof Node && !ref.current?.contains(e.target)) {
-                    onUnclickRef.current()
-                }
-            }
-
-            window.addEventListener("pointerdown", listener)
-
-            return () => void window.removeEventListener("pointerdown", listener)
-        }
-    }, [condition])
 }

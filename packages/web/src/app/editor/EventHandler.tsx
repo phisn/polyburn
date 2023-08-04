@@ -56,7 +56,7 @@ export function EventHandler() {
             }
 
             const position = canvasToWorld({ x: raw.clientX, y: raw.clientY }, camera, canvas)
-
+            raw.x
             const event: EditorEvent = {
                 type: raw.type,
 

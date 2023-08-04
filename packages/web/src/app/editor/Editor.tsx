@@ -70,6 +70,16 @@ export function Editor() {
                             ],
                         },
                     ],
+                    [
+                        3,
+                        {
+                            type: EntityType.Rocket,
+                            id: 3,
+
+                            position: new Vector3(-2, 0),
+                            rotation: 0,
+                        },
+                    ],
                 ]),
                 gamemodes: [
                     {

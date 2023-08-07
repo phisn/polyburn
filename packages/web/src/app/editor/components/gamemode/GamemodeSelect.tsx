@@ -1,5 +1,7 @@
 import { Transition } from "@headlessui/react"
 import { useEffect, useRef, useState } from "react"
+import { ChevronDown } from "../../../../common/components/inline-svg/ChevronDown"
+import { ChevronUp } from "../../../../common/components/inline-svg/ChevronUp"
 import { ListTask } from "../../../../common/components/inline-svg/ListTask"
 import { Pencil } from "../../../../common/components/inline-svg/Pencil"
 import { PencilSquare } from "../../../../common/components/inline-svg/PencilSquare"
@@ -83,24 +85,22 @@ export enum GamemodeOptionType {
 function GamemodeOption(props: { first: boolean; gamemode: GamemodeState; selected: boolean }) {
     const [mode, setMode] = useState(GamemodeOptionType.None)
 
+    const dispatch = useEditorStore(store => store.mutation)
+    const selectGamemode = useEditorStore(store => store.selectGamemode)
+
     const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        if (mode !== GamemodeOptionType.Context) {
-            const listener = (e: PointerEvent) => {
-                if (e.target instanceof Node && !ref.current?.contains(e.target)) {
-                    setMode(GamemodeOptionType.None)
-                }
-            }
-
-            window.addEventListener("pointerdown", listener)
-
-            return () => void window.removeEventListener("pointerdown", listener)
+        if (!props.selected && mode !== GamemodeOptionType.None) {
+            setMode(GamemodeOptionType.None)
         }
-    }, [])
+    }, [props.selected])
 
-    const dispatch = useEditorStore(store => store.mutation)
-    const selectGamemode = useEditorStore(store => store.selectGamemode)
+    useUnclick(ref, () => {
+        if (mode !== GamemodeOptionType.None) {
+            setMode(GamemodeOptionType.None)
+        }
+    })
 
     return (
         <div ref={ref} className="join-item">
@@ -119,23 +119,63 @@ function GamemodeOption(props: { first: boolean; gamemode: GamemodeState; select
             )}
             {mode !== GamemodeOptionType.Rename && (
                 <div
+                    className="relative"
                     onContextMenu={e => {
                         e.preventDefault()
+                        selectGamemode(props.gamemode)
                         setMode(GamemodeOptionType.Context)
                     }}
                 >
-                    <button
-                        className={`join-item btn w-full bg-opacity-60 text-zinc-50 ${
+                    <div
+                        className={`join-item btn flex w-full justify-between bg-opacity-60 text-zinc-50 ${
                             props.selected
-                                ? "btn-disabled !btn-active !btn-success relative z-10" // z-10 to prevent overlap with other buttons
+                                ? "!btn-active !btn-success relative z-10" // z-10 to prevent overlap with other buttons
                                 : ""
                         }`}
                         onClick={() => {
-                            selectGamemode(props.gamemode)
+                            if (!props.selected) {
+                                selectGamemode(props.gamemode)
+                            } else if (mode === GamemodeOptionType.Context) {
+                                setMode(GamemodeOptionType.None)
+                            } else {
+                                setMode(GamemodeOptionType.Context)
+                            }
                         }}
                     >
-                        {props.gamemode.name}
-                    </button>
+                        <div className="grid w-full grid-cols-3 items-center">
+                            <div className="col-start-2">{props.gamemode.name}</div>
+
+                            {props.selected && (
+                                <label className="swap swap-rotate justify-self-end rounded-lg p-2">
+                                    <input
+                                        type="checkbox"
+                                        onChange={() => {
+                                            selectGamemode(props.gamemode)
+
+                                            if (mode !== GamemodeOptionType.None) {
+                                                setMode(GamemodeOptionType.None)
+                                            } else {
+                                                setMode(GamemodeOptionType.Context)
+                                            }
+                                        }}
+                                        checked={mode !== GamemodeOptionType.None}
+                                    />
+                                    <ChevronDown
+                                        className="swap-on"
+                                        width="16"
+                                        height="16"
+                                        fill={props.selected ? "black" : ""}
+                                    />
+                                    <ChevronUp
+                                        className="swap-off"
+                                        width="16"
+                                        height="16"
+                                        fill={props.selected ? "black" : ""}
+                                    />
+                                </label>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
             <Transition

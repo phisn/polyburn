@@ -7,6 +7,7 @@ export interface EditorEvent {
     type: string
 
     position: Vector3
+
     positionInGrid: Vector3
     positionInWindow: { x: number; y: number }
 
@@ -29,15 +30,7 @@ function canvasToWorld(
     camera: Camera,
     canvas: HTMLCanvasElement,
 ) {
-    const rect = canvas.getBoundingClientRect()
-
-    const vector = new Vector3(
-        ((position.x - rect.left) / canvas.clientWidth) * 2 - 1,
-        -((position.y - rect.top) / canvas.clientHeight) * 2 + 1,
-        0.5,
-    )
-
-    return vector.unproject(camera)
+    return
 }
 
 export function EventHandler() {
@@ -45,6 +38,9 @@ export function EventHandler() {
 
     const canvas = useThree(state => state.gl.domElement)
     const camera = useThree(state => state.camera)
+    const pointer = useThree(state => state.pointer)
+
+    const position = new Vector3()
 
     const dispatchEvent = useEventDispatch()
 
@@ -55,18 +51,25 @@ export function EventHandler() {
                 window.document.body.style.cursor = "default"
             }
 
-            const position = canvasToWorld({ x: raw.clientX, y: raw.clientY }, camera, canvas)
-            raw.x
+            position.set(
+                (raw.offsetX / canvas.clientWidth) * 2 - 1,
+                -(raw.offsetY / canvas.clientHeight) * 2 + 1,
+                0.5,
+            )
+
+            position.unproject(camera)
+
             const event: EditorEvent = {
                 type: raw.type,
 
-                position,
+                position: position,
+
                 positionInGrid: new Vector3(
                     Math.round(position.x * 4) * 0.25,
                     Math.round(position.y * 4) * 0.25,
                     0,
                 ),
-                positionInWindow: { x: raw.clientX, y: raw.clientY },
+                positionInWindow: { x: raw.offsetX, y: raw.offsetY },
 
                 leftButtonDown: (raw.buttons & 1) === 1,
                 rightButtonDown: (raw.buttons & 2) === 2,
@@ -91,6 +94,11 @@ export function EventHandler() {
 
             lastNativeEventRef.current = event
             dispatchEvent(event)
+
+            if (event.consumed) {
+                raw.stopPropagation()
+                raw.preventDefault()
+            }
         }
 
         canvas.addEventListener("pointerdown", onPointerEvent)

@@ -8,7 +8,7 @@ import { Camera } from "./components/Camera"
 import { PrimaryBar } from "./components/PrimaryBar"
 import { GamemodeSelect } from "./components/gamemode/GamemodeSelect"
 import { Level } from "./entities/Level"
-import { Rocket } from "./entities/Rocket"
+import { Rocket } from "./entities/rocket/Rocket"
 import { Shape } from "./entities/shape/Shape"
 import { ProvideWorldStore, useEditorStore } from "./store/EditorStore"
 import { ProvideEventStore } from "./store/EventStore"
@@ -131,7 +131,7 @@ function Entities() {
                 <>
                     {entity.type === EntityType.Shape && <Shape key={id} state={entity} />}
 
-                    {entity.type === EntityType.Rocket && <Rocket key={id} />}
+                    {entity.type === EntityType.Rocket && <Rocket key={id} state={entity} />}
                     {entity.type === EntityType.Level && <Level key={id} />}
                 </>
             ))}

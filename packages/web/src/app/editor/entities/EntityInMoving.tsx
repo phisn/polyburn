@@ -3,7 +3,6 @@ import { Object3D } from "three"
 import { EntityState } from "../models/EntityState"
 import { useEditorStore } from "../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../store/EventStore"
-import { ModeMoving } from "./rocket/modes/RocketInMoving"
 
 export interface EntityModeMoving {
     type: "moving"
@@ -14,7 +13,7 @@ export interface EntityModeMoving {
 export function EntityInMoving(props: {
     entityRef: React.MutableRefObject<Object3D | undefined>
     state: EntityState
-    mode: ModeMoving
+    mode: EntityModeMoving
     onCancel: () => void
 }) {
     const entityRef = useRef<Object3D>()

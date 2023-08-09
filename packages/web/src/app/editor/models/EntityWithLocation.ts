@@ -46,30 +46,35 @@ export const findEdgeForEntity = (world: WorldState, position: Point, snap: bool
         return edge
     }
 
+    const shape = shapes[edge.shapeIndex]
+
     // edge.point is the closest point on the edge
     // edge.edge contains the two indices of the edge's vertices
 
-    const edgeStart = shapes[edge.shapeIndex].vertices[edge.edge[0]]
-    const edgeEnd = shapes[edge.shapeIndex].vertices[edge.edge[1]]
+    const edgeStart = {
+        x: shapes[edge.shapeIndex].vertices[edge.edge[0]].position.x + shape.position.x,
+        y: shapes[edge.shapeIndex].vertices[edge.edge[0]].position.y + shape.position.y,
+    }
 
-    const rotation =
-        Math.atan2(
-            edgeEnd.position.y - edgeStart.position.y,
-            edgeEnd.position.x - edgeStart.position.x,
-        ) + Math.PI
+    const edgeEnd = {
+        x: shapes[edge.shapeIndex].vertices[edge.edge[1]].position.x + shape.position.x,
+        y: shapes[edge.shapeIndex].vertices[edge.edge[1]].position.y + shape.position.y,
+    }
+
+    const rotation = Math.atan2(edgeEnd.y - edgeStart.y, edgeEnd.x - edgeStart.x) + Math.PI
 
     if (snap) {
         const edgeVector = {
-            x: edgeEnd.position.x - edgeStart.position.x,
-            y: edgeEnd.position.y - edgeStart.position.y,
+            x: edgeEnd.x - edgeStart.x,
+            y: edgeEnd.y - edgeStart.y,
         }
 
         const edgeLength = Math.sqrt(edgeVector.x * edgeVector.x + edgeVector.y * edgeVector.y)
         const edgeDirection = { x: edgeVector.x / edgeLength, y: edgeVector.y / edgeLength }
 
         const edgeStartToPosition = {
-            x: position.x - edgeStart.position.x,
-            y: position.y - edgeStart.position.y,
+            x: position.x - edgeStart.x,
+            y: position.y - edgeStart.y,
         }
 
         const edgeStartToPositionLength = Math.sqrt(
@@ -81,8 +86,8 @@ export const findEdgeForEntity = (world: WorldState, position: Point, snap: bool
             Math.round(edgeStartToPositionLength / snapDistance) * snapDistance
 
         const snappedPoint = {
-            x: edgeStart.position.x + edgeDirection.x * snapDistanceFromEdgeStart,
-            y: edgeStart.position.y + edgeDirection.y * snapDistanceFromEdgeStart,
+            x: edgeStart.x + edgeDirection.x * snapDistanceFromEdgeStart,
+            y: edgeStart.y + edgeDirection.y * snapDistanceFromEdgeStart,
         }
 
         return {

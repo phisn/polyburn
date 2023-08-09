@@ -8,6 +8,7 @@ import {
     isPointInsideEntity,
 } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { EntityContextMenu } from "../../common-components/GroupContextMenu"
 import { RocketMode } from "../Rocket"
 import { RocketState } from "../RocketState"
 
@@ -24,11 +25,18 @@ export function RocketInNone(props: {
     const svgRef = useRef<Object3D>()
 
     const [hovered, setHovered] = useState(false)
+    const [showRocketDialog, setShowRocketDialog] = useState<{ x: number; y: number } | false>(
+        false,
+    )
 
     useEventListener(
         event => {
             if (!svgRef.current) {
                 return
+            }
+
+            if (event.leftButtonClicked || event.rightButtonClicked) {
+                setShowRocketDialog(false)
             }
 
             if (event.consumed) {
@@ -58,6 +66,11 @@ export function RocketInNone(props: {
                             y: props.state.position.y - event.positionInGrid.y,
                         },
                     })
+                } else if (event.rightButtonClicked) {
+                    setShowRocketDialog({
+                        x: event.positionInGrid.x + 0.1,
+                        y: event.positionInGrid.y - 0.1,
+                    })
                 } else {
                     document.body.style.cursor = "grab"
                 }
@@ -81,6 +94,9 @@ export function RocketInNone(props: {
                     fillMaterial={hovered ? new MeshBasicMaterial({ color: "#ffff55" }) : undefined}
                 />
             </Suspense>
+            {showRocketDialog && (
+                <EntityContextMenu state={props.state} position={props.state.position} />
+            )}
         </>
     )
 }

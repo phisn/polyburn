@@ -23,6 +23,7 @@ export function Camera() {
     })
 
     const canvas = useThree(state => state.gl.domElement)
+    const canvasSize = useThree(state => state.size)
 
     const [mode, setMode] = useState<Mode>({ type: "none" })
 
@@ -77,35 +78,29 @@ export function Camera() {
 
     useEffect(() => {
         const onScroll = (raw: WheelEvent) => {
-            if (raw.ctrlKey) {
-                if (
-                    (raw.deltaY < 0 && cameraRef.current.zoom < 80) ||
-                    (raw.deltaY > 0 && cameraRef.current.zoom > 2)
-                ) {
-                    cameraRef.current.zoom =
-                        2 ** (Math.log2(cameraRef.current.zoom) - raw.deltaY / 100)
-                    cameraRef.current.updateProjectionMatrix()
+            if (
+                (raw.deltaY < 0 && cameraRef.current.zoom < 80) ||
+                (raw.deltaY > 0 && cameraRef.current.zoom > 2)
+            ) {
+                cameraRef.current.zoom = 2 ** (Math.log2(cameraRef.current.zoom) - raw.deltaY / 100)
+                cameraRef.current.updateProjectionMatrix()
 
-                    const canvasRect = canvas.getBoundingClientRect()
-                    const canvasCenter = {
-                        x: canvasRect.left + canvasRect.width * 0.5,
-                        y: canvasRect.top + canvasRect.height * 0.5,
-                    }
-
-                    cameraRef.current.position.set(
-                        positionRef.current.world.x +
-                            (canvasCenter.x - positionRef.current.window.x) /
-                                cameraRef.current.zoom,
-                        positionRef.current.world.y -
-                            (canvasCenter.y - positionRef.current.window.y) /
-                                cameraRef.current.zoom,
-                        cameraRef.current.position.z,
-                    )
+                const canvasCenter = {
+                    x: canvasSize.width * 0.5,
+                    y: canvasSize.height * 0.5,
                 }
 
-                raw.stopPropagation()
-                raw.preventDefault()
+                cameraRef.current.position.set(
+                    positionRef.current.world.x +
+                        (canvasCenter.x - positionRef.current.window.x) / cameraRef.current.zoom,
+                    positionRef.current.world.y -
+                        (canvasCenter.y - positionRef.current.window.y) / cameraRef.current.zoom,
+                    cameraRef.current.position.z,
+                )
             }
+
+            raw.stopPropagation()
+            raw.preventDefault()
         }
 
         canvas.addEventListener("wheel", onScroll)

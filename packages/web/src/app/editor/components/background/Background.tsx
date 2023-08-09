@@ -1,6 +1,9 @@
 import { Html } from "@react-three/drei"
 import { useState } from "react"
+import { EntityType } from "runtime/src/core/common/EntityType"
+import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry"
 import { Point } from "runtime/src/model/world/Point"
+import { ContextMenu } from "../../../../common/components/ContextMenu"
 import { levelNew } from "../../entities/level/mutations/levelNew"
 import { rocketNew } from "../../entities/rocket/mutations/rocketNew"
 import { shapeNew } from "../../entities/shape/mutations/shapeNew"
@@ -48,12 +51,16 @@ export function Background() {
     }, priority)
 
     if (mode.type === "contextMenu") {
+        function spawnPositionForType(position: Point, type: EntityType) {
+            return {
+                x: position.x - entityModelRegistry[EntityType.Rocket].width / 2,
+                y: position.y + entityModelRegistry[EntityType.Rocket].height / 2,
+            }
+        }
+
         return (
             <Html as="div" position={[mode.position.x, mode.position.y, priority]}>
-                <ul
-                    className="menu bg-base-200 rounded-box absolute left-2 top-2 w-56"
-                    onContextMenu={e => e.preventDefault()}
-                >
+                <ContextMenu>
                     <li>
                         <a
                             onClick={() => {
@@ -67,7 +74,12 @@ export function Background() {
                     <li>
                         <a
                             onClick={() => {
-                                dispatchMutation(rocketNew({ ...mode.position }, 0))
+                                dispatchMutation(
+                                    rocketNew(
+                                        spawnPositionForType(mode.position, EntityType.Rocket),
+                                        0,
+                                    ),
+                                )
                                 setMode({ type: "none" })
                             }}
                         >
@@ -77,14 +89,19 @@ export function Background() {
                     <li>
                         <a
                             onClick={() => {
-                                dispatchMutation(levelNew({ ...mode.position }, 0))
+                                dispatchMutation(
+                                    levelNew(
+                                        spawnPositionForType(mode.position, EntityType.Level),
+                                        0,
+                                    ),
+                                )
                                 setMode({ type: "none" })
                             }}
                         >
                             Create Level
                         </a>
                     </li>
-                </ul>
+                </ContextMenu>
             </Html>
         )
     }

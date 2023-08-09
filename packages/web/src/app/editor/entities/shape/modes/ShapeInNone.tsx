@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
+import { Point } from "runtime/src/model/world/Point"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { EntityContextMenu } from "../../common-components/GroupContextMenu"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import { ShapeState, isPointInsideShape } from "../ShapeState"
@@ -15,6 +17,7 @@ export function ShapeInNone(props: {
 }) {
     const geometryRef = useRef<MutatableShapeGeometry>(new MutatableShapeGeometry())
 
+    const [showShapeDialog, setShowShapeDialog] = useState<undefined | { position: Point }>()
     const [hovered, setHovered] = useState(false)
 
     useEffect(() => {
@@ -22,6 +25,10 @@ export function ShapeInNone(props: {
     })
 
     useEventListener(event => {
+        if (showShapeDialog && (event.leftButtonClicked || event.rightButtonClicked)) {
+            setShowShapeDialog(undefined)
+        }
+
         if (event.consumed) {
             setHovered(false)
             return
@@ -29,8 +36,10 @@ export function ShapeInNone(props: {
 
         const isPointInside = isPointInsideShape(event.position, props.state)
 
-        if (event.leftButtonClicked) {
-            if (isPointInside) {
+        setHovered(isPointInside)
+
+        if (isPointInside) {
+            if (event.leftButtonClicked) {
                 if (event.shiftKey) {
                     props.setMode({
                         type: "moving",
@@ -44,17 +53,11 @@ export function ShapeInNone(props: {
                 }
 
                 return ConsumeEvent
+            } else if (event.rightButtonClicked) {
+                setShowShapeDialog({ position: event.position })
             }
-        } else {
-            setHovered(isPointInside)
 
-            if (isPointInside) {
-                if (event.shiftKey) {
-                    document.body.style.cursor = "grab"
-                }
-
-                return ConsumeEvent
-            }
+            return ConsumeEvent
         }
     }, Priority.Normal)
 
@@ -67,6 +70,10 @@ export function ShapeInNone(props: {
             >
                 <meshBasicMaterial color={materialColor()} vertexColors />
             </mesh>
+
+            {showShapeDialog && (
+                <EntityContextMenu state={props.state} position={showShapeDialog.position} />
+            )}
         </>
     )
 

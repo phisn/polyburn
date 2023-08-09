@@ -140,6 +140,7 @@ function GamemodeOption(props: { first: boolean; gamemode: GamemodeState; select
                             } else {
                                 setMode(GamemodeOptionType.Context)
                             }
+                            console.log("toggle")
                         }}
                     >
                         <div className="grid w-full grid-cols-3 items-center">
@@ -149,6 +150,7 @@ function GamemodeOption(props: { first: boolean; gamemode: GamemodeState; select
                                 <label className="swap swap-rotate justify-self-end rounded-lg p-2">
                                     <input
                                         type="checkbox"
+                                        disabled
                                         onChange={() => {
                                             selectGamemode(props.gamemode)
 
@@ -226,7 +228,7 @@ function GamemodeOptionGroups(props: { gamemode: GamemodeState }) {
     const [creating, setCreating] = useState(false)
 
     const dispatch = useEditorStore(store => store.mutation)
-    const world = useEditorStore(store => store.state.world)
+    const world = useEditorStore(store => store.state).world
 
     const groups = [
         ...world.gamemodes.flatMap(gamemode => gamemode.groups),

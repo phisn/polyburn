@@ -1,16 +1,15 @@
-import { Html } from "@react-three/drei"
 import { useEffect, useRef, useState } from "react"
 import { Point } from "runtime/src/model/world/Point"
-import { Mesh, MeshBasicMaterial, Vector2, Vector3 } from "three"
+import { Mesh, MeshBasicMaterial, Vector2 } from "three"
 import {
     baseZoomFactor,
     highlightColor,
     highlightDeleteColor,
     snapDistance,
 } from "../../../../../common/Values"
-import { ListTask } from "../../../../../common/components/inline-svg/ListTask"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { EntityContextMenu } from "../../common-components/GroupContextMenu"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import {
@@ -102,7 +101,6 @@ export function ShapeInSelected(props: {
                 window.document.body.style.cursor = "pointer"
 
                 if (event.leftButtonClicked) {
-                    console.log("remove vertex dispatch here")
                     dispatch(shapeRemoveVertex(props.state, closestVertex.vertexIndex))
                 } else {
                     showMarker(closestVertex.point, highlightDeleteColor)
@@ -173,8 +171,8 @@ export function ShapeInSelected(props: {
             if (event.rightButtonClicked) {
                 setShowShapeDialog({
                     position: {
-                        x: props.state.position.x + event.positionInGrid.x + 0.1,
-                        y: props.state.position.y + event.positionInGrid.y - 0.1,
+                        x: event.positionInGrid.x + 0.1,
+                        y: event.positionInGrid.y - 0.1,
                     },
                 })
             }
@@ -220,46 +218,8 @@ export function ShapeInSelected(props: {
             )}
 
             {showShapeDialog && (
-                <ShapeContext state={props.state} position={showShapeDialog.position} />
+                <EntityContextMenu state={props.state} position={showShapeDialog.position} />
             )}
         </>
-    )
-}
-
-function ShapeContext(props: { state: ShapeState; position: Point }) {
-    const world = useEditorStore(store => store.state).world
-
-    const groups = world.gamemodes
-        .flatMap(gamemode => gamemode.groups)
-        .filter((group, index, self) => self.indexOf(group) === index)
-
-    return (
-        <Html
-            as="div"
-            position={new Vector3(props.position.x, props.position.y, Priority.Selected + 0.01)}
-        >
-            <div className="rounded-2xl">
-                <div className="join">
-                    <div className="join-item bg-base-100 flex items-center bg-opacity-80 p-3 text-sm text-white backdrop-blur-2xl">
-                        <ListTask width="20" height="20" />
-                    </div>
-                    {groups.length > 0 && (
-                        <select className="join-item select bg-base-300 min-w-[10rem] bg-opacity-75 !outline-none backdrop-blur-2xl">
-                            <option>None</option>
-                            {groups.map(group => (
-                                <option key={group} selected={group === props.state.group}>
-                                    {group}
-                                </option>
-                            ))}
-                        </select>
-                    )}
-                    {groups.length === 0 && (
-                        <div className="join-item bg-base-300 text-error flex min-w-[18rem] items-center justify-center bg-opacity-75 text-center text-sm backdrop-blur-2xl">
-                            Create new group in gamemode settings
-                        </div>
-                    )}
-                </div>
-            </div>
-        </Html>
     )
 }

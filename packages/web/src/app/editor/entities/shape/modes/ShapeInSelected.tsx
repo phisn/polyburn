@@ -33,7 +33,7 @@ export function ShapeInSelected(props: {
     setMode: (mode: ShapeMode) => void
 }) {
     const [showVertexDialog, setShowVertexDialog] = useState<undefined | { vertexIndex: number }>()
-    const [showShapeDialog, setShowShapeDialog] = useState<undefined | { position: Point }>()
+    const [showShapeDialog, setShowShapeDialog] = useState<undefined | { x: number; y: number }>()
 
     const markerRef = useRef<Mesh>(null!)
     const markerMaterialRef = useRef<MeshBasicMaterial>(null!)
@@ -170,10 +170,8 @@ export function ShapeInSelected(props: {
 
             if (event.rightButtonClicked) {
                 setShowShapeDialog({
-                    position: {
-                        x: event.positionInGrid.x + 0.1,
-                        y: event.positionInGrid.y - 0.1,
-                    },
+                    x: event.positionInGrid.x + 0.1,
+                    y: event.positionInGrid.y - 0.1,
                 })
             }
 
@@ -218,7 +216,7 @@ export function ShapeInSelected(props: {
             )}
 
             {showShapeDialog && (
-                <EntityContextMenu state={props.state} position={showShapeDialog.position} />
+                <EntityContextMenu state={props.state} position={showShapeDialog} />
             )}
         </>
     )

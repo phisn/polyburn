@@ -62,7 +62,7 @@ export function EntityContextMenuRaw(props: {
                 </ContextMenu>
             )}
             {groupMenu && (
-                <div className="bg-base-300 rounded-box bg-opacity-70 backdrop-blur-2xl">
+                <div className="bg-base-300 rounded-box bg-opacity-70 backdrop-blur-xl">
                     <div
                         className="btn btn-ghost grid grid-cols-3 rounded-2xl rounded-b-none text-sm"
                         onClick={() => setGroupMenu(false)}

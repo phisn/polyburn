@@ -25,9 +25,7 @@ export function RocketInNone(props: {
     const svgRef = useRef<Object3D>()
 
     const [hovered, setHovered] = useState(false)
-    const [showRocketDialog, setShowRocketDialog] = useState<{ x: number; y: number } | false>(
-        false,
-    )
+    const [showRocketDialog, setShowRocketDialog] = useState<{ x: number; y: number } | undefined>()
 
     useEventListener(
         event => {
@@ -35,8 +33,8 @@ export function RocketInNone(props: {
                 return
             }
 
-            if (event.leftButtonClicked || event.rightButtonClicked) {
-                setShowRocketDialog(false)
+            if (setShowRocketDialog && (event.leftButtonClicked || event.rightButtonClicked)) {
+                setShowRocketDialog(undefined)
             }
 
             if (event.consumed) {
@@ -68,8 +66,8 @@ export function RocketInNone(props: {
                     })
                 } else if (event.rightButtonClicked) {
                     setShowRocketDialog({
-                        x: event.positionInGrid.x + 0.1,
-                        y: event.positionInGrid.y - 0.1,
+                        x: event.position.x + 0.1,
+                        y: event.position.y - 0.1,
                     })
                 } else {
                     document.body.style.cursor = "grab"
@@ -95,7 +93,7 @@ export function RocketInNone(props: {
                 />
             </Suspense>
             {showRocketDialog && (
-                <EntityContextMenu state={props.state} position={props.state.position} />
+                <EntityContextMenu state={props.state} position={showRocketDialog} />
             )}
         </>
     )

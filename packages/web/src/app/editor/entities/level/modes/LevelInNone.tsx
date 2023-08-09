@@ -8,6 +8,7 @@ import {
     isPointInsideEntity,
 } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { EntityContextMenu } from "../../common-components/GroupContextMenu"
 import { LevelMode } from "../Level"
 import { LevelState } from "../LevelState"
 
@@ -23,12 +24,17 @@ export function LevelInNone(props: {
     const graphicEntry = entityGraphicRegistry[EntityType.Level]
     const svgRef = useRef<Object3D>()
 
+    const [showLevelDialog, setShowLevelDialog] = useState<{ x: number; y: number } | undefined>()
     const [hovered, setHovered] = useState(false)
 
     useEventListener(
         event => {
             if (!svgRef.current) {
                 return
+            }
+
+            if (setShowLevelDialog && (event.leftButtonClicked || event.rightButtonClicked)) {
+                setShowLevelDialog(undefined)
             }
 
             if (event.consumed) {
@@ -54,18 +60,30 @@ export function LevelInNone(props: {
             setHovered(isInside)
 
             if (isInside) {
-                if (event.leftButtonClicked) {
-                    document.body.style.cursor = "grabbing"
-
-                    props.setMode({
-                        type: "moving",
-                        offsetPosition: {
-                            x: props.state.position.x - event.positionInGrid.x,
-                            y: props.state.position.y - event.positionInGrid.y,
-                        },
+                if (event.rightButtonClicked) {
+                    setShowLevelDialog({
+                        x: event.position.x + 0.1,
+                        y: event.position.y - 0.1,
                     })
-                } else {
-                    document.body.style.cursor = "grab"
+                } else if (event.shiftKey) {
+                    if (event.leftButtonClicked) {
+                        document.body.style.cursor = "grabbing"
+
+                        props.setMode({
+                            type: "moving",
+                            offsetPosition: {
+                                x: props.state.position.x - event.positionInGrid.x,
+                                y: props.state.position.y - event.positionInGrid.y,
+                            },
+                            previousMode: { type: "none" },
+                        })
+                    } else {
+                        document.body.style.cursor = "grab"
+                    }
+                } else if (event.leftButtonClicked) {
+                    props.setMode({
+                        type: "selected",
+                    })
                 }
 
                 return ConsumeEvent
@@ -93,6 +111,10 @@ export function LevelInNone(props: {
                     }
                 />
             </Suspense>
+
+            {showLevelDialog && (
+                <EntityContextMenu state={props.state} position={showLevelDialog} />
+            )}
         </>
     )
 }

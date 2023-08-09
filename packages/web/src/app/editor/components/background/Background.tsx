@@ -4,6 +4,9 @@ import { EntityType } from "runtime/src/core/common/EntityType"
 import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry"
 import { Point } from "runtime/src/model/world/Point"
 import { ContextMenu } from "../../../../common/components/ContextMenu"
+import { FlagSvg } from "../../../../common/components/inline-svg/Flag"
+import { RocketSvg } from "../../../../common/components/inline-svg/Rocket"
+import { TriangleSvg } from "../../../../common/components/inline-svg/Triangle"
 import { levelNew } from "../../entities/level/mutations/levelNew"
 import { rocketNew } from "../../entities/rocket/mutations/rocketNew"
 import { shapeNew } from "../../entities/shape/mutations/shapeNew"
@@ -68,6 +71,7 @@ export function Background() {
                                 setMode({ type: "none" })
                             }}
                         >
+                            <TriangleSvg width="16" height="16" />
                             Create Shape
                         </a>
                     </li>
@@ -83,6 +87,7 @@ export function Background() {
                                 setMode({ type: "none" })
                             }}
                         >
+                            <RocketSvg width="16" height="16" />
                             Create Rocket
                         </a>
                     </li>
@@ -98,6 +103,7 @@ export function Background() {
                                 setMode({ type: "none" })
                             }}
                         >
+                            <FlagSvg width="16" height="16" />
                             Create Level
                         </a>
                     </li>

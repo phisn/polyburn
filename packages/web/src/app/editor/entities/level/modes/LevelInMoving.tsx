@@ -13,6 +13,7 @@ import { levelMove } from "../mutations/levelMove"
 export interface LevelModeMoving {
     type: "moving"
     offsetPosition: { x: number; y: number }
+    previousMode: LevelMode
 }
 
 export function LevelInMoving(props: {
@@ -20,7 +21,7 @@ export function LevelInMoving(props: {
     mode: LevelModeMoving
     setMode: (mode: LevelMode) => void
 }) {
-    const graphicEntry = entityGraphicRegistry[EntityType.Level]
+    const graphicEntry = entityGraphicRegistry["Green Flag"]
 
     const svgRef = useRef<Object3D>()
 
@@ -56,7 +57,7 @@ export function LevelInMoving(props: {
                     ),
                 )
 
-                props.setMode({ type: "none" })
+                props.setMode(props.mode.previousMode)
             }
 
             function updateLocation(x: number, y: number, rotation: number) {

@@ -1,9 +1,9 @@
 import { useState } from "react"
 import { RocketState } from "./RocketState"
-import { ModeMoving, RocketInMoving } from "./modes/RocketInMoving"
-import { ModeNone, RocketInNone } from "./modes/RocketInNone"
+import { RocketInMoving, RocketModeMoving } from "./modes/RocketInMoving"
+import { RocketInNone, RocketModeNone } from "./modes/RocketInNone"
 
-export type RocketMode = ModeNone | ModeMoving
+export type RocketMode = RocketModeNone | RocketModeMoving
 
 export function Rocket(props: { state: RocketState }) {
     const [mode, setMode] = useState<RocketMode>({ type: "none" })

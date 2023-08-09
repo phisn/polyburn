@@ -131,7 +131,7 @@ export function ShapeInSelected(props: {
             return ConsumeEvent
         }
 
-        const closestEdge = findClosestEdge(props.state, event.position, snapDistance)
+        const closestEdge = findClosestEdge([props.state], event.position, snapDistance)
 
         if (closestEdge) {
             if (event.leftButtonClicked) {

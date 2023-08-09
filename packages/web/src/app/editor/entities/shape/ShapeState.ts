@@ -1,5 +1,5 @@
 import { EntityType } from "runtime/src/core/common/EntityType"
-import { Vector2, Vector3 } from "three"
+import { Vector2 } from "three"
 import { Point } from "../../../../../../runtime/src/model/world/Point"
 import { BaseEntityState } from "../../store/BaseEntityState"
 
@@ -41,7 +41,7 @@ export interface ShapeVertex {
 export interface ShapeState extends BaseEntityState {
     type: EntityType.Shape
 
-    position: Vector3
+    position: Point
     vertices: ShapeVertex[]
 }
 
@@ -184,29 +184,35 @@ export function isPointInsideShape(point: Point, shape: ShapeState): boolean {
     return isInside
 }
 
-export function findClosestEdge(shape: ShapeState, point: Point, snapDistance: number) {
+export function findClosestEdge(shapes: ShapeState[], point: Point, snapDistance: number) {
     let minDistance = Number.MAX_VALUE
     let closestPoint: Point = { x: 0, y: 0 }
     let edgeIndices: [number, number] = [0, 0]
+    let shapeIndex = 0
 
-    for (let j = 0; j < shape.vertices.length; ++j) {
-        const p1 = {
-            x: shape.vertices[j].position.x + shape.position.x,
-            y: shape.vertices[j].position.y + shape.position.y,
-        }
+    for (let i = 0; i < shapes.length; ++i) {
+        const shape = shapes[i]
 
-        const p2 = {
-            x: shape.vertices[(j + 1) % shape.vertices.length].position.x + shape.position.x,
-            y: shape.vertices[(j + 1) % shape.vertices.length].position.y + shape.position.y,
-        }
+        for (let j = 0; j < shape.vertices.length; ++j) {
+            const p1 = {
+                x: shape.vertices[j].position.x + shape.position.x,
+                y: shape.vertices[j].position.y + shape.position.y,
+            }
 
-        const closest = getClosestPointOnLine(p1, p2, point)
-        const distance = getDistance(closest, point)
+            const p2 = {
+                x: shape.vertices[(j + 1) % shape.vertices.length].position.x + shape.position.x,
+                y: shape.vertices[(j + 1) % shape.vertices.length].position.y + shape.position.y,
+            }
 
-        if (distance < minDistance) {
-            minDistance = distance
-            closestPoint = closest
-            edgeIndices = [j, (j + 1) % shape.vertices.length]
+            const closest = getClosestPointOnLine(p1, p2, point)
+            const distance = getDistance(closest, point)
+
+            if (distance < minDistance) {
+                minDistance = distance
+                closestPoint = closest
+                edgeIndices = [j, (j + 1) % shape.vertices.length]
+                shapeIndex = i
+            }
         }
     }
 
@@ -214,7 +220,7 @@ export function findClosestEdge(shape: ShapeState, point: Point, snapDistance: n
         return null
     }
 
-    return { point: closestPoint, edge: edgeIndices }
+    return { point: closestPoint, edge: edgeIndices, shapeIndex }
 }
 
 export function findClosestVertex(shape: ShapeState, point: Point, snapDistance: number) {

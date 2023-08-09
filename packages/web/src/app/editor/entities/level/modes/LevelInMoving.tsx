@@ -6,21 +6,21 @@ import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics
 import { findLocationForEntity } from "../../../models/EntityWithLocation"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
-import { RocketMode } from "../Rocket"
-import { RocketState } from "../RocketState"
-import { rocketMove } from "../mutations/rocketMove"
+import { LevelMode } from "../Level"
+import { LevelState } from "../LevelState"
+import { levelMove } from "../mutations/levelMove"
 
-export interface RocketModeMoving {
+export interface LevelModeMoving {
     type: "moving"
     offsetPosition: { x: number; y: number }
 }
 
-export function RocketInMoving(props: {
-    state: RocketState
-    mode: RocketModeMoving
-    setMode: (mode: RocketMode) => void
+export function LevelInMoving(props: {
+    state: LevelState
+    mode: LevelModeMoving
+    setMode: (mode: LevelMode) => void
 }) {
-    const graphicEntry = entityGraphicRegistry[EntityType.Rocket]
+    const graphicEntry = entityGraphicRegistry[EntityType.Level]
 
     const svgRef = useRef<Object3D>()
 
@@ -43,13 +43,13 @@ export function RocketInMoving(props: {
             }
 
             if (event.leftButtonDown) {
-                updateLocation(...findLocationForEntity(world, event, EntityType.Rocket))
+                updateLocation(...findLocationForEntity(world, event, EntityType.Level))
                 window.document.body.style.cursor = "grabbing"
             } else {
                 window.document.body.style.cursor = "grab"
 
                 dispatchMutation(
-                    rocketMove(
+                    levelMove(
                         props.state,
                         positionRef.current.position,
                         positionRef.current.rotation,

@@ -3,11 +3,11 @@ import { EntityType } from "runtime/src/core/common/EntityType"
 import { Vector2, Vector3 } from "three"
 import { EventHandler } from "./EventHandler"
 import { editorTunnel } from "./Tunnel"
-import { Background } from "./components/Background"
 import { Camera } from "./components/Camera"
 import { PrimaryBar } from "./components/PrimaryBar"
+import { Background } from "./components/background/Background"
 import { GamemodeSelect } from "./components/gamemode/GamemodeSelect"
-import { Level } from "./entities/Level"
+import { Level } from "./entities/level/Level"
 import { Rocket } from "./entities/rocket/Rocket"
 import { Shape } from "./entities/shape/Shape"
 import { ProvideWorldStore, useEditorStore } from "./store/EditorStore"
@@ -130,9 +130,8 @@ function Entities() {
             {[...entities.entries()].map(([id, entity]) => (
                 <>
                     {entity.type === EntityType.Shape && <Shape key={id} state={entity} />}
-
                     {entity.type === EntityType.Rocket && <Rocket key={id} state={entity} />}
-                    {entity.type === EntityType.Level && <Level key={id} />}
+                    {entity.type === EntityType.Level && <Level key={id} state={entity} />}
                 </>
             ))}
         </>

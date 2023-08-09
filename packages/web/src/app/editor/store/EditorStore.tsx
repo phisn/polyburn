@@ -14,6 +14,8 @@ export interface Mutation {
     undo: (world: WorldState) => void
 }
 
+export type MutationGenerator = Mutation | ((world: WorldState) => MutationGenerator)
+
 interface WorldStore {
     gamemode?: GamemodeState
 
@@ -21,7 +23,7 @@ interface WorldStore {
     canUndo: boolean
     canRedo: boolean
 
-    mutation: (mutation: Mutation) => void
+    mutation: (mutation: MutationGenerator) => void
     redo: () => void
     undo: () => void
 
@@ -37,7 +39,13 @@ const createEditorStore = (world: WorldState) =>
         },
         canUndo: false,
         canRedo: false,
-        mutation(mutation: Mutation) {
+        mutation(generator) {
+            while (generator instanceof Function) {
+                generator = generator(get().state.world)
+            }
+
+            const mutation = generator
+
             mutation.do(get().state.world)
 
             set(store => ({

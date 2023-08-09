@@ -10,6 +10,8 @@ export type ShapeMode = ShapeModeMoving | ShapeModeNone | ShapeModeSelected | Sh
 export function Shape(props: { state: ShapeState }) {
     const [mode, setMode] = useState<ShapeMode>({ type: "none" })
 
+    console.log("shape with id = " + props.state.id + " in mode " + mode.type + " rendered")
+
     return (
         <>
             {mode.type === "none" && (

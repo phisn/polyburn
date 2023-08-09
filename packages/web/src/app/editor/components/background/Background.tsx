@@ -1,7 +1,11 @@
 import { Html } from "@react-three/drei"
 import { useState } from "react"
 import { Point } from "runtime/src/model/world/Point"
-import { ConsumeEvent, Priority, useEventListener } from "../store/EventStore"
+import { levelNew } from "../../entities/level/mutations/levelNew"
+import { rocketNew } from "../../entities/rocket/mutations/rocketNew"
+import { shapeNew } from "../../entities/shape/mutations/shapeNew"
+import { useEditorStore } from "../../store/EditorStore"
+import { ConsumeEvent, Priority, useEventListener } from "../../store/EventStore"
 
 interface ModeNone {
     type: "none"
@@ -18,6 +22,8 @@ export function Background() {
     })
 
     const priority = mode.type === "none" ? Priority.Fallback : Priority.Action
+
+    const dispatchMutation = useEditorStore(store => store.mutation)
 
     useEventListener(event => {
         if (event.consumed) {
@@ -49,13 +55,34 @@ export function Background() {
                     onContextMenu={e => e.preventDefault()}
                 >
                     <li>
-                        <a>Create Shape</a>
+                        <a
+                            onClick={() => {
+                                dispatchMutation(shapeNew({ ...mode.position }))
+                                setMode({ type: "none" })
+                            }}
+                        >
+                            Create Shape
+                        </a>
                     </li>
                     <li>
-                        <a>Create Rocket</a>
+                        <a
+                            onClick={() => {
+                                dispatchMutation(rocketNew({ ...mode.position }, 0))
+                                setMode({ type: "none" })
+                            }}
+                        >
+                            Create Rocket
+                        </a>
                     </li>
                     <li>
-                        <a>Create Level</a>
+                        <a
+                            onClick={() => {
+                                dispatchMutation(levelNew({ ...mode.position }, 0))
+                                setMode({ type: "none" })
+                            }}
+                        >
+                            Create Level
+                        </a>
                     </li>
                 </ul>
             </Html>

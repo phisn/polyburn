@@ -1,26 +1,26 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useRef, useState } from "react"
 import { EntityType } from "runtime/src/core/common/EntityType"
-import { RocketEntityModel } from "runtime/src/model/world/EntityModel"
+import { FlagEntityModel } from "runtime/src/model/world/FlagEntityModel"
 import { Euler, MeshBasicMaterial, Object3D } from "three"
 import {
     entityGraphicRegistry,
     isPointInsideEntity,
 } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
-import { RocketMode } from "../Rocket"
-import { RocketState } from "../RocketState"
+import { LevelMode } from "../Level"
+import { LevelState } from "../LevelState"
 
-export interface RocketModeNone {
+export interface LevelModeNone {
     type: "none"
 }
 
-export function RocketInNone(props: {
-    state: RocketState
-    mode: RocketModeNone
-    setMode: (mode: RocketMode) => void
+export function LevelInNone(props: {
+    state: LevelState
+    mode: LevelModeNone
+    setMode: (mode: LevelMode) => void
 }) {
-    const graphicEntry = entityGraphicRegistry[EntityType.Rocket]
+    const graphicEntry = entityGraphicRegistry[EntityType.Level]
     const svgRef = useRef<Object3D>()
 
     const [hovered, setHovered] = useState(false)
@@ -37,14 +37,20 @@ export function RocketInNone(props: {
                 return
             }
 
-            const rocket: RocketEntityModel = {
-                type: EntityType.Rocket,
+            const flag: FlagEntityModel = {
+                type: EntityType.Level,
 
                 position: props.state.position,
                 rotation: props.state.rotation,
+
+                cameraTopLeft: { x: 0, y: 0 },
+                cameraBottomRight: { x: 0, y: 0 },
+
+                captureLeft: 0,
+                captureRight: 0,
             }
 
-            const isInside = isPointInsideEntity(event.position, rocket)
+            const isInside = isPointInsideEntity(event.position, flag)
             setHovered(isInside)
 
             if (isInside) {
@@ -78,7 +84,13 @@ export function RocketInNone(props: {
                     rotation={new Euler(0, 0, props.state.rotation)}
                     src={graphicEntry.src}
                     scale={graphicEntry.scale}
-                    fillMaterial={hovered ? new MeshBasicMaterial({ color: "#ffff55" }) : undefined}
+                    fillMaterial={
+                        hovered
+                            ? new MeshBasicMaterial({
+                                  color: "#ffff55",
+                              })
+                            : undefined
+                    }
                 />
             </Suspense>
         </>

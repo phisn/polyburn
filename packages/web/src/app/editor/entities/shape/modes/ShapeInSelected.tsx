@@ -7,9 +7,9 @@ import {
     highlightDeleteColor,
     snapDistance,
 } from "../../../../../common/Values"
+import { EntityContextMenu } from "../../../components/GroupContextMenu"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
-import { EntityContextMenu } from "../../common-components/GroupContextMenu"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import {

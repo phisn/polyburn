@@ -3,13 +3,16 @@ import { Suspense, useRef, useState } from "react"
 import { EntityType } from "runtime/src/core/common/EntityType"
 import { FlagEntityModel } from "runtime/src/model/world/FlagEntityModel"
 import { Euler, Object3D } from "three"
+
 import {
     entityGraphicRegistry,
     isPointInsideEntity,
 } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { EntityContextMenu } from "../../../components/GroupContextMenu"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
-import { EntityContextMenu } from "../../common-components/GroupContextMenu"
+import { CameraSide } from "../CameraSide"
 import { LevelMode } from "../Level"
+import { LevelCameraLines } from "../LevelCameraLines"
 import { LevelState } from "../LevelState"
 
 export interface LevelModeSelected {
@@ -25,6 +28,12 @@ export function LevelInSelected(props: {
     const svgRef = useRef<Object3D>()
 
     const [showLevelDialog, setShowLevelDialog] = useState<{ x: number; y: number } | undefined>()
+
+    interface CameraHovered {
+        side: CameraSide
+    }
+
+    const [cameraHovered, setCameraHovered] = useState<CameraHovered | undefined>()
 
     useEventListener(event => {
         if (showLevelDialog && (event.leftButtonClicked || event.rightButtonClicked)) {
@@ -100,6 +109,13 @@ export function LevelInSelected(props: {
             {showLevelDialog && (
                 <EntityContextMenu state={props.state} position={showLevelDialog} />
             )}
+
+            <LevelCameraLines
+                state={props.state}
+                color={"green"}
+                priority={Priority.Selected}
+                colorCustom={cameraHovered?.side && { [cameraHovered.side]: "red" }}
+            />
         </>
     )
 }

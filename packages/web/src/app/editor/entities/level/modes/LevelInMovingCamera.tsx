@@ -3,6 +3,7 @@ import { Suspense, useRef } from "react"
 import { EntityType } from "runtime/src/core/common/EntityType"
 import { Euler, Object3D } from "three"
 import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { findLocationForEntity } from "../../../models/EntityWithLocation"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
@@ -11,18 +12,18 @@ import { LevelCameraLines } from "../LevelCameraLines"
 import { LevelState } from "../LevelState"
 import { levelMove } from "../mutations/levelMove"
 
-export interface LevelModeMoving {
+export interface LevelModeMovingCamera {
     type: "moving"
     offsetPosition: { x: number; y: number }
     previousMode: LevelMode
 }
 
-export function LevelInMoving(props: {
+export function LevelInMovingCamera(props: {
     state: LevelState
-    mode: LevelModeMoving
+    mode: LevelModeMovingCamera
     setMode: (mode: LevelMode) => void
 }) {
-    const graphicEntry = entityGraphicRegistry["Green Flag"]
+    const graphicEntry = entityGraphicRegistry[EntityGraphicType.GreenFlag]
 
     const svgRef = useRef<Object3D>()
 

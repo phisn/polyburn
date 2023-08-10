@@ -1,4 +1,5 @@
 import { Canvas } from "@react-three/fiber"
+import { Fragment } from "react"
 import { EntityType } from "runtime/src/core/common/EntityType"
 import { Vector2, Vector3 } from "three"
 import { EventHandler } from "./EventHandler"
@@ -128,11 +129,11 @@ function Entities() {
     return (
         <>
             {[...entities.entries()].map(([id, entity]) => (
-                <>
-                    {entity.type === EntityType.Shape && <Shape key={id} state={entity} />}
-                    {entity.type === EntityType.Rocket && <Rocket key={id} state={entity} />}
-                    {entity.type === EntityType.Level && <Level key={id} state={entity} />}
-                </>
+                <Fragment key={id}>
+                    {entity.type === EntityType.Shape && <Shape state={entity} />}
+                    {entity.type === EntityType.Rocket && <Rocket state={entity} />}
+                    {entity.type === EntityType.Level && <Level state={entity} />}
+                </Fragment>
             ))}
         </>
     )

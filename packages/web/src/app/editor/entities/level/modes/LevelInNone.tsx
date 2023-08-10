@@ -7,9 +7,10 @@ import {
     entityGraphicRegistry,
     isPointInsideEntity,
 } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { EntityContextMenu } from "../../../components/GroupContextMenu"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
-import { EntityContextMenu } from "../../common-components/GroupContextMenu"
 import { LevelMode } from "../Level"
+import { LevelCameraLines } from "../LevelCameraLines"
 import { LevelState } from "../LevelState"
 
 export interface LevelModeNone {
@@ -115,6 +116,13 @@ export function LevelInNone(props: {
             {showLevelDialog && (
                 <EntityContextMenu state={props.state} position={showLevelDialog} />
             )}
+
+            <LevelCameraLines
+                dashed
+                state={props.state}
+                color={hovered ? "purple" : "orange"}
+                priority={Priority.Normal}
+            />
         </>
     )
 }

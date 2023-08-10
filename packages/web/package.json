@@ -29,6 +29,7 @@
         "runtime-framework": "workspace:*",
         "tailwind-scrollbar": "^3.0.4",
         "three": "^0.154.0",
+        "three-stdlib": "^2.24.2",
         "tunnel-rat": "^0.1.2",
         "zustand": "^4.3.9"
     },

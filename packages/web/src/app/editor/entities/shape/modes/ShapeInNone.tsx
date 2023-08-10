@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
+import { EntityContextMenu } from "../../../components/GroupContextMenu"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
-import { EntityContextMenu } from "../../common-components/GroupContextMenu"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import { ShapeState, isPointInsideShape } from "../ShapeState"

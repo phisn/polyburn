@@ -7,8 +7,8 @@ import {
     entityGraphicRegistry,
     isPointInsideEntity,
 } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { EntityContextMenu } from "../../../components/GroupContextMenu"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
-import { EntityContextMenu } from "../../common-components/GroupContextMenu"
 import { RocketMode } from "../Rocket"
 import { RocketState } from "../RocketState"
 

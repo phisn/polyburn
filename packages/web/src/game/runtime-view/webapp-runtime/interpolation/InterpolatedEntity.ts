@@ -27,7 +27,7 @@ export function interpolateEntity(entity: InterpolatedEntity, delta: number) {
     )
 }
 
-export function updateInterpolatedEntity(entity: InterpolatedEntity, delta: number) {
+export function updateInterpolatedEntity(entity: InterpolatedEntity) {
     if (entity.components.rigidBody.isSleeping()) {
         return
     }
@@ -43,6 +43,4 @@ export function updateInterpolatedEntity(entity: InterpolatedEntity, delta: numb
 
     entity.components.interpolation.newPosition.set(position.x, position.y, 0)
     entity.components.interpolation.newRotation = entity.components.rigidBody.rotation()
-
-    interpolateEntity(entity, delta)
 }

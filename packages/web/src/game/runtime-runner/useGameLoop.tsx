@@ -14,40 +14,72 @@ export const GameLoopContextProvider = GameLoopContext.Provider
 export const useGameLoop = (
     events: {
         update: () => void
-        afterUpdate: (time: number) => void
+        afterUpdate: () => void
         afterFrame: (time: number, ticked: boolean) => void
     },
     tickRate: number,
 ) => {
-    let lastTime = performance.now()
+    let timer = performance.now()
 
     useFrame(() => {
-        const now = performance.now()
+        let now = performance.now()
 
-        if (now - lastTime >= tickRate) {
+        let delta = 0
+
+        if (now - timer >= tickRate) {
             let frames = 0
 
+            // console.log("remaining " + (now - timer - tickRate))
+
             do {
-                lastTime += tickRate
+                timer += tickRate
                 events.update()
+                events.afterUpdate()
 
                 frames++
-            } while (now - lastTime >= tickRate)
+
+                now = performance.now()
+            } while (now - timer >= tickRate)
 
             if (frames > 1) {
-                console.log("Skipped " + (frames - 1) + " frames")
+                console.log("skipped " + (frames - 1) + " frames")
             }
 
-            const delta = getDelta()
+            // const delta = getDelta()
 
-            events.afterUpdate(delta)
-            events.afterFrame(delta, true)
+            /*console.log(
+                "real using delta " +
+                    getDelta().toFixed(4) +
+                    " time " +
+                    performance.now().toFixed(4),
+            )
+            */
+
+            events.afterFrame(getDelta(), true)
         } else {
+            // console.log("skipping frame")
             events.afterFrame(getDelta(), false)
         }
 
         function getDelta() {
-            return Math.min((performance.now() - lastTime) / tickRate, 1.0)
+            let delta = (performance.now() - timer) / tickRate
+
+            if (delta > 1) {
+                delta = 1
+            }
+
+            return delta
         }
     })
+
+    /*
+        Graphics |     |     |     |     |     |     |     |     |     |     |     |     |
+        Physics  |       |       |       |       |       |       |       |       |       |
+                 1       2       3       4       5       6       7       8       9       0
+
+
+        Graphics |       |       |       |       |       |       |       |       |       |
+        Physics  |     |     |     |     |     |     |     |     |     |     |     |     |
+                 1     2     3     4     5     6     7     8     9     0     1     2     3
+    */
 }

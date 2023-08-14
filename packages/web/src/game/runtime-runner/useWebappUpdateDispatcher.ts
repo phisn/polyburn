@@ -10,12 +10,11 @@ import { useGameStore } from "../store/GameStore"
 
 export function useWebappUpdateDispatcher(store: EntityStore<WebappComponents>) {
     const entities = useMemo(() => store.newSet("interpolation", "rigidBody"), [store])
-
     const listeners = useGameStore(store => store.graphicListeners)
 
-    function updateInterpolation(time: number) {
+    function updateInterpolation() {
         for (const entity of entities) {
-            updateInterpolatedEntity(entity, time)
+            updateInterpolatedEntity(entity)
         }
     }
 

@@ -35,6 +35,14 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
 
         // console.log(`rocket position { x: ${props.entity.components.interpolation.position.y}, y: ${props.entity.components.interpolation.position.y} }`)
 
+        /*console.log(
+            "updating x=" +
+                props.entity.components.interpolation.position.x +
+                " at " +
+                performance.now(),
+        )
+        */
+
         const positionAnchored = changeAnchor(
             props.entity.components.interpolation.position,
             props.entity.components.interpolation.rotation,

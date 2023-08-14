@@ -27,7 +27,7 @@ function Game(props: { world: WorldModel }) {
     return (
         <ProvideGameStore systemContext={context}>
             <div
-                className="h-full select-none"
+                className="pointer-events-none h-full select-none"
                 style={{
                     msTouchAction: "manipulation",
                     touchAction: "none",
@@ -41,6 +41,7 @@ function Game(props: { world: WorldModel }) {
                 }}
             >
                 <Canvas
+                    className="pointer-events-none"
                     style={{
                         msTouchAction: "manipulation",
                         background: "#000000",

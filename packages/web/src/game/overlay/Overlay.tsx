@@ -5,10 +5,8 @@ import { ZoomInSvg } from "../../common/components/inline-svg/ZoomIn"
 import { ZoomOutSvg } from "../../common/components/inline-svg/ZoomOut"
 import { useGameStore } from "../store/GameStore"
 import { canZoomIn, canZoomOut } from "../store/ZoomSteps"
-import Map from "./Map"
 import Replay from "./Replay"
 import { Starting } from "./Starting"
-import { Timer } from "./Timer"
 
 export default function Overlay(props: { camera: OrthographicCamera }) {
     const [zoomIndex, zoomIn, zoomOut] = useGameStore(
@@ -33,7 +31,9 @@ export default function Overlay(props: { camera: OrthographicCamera }) {
                         <ZoomInSvg className="h-6 w-6" />
                     </button>
 
+                    {/*
                     <Map camera={props.camera} />
+                    */}
 
                     <button
                         className={`btn btn-square btn-ghost select-none ${
@@ -46,11 +46,13 @@ export default function Overlay(props: { camera: OrthographicCamera }) {
                 </div>
             </div>
 
+            {/*
             <div className="absolute right-0 top-0 p-4">
                 <div className="flex select-none items-center">
                     <Timer />
                 </div>
             </div>
+                    */}
         </>
     )
 }

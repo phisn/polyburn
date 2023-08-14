@@ -1,10 +1,11 @@
 import { useState } from "react"
 import { LevelState } from "./LevelState"
 import { LevelInMoving, LevelModeMoving } from "./modes/LevelInMoving"
+import { LevelInMovingCamera, LevelModeMovingCamera } from "./modes/LevelInMovingCamera"
 import { LevelInNone, LevelModeNone } from "./modes/LevelInNone"
 import { LevelInSelected, LevelModeSelected } from "./modes/LevelInSelected"
 
-export type LevelMode = LevelModeNone | LevelModeMoving | LevelModeSelected
+export type LevelMode = LevelModeNone | LevelModeMoving | LevelModeSelected | LevelModeMovingCamera
 
 export function Level(props: { state: LevelState }) {
     const [mode, setMode] = useState<LevelMode>({ type: "none" })
@@ -19,6 +20,9 @@ export function Level(props: { state: LevelState }) {
             )}
             {mode.type === "selected" && (
                 <LevelInSelected state={props.state} mode={mode} setMode={setMode} />
+            )}
+            {mode.type === "movingCamera" && (
+                <LevelInMovingCamera state={props.state} mode={mode} setMode={setMode} />
             )}
         </>
     )

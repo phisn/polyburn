@@ -1,5 +1,6 @@
 import { EntityType } from "runtime/src/core/common/EntityType"
 import { Point } from "runtime/src/model/world/Point"
+import { snapDistance } from "../../../../common/Values"
 import { BaseEntityState } from "../../store/BaseEntityState"
 import { CameraSide } from "./CameraSide"
 
@@ -22,22 +23,55 @@ export function findCameraLineCloseTo(state: LevelState, point: Point) {
     let closestLine: CameraSide | undefined
     let closestDistance = Number.MAX_SAFE_INTEGER
 
-    for (const [key, line] of Object.entries(lines)) {
-        const distance = distanceFromPointToLine(point, line)
+    for (const [key, [p1, p2]] of Object.entries(lines)) {
+        const distance = distanceToLine(point, [p1, p2])
+
         if (distance < closestDistance) {
             closestLine = key as CameraSide
             closestDistance = distance
         }
     }
 
+    if (closestDistance > snapDistance) {
+        return undefined
+    }
+
     return closestLine
 }
 
-export function distanceFromPointToLine(point: { x: number; y: number }, line: [number, number][]) {
-    return 0
+export function distanceToLine(point: { x: number; y: number }, [p1, p2]: [number, number][]) {
+    const [x1, y1] = p1
+    const [x2, y2] = p2
+
+    const A = point.x - x1
+    const B = point.y - y1
+    const C = x2 - x1
+    const D = y2 - y1
+
+    const dot = A * C + B * D
+    const len_sq = C * C + D * D
+    const param = dot / len_sq
+
+    let xx, yy
+
+    if (param < 0 || (x1 === x2 && y1 === y2)) {
+        xx = x1
+        yy = y1
+    } else if (param > 1) {
+        xx = x2
+        yy = y2
+    } else {
+        xx = x1 + param * C
+        yy = y1 + param * D
+    }
+
+    const dx = point.x - xx
+    const dy = point.y - yy
+
+    return Math.sqrt(dx * dx + dy * dy)
 }
 
-export function cameraLinesFromLevel(state: LevelState) {
+export function cameraLinesFromLevel(state: { cameraTopLeft: Point; cameraBottomRight: Point }) {
     const corners: { [key: string]: [number, number] } = {
         topLeft: [state.cameraTopLeft.x, state.cameraTopLeft.y],
         topRight: [state.cameraBottomRight.x, state.cameraTopLeft.y],

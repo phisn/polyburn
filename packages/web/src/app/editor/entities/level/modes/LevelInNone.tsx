@@ -72,10 +72,6 @@ export function LevelInNone(props: {
 
                         props.setMode({
                             type: "moving",
-                            offsetPosition: {
-                                x: props.state.position.x - event.positionInGrid.x,
-                                y: props.state.position.y - event.positionInGrid.y,
-                            },
                             previousMode: { type: "none" },
                         })
                     } else {

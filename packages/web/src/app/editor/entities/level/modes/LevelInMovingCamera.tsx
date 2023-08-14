@@ -1,21 +1,18 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useRef } from "react"
-import { EntityType } from "runtime/src/core/common/EntityType"
-import { Euler, Object3D } from "three"
+import { Euler } from "three"
 import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
-import { findLocationForEntity } from "../../../models/EntityWithLocation"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { CameraSide } from "../CameraSide"
 import { LevelMode } from "../Level"
-import { LevelCameraLines } from "../LevelCameraLines"
+import { LevelCameraLines, LevelCameraLinesRef } from "../LevelCameraLines"
 import { LevelState } from "../LevelState"
-import { levelMove } from "../mutations/levelMove"
 
 export interface LevelModeMovingCamera {
-    type: "moving"
-    offsetPosition: { x: number; y: number }
-    previousMode: LevelMode
+    type: "movingCamera"
+    side: CameraSide
 }
 
 export function LevelInMovingCamera(props: {
@@ -25,7 +22,7 @@ export function LevelInMovingCamera(props: {
 }) {
     const graphicEntry = entityGraphicRegistry[EntityGraphicType.GreenFlag]
 
-    const svgRef = useRef<Object3D>()
+    const cameraLinesRef = useRef<LevelCameraLinesRef>(null)
 
     const positionRef = useRef({
         position: { ...props.state.position },
@@ -46,34 +43,11 @@ export function LevelInMovingCamera(props: {
             }
 
             if (event.leftButtonDown) {
-                updateLocation(...findLocationForEntity(world, event, EntityType.Level))
                 window.document.body.style.cursor = "grabbing"
+                cameraLinesRef.current?.setLineTo(props.mode.side, event.positionInGrid)
             } else {
                 window.document.body.style.cursor = "grab"
-
-                dispatchMutation(
-                    levelMove(
-                        props.state,
-                        positionRef.current.position,
-                        positionRef.current.rotation,
-                    ),
-                )
-
-                props.setMode(props.mode.previousMode)
-            }
-
-            function updateLocation(x: number, y: number, rotation: number) {
-                positionRef.current.position.x = x
-                positionRef.current.position.y = y
-                positionRef.current.rotation = rotation
-
-                svgRef.current?.position.set(
-                    positionRef.current.position.x,
-                    positionRef.current.position.y,
-                    Priority.Action,
-                )
-
-                svgRef.current?.rotation.set(0, 0, positionRef.current.rotation)
+                props.setMode({ type: "selected" })
             }
 
             return ConsumeEvent
@@ -86,7 +60,6 @@ export function LevelInMovingCamera(props: {
         <>
             <Suspense>
                 <Svg
-                    ref={svgRef as any}
                     position={[positionRef.current.position.x, positionRef.current.position.y, 0]}
                     rotation={new Euler(0, 0, positionRef.current.rotation)}
                     src={graphicEntry.src}
@@ -95,9 +68,11 @@ export function LevelInMovingCamera(props: {
             </Suspense>
 
             <LevelCameraLines
-                color={props.mode.previousMode.type === "none" ? "purple" : "green"}
+                ref={cameraLinesRef}
+                color={"purple"}
                 state={props.state}
                 priority={Priority.Action}
+                colorCustom={{ [props.mode.side]: "orange" }}
             />
         </>
     )

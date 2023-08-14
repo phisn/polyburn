@@ -13,7 +13,7 @@ import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventSt
 import { CameraSide } from "../CameraSide"
 import { LevelMode } from "../Level"
 import { LevelCameraLines } from "../LevelCameraLines"
-import { LevelState } from "../LevelState"
+import { LevelState, findCameraLineCloseTo } from "../LevelState"
 
 export interface LevelModeSelected {
     type: "selected"
@@ -35,64 +35,83 @@ export function LevelInSelected(props: {
 
     const [cameraHovered, setCameraHovered] = useState<CameraHovered | undefined>()
 
-    useEventListener(event => {
-        if (showLevelDialog && (event.leftButtonClicked || event.rightButtonClicked)) {
-            setShowLevelDialog(undefined)
-        }
-
-        if (event.consumed) {
-            if (event.leftButtonClicked || event.rightButtonClicked) {
-                props.setMode({ type: "none" })
+    useEventListener(
+        event => {
+            if (showLevelDialog && (event.leftButtonClicked || event.rightButtonClicked)) {
+                setShowLevelDialog(undefined)
             }
 
-            return
-        }
+            if (event.consumed) {
+                if (event.leftButtonClicked || event.rightButtonClicked) {
+                    props.setMode({ type: "none" })
+                }
 
-        const flag: FlagEntityModel = {
-            type: EntityType.Level,
+                return
+            }
 
-            position: props.state.position,
-            rotation: props.state.rotation,
+            const line = findCameraLineCloseTo(props.state, event.positionInGrid)
 
-            cameraTopLeft: { x: 0, y: 0 },
-            cameraBottomRight: { x: 0, y: 0 },
-
-            captureLeft: 0,
-            captureRight: 0,
-        }
-
-        const isInside = isPointInsideEntity(event.position, flag)
-
-        if (isInside) {
-            if (event.rightButtonClicked) {
-                setShowLevelDialog({
-                    x: event.position.x + 0.1,
-                    y: event.position.y - 0.1,
-                })
-            } else if (event.shiftKey) {
+            if (line) {
                 if (event.leftButtonClicked) {
                     document.body.style.cursor = "grabbing"
-
                     props.setMode({
-                        type: "moving",
-                        offsetPosition: {
-                            x: props.state.position.x - event.positionInGrid.x,
-                            y: props.state.position.y - event.positionInGrid.y,
-                        },
-                        previousMode: { type: "selected" },
+                        type: "movingCamera",
+                        side: line,
                     })
                 } else {
                     document.body.style.cursor = "grab"
+                    setCameraHovered({ side: line })
                 }
+
+                return ConsumeEvent
+            } else {
+                setCameraHovered(undefined)
             }
 
-            return ConsumeEvent
-        } else {
-            if (event.leftButtonClicked || event.rightButtonClicked) {
-                props.setMode({ type: "none" })
+            const flag: FlagEntityModel = {
+                type: EntityType.Level,
+
+                position: props.state.position,
+                rotation: props.state.rotation,
+
+                cameraTopLeft: { x: 0, y: 0 },
+                cameraBottomRight: { x: 0, y: 0 },
+
+                captureLeft: 0,
+                captureRight: 0,
             }
-        }
-    }, Priority.Selected)
+
+            const isInside = isPointInsideEntity(event.position, flag)
+
+            if (isInside) {
+                if (event.rightButtonClicked) {
+                    setShowLevelDialog({
+                        x: event.position.x + 0.1,
+                        y: event.position.y - 0.1,
+                    })
+                } else if (event.shiftKey) {
+                    if (event.leftButtonClicked) {
+                        document.body.style.cursor = "grabbing"
+
+                        props.setMode({
+                            type: "moving",
+                            previousMode: { type: "selected" },
+                        })
+                    } else {
+                        document.body.style.cursor = "grab"
+                    }
+                }
+
+                return ConsumeEvent
+            } else {
+                if (event.leftButtonClicked || event.rightButtonClicked) {
+                    props.setMode({ type: "none" })
+                }
+            }
+        },
+        Priority.Selected,
+        true,
+    )
 
     return (
         <>
@@ -112,9 +131,9 @@ export function LevelInSelected(props: {
 
             <LevelCameraLines
                 state={props.state}
-                color={"green"}
+                color={"purple"}
                 priority={Priority.Selected}
-                colorCustom={cameraHovered?.side && { [cameraHovered.side]: "red" }}
+                colorCustom={cameraHovered?.side && { [cameraHovered.side]: "orange" }}
             />
         </>
     )

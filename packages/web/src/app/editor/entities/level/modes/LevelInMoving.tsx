@@ -13,7 +13,6 @@ import { levelMove } from "../mutations/levelMove"
 
 export interface LevelModeMoving {
     type: "moving"
-    offsetPosition: { x: number; y: number }
     previousMode: LevelMode
 }
 

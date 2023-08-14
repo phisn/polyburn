@@ -46,7 +46,7 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
                         ty1 = position.y
                         ty2 = position.y
 
-                        ly1 = position.y
+                        ly2 = position.y
                         ry1 = position.y
 
                         break
@@ -55,14 +55,14 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
                         rx2 = position.x
 
                         tx2 = position.x
-                        bx2 = position.x
+                        bx1 = position.x
 
                         break
                     case "bottom":
                         by1 = position.y
                         by2 = position.y
 
-                        ly2 = position.y
+                        ly1 = position.y
                         ry2 = position.y
 
                         break
@@ -71,7 +71,7 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
                         lx2 = position.x
 
                         tx1 = position.x
-                        bx1 = position.x
+                        bx2 = position.x
 
                         break
                 }

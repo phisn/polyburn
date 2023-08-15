@@ -9,6 +9,7 @@ import { CameraSide } from "../CameraSide"
 import { LevelMode } from "../Level"
 import { LevelCameraLines, LevelCameraLinesRef } from "../LevelCameraLines"
 import { LevelState } from "../LevelState"
+import { levelChangeCameraBoundsByMouse } from "../mutations/levelChangeCameraBounds"
 
 export interface LevelModeMovingCamera {
     type: "movingCamera"
@@ -30,7 +31,6 @@ export function LevelInMovingCamera(props: {
     })
 
     const dispatchMutation = useEditorStore(store => store.mutation)
-    const world = useEditorStore(store => store.state.world)
 
     useEventListener(
         event => {
@@ -45,8 +45,18 @@ export function LevelInMovingCamera(props: {
             if (event.leftButtonDown) {
                 window.document.body.style.cursor = "grabbing"
                 cameraLinesRef.current?.setLineTo(props.mode.side, event.positionInGrid)
+                positionRef.current.position = event.positionInGrid
             } else {
                 window.document.body.style.cursor = "grab"
+
+                dispatchMutation(
+                    levelChangeCameraBoundsByMouse(
+                        props.state,
+                        props.mode.side,
+                        positionRef.current.position,
+                    ),
+                )
+
                 props.setMode({ type: "selected" })
             }
 

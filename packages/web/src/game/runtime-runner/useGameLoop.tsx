@@ -24,12 +24,8 @@ export const useGameLoop = (
     useFrame(() => {
         let now = performance.now()
 
-        let delta = 0
-
         if (now - timer >= tickRate) {
             let frames = 0
-
-            // console.log("remaining " + (now - timer - tickRate))
 
             do {
                 timer += tickRate
@@ -45,19 +41,8 @@ export const useGameLoop = (
                 console.log("skipped " + (frames - 1) + " frames")
             }
 
-            // const delta = getDelta()
-
-            /*console.log(
-                "real using delta " +
-                    getDelta().toFixed(4) +
-                    " time " +
-                    performance.now().toFixed(4),
-            )
-            */
-
             events.afterFrame(getDelta(), true)
         } else {
-            // console.log("skipping frame")
             events.afterFrame(getDelta(), false)
         }
 
@@ -73,13 +58,13 @@ export const useGameLoop = (
     })
 
     /*
-        Graphics |     |     |     |     |     |     |     |     |     |     |     |     |
+        Graphics |   |   |   |   |   |   |     |     |     |     |     |     |
         Physics  |       |       |       |       |       |       |       |       |       |
                  1       2       3       4       5       6       7       8       9       0
 
 
-        Graphics |       |       |       |       |       |       |       |       |       |
-        Physics  |     |     |     |     |     |     |     |     |     |     |     |     |
+        Graphics  |       |       |       |       |       |       |       |       |       |
+        Physics  |   |   |   |   |   |   |     |     |     |     |     |     |
                  1     2     3     4     5     6     7     8     9     0     1     2     3
     */
 }

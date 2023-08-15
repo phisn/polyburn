@@ -47,12 +47,17 @@ export function Background() {
 
     if (mode.type === "contextMenu") {
         return (
-            <Html as="div" position={[mode.position.x, mode.position.y, priority]}>
-                <CreateEntityMenu
-                    position={mode.position}
-                    dispatchMutation={dispatchMutation}
-                    onCancel={() => setMode({ type: "none" })}
-                />
+            <Html
+                wrapperClass="pointer-events-none"
+                position={[mode.position.x, mode.position.y, priority + 0.01]}
+            >
+                <div className="pointer-events-auto" onContextMenu={e => e.preventDefault()}>
+                    <CreateEntityMenu
+                        position={mode.position}
+                        dispatchMutation={dispatchMutation}
+                        onCancel={() => setMode({ type: "none" })}
+                    />
+                </div>
             </Html>
         )
     }

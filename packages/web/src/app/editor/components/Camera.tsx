@@ -108,7 +108,7 @@ export function Camera() {
         return () => {
             canvas.removeEventListener("wheel", onScroll)
         }
-    }, [])
+    }, [canvas, canvasSize])
 
     return (
         <OrthographicCamera ref={cameraRef} position={[0, 0, 100]} makeDefault manual zoom={50} />

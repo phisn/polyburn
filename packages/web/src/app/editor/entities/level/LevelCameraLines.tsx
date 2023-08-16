@@ -1,13 +1,14 @@
 import { Line } from "@react-three/drei"
-import { forwardRef, useImperativeHandle, useRef } from "react"
+import { forwardRef, Fragment, useImperativeHandle, useRef } from "react"
 import { Point } from "runtime/src/model/world/Point"
 import { Line2 } from "three-stdlib"
 import { Priority } from "../../store/EventStore"
 import { CameraSide, cameraSides } from "./CameraSide"
-import { LevelState, cameraLinesFromLevel } from "./LevelState"
+import { cameraLinesFromLevel, LevelState } from "./LevelState"
 
 export interface LevelCameraLinesRef {
     setLineTo: (side: CameraSide, position: Point) => void
+    setCorners(topLeft: Point, bottomRight: Point): void
 }
 
 export const LevelCameraLines = forwardRef(function LevelCameraLines(
@@ -17,13 +18,20 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
         colorCustom?: { [key in string]: string }
         priority: Priority
         dashed?: boolean
-        dashedCustom?: { [key in CameraSide]: boolean }
+        alwaysShowDashed?: CameraSide
     },
     ref: React.Ref<LevelCameraLinesRef>,
 ) {
     const lines = cameraLinesFromLevel(props.state)
 
     const linesRef = {
+        top: useRef<Line2>(null!),
+        right: useRef<Line2>(null!),
+        bottom: useRef<Line2>(null!),
+        left: useRef<Line2>(null!),
+    }
+
+    const linesDashedRef = {
         top: useRef<Line2>(null!),
         right: useRef<Line2>(null!),
         bottom: useRef<Line2>(null!),
@@ -114,6 +122,27 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
 
                 linesRef[side].current.geometry.attributes.position.needsUpdate = true
             },
+            setCorners(topLeft, bottomRight) {
+                const lines = cameraLinesFromLevel({
+                    cameraTopLeft: topLeft,
+                    cameraBottomRight: bottomRight,
+                })
+
+                cameraSides.forEach(side => {
+                    const [[p1x, p1y], [p2x, p2y]] = lines[side]
+                    const lineRef = linesRef[side].current
+
+                    lineRef.geometry.setPositions([
+                        p1x,
+                        p1y,
+                        props.priority,
+                        p2x,
+                        p2y,
+                        props.priority,
+                    ])
+                    lineRef.geometry.attributes.position.needsUpdate = true
+                })
+            },
         }),
         [],
     )
@@ -121,15 +150,29 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
     return (
         <>
             {cameraSides.map(side => (
+                <Fragment key={side}>
+                    <Line
+                        ref={linesRef[side]}
+                        points={lines[side].map(([p1, p2]) => [p1, p2, props.priority as number])}
+                        color={props.colorCustom?.[side] || props.color}
+                        dashed={props.dashed}
+                        lineWidth={3}
+                    />
+                </Fragment>
+            ))}
+
+            {props.alwaysShowDashed && (
                 <Line
-                    key={side}
-                    ref={linesRef[side]}
-                    points={lines[side].map(([p1, p2]) => [p1, p2, props.priority as number])}
-                    color={props.colorCustom?.[side] || props.color}
-                    dashed={props.dashed || props.dashedCustom?.[side]}
+                    points={lines[props.alwaysShowDashed].map(([p1, p2]) => [
+                        p1,
+                        p2,
+                        (props.priority as number) - 0.001,
+                    ])}
+                    color={props.color}
+                    dashed
                     lineWidth={3}
                 />
-            ))}
+            )}
         </>
     )
 })

@@ -5,28 +5,28 @@ import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics
 import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { CameraSide } from "../CameraSide"
 import { LevelMode } from "../Level"
 import { LevelCameraLines, LevelCameraLinesRef } from "../LevelCameraLines"
 import { LevelState } from "../LevelState"
-import { levelChangeCameraBounds } from "../mutations/levelChangeCameraBounds"
+import { levelChangeCameraBoundsByMouse } from "../mutations/levelChangeCameraBounds"
 
-export interface LevelModeMovingCamera {
-    type: "movingCamera"
-    offset: { x: number; y: number }
+export interface LevelModeMovingCameraLine {
+    type: "movingCameraLine"
+    side: CameraSide
 }
 
-export function LevelInMovingCamera(props: {
+export function LevelInMovingCameraLine(props: {
     state: LevelState
-    mode: LevelModeMovingCamera
+    mode: LevelModeMovingCameraLine
     setMode: (mode: LevelMode) => void
 }) {
     const graphicEntry = entityGraphicRegistry[EntityGraphicType.GreenFlag]
 
     const cameraLinesRef = useRef<LevelCameraLinesRef>(null)
 
-    const boundsRef = useRef({
-        topLeft: { ...props.state.cameraTopLeft },
-        bottomRight: { ...props.state.cameraBottomRight },
+    const positionRef = useRef({
+        position: { ...props.state.position },
     })
 
     const dispatchMutation = useEditorStore(store => store.mutation)
@@ -43,28 +43,16 @@ export function LevelInMovingCamera(props: {
 
             if (event.leftButtonDown) {
                 window.document.body.style.cursor = "grabbing"
-
-                const dx = event.positionInGrid.x - props.mode.offset.x
-                const dy = event.positionInGrid.y - props.mode.offset.y
-
-                boundsRef.current.topLeft.x = props.state.cameraTopLeft.x + dx
-                boundsRef.current.topLeft.y = props.state.cameraTopLeft.y + dy
-
-                boundsRef.current.bottomRight.x = props.state.cameraBottomRight.x + dx
-                boundsRef.current.bottomRight.y = props.state.cameraBottomRight.y + dy
-
-                cameraLinesRef.current?.setCorners(
-                    boundsRef.current.topLeft,
-                    boundsRef.current.bottomRight,
-                )
+                cameraLinesRef.current?.setLineTo(props.mode.side, event.positionInGrid)
+                positionRef.current.position = event.positionInGrid
             } else {
                 window.document.body.style.cursor = "grab"
 
                 dispatchMutation(
-                    levelChangeCameraBounds(
+                    levelChangeCameraBoundsByMouse(
                         props.state,
-                        boundsRef.current.topLeft,
-                        boundsRef.current.bottomRight,
+                        props.mode.side,
+                        positionRef.current.position,
                     ),
                 )
 
@@ -90,16 +78,11 @@ export function LevelInMovingCamera(props: {
 
             <LevelCameraLines
                 ref={cameraLinesRef}
-                color={"orange"}
+                color={"purple"}
                 state={props.state}
                 priority={Priority.Action}
-            />
-
-            <LevelCameraLines
-                color={"purple"}
-                dashed
-                state={props.state}
-                priority={Priority.Selected}
+                colorCustom={{ [props.mode.side]: "orange" }}
+                alwaysShowDashed={props.mode.side}
             />
         </>
     )

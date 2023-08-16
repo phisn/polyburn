@@ -19,8 +19,8 @@ export function levelChangeCameraBounds(level: LevelState, topLeft: Point, botto
 }
 
 export function levelChangeCameraBoundsByMouse(level: LevelState, side: CameraSide, point: Point) {
-    const topLeft = level.cameraTopLeft
-    const bottomRight = level.cameraBottomRight
+    const topLeft = { ...level.cameraTopLeft }
+    const bottomRight = { ...level.cameraBottomRight }
 
     switch (side) {
         case "top":

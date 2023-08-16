@@ -30,7 +30,7 @@ export function LevelInSelected(props: {
     const [showLevelDialog, setShowLevelDialog] = useState<{ x: number; y: number } | undefined>()
 
     interface CameraHovered {
-        side: CameraSide
+        side: CameraSide | "all"
     }
 
     const [cameraHovered, setCameraHovered] = useState<CameraHovered | undefined>()
@@ -54,10 +54,24 @@ export function LevelInSelected(props: {
             if (line) {
                 if (event.leftButtonClicked) {
                     document.body.style.cursor = "grabbing"
-                    props.setMode({
-                        type: "movingCamera",
-                        side: line,
-                    })
+
+                    if (event.shiftKey) {
+                        props.setMode({
+                            type: "movingCamera",
+                            offset: {
+                                x: event.positionInGrid.x,
+                                y: event.positionInGrid.y,
+                            },
+                        })
+                    } else {
+                        props.setMode({
+                            type: "movingCameraLine",
+                            side: line,
+                        })
+                    }
+                } else if (event.shiftKey) {
+                    document.body.style.cursor = "grab"
+                    setCameraHovered({ side: "all" })
                 } else {
                     document.body.style.cursor = "grab"
                     setCameraHovered({ side: line })
@@ -129,12 +143,21 @@ export function LevelInSelected(props: {
                 <EntityContextMenu state={props.state} position={showLevelDialog} />
             )}
 
-            <LevelCameraLines
-                state={props.state}
-                color={"purple"}
-                priority={Priority.Selected}
-                colorCustom={cameraHovered?.side && { [cameraHovered.side]: "orange" }}
-            />
+            {cameraHovered?.side === "all" && (
+                <LevelCameraLines
+                    state={props.state}
+                    color={"orange"}
+                    priority={Priority.Selected}
+                />
+            )}
+            {cameraHovered?.side !== "all" && (
+                <LevelCameraLines
+                    state={props.state}
+                    color={"purple"}
+                    priority={Priority.Selected}
+                    colorCustom={cameraHovered?.side && { [cameraHovered.side]: "orange" }}
+                />
+            )}
         </>
     )
 }

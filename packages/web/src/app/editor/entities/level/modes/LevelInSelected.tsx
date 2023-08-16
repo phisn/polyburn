@@ -153,7 +153,7 @@ export function LevelInSelected(props: {
             {cameraHovered?.side !== "all" && (
                 <LevelCameraLines
                     state={props.state}
-                    color={"blue"}
+                    color={"pruple"}
                     priority={Priority.Selected}
                     colorCustom={cameraHovered?.side && { [cameraHovered.side]: "orange" }}
                 />

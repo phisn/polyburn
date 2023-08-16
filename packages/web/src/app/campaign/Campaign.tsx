@@ -1,5 +1,3 @@
-"use client"
-
 import { Transition } from "@headlessui/react"
 import { Fragment, useState, useTransition } from "react"
 import { importWorld } from "runtime/src/model/world/WorldModel"

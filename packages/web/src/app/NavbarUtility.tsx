@@ -1,5 +1,3 @@
-"use client"
-
 import { BrowserView } from "react-device-detect"
 import { Link } from "react-router-dom"
 import { PencilSquare } from "../common/components/inline-svg/PencilSquare"

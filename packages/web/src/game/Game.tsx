@@ -1,5 +1,3 @@
-"use client"
-
 import RAPIER from "@dimforge/rapier2d-compat"
 import { PerformanceMonitor } from "@react-three/drei"
 import { Canvas, useThree } from "@react-three/fiber"

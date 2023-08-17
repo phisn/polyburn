@@ -1,18 +1,18 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { ShapeModel } from "../../model/world/ShapeModel"
-import { EntityType } from "../common/EntityType"
+import { ShapeModel } from "../../../proto/world"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
+import { EntityType } from "../common/EntityType"
 
 export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shape: ShapeModel) => {
-    const [vertices, top, left] = verticesForShape(shape)
+    const [verticesRaw, top, left] = verticesForShape(shape)
 
     const body = context.physics.createRigidBody(
         RAPIER.RigidBodyDesc.fixed().setTranslation(left, top),
     )
 
-    const collider = RAPIER.ColliderDesc.polyline(vertices).setCollisionGroups(0x0002_0005)
+    const collider = RAPIER.ColliderDesc.polyline(verticesRaw).setCollisionGroups(0x0002_0005)
 
     if (collider === null) {
         throw new Error("Failed to create collider")
@@ -20,10 +20,15 @@ export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shap
 
     context.physics.createCollider(collider, body)
 
+    const vertices = shape.vertices.map(v => ({
+        point: { x: v.x, y: v.y },
+        color: v.color,
+    }))
+
     return context.store.create({
         entityType: EntityType.Shape,
         rigidBody: body,
-        shape: { vertices: shape.vertices },
+        shape: { vertices },
     })
 }
 

@@ -1,5 +1,4 @@
-import LZString from "lz-string"
-
+/*
 import { EntityType } from "../../core/common/EntityType"
 import { EntityModel } from "./EntityModel"
 import { ShapeModel } from "./ShapeModel"
@@ -52,3 +51,4 @@ export function validate(world: WorldModel): ValidationError | null {
 
     return null
 }
+*/

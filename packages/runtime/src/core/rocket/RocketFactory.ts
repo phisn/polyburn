@@ -1,22 +1,27 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
+import { RocketModel } from "../../../proto/world"
+import { Point } from "../../model/Point"
 import { changeAnchor } from "../../model/changeAnchor"
-import { RocketEntityModel } from "../../model/world/EntityModel"
-import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
-import { Point } from "../../model/world/Point"
-import { EntityType } from "../common/EntityType"
+import { entityRegistry } from "../../model/entityRegistry"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
+import { EntityType } from "../common/EntityType"
 import { RocketEntity } from "./RocketEntity"
 
 export const newRocket = (
     context: RuntimeFactoryContext<RuntimeComponents>,
-    rocket: RocketEntityModel,
+    rocket: RocketModel,
 ): RocketEntity => {
-    const entry = entityModelRegistry[EntityType.Rocket]
+    const entry = entityRegistry[EntityType.Rocket]
+
+    const rocketPosition = {
+        x: rocket.positionX,
+        y: rocket.positionY,
+    }
 
     const positionAtCenter = changeAnchor(
-        rocket.position,
+        rocketPosition,
         rocket.rotation,
         entry,
         { x: 0, y: 1 },
@@ -50,8 +55,8 @@ export const newRocket = (
         Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y))
 
     const firstLevel = context.store.find("level").reduce((previous, current) => {
-        return distance(previous.components.level.flag, rocket.position) <
-            distance(current.components.level.flag, rocket.position)
+        return distance(previous.components.level.flag, rocketPosition) <
+            distance(current.components.level.flag, rocketPosition)
             ? previous
             : current
     })

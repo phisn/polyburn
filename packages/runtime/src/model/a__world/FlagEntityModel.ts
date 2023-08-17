@@ -1,7 +1,5 @@
 import { EntityType } from "../../core/common/EntityType"
-import { changeAnchor } from "../changeAnchor"
-import { entityModelRegistry } from "./EntityModelRegistry"
-import { Point } from "./Point"
+import { Point } from "../Point"
 
 export interface FlagEntityModel {
     type: EntityType.Level
@@ -14,27 +12,6 @@ export interface FlagEntityModel {
 
     captureLeft: number
     captureRight: number
-}
-
-export const flagCaptureHeight = 0.5
-
-export function captureBox(entity: FlagEntityModel) {
-    const entry = entityModelRegistry[EntityType.Level]
-
-    const transformed = changeAnchor(
-        entity.position,
-        entity.rotation,
-        entry,
-        { x: 0.5, y: 1 },
-        { x: 0.2, y: 0 },
-    )
-
-    const size = {
-        width: entity.captureLeft + entity.captureRight,
-        height: flagCaptureHeight,
-    }
-
-    return { size, transformed }
 }
 
 export function moveCameraSideTo(

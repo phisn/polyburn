@@ -1,4 +1,4 @@
-import { getClosestPointOnLine, getDistance, Point } from "./Point"
+import { getClosestPointOnLine, getDistance, Point } from "../Point"
 
 export interface ShapeModel {
     vertices: Point[]

@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+enum EntityType {
+    ROCKET = 0;
+    LEVEL = 1;
+    SHAPE = 2;
+}
+
+message RocketConfig {
+    float thrust_distance = 1;
+    float thrust_value = 2;
+    float thrust_ground_multiplier = 3;
+    float explosion_angle = 4;
+}
+
+message RocketModel {
+    float position_x = 2;
+    float position_y = 3;
+    float rotation = 4;
+
+    RocketConfig default_config = 5;
+}
+
+message LevelModel {
+    float position_x = 2;
+    float position_y = 3;
+    float rotation = 4;
+
+    float camera_top_left_x = 5;
+    float camera_top_left_y = 6;
+    float camera_bottom_right_x = 7;
+    float camera_bottom_right_y = 8;
+
+    float capture_area_left = 9;
+    float capture_area_right = 10;
+
+    optional RocketConfig rocket_config = 11;
+}
+
+message ShapeVertex {
+    float x = 1;
+    float y = 2;
+    int32 color = 3;
+}
+
+message ShapeModel {
+    repeated ShapeVertex vertices = 2;
+}
+
+message EntityModel {
+    oneof entity {
+        RocketModel rocket = 1;
+        LevelModel level = 2;
+        ShapeModel shape = 3;
+    }
+}
+
+message GamemodeModel {
+    string name = 1;
+    repeated string groups = 2;
+}
+
+message WorldModel {
+    repeated GamemodeModel gamemodes = 1;
+    map<string, EntityModel> groups = 2;
+}

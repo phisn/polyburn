@@ -11,6 +11,7 @@ import { GamemodeSelect } from "./components/gamemode/GamemodeSelect"
 import { Level } from "./entities/level/Level"
 import { Rocket } from "./entities/rocket/Rocket"
 import { Shape } from "./entities/shape/Shape"
+import { EntityState } from "./models/EntityState"
 import { ProvideWorldStore, useEditorStore } from "./store/EditorStore"
 import { ProvideEventStore } from "./store/EventStore"
 
@@ -123,12 +124,11 @@ export function Editor() {
 
 function Entities() {
     const entities = useEditorStore(store => store.state).world.entities
-
-    console.log("render entities")
+    const gamemode = useEditorStore(store => store.gamemode)?.groups ?? []
 
     return (
         <>
-            {[...entities.entries()].map(([id, entity]) => (
+            {[...entities.entries()].filter(filterEntitiesInGamemode).map(([id, entity]) => (
                 <Fragment key={id}>
                     {entity.type === EntityType.Shape && <Shape state={entity} />}
                     {entity.type === EntityType.Rocket && <Rocket state={entity} />}
@@ -137,4 +137,8 @@ function Entities() {
             ))}
         </>
     )
+
+    function filterEntitiesInGamemode([, entity]: [number, EntityState]) {
+        return entity.group === undefined || gamemode.includes(entity.group)
+    }
 }

@@ -1,14 +1,18 @@
 {
     "name": "runtime",
     "scripts": {
-        "test": "vitest run"
+        "install": "pnpm run proto",
+        "test": "vitest run",
+        "proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=. --ts_proto_opt=unrecognizedEnum=false ./proto/*.proto"
     },
     "dependencies": {
         "@dimforge/rapier2d-compat": "^0.11.2",
         "@stdlib/math": "^0.0.11",
         "lz-string": "^1.5.0",
         "mnemonist": "^0.39.5",
+        "protobufjs": "^7.2.4",
         "runtime-framework": "workspace:*",
+        "ts-proto": "^1.156.6",
         "typescript": "latest"
     },
     "devDependencies": {

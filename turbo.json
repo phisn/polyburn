@@ -2,8 +2,11 @@
     "$schema": "https://turbo.build/schema.json",
     "globalDependencies": ["**/.env.*local"],
     "pipeline": {
+        "proto": {
+            "outputs": [".proto/**"]
+        },
         "build": {
-            "dependsOn": ["^build"],
+            "dependsOn": ["proto", "^build"],
             "outputs": [".dist/**"]
         },
         "test": {
@@ -11,6 +14,7 @@
         },
         "lint": {},
         "dev": {
+            "dependsOn": ["proto"],
             "cache": false,
             "persistent": true
         },

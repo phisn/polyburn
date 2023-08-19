@@ -1,12 +1,10 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useRef, useState } from "react"
 import { Euler, MeshBasicMaterial, Object3D } from "three"
-import {
-    entityGraphicRegistry,
-    isPointInsideEntity,
-} from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
+import { isPointInsideEntity } from "../../../models/isPointInsideEntity"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
 import { RocketMode } from "../Rocket"
 import { RocketState } from "../RocketState"

@@ -1,7 +1,7 @@
 import { Html } from "@react-three/drei"
 import { MeshProps } from "@react-three/fiber"
 import { forwardRef, useEffect, useState } from "react"
-import { RgbColorPicker } from "react-colorful"
+import { HexColorPicker } from "react-colorful"
 import { Mesh, Vector3 } from "three"
 import { baseZoomFactor } from "../../../../common/Values"
 import { MutatableShapeGeometry } from "./MutatableShapeGeometry"
@@ -26,14 +26,14 @@ export function VertexContext(props: {
     state: ShapeState
     vertexIndex: number
 }) {
-    const [color, setColor] = useState(props.state.vertices[props.vertexIndex].color)
+    const [color, setColor] = useState(colorToHex(props.state.vertices[props.vertexIndex].color))
 
     useEffect(() => {
-        setColor(props.state.vertices[props.vertexIndex].color)
+        setColor(colorToHex(props.state.vertices[props.vertexIndex].color))
     }, [props.vertexIndex])
 
     useEffect(() => {
-        props.state.vertices[props.vertexIndex].color = color
+        props.state.vertices[props.vertexIndex].color = hexToColor(color)
         props.geometryRef.current.update(props.state.vertices)
     }, [color])
 
@@ -42,7 +42,7 @@ export function VertexContext(props: {
             if (event.ctrlKey) {
                 switch (event.key) {
                     case "c":
-                        navigator.clipboard.writeText(colorToHex(color))
+                        navigator.clipboard.writeText(color)
 
                         break
 
@@ -51,7 +51,7 @@ export function VertexContext(props: {
                             const trimmed = text.trim()
 
                             if (trimmed.length === 7 && trimmed.startsWith("#")) {
-                                setColor(hexToColor(trimmed))
+                                setColor(trimmed)
                             }
                         })
 
@@ -76,7 +76,7 @@ export function VertexContext(props: {
                     )
                 }
             >
-                <RgbColorPicker
+                <HexColorPicker
                     className="absolute pl-4 pt-4"
                     onContextMenu={e => e.preventDefault()}
                     color={color}

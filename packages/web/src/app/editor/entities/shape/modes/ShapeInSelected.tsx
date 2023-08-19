@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Point } from "runtime/src/model/Point"
-import { Mesh, MeshBasicMaterial } from "three"
+import { Mesh, MeshBasicMaterial, Vector2 } from "three"
 import {
     baseZoomFactor,
     highlightColor,
@@ -56,10 +56,10 @@ export function ShapeInSelected(props: {
             type: "vertex",
             vertexIndex,
             vertex: {
-                position: {
-                    x: position.x - props.state.position.x,
-                    y: position.y - props.state.position.y,
-                },
+                position: new Vector2(
+                    position.x - props.state.position.x,
+                    position.y - props.state.position.y,
+                ),
                 color,
             },
             insert,

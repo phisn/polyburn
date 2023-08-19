@@ -13,8 +13,8 @@ import { newRocket } from "./core/rocket/RocketFactory"
 import { newShape } from "./core/shape/ShapeFactory"
 
 export const newRuntime = <Components extends RuntimeComponents>(
-    gamemodeName: string,
     world: WorldModel,
+    gamemodeName: string,
 ) => {
     const gamemode = world.gamemodes[gamemodeName]
 

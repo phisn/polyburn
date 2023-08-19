@@ -1,7 +1,7 @@
 import { Canvas } from "@react-three/fiber"
 import { Fragment } from "react"
-import { EntityType } from "runtime/src/core/common/EntityType"
-import { Vector2, Vector3 } from "three"
+import { EntityType } from "runtime/proto/world"
+import { Vector2 } from "three"
 import { EventHandler } from "./EventHandler"
 import { editorTunnel } from "./Tunnel"
 import { Camera } from "./components/Camera"
@@ -23,25 +23,25 @@ export function Editor() {
                     [
                         1,
                         {
-                            type: EntityType.Shape,
+                            type: EntityType.SHAPE,
                             id: 1,
-                            position: new Vector3(0, 0),
+                            position: { x: 0, y: 0 },
                             vertices: [
                                 {
                                     position: new Vector2(0, 0),
-                                    color: { r: 255, g: 0, b: 0 },
+                                    color: 0xff0000,
                                 },
                                 {
                                     position: new Vector2(5, 0),
-                                    color: { r: 0, g: 255, b: 0 },
+                                    color: 0x00ff00,
                                 },
                                 {
                                     position: new Vector2(5, 5),
-                                    color: { r: 0, g: 0, b: 255 },
+                                    color: 0x0000ff,
                                 },
                                 {
                                     position: new Vector2(0, 5),
-                                    color: { r: 255, g: 0, b: 0 },
+                                    color: 0xff0000,
                                 },
                             ],
                         },
@@ -49,25 +49,25 @@ export function Editor() {
                     [
                         2,
                         {
-                            type: EntityType.Shape,
+                            type: EntityType.SHAPE,
                             id: 2,
-                            position: new Vector3(0, 0),
+                            position: { x: 0, y: 0 },
                             vertices: [
                                 {
                                     position: new Vector2(5, 5),
-                                    color: { r: 255, g: 0, b: 0 },
+                                    color: 0xff0000,
                                 },
                                 {
                                     position: new Vector2(10, 5),
-                                    color: { r: 0, g: 255, b: 0 },
+                                    color: 0x00ff00,
                                 },
                                 {
                                     position: new Vector2(10, 10),
-                                    color: { r: 0, g: 0, b: 255 },
+                                    color: 0x0000ff,
                                 },
                                 {
                                     position: new Vector2(5, 10),
-                                    color: { r: 255, g: 0, b: 0 },
+                                    color: 0xff0000,
                                 },
                             ],
                         },
@@ -75,11 +75,13 @@ export function Editor() {
                     [
                         3,
                         {
-                            type: EntityType.Rocket,
+                            type: EntityType.ROCKET,
                             id: 3,
 
-                            position: new Vector3(-2, 0),
+                            position: { x: -2, y: 0 },
                             rotation: 0,
+
+                            defaultConfig: undefined,
                         },
                     ],
                 ]),
@@ -130,9 +132,9 @@ function Entities() {
         <>
             {[...entities.entries()].filter(filterEntitiesInGamemode).map(([id, entity]) => (
                 <Fragment key={id}>
-                    {entity.type === EntityType.Shape && <Shape state={entity} />}
-                    {entity.type === EntityType.Rocket && <Rocket state={entity} />}
-                    {entity.type === EntityType.Level && <Level state={entity} />}
+                    {entity.type === EntityType.SHAPE && <Shape state={entity} />}
+                    {entity.type === EntityType.ROCKET && <Rocket state={entity} />}
+                    {entity.type === EntityType.LEVEL && <Level state={entity} />}
                 </Fragment>
             ))}
         </>

@@ -1,5 +1,6 @@
 import { EntityType } from "runtime/proto/world"
 import { Point } from "runtime/src/model/Point"
+import { Vector2 } from "three"
 import { EntityStateBase } from "../../models/EntityStateBase"
 
 export function averageColor(a: number, b: number): number {
@@ -27,7 +28,7 @@ export function hexToColor(hex: string): number {
 }
 
 export interface ShapeVertex {
-    position: Point
+    position: Vector2
     color: number
 }
 

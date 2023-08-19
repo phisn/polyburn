@@ -1,12 +1,10 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useRef, useState } from "react"
 import { Euler, Object3D } from "three"
-
-import {
-    entityGraphicRegistry,
-    isPointInsideEntity,
-} from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
+import { isPointInsideEntity } from "../../../models/isPointInsideEntity"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
 import { CameraSide } from "../CameraSide"
 import { LevelMode } from "../Level"
@@ -22,7 +20,7 @@ export function LevelInSelected(props: {
     mode: LevelModeSelected
     setMode: (mode: LevelMode) => void
 }) {
-    const graphicEntry = entityGraphicRegistry["Green Flag"]
+    const graphicEntry = entityGraphicRegistry[EntityGraphicType.GreenFlag]
     const svgRef = useRef<Object3D>()
 
     const [showLevelDialog, setShowLevelDialog] = useState<{ x: number; y: number } | undefined>()
@@ -80,7 +78,12 @@ export function LevelInSelected(props: {
                 setCameraHovered(undefined)
             }
 
-            const isInside = isPointInsideEntity(event.position, flag)
+            const isInside = isPointInsideEntity(
+                event.position,
+                props.state.position,
+                props.state.rotation,
+                EntityGraphicType.GreenFlag,
+            )
 
             if (isInside) {
                 if (event.rightButtonClicked) {

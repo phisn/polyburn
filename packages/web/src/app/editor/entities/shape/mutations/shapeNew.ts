@@ -1,5 +1,6 @@
 import { EntityType } from "runtime/proto/world"
 import { Point } from "runtime/src/model/Point"
+import { Vector2 } from "three"
 import { WorldState } from "../../../models/WorldState"
 import { ShapeState } from "../ShapeState"
 
@@ -12,15 +13,15 @@ export const shapeNew = (position: Point) => (world: WorldState) => {
         position,
         vertices: [
             {
-                position: { x: 0, y: -2 },
+                position: new Vector2(2, 2),
                 color: 0xff0000,
             },
             {
-                position: { x: -2, y: -2 },
+                position: new Vector2(-2, -2),
                 color: 0xffffff,
             },
             {
-                position: { x: 2, y: -2 },
+                position: new Vector2(2, -2),
                 color: 0xffffff,
             },
         ],

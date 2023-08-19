@@ -59,7 +59,7 @@ export default function Campaign() {
 
         return (
             <div className="absolute bottom-0 left-0 right-0 top-0 ">
-                <Game world={map} />
+                <Game world={map} gamemode="normal" />
 
                 <div
                     className="absolute left-0 top-0 p-4"

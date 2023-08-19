@@ -1,9 +1,7 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { SystemStack } from "runtime-framework"
+import { WorldModel } from "runtime/proto/world"
 import { newRuntime } from "runtime/src/Runtime"
-import { Gamemode } from "runtime/src/gamemode/Gamemode"
-import { WorldModel } from "runtime/src/model/world/WorldModel"
-
 import { RuntimeSystemContext } from "runtime/src/core/RuntimeSystemStack"
 import { defaultConfig } from "../../../../../runtime/src/core/RuntimeConfig"
 import { WebappComponents } from "./WebappComponents"
@@ -15,8 +13,8 @@ import { newThrustParticleSpawnSystem } from "./particle-thrust-source/ThrustPar
 import { newParticleAgeSystem } from "./particle/ParticleAgeSystem"
 import { newParticleStepSystem } from "./particle/ParticleStepSystem"
 
-export const newWebappRuntime = (gamemode: Gamemode, world: WorldModel) => {
-    const { context, stack } = newRuntime<WebappComponents>(gamemode, world)
+export const newWebappRuntime = (world: WorldModel, gamemode: string) => {
+    const { context, stack } = newRuntime<WebappComponents>(world, gamemode)
 
     const particlePhysics = RAPIER.World.restoreSnapshot(context.physics.takeSnapshot())
 

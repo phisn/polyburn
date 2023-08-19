@@ -41,7 +41,7 @@ message LevelModel {
 message ShapeVertex {
     float x = 1;
     float y = 2;
-    int32 color = 3;
+    optional int32 color = 3;
 }
 
 message ShapeModel {

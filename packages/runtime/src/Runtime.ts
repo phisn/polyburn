@@ -35,6 +35,14 @@ export const newRuntime = <Components extends RuntimeComponents>(
 
     context.physics.gravity = new RAPIER.Vector2(0, -20)
 
+    for (const level of groups.flatMap(group => group.levels)) {
+        newLevel(context, level)
+    }
+
+    for (const shape of groups.flatMap(group => group.shapes)) {
+        newShape(context, shape)
+    }
+
     const rocketModel = groups.flatMap(group => group.rockets).at(0)
 
     if (rocketModel === undefined) {
@@ -46,14 +54,6 @@ export const newRuntime = <Components extends RuntimeComponents>(
     rocket.components.rocket.currentLevel.components.level.boundsCollider.setSensor(false)
     rocket.components.rocket.currentLevel.components.level.captured = true
     rocket.components.rocket.currentLevel.components.level.hideFlag = true
-
-    for (const level of groups.flatMap(group => group.levels)) {
-        newLevel(context, level)
-    }
-
-    for (const shape of groups.flatMap(group => group.shapes)) {
-        newShape(context, shape)
-    }
 
     context.store.world.components.world = {
         replay: [],

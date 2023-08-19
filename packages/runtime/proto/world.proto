@@ -14,27 +14,28 @@ message RocketConfig {
 }
 
 message RocketModel {
-    float position_x = 2;
-    float position_y = 3;
-    float rotation = 4;
+    float position_x = 1;
+    float position_y = 2;
+    float rotation = 3;
 
-    RocketConfig default_config = 5;
+    RocketConfig default_config = 4;
 }
 
 message LevelModel {
-    float position_x = 2;
-    float position_y = 3;
-    float rotation = 4;
+    float position_x = 1;
+    float position_y = 2;
+    float rotation = 3;
 
-    float camera_top_left_x = 5;
-    float camera_top_left_y = 6;
-    float camera_bottom_right_x = 7;
-    float camera_bottom_right_y = 8;
+    float camera_top_left_x = 4;
+    float camera_top_left_y = 5;
 
-    float capture_area_left = 9;
-    float capture_area_right = 10;
+    float camera_bottom_right_x = 6;
+    float camera_bottom_right_y = 7;
 
-    optional RocketConfig rocket_config = 11;
+    float capture_area_left = 8;
+    float capture_area_right = 9;
+
+    optional RocketConfig rocket_config = 10;
 }
 
 message ShapeVertex {
@@ -44,23 +45,22 @@ message ShapeVertex {
 }
 
 message ShapeModel {
-    repeated ShapeVertex vertices = 2;
+    float position_x = 1;
+    float position_y = 2;
+    repeated ShapeVertex vertices = 3;
 }
 
-message EntityModel {
-    oneof entity {
-        RocketModel rocket = 1;
-        LevelModel level = 2;
-        ShapeModel shape = 3;
-    }
+message GroupModel {
+    repeated RocketModel rockets = 1;
+    repeated LevelModel levels = 2;
+    repeated ShapeModel shapes = 3;
 }
 
 message GamemodeModel {
-    string name = 1;
-    repeated string groups = 2;
+    repeated string groups = 1;
 }
 
 message WorldModel {
-    repeated GamemodeModel gamemodes = 1;
-    map<string, EntityModel> groups = 2;
+    map<string, GroupModel> groups = 1;
+    map<string, GamemodeModel> gamemodes = 2;
 }

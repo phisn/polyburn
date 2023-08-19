@@ -1,11 +1,11 @@
-import { EntityType } from "runtime/src/core/common/EntityType"
-import { Point } from "runtime/src/model/world/Point"
+import { EntityType } from "runtime/proto/world"
+import { Point } from "runtime/src/model/Point"
 import { snapDistance } from "../../../../common/Values"
-import { BaseEntityState } from "../../store/BaseEntityState"
+import { EntityStateBase } from "../../models/EntityStateBase"
 import { CameraSide } from "./CameraSide"
 
-export interface LevelState extends BaseEntityState {
-    type: EntityType.Level
+export interface LevelState extends EntityStateBase {
+    type: EntityType.LEVEL
 
     position: Point
     rotation: number

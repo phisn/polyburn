@@ -1,7 +1,5 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useRef, useState } from "react"
-import { EntityType } from "runtime/src/core/common/EntityType"
-import { FlagEntityModel } from "runtime/src/model/world/FlagEntityModel"
 import { Euler, Object3D } from "three"
 
 import {
@@ -80,19 +78,6 @@ export function LevelInSelected(props: {
                 return ConsumeEvent
             } else {
                 setCameraHovered(undefined)
-            }
-
-            const flag: FlagEntityModel = {
-                type: EntityType.Level,
-
-                position: props.state.position,
-                rotation: props.state.rotation,
-
-                cameraTopLeft: { x: 0, y: 0 },
-                cameraBottomRight: { x: 0, y: 0 },
-
-                captureLeft: 0,
-                captureRight: 0,
             }
 
             const isInside = isPointInsideEntity(event.position, flag)

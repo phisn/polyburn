@@ -10,11 +10,11 @@ export interface EntityModelRegistry {
 }
 
 export const entityModelRegistry: EntityModelRegistry = {
-    [EntityType.Rocket]: {
+    [EntityType.ROCKET]: {
         width: 1.8,
         height: 3.6,
     },
-    [EntityType.Level]: {
+    [EntityType.LEVEL]: {
         width: 1.65,
         height: 2.616,
     },

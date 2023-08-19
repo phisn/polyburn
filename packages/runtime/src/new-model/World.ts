@@ -1,8 +1,4 @@
-enum EntityType {
-    Rocket = 0,
-    Level = 1,
-    Shape = 2,
-}
+import { EntityType } from "../../proto/world"
 
 export interface RocketConfig {
     thrustDistance: number
@@ -12,7 +8,7 @@ export interface RocketConfig {
 }
 
 export interface RocketEntity {
-    type: EntityType.Rocket
+    type: EntityType.ROCKET
     position: { x: number; y: number }
     rotation: number
 
@@ -20,7 +16,7 @@ export interface RocketEntity {
 }
 
 export interface LevelEntity {
-    type: EntityType.Level
+    type: EntityType.LEVEL
     position: { x: number; y: number }
     rotation: number
 
@@ -40,7 +36,7 @@ export interface ShapeVertex {
 }
 
 export interface ShapeEntity {
-    type: EntityType.Shape
+    type: EntityType.SHAPE
     vertices: ShapeVertex[]
 }
 

@@ -1,8 +1,8 @@
-import { EntityType } from "runtime/src/core/common/EntityType"
-import { BaseEntityState } from "../../store/BaseEntityState"
+import { EntityType } from "runtime/proto/world"
+import { EntityStateBase } from "../../models/EntityStateBase"
 
-export interface RocketState extends BaseEntityState {
-    type: EntityType.Rocket
+export interface RocketState extends EntityStateBase {
+    type: EntityType.ROCKET
 
     position: { x: number; y: number }
     rotation: number

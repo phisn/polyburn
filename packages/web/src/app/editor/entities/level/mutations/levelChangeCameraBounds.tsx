@@ -1,4 +1,4 @@
-import { Point } from "runtime/src/model/world/Point"
+import { Point } from "runtime/src/model/Point"
 import { CameraSide } from "../CameraSide"
 import { LevelState } from "../LevelState"
 

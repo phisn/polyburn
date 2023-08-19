@@ -1,6 +1,6 @@
 import { Html } from "@react-three/drei"
 import { useRef, useState } from "react"
-import { Point } from "runtime/src/model/world/Point"
+import { Point } from "runtime/src/model/Point"
 import { Vector3 } from "three"
 import { ContextMenu } from "../../../common/components/ContextMenu"
 import { BackArrowSvg } from "../../../common/components/inline-svg/BackArrow"

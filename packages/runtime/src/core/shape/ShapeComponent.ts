@@ -1,4 +1,4 @@
-import { Point } from "../../model/world/Point"
+import { Point } from "../../model/Point"
 
 export interface ShapeComponent {
     vertices: ShapeVertex[]

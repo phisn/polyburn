@@ -3,7 +3,7 @@ import { Point } from "../Point"
 import { FlagEntityModel } from "./FlagEntityModel"
 
 export interface RocketEntityModel {
-    type: EntityType.Rocket
+    type: EntityType.ROCKET
 
     position: Point
     rotation: number

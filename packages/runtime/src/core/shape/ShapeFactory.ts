@@ -1,9 +1,8 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { ShapeModel } from "../../../proto/world"
+import { EntityType, ShapeModel } from "../../../proto/world"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
-import { EntityType } from "../common/EntityType"
 
 export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shape: ShapeModel) => {
     const [verticesRaw, top, left] = verticesForShape(shape)
@@ -26,7 +25,7 @@ export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shap
     }))
 
     return context.store.create({
-        entityType: EntityType.Shape,
+        entityType: EntityType.SHAPE,
         rigidBody: body,
         shape: { vertices },
     })

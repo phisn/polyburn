@@ -1,6 +1,5 @@
 import { Transition } from "@headlessui/react"
 import { Fragment, useState, useTransition } from "react"
-import { importWorld } from "runtime/src/model/world/WorldModel"
 import Navbar from "../../common/components/Navbar"
 import { BackArrowSvg } from "../../common/components/inline-svg/BackArrow"
 import { StopSvg } from "../../common/components/inline-svg/Stop"
@@ -56,7 +55,7 @@ export default function Campaign() {
     const [isPending, startTransition] = useTransition()
 
     if (worldSelected && gamemodeSelected) {
-        const map = importWorld(worldSelected.raw)
+        const map = null! // importWorld(worldSelected.raw)
 
         return (
             <div className="absolute bottom-0 left-0 right-0 top-0 ">

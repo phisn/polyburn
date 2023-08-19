@@ -1,18 +1,18 @@
-import { EntityType } from "runtime/src/core/common/EntityType"
+import { EntityType } from "runtime/proto/world"
+import { Point } from "runtime/src/model/Point"
 import { changeAnchor } from "runtime/src/model/changeAnchor"
-import { Point } from "runtime/src/model/world/Point"
-import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { entityRegistry } from "runtime/src/model/entityRegistry"
 import { WorldState } from "../../../models/WorldState"
 import { LevelState } from "../LevelState"
 
 export const levelNew = (position: Point, rotation: number) => (world: WorldState) => {
     const id = [...world.entities.keys()].reduce((max, id) => Math.max(max, id), 0) + 1
 
-    const entry = entityGraphicRegistry[EntityType.Level]
-    const center = changeAnchor(position, 0, entry.size, { x: 0, y: 1 }, { x: 0.2, y: 0.5 })
+    const entry = entityRegistry[EntityType.LEVEL]
+    const center = changeAnchor(position, 0, entry, { x: 0, y: 1 }, { x: 0.2, y: 0.5 })
 
     const level: LevelState = {
-        type: EntityType.Level,
+        type: EntityType.LEVEL,
 
         id,
 

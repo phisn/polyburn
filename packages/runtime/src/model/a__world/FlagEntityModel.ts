@@ -2,7 +2,7 @@ import { EntityType } from "../../core/common/EntityType"
 import { Point } from "../Point"
 
 export interface FlagEntityModel {
-    type: EntityType.Level
+    type: EntityType.LEVEL
 
     position: Point
     rotation: number

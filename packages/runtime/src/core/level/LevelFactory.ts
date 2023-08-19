@@ -1,9 +1,8 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { LevelModel } from "../../../proto/world"
+import { EntityType, LevelModel } from "../../../proto/world"
 import { captureBox } from "../../model/LevelModel"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
-import { EntityType } from "../common/EntityType"
 
 export const newLevel = (
     factoryContext: RuntimeFactoryContext<RuntimeComponents>,
@@ -68,7 +67,7 @@ export const newLevel = (
             captureCollider,
         },
 
-        entityType: EntityType.Level,
+        entityType: EntityType.LEVEL,
         rigidBody: body,
     })
 }

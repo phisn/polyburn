@@ -1,12 +1,11 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useRef, useState } from "react"
-import { EntityType } from "runtime/src/core/common/EntityType"
-import { RocketEntityModel } from "runtime/src/model/world/EntityModel"
 import { Euler, MeshBasicMaterial, Object3D } from "three"
 import {
     entityGraphicRegistry,
     isPointInsideEntity,
 } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
 import { RocketMode } from "../Rocket"
@@ -21,7 +20,7 @@ export function RocketInNone(props: {
     mode: RocketModeNone
     setMode: (mode: RocketMode) => void
 }) {
-    const graphicEntry = entityGraphicRegistry[EntityType.Rocket]
+    const graphicEntry = entityGraphicRegistry[EntityGraphicType.Rocket]
     const svgRef = useRef<Object3D>()
 
     const [hovered, setHovered] = useState(false)
@@ -43,14 +42,13 @@ export function RocketInNone(props: {
                 return
             }
 
-            const rocket: RocketEntityModel = {
-                type: EntityType.Rocket,
+            const isInside = isPointInsideEntity(
+                event.position,
+                { x: props.state.position.x, y: props.state.position.y },
+                props.state.rotation,
+                EntityGraphicType.Rocket,
+            )
 
-                position: props.state.position,
-                rotation: props.state.rotation,
-            }
-
-            const isInside = isPointInsideEntity(event.position, rocket)
             setHovered(isInside)
 
             if (isInside) {

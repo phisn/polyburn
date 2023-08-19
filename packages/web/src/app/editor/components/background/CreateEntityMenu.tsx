@@ -1,6 +1,6 @@
-import { EntityType } from "runtime/src/core/common/EntityType"
-import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry"
-import { Point } from "runtime/src/model/world/Point"
+import { EntityType } from "runtime/proto/world"
+import { Point } from "runtime/src/model/Point"
+import { entityRegistry } from "runtime/src/model/entityRegistry"
 import { ContextMenu } from "../../../../common/components/ContextMenu"
 import { FlagSvg } from "../../../../common/components/inline-svg/Flag"
 import { RocketSvg } from "../../../../common/components/inline-svg/Rocket"
@@ -17,8 +17,8 @@ export function CreateEntityMenu(props: {
 }) {
     function spawnPositionForType(position: Point, type: EntityType) {
         return {
-            x: position.x - entityModelRegistry[type].width / 2,
-            y: position.y + entityModelRegistry[type].height / 2,
+            x: position.x - entityRegistry[type].width / 2,
+            y: position.y + entityRegistry[type].height / 2,
         }
     }
 
@@ -39,7 +39,7 @@ export function CreateEntityMenu(props: {
                 <a
                     onClick={() => {
                         props.dispatchMutation(
-                            rocketNew(spawnPositionForType(props.position, EntityType.Rocket), 0),
+                            rocketNew(spawnPositionForType(props.position, EntityType.ROCKET), 0),
                         )
                         props.onCancel()
                     }}
@@ -52,7 +52,7 @@ export function CreateEntityMenu(props: {
                 <a
                     onClick={() => {
                         props.dispatchMutation(
-                            levelNew(spawnPositionForType(props.position, EntityType.Level), 0),
+                            levelNew(spawnPositionForType(props.position, EntityType.LEVEL), 0),
                         )
                         props.onCancel()
                     }}

@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier2d-compat"
-import { Point } from "../../model/world/Point"
+import { Point } from "../../model/Point"
 
 export interface LevelComponent {
     captured: boolean

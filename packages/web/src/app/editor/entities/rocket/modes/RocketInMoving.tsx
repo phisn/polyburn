@@ -1,8 +1,9 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useRef } from "react"
-import { EntityType } from "runtime/src/core/common/EntityType"
+import { EntityType } from "runtime/proto/world"
 import { Euler, Object3D } from "three"
 import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { findLocationForEntity } from "../../../models/EntityWithLocation"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
@@ -20,7 +21,7 @@ export function RocketInMoving(props: {
     mode: RocketModeMoving
     setMode: (mode: RocketMode) => void
 }) {
-    const graphicEntry = entityGraphicRegistry[EntityType.Rocket]
+    const graphicEntry = entityGraphicRegistry[EntityGraphicType.Rocket]
 
     const svgRef = useRef<Object3D>()
 
@@ -43,7 +44,7 @@ export function RocketInMoving(props: {
             }
 
             if (event.leftButtonDown) {
-                updateLocation(...findLocationForEntity(world, event, EntityType.Rocket))
+                updateLocation(...findLocationForEntity(world, event, EntityType.ROCKET))
                 window.document.body.style.cursor = "grabbing"
             } else {
                 window.document.body.style.cursor = "grab"

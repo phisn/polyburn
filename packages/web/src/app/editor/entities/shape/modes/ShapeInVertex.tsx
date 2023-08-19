@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { Point } from "runtime/src/model/world/Point"
+import { Point } from "runtime/src/model/Point"
 import { Mesh, MeshBasicMaterial } from "three"
 import {
     baseZoomFactor,
@@ -80,7 +80,8 @@ export function ShapeInVertex(props: {
             y: verticesRef.current[vertexIndexRef.current].position.y,
         }
 
-        verticesRef.current[vertexIndexRef.current].position.set(position.x, position.y)
+        verticesRef.current[vertexIndexRef.current].position.x = position.x
+        verticesRef.current[vertexIndexRef.current].position.y = position.y
 
         markerRef.current.position.set(
             position.x + props.state.position.x,
@@ -89,9 +90,9 @@ export function ShapeInVertex(props: {
         )
 
         let duplicateIndex = verticesRef.current.findIndex(
-            (x, i) =>
-                x.position.x === verticesRef.current[vertexIndexRef.current].position.x &&
-                x.position.y === verticesRef.current[vertexIndexRef.current].position.y &&
+            (v, i) =>
+                v.position.x === verticesRef.current[vertexIndexRef.current].position.x &&
+                v.position.y === verticesRef.current[vertexIndexRef.current].position.y &&
                 i !== vertexIndexRef.current,
         )
 
@@ -99,7 +100,8 @@ export function ShapeInVertex(props: {
             markerMaterialRef.current.color.set(highlightOverrideColor)
 
             if (!canRemoveVertex(vertexIndexRef.current, verticesRef.current)) {
-                verticesRef.current[vertexIndexRef.current].position.set(previous.x, previous.y)
+                verticesRef.current[vertexIndexRef.current].position.x = previous.x
+                verticesRef.current[vertexIndexRef.current].position.y = previous.y
 
                 markerRef.current.position.set(
                     previous.x + props.state.position.x,
@@ -131,7 +133,8 @@ export function ShapeInVertex(props: {
             )
 
             if (intersection === null) {
-                verticesRef.current[vertexIndexRef.current].position.set(previous.x, previous.y)
+                verticesRef.current[vertexIndexRef.current].position.x = previous.x
+                verticesRef.current[vertexIndexRef.current].position.y = previous.y
 
                 markerRef.current.position.set(
                     previous.x + props.state.position.x,

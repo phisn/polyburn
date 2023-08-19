@@ -6,7 +6,7 @@ import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 
 import { EntityStore } from "runtime-framework"
-import { Point } from "runtime/src/model/world/Point"
+import { Point } from "runtime/src/model/Point"
 import { gameCameraTransitionSpeed } from "../../common/Values"
 import { useGameStore } from "../store/GameStore"
 import { useGraphicUpdate } from "../store/useGraphicUpdate"

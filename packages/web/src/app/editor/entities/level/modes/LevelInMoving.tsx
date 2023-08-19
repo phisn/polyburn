@@ -1,6 +1,6 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useRef } from "react"
-import { EntityType } from "runtime/src/core/common/EntityType"
+import { EntityType } from "runtime/proto/world"
 import { Euler, Object3D } from "three"
 import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { findLocationForEntity } from "../../../models/EntityWithLocation"
@@ -44,7 +44,7 @@ export function LevelInMoving(props: {
             }
 
             if (event.leftButtonDown) {
-                updateLocation(...findLocationForEntity(world, event, EntityType.Level))
+                updateLocation(...findLocationForEntity(world, event, EntityType.LEVEL))
                 window.document.body.style.cursor = "grabbing"
             } else {
                 window.document.body.style.cursor = "grab"

@@ -11,17 +11,18 @@ import { RuntimeSystemContext } from "./core/RuntimeSystemStack"
 import { newLevel } from "./core/level/LevelFactory"
 import { newRocket } from "./core/rocket/RocketFactory"
 import { newShape } from "./core/shape/ShapeFactory"
-import { filterForType } from "./model/EntityModel"
 
 export const newRuntime = <Components extends RuntimeComponents>(
     gamemodeName: string,
     world: WorldModel,
 ) => {
-    const gamemode = world.gamemodes.find(gamemode => gamemode.name === gamemodeName)
+    const gamemode = world.gamemodes[gamemodeName]
 
     if (gamemode === undefined) {
         throw new Error(`Gamemode ${gamemodeName} not found`)
     }
+
+    const groups = gamemode.groups.map(group => world.groups[group])
 
     const context: RuntimeFactoryContext<Components> = {
         store: createEntityStore(),
@@ -34,9 +35,7 @@ export const newRuntime = <Components extends RuntimeComponents>(
 
     context.physics.gravity = new RAPIER.Vector2(0, -20)
 
-    const entities = gamemode.groups.flatMap(group => world.groups[group])
-
-    const rocketModel = entities.find(entity => entity.rocket)?.rocket
+    const rocketModel = groups.flatMap(group => group.rockets).at(0)
 
     if (rocketModel === undefined) {
         throw new Error("No rocket found in world")
@@ -48,11 +47,11 @@ export const newRuntime = <Components extends RuntimeComponents>(
     rocket.components.rocket.currentLevel.components.level.captured = true
     rocket.components.rocket.currentLevel.components.level.hideFlag = true
 
-    for (const level of filterForType(entities, "level")) {
+    for (const level of groups.flatMap(group => group.levels)) {
         newLevel(context, level)
     }
 
-    for (const shape of filterForType(entities, "shape")) {
+    for (const shape of groups.flatMap(group => group.shapes)) {
         newShape(context, shape)
     }
 

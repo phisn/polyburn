@@ -1,14 +1,14 @@
-import { EntityType } from "runtime/src/core/common/EntityType"
+import { EntityType } from "runtime/proto/world"
+import { entityRegistry } from "runtime/src/model/EntityRegistry"
+import { Point } from "runtime/src/model/Point"
 import { changeAnchor } from "runtime/src/model/changeAnchor"
-import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry"
-import { Point } from "runtime/src/model/world/Point"
 import { snapDistance } from "../../../common/Values"
 import { EditorEvent } from "../EventHandler"
 import { ShapeState, findClosestEdge } from "../entities/shape/ShapeState"
 import { WorldState } from "./WorldState"
 
 export const findLocationForEntity = (world: WorldState, event: EditorEvent, type: EntityType) => {
-    const graphicEntry = entityModelRegistry[type]
+    const graphicEntry = entityRegistry[type]
     const edge = findEdgeForEntity(world, event.position, true)
 
     if (edge) {
@@ -36,7 +36,7 @@ export const findLocationForEntity = (world: WorldState, event: EditorEvent, typ
 
 export const findEdgeForEntity = (world: WorldState, position: Point, snap: boolean) => {
     const shapes = [...world.entities.values()].filter(
-        (entity): entity is ShapeState => entity.type === EntityType.Shape,
+        (entity): entity is ShapeState => entity.type === EntityType.SHAPE,
         position,
     )
 

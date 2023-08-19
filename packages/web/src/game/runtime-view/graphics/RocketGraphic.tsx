@@ -4,12 +4,11 @@ import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 import { Object3D } from "three"
 
 import { Entity } from "runtime-framework"
-import { EntityType } from "runtime/src/core/common/EntityType"
 import { changeAnchor } from "runtime/src/model/changeAnchor"
-import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry"
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 import { entityGraphicRegistry } from "./EntityGraphicRegistry"
+import { EntityGraphicType } from "./EntityGraphicType"
 
 export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
     if (!props.entity.has(...RocketEntityComponents)) {
@@ -19,8 +18,7 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
     const svgRef = useRef<Object3D>()
     // const lineRef = useRef<any>(null!)
 
-    const entry = entityModelRegistry[EntityType.Rocket]
-    const graphicEntry = entityGraphicRegistry[EntityType.Rocket]
+    const graphicEntry = entityGraphicRegistry[EntityGraphicType.Rocket]
 
     useGraphicUpdate(() => {
         if (!props.entity.has("interpolation")) {
@@ -46,7 +44,7 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
         const positionAnchored = changeAnchor(
             props.entity.components.interpolation.position,
             props.entity.components.interpolation.rotation,
-            entry,
+            graphicEntry.size,
             { x: 0.5, y: 0.5 },
             { x: 0, y: 1 },
         )

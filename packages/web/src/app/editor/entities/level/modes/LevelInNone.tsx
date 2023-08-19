@@ -1,12 +1,8 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useRef, useState } from "react"
-import { EntityType } from "runtime/src/core/common/EntityType"
-import { FlagEntityModel } from "runtime/src/model/world/FlagEntityModel"
 import { Euler, MeshBasicMaterial, Object3D } from "three"
-import {
-    entityGraphicRegistry,
-    isPointInsideEntity,
-} from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
+import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
 import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
 import { LevelMode } from "../Level"
@@ -22,7 +18,7 @@ export function LevelInNone(props: {
     mode: LevelModeNone
     setMode: (mode: LevelMode) => void
 }) {
-    const graphicEntry = entityGraphicRegistry[EntityType.Level]
+    const graphicEntry = entityGraphicRegistry[EntityGraphicType.RedFlag]
     const svgRef = useRef<Object3D>()
 
     const [showLevelDialog, setShowLevelDialog] = useState<{ x: number; y: number } | undefined>()
@@ -44,20 +40,13 @@ export function LevelInNone(props: {
                 return
             }
 
-            const flag: FlagEntityModel = {
-                type: EntityType.Level,
+            const isInside = isPointInsideEntity(
+                event.position,
+                props.state.position,
+                props.state.rotation,
+                EntityGraphicType.RedFlag,
+            )
 
-                position: props.state.position,
-                rotation: props.state.rotation,
-
-                cameraTopLeft: { x: 0, y: 0 },
-                cameraBottomRight: { x: 0, y: 0 },
-
-                captureLeft: 0,
-                captureRight: 0,
-            }
-
-            const isInside = isPointInsideEntity(event.position, flag)
             setHovered(isInside)
 
             if (isInside) {

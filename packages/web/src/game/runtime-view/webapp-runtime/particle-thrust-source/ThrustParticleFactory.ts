@@ -1,9 +1,9 @@
 import { RocketEntity } from "runtime/src/core/rocket/RocketEntity"
 import { changeAnchor } from "runtime/src/model/changeAnchor"
-import { entityModelRegistry } from "runtime/src/model/world/EntityModelRegistry"
 import { randInt } from "three/src/math/MathUtils"
 
-import { EntityType } from "runtime/src/core/common/EntityType"
+import { EntityType } from "runtime/proto/world"
+import { entityRegistry } from "runtime/src/model/entityRegistry"
 import { Gradient, rgpRemixGradient } from "../particle/Gradient"
 import { ParticleConfiguration } from "../particle/ParticleSource"
 
@@ -39,7 +39,7 @@ const mixed = [
 console.log(`choosen gradient: ${mixedIndex}`)
 
 export const newThrustParticleFactory = (rocket: RocketEntity) => (): ParticleConfiguration => {
-    const rocketEntry = entityModelRegistry[EntityType.Rocket]
+    const rocketEntry = entityRegistry[EntityType.ROCKET]
 
     const rigidBody = rocket.components.rigidBody
     const rocketRotation = rigidBody.rotation()

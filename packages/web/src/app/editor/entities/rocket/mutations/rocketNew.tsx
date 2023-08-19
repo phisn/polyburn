@@ -1,5 +1,5 @@
-import { EntityType } from "runtime/src/core/common/EntityType"
-import { Point } from "runtime/src/model/world/Point"
+import { EntityType } from "runtime/proto/world"
+import { Point } from "runtime/src/model/Point"
 import { WorldState } from "../../../models/WorldState"
 import { RocketState } from "../RocketState"
 
@@ -7,7 +7,7 @@ export const rocketNew = (position: Point, rotation: number) => (world: WorldSta
     const id = [...world.entities.keys()].reduce((max, id) => Math.max(max, id), 0) + 1
 
     const rocket: RocketState = {
-        type: EntityType.Rocket,
+        type: EntityType.ROCKET,
 
         id,
 

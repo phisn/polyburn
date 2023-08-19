@@ -1,8 +1,8 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
+import { EntityType } from "../../../proto/world"
 import { changeAnchor } from "../../model/changeAnchor"
-import { entityModelRegistry } from "../../model/world/EntityModelRegistry"
-import { EntityType } from "../common/EntityType"
+import { entityRegistry } from "../../model/entityRegistry"
 
 const rayDir = new RAPIER.Vector2(0, 1)
 const ray = new RAPIER.Ray(new RAPIER.Vector2(0, 0), new RAPIER.Vector2(0, 1))
@@ -12,7 +12,7 @@ export const rocketGroundRayRaw = (
     rocket: RAPIER.RigidBody,
     length: number,
 ) => {
-    const entry = entityModelRegistry[EntityType.Rocket]
+    const entry = entityRegistry[EntityType.ROCKET]
 
     const rayStart = changeAnchor(
         rocket.translation(),

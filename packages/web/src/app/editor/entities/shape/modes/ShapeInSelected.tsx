@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
-import { Point } from "runtime/src/model/world/Point"
-import { Mesh, MeshBasicMaterial, Vector2 } from "three"
+import { Point } from "runtime/src/model/Point"
+import { Mesh, MeshBasicMaterial } from "three"
 import {
     baseZoomFactor,
     highlightColor,
@@ -14,7 +14,6 @@ import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import {
     ShapeState,
-    ShapeVertexColor,
     averageColor,
     findClosestEdge,
     findClosestVertex,
@@ -52,22 +51,15 @@ export function ShapeInSelected(props: {
         markerRef.current.position.set(point.x, point.y, Priority.Selected + 0.001)
     }
 
-    function startVertexMode(
-        vertexIndex: number,
-        position: Point,
-        color: ShapeVertexColor,
-        insert: boolean,
-    ) {
-        const vector = new Vector2(
-            position.x - props.state.position.x,
-            position.y - props.state.position.y,
-        )
-
+    function startVertexMode(vertexIndex: number, position: Point, color: number, insert: boolean) {
         props.setMode({
             type: "vertex",
             vertexIndex,
             vertex: {
-                position: vector,
+                position: {
+                    x: position.x - props.state.position.x,
+                    y: position.y - props.state.position.y,
+                },
                 color,
             },
             insert,

@@ -1,19 +1,18 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
-import { RocketModel } from "../../../proto/world"
+import { EntityType, RocketModel } from "../../../proto/world"
 import { Point } from "../../model/Point"
 import { changeAnchor } from "../../model/changeAnchor"
 import { entityRegistry } from "../../model/entityRegistry"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
-import { EntityType } from "../common/EntityType"
 import { RocketEntity } from "./RocketEntity"
 
 export const newRocket = (
     context: RuntimeFactoryContext<RuntimeComponents>,
     rocket: RocketModel,
 ): RocketEntity => {
-    const entry = entityRegistry[EntityType.Rocket]
+    const entry = entityRegistry[EntityType.ROCKET]
 
     const rocketPosition = {
         x: rocket.positionX,
@@ -71,7 +70,7 @@ export const newRocket = (
             currentLevel: firstLevel,
         },
 
-        entityType: EntityType.Rocket,
+        entityType: EntityType.ROCKET,
         moving: {},
         rigidBody: body,
     })

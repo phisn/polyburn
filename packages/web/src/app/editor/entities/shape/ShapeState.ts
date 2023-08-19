@@ -1,45 +1,38 @@
-import { EntityType } from "runtime/src/core/common/EntityType"
-import { Vector2 } from "three"
-import { Point } from "../../../../../../runtime/src/model/world/Point"
-import { BaseEntityState } from "../../store/BaseEntityState"
+import { EntityType } from "runtime/proto/world"
+import { Point } from "runtime/src/model/Point"
+import { EntityStateBase } from "../../models/EntityStateBase"
 
-export interface ShapeVertexColor {
-    r: number
-    g: number
-    b: number
+export function averageColor(a: number, b: number): number {
+    const ra = (a & 0xff0000) >> 16
+    const ga = (a & 0x00ff00) >> 8
+    const ba = a & 0x0000ff
+
+    const rb = (b & 0xff0000) >> 16
+    const gb = (b & 0x00ff00) >> 8
+    const bb = b & 0x0000ff
+
+    const rc = Math.round((ra + rb) / 2)
+    const gc = Math.round((ga + gb) / 2)
+    const bc = Math.round((ba + bb) / 2)
+
+    return (rc << 16) | (gc << 8) | bc
 }
 
-export function averageColor(a: ShapeVertexColor, b: ShapeVertexColor): ShapeVertexColor {
-    return {
-        r: Math.round((a.r + b.r) / 2),
-        g: Math.round((a.g + b.g) / 2),
-        b: Math.round((a.b + b.b) / 2),
-    }
+export function colorToHex(color: number): string {
+    return `#${color.toString(16).padStart(6, "0")}`
 }
 
-export function colorToHex(color: ShapeVertexColor): string {
-    const r = color.r.toString(16).padStart(2, "0")
-    const g = color.g.toString(16).padStart(2, "0")
-    const b = color.b.toString(16).padStart(2, "0")
-
-    return `#${r}${g}${b}`
-}
-
-export function hexToColor(hex: string): ShapeVertexColor {
-    return {
-        r: parseInt(hex.substring(1, 3), 16),
-        g: parseInt(hex.substring(3, 5), 16),
-        b: parseInt(hex.substring(5, 7), 16),
-    }
+export function hexToColor(hex: string): number {
+    return parseInt(hex.replace("#", ""), 16)
 }
 
 export interface ShapeVertex {
-    position: Vector2
-    color: ShapeVertexColor
+    position: Point
+    color: number
 }
 
-export interface ShapeState extends BaseEntityState {
-    type: EntityType.Shape
+export interface ShapeState extends EntityStateBase {
+    type: EntityType.SHAPE
 
     position: Point
     vertices: ShapeVertex[]

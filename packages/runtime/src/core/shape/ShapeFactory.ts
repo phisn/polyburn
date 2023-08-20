@@ -1,11 +1,13 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
 import { EntityType, ShapeModel } from "../../../proto/world"
+import { ShapeVertex, bytesToVertices } from "../../model/ShapeModel"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
 
 export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shape: ShapeModel) => {
-    const [verticesRaw, top, left] = verticesForShape(shape)
+    const vertices = bytesToVertices(shape.vertices)
+    const [verticesRaw, top, left] = verticesForShape(vertices)
 
     const body = context.physics.createRigidBody(
         RAPIER.RigidBodyDesc.fixed().setTranslation(left, top),
@@ -19,10 +21,12 @@ export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shap
 
     context.physics.createCollider(collider, body)
 
+    /*
     const vertices = shape.vertices.map(v => ({
         point: { x: v.x, y: v.y },
-        color: v.color,
+        color: v.color ?? 0x000000,
     }))
+    */
 
     return context.store.create({
         entityType: EntityType.SHAPE,
@@ -31,19 +35,19 @@ export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shap
     })
 }
 
-function verticesForShape(shape: ShapeModel): [Float32Array, number, number] {
-    const left = shape.vertices.reduce((acc, vertex) => Math.min(acc, vertex.x), Infinity)
-    const top = shape.vertices.reduce((acc, vertex) => Math.min(acc, vertex.y), Infinity)
+function verticesForShape(vertices: ShapeVertex[]): [Float32Array, number, number] {
+    const left = vertices.reduce((acc, vertex) => Math.min(acc, vertex.point.x), Infinity)
+    const top = vertices.reduce((acc, vertex) => Math.min(acc, vertex.point.y), Infinity)
 
-    const vertices = new Float32Array(shape.vertices.length * 2 + 2)
+    const verticesRaw = new Float32Array(vertices.length * 2 + 2)
 
-    shape.vertices.forEach((vertex, i) => {
-        vertices[i * 2] = vertex.x - left
-        vertices[i * 2 + 1] = vertex.y - top
+    vertices.forEach((vertex, i) => {
+        verticesRaw[i * 2] = vertex.point.x - left
+        verticesRaw[i * 2 + 1] = vertex.point.y - top
     })
 
-    vertices[vertices.length - 2] = shape.vertices[0].x - left
-    vertices[vertices.length - 1] = shape.vertices[0].y - top
+    verticesRaw[verticesRaw.length - 2] = vertices[0].point.x - left
+    verticesRaw[verticesRaw.length - 1] = vertices[0].point.y - top
 
-    return [vertices, top, left]
+    return [verticesRaw, top, left]
 }

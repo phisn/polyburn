@@ -1,10 +1,5 @@
-import { Point } from "../../model/Point"
+import { ShapeVertex } from "../../model/ShapeModel"
 
 export interface ShapeComponent {
     vertices: ShapeVertex[]
-}
-
-export interface ShapeVertex {
-    point: Point
-    color: number
 }

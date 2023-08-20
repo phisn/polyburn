@@ -38,16 +38,8 @@ message LevelModel {
     optional RocketConfig rocket_config = 10;
 }
 
-message ShapeVertex {
-    float x = 1;
-    float y = 2;
-    optional int32 color = 3;
-}
-
 message ShapeModel {
-    float position_x = 1;
-    float position_y = 2;
-    repeated ShapeVertex vertices = 3;
+    bytes vertices = 1;
 }
 
 message GroupModel {

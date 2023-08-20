@@ -61,6 +61,9 @@ importers:
       '@dimforge/rapier2d-compat':
         specifier: ^0.11.2
         version: 0.11.2
+      '@petamoriken/float16':
+        specifier: ^3.8.3
+        version: 3.8.3
       '@stdlib/math':
         specifier: ^0.0.11
         version: 0.0.11
@@ -115,6 +118,16 @@ importers:
         specifier: ^0.33.0
         version: 0.33.0
 
+  packages/server:
+    dependencies:
+      zod:
+        specifier: ^3.22.2
+        version: 3.22.2
+    devDependencies:
+      '@types/node':
+        specifier: ^20.5.0
+        version: 20.5.0
+
   packages/web:
     dependencies:
       '@dimforge/rapier2d-compat':
@@ -123,6 +136,9 @@ importers:
       '@headlessui/react':
         specifier: ^1.7.16
         version: 1.7.16(react-dom@0.0.0-experimental-546fe4681-20230713)(react@0.0.0-experimental-546fe4681-20230713)
+      '@petamoriken/float16':
+        specifier: ^3.8.3
+        version: 3.8.3
       '@react-three/drei':
         specifier: ^9.80.3
         version: 9.80.3(@react-three/fiber@8.13.6)(@types/three@0.153.0)(react-dom@0.0.0-experimental-546fe4681-20230713)(react@0.0.0-experimental-546fe4681-20230713)(three@0.154.0)
@@ -1754,6 +1770,10 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
+
+  /@petamoriken/float16@3.8.3:
+    resolution: {integrity: sha512-an2OZ7/6er9Jja8EDUvU/tmtGIutdlb6LwXOwgjzoCjDRAsUd8sRZMBjoPEy78Xa9iOp+Kglk2CHgVwZuZbWbw==}
+    dev: false
 
   /@protobufjs/aspromise@1.1.2:
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
@@ -7287,6 +7307,10 @@ packages:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
     dev: true
+
+  /zod@3.22.2:
+    resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
+    dev: false
 
   /zstddec@0.0.2:
     resolution: {integrity: sha512-DCo0oxvcvOTGP/f5FA6tz2Z6wF+FIcEApSTu0zV5sQgn9hoT5lZ9YRAKUraxt9oP7l4e8TnNdi8IZTCX6WCkwA==}

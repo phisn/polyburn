@@ -43,9 +43,9 @@ export function importModel(model: WorldModel): WorldState {
                             group,
 
                             position: { x: 0, y: 0 },
-                            vertices: bytesToVertices(shape.vertices).map(v => ({
+                            vertices: bytesToVertices(shape.vertices).map((v, i) => ({
                                 position: new Vector2(v.position.x, v.position.y),
-                                color: v.color === 0xf87cf8 ? 0xffffff : v.color,
+                                color: v.color,
                             })),
                         }),
                     ),

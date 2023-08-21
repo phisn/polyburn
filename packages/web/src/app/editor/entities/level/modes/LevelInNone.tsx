@@ -90,7 +90,7 @@ export function LevelInNone(props: {
                     position={[
                         props.state.position.x,
                         props.state.position.y,
-                        Priority.Normal + SubPriority.Level,
+                        Priority.Normal + SubPriority.Level + (hovered ? 0.001 : 0),
                     ]}
                     rotation={new Euler(0, 0, props.state.rotation)}
                     src={graphicEntry.src}
@@ -117,7 +117,7 @@ export function LevelInNone(props: {
                 dashed={!(hovered || showLevelDialog)}
                 state={props.state}
                 color={hovered || showLevelDialog ? LevelCameraHoverColor : LevelCameraColor}
-                priority={Priority.Normal + SubPriority.Level}
+                priority={Priority.Normal + SubPriority.Level + (hovered ? 0.001 : 0)}
             />
         </>
     )

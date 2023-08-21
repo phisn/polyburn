@@ -15,7 +15,11 @@ import { Priority } from "../models/Priority"
 import { WorldState } from "../models/WorldState"
 import { MutationGenerator, useEditorStore } from "../store/EditorStore"
 
-export function EntityContextMenu(props: { state: EntityState; position: Point }) {
+export function EntityContextMenu(props: {
+    state: EntityState
+    position: Point
+    onCancel: () => void
+}) {
     const world = useEditorStore(store => store.state).world
     const dispatch = useEditorStore(store => store.mutation)
 
@@ -24,7 +28,12 @@ export function EntityContextMenu(props: { state: EntityState; position: Point }
             as="div"
             position={new Vector3(props.position.x, props.position.y, Priority.Selected + 0.01)}
         >
-            <EntityContextMenuRaw world={world} dispatch={dispatch} state={props.state} />
+            <EntityContextMenuRaw
+                world={world}
+                dispatch={dispatch}
+                onCancel={props.onCancel}
+                state={props.state}
+            />
         </Html>
     )
 }
@@ -32,6 +41,7 @@ export function EntityContextMenu(props: { state: EntityState; position: Point }
 export function EntityContextMenuRaw(props: {
     world: WorldState
     dispatch: (mutation: MutationGenerator) => void
+    onCancel: () => void
 
     state: EntityState
     children?: React.ReactNode
@@ -73,13 +83,23 @@ export function EntityContextMenuRaw(props: {
                         </a>
                     </li>
                     <li>
-                        <a onClick={() => props.dispatch(entityClone(props.state))}>
+                        <a
+                            onClick={() => {
+                                props.dispatch(entityClone(props.state))
+                                props.onCancel()
+                            }}
+                        >
                             <BoxArrowUpRightSvg width="16" height="16" />
                             <div>Clone</div>
                         </a>
                     </li>
                     <li>
-                        <a onClick={() => props.dispatch(entityRemove(props.state))}>
+                        <a
+                            onClick={() => {
+                                props.dispatch(entityRemove(props.state))
+                                props.onCancel()
+                            }}
+                        >
                             <X width="16" height="16" className="scale-150 transform" />
                             <div>Remove</div>
                         </a>

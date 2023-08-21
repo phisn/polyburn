@@ -90,11 +90,19 @@ export function RocketInNone(props: {
                     rotation={new Euler(0, 0, props.state.rotation)}
                     src={graphicEntry.src}
                     scale={graphicEntry.scale}
-                    fillMaterial={hovered ? new MeshBasicMaterial({ color: "#ffff55" }) : undefined}
+                    fillMaterial={
+                        hovered || showRocketDialog
+                            ? new MeshBasicMaterial({ color: "#ffff55" })
+                            : undefined
+                    }
                 />
             </Suspense>
             {showRocketDialog && (
-                <EntityContextMenu state={props.state} position={showRocketDialog} />
+                <EntityContextMenu
+                    state={props.state}
+                    position={showRocketDialog}
+                    onCancel={() => setShowRocketDialog(undefined)}
+                />
             )}
         </>
     )

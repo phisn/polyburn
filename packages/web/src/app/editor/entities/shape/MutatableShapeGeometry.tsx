@@ -15,6 +15,14 @@ function IterateInReverseOrder(vertices: Point[], callback: (i: number, vertex: 
 }
 
 export class MutatableShapeGeometry extends BufferGeometry {
+    constructor(shapeVertices?: ShapeVertex[]) {
+        super()
+
+        if (shapeVertices) {
+            this.update(shapeVertices)
+        }
+    }
+
     update(shapeVertices: ShapeVertex[]) {
         const vertices = shapeVertices.map(vertex => vertex.position)
 

@@ -79,13 +79,17 @@ export function ShapeInNone(props: {
             </mesh>
 
             {showShapeDialog && (
-                <EntityContextMenu state={props.state} position={showShapeDialog} />
+                <EntityContextMenu
+                    state={props.state}
+                    position={showShapeDialog}
+                    onCancel={() => setShowShapeDialog(undefined)}
+                />
             )}
         </>
     )
 
     function materialColor() {
-        if (hovered) {
+        if (hovered || showShapeDialog) {
             return "#aaaaaa"
         }
 

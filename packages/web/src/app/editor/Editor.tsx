@@ -1,16 +1,20 @@
 import { Canvas } from "@react-three/fiber"
-import { Fragment } from "react"
+import { Fragment, useEffect } from "react"
 import { EntityType } from "runtime/proto/world"
+import { Navbar } from "../../common/components/Navbar"
+import { StopSvg } from "../../common/components/inline-svg/Stop"
+import Game from "../../game/Game"
 import { EventHandler } from "./EventHandler"
 import { editorTunnel } from "./Tunnel"
 import { Camera } from "./components/Camera"
 import { Background } from "./components/background/Background"
 import { GamemodeSelect } from "./components/gamemode/GamemodeSelect"
-import { Navbar } from "./components/navbar/Navbar"
+import { EditorNavbar } from "./components/navbar/Navbar"
 import { Level } from "./entities/level/Level"
 import { Rocket } from "./entities/rocket/Rocket"
 import { Shape } from "./entities/shape/Shape"
 import { EntityState } from "./models/EntityState"
+import { exportModel } from "./models/exportModel"
 import { importModelString } from "./models/importModel"
 import { ProvideWorldStore, useEditorStore } from "./store/EditorStore"
 import { ProvideEventStore } from "./store/EventStore"
@@ -22,25 +26,87 @@ export function Editor() {
     return (
         <ProvideWorldStore world={importModelString(mapRaw)}>
             <ProvideEventStore>
-                <div className="relative h-max w-full grow">
-                    <div className="absolute bottom-0 left-0 right-0 top-0">
-                        <Canvas className="" style={{}}>
-                            <Camera />
-
-                            <Entities />
-                            <EventHandler />
-
-                            <Background />
-                        </Canvas>
-                    </div>
-
-                    <editorTunnel.Out />
-
-                    <Navbar />
-                    <GamemodeSelect />
-                </div>
+                <InnerEditor />
             </ProvideEventStore>
         </ProvideWorldStore>
+    )
+}
+
+function InnerEditor() {
+    const running = useEditorStore(store => store.running)
+
+    if (running) {
+        return <GameInEditor />
+    }
+
+    return (
+        <>
+            <div className="relative h-max w-full grow">
+                <div className="absolute bottom-0 left-0 right-0 top-0">
+                    <Canvas className="" style={{}}>
+                        <Camera />
+
+                        <Entities />
+                        <EventHandler />
+
+                        <Background />
+                    </Canvas>
+                </div>
+
+                <editorTunnel.Out />
+
+                <EditorNavbar />
+                <GamemodeSelect />
+            </div>
+        </>
+    )
+}
+
+function GameInEditor() {
+    const gamemode = useEditorStore(store => store.gamemode)
+
+    const world = useEditorStore(store => store.state).world
+    const worldModel = exportModel(world)
+
+    const stop = useEditorStore(store => store.stop)
+
+    if (gamemode === undefined) {
+        useEffect(() => {
+            stop()
+        }, [])
+
+        return null
+    }
+
+    return (
+        <div className="absolute bottom-0 left-0 right-0 top-0 ">
+            <Game world={worldModel} gamemode={gamemode.name} />
+
+            <div
+                className="absolute left-0 top-0 p-4"
+                style={{
+                    touchAction: "none",
+                    userSelect: "none",
+
+                    // Prevent canvas selection on ios
+                    // https://github.com/playcanvas/editor/issues/160
+                    WebkitTouchCallout: "none",
+                    WebkitUserSelect: "none",
+                    WebkitTapHighlightColor: "rgba(255,255,255,0)",
+                }}
+            >
+                <Navbar>
+                    <button
+                        className="btn btn-square btn-ghost"
+                        onClick={() => {
+                            stop()
+                        }}
+                    >
+                        <StopSvg width="16" height="16" />
+                    </button>
+                </Navbar>
+            </div>
+        </div>
     )
 }
 

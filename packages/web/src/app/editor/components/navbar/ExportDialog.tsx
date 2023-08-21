@@ -43,7 +43,7 @@ export function ExportDialog(props: { open: boolean; closeDialog: () => void }) 
             ></textarea>
 
             <div className="space-x-4">
-                <button className="btn" onClick={onCopy}>
+                <button className="btn btn-success" onClick={onCopy}>
                     Copy
                 </button>
                 <button className="btn btn-ghost" onClick={props.closeDialog}>

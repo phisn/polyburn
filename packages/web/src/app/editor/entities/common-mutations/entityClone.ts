@@ -8,6 +8,9 @@ export const entityClone = (entity: EntityState, group?: string) => (world: Worl
     deepcopy.id = id
     deepcopy.group = group
 
+    deepcopy.position.x += 1
+    deepcopy.position.y += 1
+
     return {
         do() {
             world.entities.set(id, deepcopy)

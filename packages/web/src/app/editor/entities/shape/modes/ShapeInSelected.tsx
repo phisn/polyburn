@@ -217,7 +217,11 @@ export function ShapeInSelected(props: {
             )}
 
             {showShapeDialog && (
-                <EntityContextMenu state={props.state} position={showShapeDialog} />
+                <EntityContextMenu
+                    state={props.state}
+                    position={showShapeDialog}
+                    onCancel={() => setShowShapeDialog(undefined)}
+                />
             )}
         </>
     )

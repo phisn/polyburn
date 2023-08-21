@@ -1,7 +1,7 @@
 import { Transition } from "@headlessui/react"
 import { Fragment, useState, useTransition } from "react"
 import { WorldModel } from "runtime/proto/world"
-import Navbar from "../../common/components/Navbar"
+import { Navbar } from "../../common/components/Navbar"
 import { BackArrowSvg } from "../../common/components/inline-svg/BackArrow"
 import { StopSvg } from "../../common/components/inline-svg/Stop"
 import Game from "../../game/Game"

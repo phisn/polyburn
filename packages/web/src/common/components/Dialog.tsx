@@ -20,7 +20,7 @@ function Dialog(props: DialogProps) {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-black bg-opacity-50" />
+                    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-[2px]" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 overflow-y-auto">
@@ -34,7 +34,7 @@ function Dialog(props: DialogProps) {
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <NativeDialog.Panel className="bg-base-200 w-full max-w-lg space-y-4 rounded-xl p-6">
+                            <NativeDialog.Panel className="bg-base-300 w-full max-w-lg space-y-4 rounded-xl bg-opacity-70 p-6 backdrop-blur-xl">
                                 {props.children}
                             </NativeDialog.Panel>
                         </Transition.Child>

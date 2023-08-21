@@ -1,8 +1,8 @@
+import { Vector2 } from "@dimforge/rapier2d-compat"
 import { f16round, getFloat16, setFloat16 } from "@petamoriken/float16"
-import { Point } from "./Point"
 
 export interface ShapeVertex {
-    position: Point
+    position: Vector2
     color: number
 }
 
@@ -60,10 +60,7 @@ export function bytesToVertices(bytes: Uint8Array) {
         aggregated.y += getFloat16(view, i + 2, true)
 
         vertices.push({
-            position: {
-                x: aggregated.x,
-                y: aggregated.y,
-            },
+            position: new Vector2(aggregated.x, aggregated.y),
             color: view.getUint32(i + 4, true),
         })
     }

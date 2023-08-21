@@ -96,7 +96,7 @@ export function LevelInNone(props: {
                     src={graphicEntry.src}
                     scale={graphicEntry.scale}
                     fillMaterial={
-                        hovered
+                        hovered || showLevelDialog
                             ? new MeshBasicMaterial({
                                   color: "#ffff55",
                               })
@@ -106,13 +106,17 @@ export function LevelInNone(props: {
             </Suspense>
 
             {showLevelDialog && (
-                <EntityContextMenu state={props.state} position={showLevelDialog} />
+                <EntityContextMenu
+                    state={props.state}
+                    position={showLevelDialog}
+                    onCancel={() => setShowLevelDialog(undefined)}
+                />
             )}
 
             <LevelCameraLines
-                dashed={!hovered}
+                dashed={!(hovered || showLevelDialog)}
                 state={props.state}
-                color={hovered ? LevelCameraHoverColor : LevelCameraColor}
+                color={hovered || showLevelDialog ? LevelCameraHoverColor : LevelCameraColor}
                 priority={Priority.Normal + SubPriority.Level}
             />
         </>

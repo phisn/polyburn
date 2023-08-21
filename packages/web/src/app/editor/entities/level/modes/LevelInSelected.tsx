@@ -134,7 +134,11 @@ export function LevelInSelected(props: {
             </Suspense>
 
             {showLevelDialog && (
-                <EntityContextMenu state={props.state} position={showLevelDialog} />
+                <EntityContextMenu
+                    state={props.state}
+                    position={showLevelDialog}
+                    onCancel={() => setShowLevelDialog(undefined)}
+                />
             )}
 
             {cameraHovered?.side === "all" && (

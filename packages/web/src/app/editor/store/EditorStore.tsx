@@ -23,11 +23,16 @@ interface WorldStore {
     canUndo: boolean
     canRedo: boolean
 
+    running: boolean
+
     mutation: (mutation: MutationGenerator) => void
     redo: () => void
     undo: () => void
 
     selectGamemode: (gamemode: GamemodeState) => void
+
+    run: () => void
+    stop: () => void
 }
 
 const createEditorStore = (world: WorldState) =>
@@ -39,6 +44,7 @@ const createEditorStore = (world: WorldState) =>
         },
         canUndo: false,
         canRedo: false,
+        running: false,
         mutation(generator) {
             while (generator instanceof Function) {
                 generator = generator(get().state.world)
@@ -92,6 +98,14 @@ const createEditorStore = (world: WorldState) =>
         selectGamemode(gamemode: GamemodeState) {
             console.log("select gamemode", gamemode.name)
             set({ gamemode })
+        },
+
+        run() {
+            set({ running: true })
+        },
+
+        stop() {
+            set({ running: false })
         },
     }))
 

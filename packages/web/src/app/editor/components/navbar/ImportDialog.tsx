@@ -62,7 +62,7 @@ export function ImportDialog(props: { open: boolean; closeDialog: () => void }) 
             />
 
             <div className="space-x-4">
-                <button className="btn" onClick={onImport}>
+                <button className="btn btn-success" onClick={onImport}>
                     Import
                 </button>
                 <button className="btn btn-ghost" onClick={props.closeDialog}>

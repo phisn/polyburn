@@ -4,10 +4,12 @@ import { Euler, MeshBasicMaterial, Object3D } from "three"
 import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
+import { Priority, SubPriority } from "../../../models/Priority"
 import { isPointInsideEntity } from "../../../models/isPointInsideEntity"
-import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { LevelMode } from "../Level"
 import { LevelCameraLines } from "../LevelCameraLines"
+import { LevelCameraColor, LevelCameraHoverColor } from "../LevelColors"
 import { LevelState } from "../LevelState"
 
 export interface LevelModeNone {
@@ -76,7 +78,7 @@ export function LevelInNone(props: {
                 return ConsumeEvent
             }
         },
-        Priority.Normal,
+        Priority.Normal + SubPriority.Level,
         true,
     )
 
@@ -85,7 +87,11 @@ export function LevelInNone(props: {
             <Suspense>
                 <Svg
                     ref={svgRef as any}
-                    position={[props.state.position.x, props.state.position.y, 0]}
+                    position={[
+                        props.state.position.x,
+                        props.state.position.y,
+                        Priority.Normal + SubPriority.Level,
+                    ]}
                     rotation={new Euler(0, 0, props.state.rotation)}
                     src={graphicEntry.src}
                     scale={graphicEntry.scale}
@@ -104,10 +110,10 @@ export function LevelInNone(props: {
             )}
 
             <LevelCameraLines
-                dashed
+                dashed={!hovered}
                 state={props.state}
-                color={hovered ? "purple" : "orange"}
-                priority={Priority.Normal}
+                color={hovered ? LevelCameraHoverColor : LevelCameraColor}
+                priority={Priority.Normal + SubPriority.Level}
             />
         </>
     )

@@ -4,11 +4,13 @@ import { Euler, Object3D } from "three"
 import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
+import { Priority, SubPriority } from "../../../models/Priority"
 import { isPointInsideEntity } from "../../../models/isPointInsideEntity"
-import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { CameraSide } from "../CameraSide"
 import { LevelMode } from "../Level"
 import { LevelCameraLines } from "../LevelCameraLines"
+import { LevelCameraDragColor, LevelCameraSelectColor } from "../LevelColors"
 import { LevelState, findCameraLineCloseTo } from "../LevelState"
 
 export interface LevelModeSelected {
@@ -111,7 +113,7 @@ export function LevelInSelected(props: {
                 }
             }
         },
-        Priority.Selected,
+        Priority.Selected + SubPriority.Level,
         true,
     )
 
@@ -120,7 +122,11 @@ export function LevelInSelected(props: {
             <Suspense>
                 <Svg
                     ref={svgRef as any}
-                    position={[props.state.position.x, props.state.position.y, 0]}
+                    position={[
+                        props.state.position.x,
+                        props.state.position.y,
+                        Priority.Selected + SubPriority.Level,
+                    ]}
                     rotation={new Euler(0, 0, props.state.rotation)}
                     src={graphicEntry.src}
                     scale={graphicEntry.scale}
@@ -134,16 +140,18 @@ export function LevelInSelected(props: {
             {cameraHovered?.side === "all" && (
                 <LevelCameraLines
                     state={props.state}
-                    color={"orange"}
-                    priority={Priority.Selected}
+                    color={"red"}
+                    priority={Priority.Selected + SubPriority.Level}
                 />
             )}
             {cameraHovered?.side !== "all" && (
                 <LevelCameraLines
                     state={props.state}
-                    color={"purple"}
-                    priority={Priority.Selected}
-                    colorCustom={cameraHovered?.side && { [cameraHovered.side]: "orange" }}
+                    color={LevelCameraSelectColor}
+                    priority={Priority.Selected + SubPriority.Level}
+                    colorCustom={
+                        cameraHovered?.side && { [cameraHovered.side]: LevelCameraDragColor }
+                    }
                 />
             )}
         </>

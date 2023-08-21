@@ -8,8 +8,9 @@ import {
     snapDistance,
 } from "../../../../../common/Values"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
+import { Priority, SubPriority } from "../../../models/Priority"
 import { useEditorStore } from "../../../store/EditorStore"
-import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import {
@@ -48,7 +49,11 @@ export function ShapeInSelected(props: {
     function showMarker(point: Point, color: string) {
         markerMaterialRef.current.color.set(color)
         markerRef.current.visible = true
-        markerRef.current.position.set(point.x, point.y, Priority.Selected + 0.001)
+        markerRef.current.position.set(
+            point.x,
+            point.y,
+            Priority.Selected + SubPriority.Shape + 0.001,
+        )
     }
 
     function startVertexMode(vertexIndex: number, position: Point, color: number, insert: boolean) {
@@ -171,14 +176,18 @@ export function ShapeInSelected(props: {
         } else if (event.leftButtonClicked) {
             props.setMode({ type: "none" })
         }
-    }, Priority.Normal)
+    }, Priority.Selected + SubPriority.Shape)
 
     return (
         <>
             <mesh
                 frustumCulled={false}
                 geometry={geometryRef.current}
-                position={[props.state.position.x, props.state.position.y, Priority.Selected]}
+                position={[
+                    props.state.position.x,
+                    props.state.position.y,
+                    Priority.Selected + SubPriority.Shape,
+                ]}
             >
                 <meshBasicMaterial vertexColors />
             </mesh>
@@ -194,7 +203,7 @@ export function ShapeInSelected(props: {
                     position={[
                         vertex.position.x + props.state.position.x,
                         vertex.position.y + props.state.position.y,
-                        Priority.Selected,
+                        Priority.Selected + SubPriority.Shape,
                     ]}
                 />
             ))}

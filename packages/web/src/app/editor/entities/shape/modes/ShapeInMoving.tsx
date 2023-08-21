@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react"
 import { Mesh } from "three"
+import { Priority, SubPriority } from "../../../models/Priority"
 import { useEditorStore } from "../../../store/EditorStore"
-import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import { ShapeState } from "../ShapeState"
@@ -51,7 +52,7 @@ export function ShapeInMoving(props: {
                 meshRef.current.position.set(
                     positionRef.current.x,
                     positionRef.current.y,
-                    Priority.Action,
+                    Priority.Action + SubPriority.Shape,
                 )
 
                 window.document.body.style.cursor = "grabbing"
@@ -68,7 +69,7 @@ export function ShapeInMoving(props: {
 
             return ConsumeEvent
         },
-        Priority.Action,
+        Priority.Action + SubPriority.Shape,
         true,
     )
 
@@ -78,7 +79,11 @@ export function ShapeInMoving(props: {
                 frustumCulled={false}
                 ref={meshRef}
                 geometry={geometryRef.current}
-                position={[positionRef.current.x, positionRef.current.y, Priority.Action]}
+                position={[
+                    positionRef.current.x,
+                    positionRef.current.y,
+                    Priority.Action + SubPriority.Shape,
+                ]}
             >
                 <meshBasicMaterial vertexColors />
             </mesh>

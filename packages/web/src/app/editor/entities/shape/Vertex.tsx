@@ -39,14 +39,17 @@ export function VertexContext(props: {
 
     useEffect(() => {
         const listener = (event: KeyboardEvent) => {
+            console.log(event)
             if (event.ctrlKey) {
                 switch (event.key) {
                     case "c":
+                        console.log("copying color")
                         navigator.clipboard.writeText(color)
 
                         break
 
                     case "v":
+                        console.log("pasting color")
                         navigator.clipboard.readText().then(text => {
                             const trimmed = text.trim()
 

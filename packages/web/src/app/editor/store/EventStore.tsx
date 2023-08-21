@@ -115,10 +115,3 @@ export function useEventListener(callback: Callback, priority: number, triggerPr
 export function useEventDispatch() {
     return useContext(Context).event
 }
-
-export enum Priority {
-    Fallback = -1,
-    Normal = 0,
-    Selected = 1,
-    Action = 2,
-}

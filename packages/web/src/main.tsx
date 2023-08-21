@@ -65,6 +65,29 @@ const wm = WorldModel.create({
                         ),
                     }
 
+                    const vertices = bytesToVertices(r.vertices)
+
+                    let maxdx = 0
+                    let maxdy = 0
+
+                    vertices.forEach((v, i) => {
+                        if (v.point.x - e.vertices[i].x > maxdx) {
+                            maxdx = v.point.x - e.vertices[i].x
+                        }
+
+                        if (v.point.y - e.vertices[i].y > maxdy) {
+                            maxdy = v.point.y - e.vertices[i].y
+                        }
+
+                        console.log(
+                            `dx: ${v.point.x - e.vertices[i].x}, dy: ${
+                                v.point.y - e.vertices[i].y
+                            }`,
+                        )
+                    })
+
+                    console.log("maxdx: " + maxdx + ", maxdy: " + maxdy)
+
                     i += 12
 
                     console.log("Got shape with vertices: " + e.vertices.length)
@@ -105,6 +128,28 @@ const wm = WorldModel.create({
 
 const uncoded = WorldModel.decode(WorldModel.encode(wm).finish())
 
+async function bufferToBase64(buffer: any) {
+    // use a FileReader to generate a base64 data URI:
+    const base64url = (await new Promise(r => {
+        const reader = new FileReader()
+        reader.onload = () => r(reader.result)
+        reader.readAsDataURL(new Blob([buffer]))
+    })) as any
+    // remove the `data:...;base64,` part from the start
+    return base64url.slice(base64url.indexOf(",") + 1)
+}
+
+const u8 = WorldModel.encode(wm).finish()
+
+console.log("length: " + u8.length)
+
+bufferToBase64(u8).then(b64 => {
+    console.log("Got b64: " + b64)
+    console.log("from " + raw.length + " bytes, to " + b64.length + " bytes")
+})
+*/
+
+/*
 console.log(
     "are equal" +
         (JSON.stringify(wm.groups["normal"].shapes[0].vertices) ===
@@ -139,26 +184,6 @@ console.log(
 console.log(JSON.stringify(v2))
 
 console.log("i: " + i + ", k: " + k)
-
-async function bufferToBase64(buffer: any) {
-    // use a FileReader to generate a base64 data URI:
-    const base64url = (await new Promise(r => {
-        const reader = new FileReader()
-        reader.onload = () => r(reader.result)
-        reader.readAsDataURL(new Blob([buffer]))
-    })) as any
-    // remove the `data:...;base64,` part from the start
-    return base64url.slice(base64url.indexOf(",") + 1)
-}
-
-const u8 = WorldModel.encode(wm).finish()
-
-console.log("length: " + u8.length)
-
-bufferToBase64(u8).then(b64 => {
-    console.log("Got b64: " + b64)
-    console.log("from " + raw.length + " bytes, to " + b64.length + " bytes")
-})
 
 const vertex1 = {
     point: { x: 2, y: 2 },

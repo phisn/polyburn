@@ -3,10 +3,12 @@ import { Suspense, useRef } from "react"
 import { Euler } from "three"
 import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
+import { Priority, SubPriority } from "../../../models/Priority"
 import { useEditorStore } from "../../../store/EditorStore"
-import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { LevelMode } from "../Level"
 import { LevelCameraLines, LevelCameraLinesRef } from "../LevelCameraLines"
+import { LevelCameraDragColor, LevelCameraSelectColor } from "../LevelColors"
 import { LevelState } from "../LevelState"
 import { levelChangeCameraBounds } from "../mutations/levelChangeCameraBounds"
 
@@ -73,7 +75,7 @@ export function LevelInMovingCamera(props: {
 
             return ConsumeEvent
         },
-        Priority.Action,
+        Priority.Action + SubPriority.Level,
         true,
     )
 
@@ -81,7 +83,11 @@ export function LevelInMovingCamera(props: {
         <>
             <Suspense>
                 <Svg
-                    position={[props.state.position.x, props.state.position.y, 0]}
+                    position={[
+                        props.state.position.x,
+                        props.state.position.y,
+                        Priority.Action + SubPriority.Level,
+                    ]}
                     rotation={new Euler(0, 0, props.state.rotation)}
                     src={graphicEntry.src}
                     scale={graphicEntry.scale}
@@ -90,16 +96,16 @@ export function LevelInMovingCamera(props: {
 
             <LevelCameraLines
                 ref={cameraLinesRef}
-                color={"orange"}
+                color={LevelCameraDragColor}
                 state={props.state}
-                priority={Priority.Action}
+                priority={Priority.Action + SubPriority.Level}
             />
 
             <LevelCameraLines
-                color={"purple"}
+                color={LevelCameraSelectColor}
                 dashed
                 state={props.state}
-                priority={Priority.Selected}
+                priority={Priority.Selected + SubPriority.Level}
             />
         </>
     )

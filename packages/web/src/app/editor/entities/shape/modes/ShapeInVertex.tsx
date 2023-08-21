@@ -6,8 +6,9 @@ import {
     highlightColor,
     highlightOverrideColor,
 } from "../../../../../common/Values"
+import { Priority, SubPriority } from "../../../models/Priority"
 import { useEditorStore } from "../../../store/EditorStore"
-import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import {
@@ -86,7 +87,7 @@ export function ShapeInVertex(props: {
         markerRef.current.position.set(
             position.x + props.state.position.x,
             position.y + props.state.position.y,
-            Priority.Action,
+            Priority.Action + SubPriority.Shape,
         )
 
         let duplicateIndex = verticesRef.current.findIndex(
@@ -106,7 +107,7 @@ export function ShapeInVertex(props: {
                 markerRef.current.position.set(
                     previous.x + props.state.position.x,
                     previous.y + props.state.position.y,
-                    Priority.Action,
+                    Priority.Action + SubPriority.Shape,
                 )
 
                 document.body.style.cursor = "not-allowed"
@@ -139,7 +140,7 @@ export function ShapeInVertex(props: {
                 markerRef.current.position.set(
                     previous.x + props.state.position.x,
                     previous.y + props.state.position.y,
-                    Priority.Action,
+                    Priority.Action + SubPriority.Shape,
                 )
 
                 document.body.style.cursor = "not-allowed"
@@ -180,7 +181,7 @@ export function ShapeInVertex(props: {
 
             return ConsumeEvent
         },
-        Priority.Action,
+        Priority.Action + SubPriority.Shape,
         true,
     )
 
@@ -189,7 +190,11 @@ export function ShapeInVertex(props: {
             <mesh
                 frustumCulled={false}
                 geometry={geometryRef.current}
-                position={[props.state.position.x, props.state.position.y, Priority.Action]}
+                position={[
+                    props.state.position.x,
+                    props.state.position.y,
+                    Priority.Action + SubPriority.Shape,
+                ]}
             >
                 <meshBasicMaterial vertexColors />
             </mesh>
@@ -198,7 +203,7 @@ export function ShapeInVertex(props: {
                 position={[
                     verticesRef.current[vertexIndexRef.current].position.x + props.state.position.x,
                     verticesRef.current[vertexIndexRef.current].position.y + props.state.position.y,
-                    Priority.Action,
+                    Priority.Action + SubPriority.Shape,
                 ]}
                 ref={markerRef}
             >

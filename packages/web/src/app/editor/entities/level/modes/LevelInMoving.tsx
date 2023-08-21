@@ -4,10 +4,12 @@ import { EntityType } from "runtime/proto/world"
 import { Euler, Object3D } from "three"
 import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { findLocationForEntity } from "../../../models/EntityWithLocation"
+import { Priority, SubPriority } from "../../../models/Priority"
 import { useEditorStore } from "../../../store/EditorStore"
-import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { LevelMode } from "../Level"
 import { LevelCameraLines } from "../LevelCameraLines"
+import { LevelCameraSelectColor } from "../LevelColors"
 import { LevelState } from "../LevelState"
 import { levelMove } from "../mutations/levelMove"
 
@@ -68,7 +70,7 @@ export function LevelInMoving(props: {
                 svgRef.current?.position.set(
                     positionRef.current.position.x,
                     positionRef.current.position.y,
-                    Priority.Action,
+                    Priority.Action + SubPriority.Level,
                 )
 
                 svgRef.current?.rotation.set(0, 0, positionRef.current.rotation)
@@ -76,7 +78,7 @@ export function LevelInMoving(props: {
 
             return ConsumeEvent
         },
-        Priority.Action,
+        Priority.Action + SubPriority.Level,
         true,
     )
 
@@ -85,7 +87,11 @@ export function LevelInMoving(props: {
             <Suspense>
                 <Svg
                     ref={svgRef as any}
-                    position={[positionRef.current.position.x, positionRef.current.position.y, 0]}
+                    position={[
+                        positionRef.current.position.x,
+                        positionRef.current.position.y,
+                        Priority.Action + SubPriority.Level,
+                    ]}
                     rotation={new Euler(0, 0, positionRef.current.rotation)}
                     src={graphicEntry.src}
                     scale={graphicEntry.scale}
@@ -93,9 +99,9 @@ export function LevelInMoving(props: {
             </Suspense>
 
             <LevelCameraLines
-                color={props.mode.previousMode.type === "none" ? "purple" : "green"}
+                color={LevelCameraSelectColor}
                 state={props.state}
-                priority={Priority.Action}
+                priority={Priority.Action + SubPriority.Level}
             />
         </>
     )

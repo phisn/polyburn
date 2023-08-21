@@ -10,7 +10,7 @@ export function ShapeGraphic(props: { entity: Entity<WebappComponents> }) {
 
     const threeShape = new THREE.Shape(
         props.entity.components.shape.vertices.map(
-            vertex => new THREE.Vector2(vertex.point.x, vertex.point.y),
+            vertex => new THREE.Vector2(vertex.position.x, vertex.position.y),
         ),
     )
 

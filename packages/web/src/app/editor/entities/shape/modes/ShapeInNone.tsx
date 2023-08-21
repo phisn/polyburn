@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
-import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { Priority, SubPriority } from "../../../models/Priority"
+import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import { ShapeState, isPointInsideShape } from "../ShapeState"
@@ -61,14 +62,18 @@ export function ShapeInNone(props: {
 
             return ConsumeEvent
         }
-    }, Priority.Normal)
+    }, Priority.Normal + SubPriority.Shape)
 
     return (
         <>
             <mesh
                 frustumCulled={false}
                 geometry={geometryRef.current}
-                position={[props.state.position.x, props.state.position.y, Priority.Normal]}
+                position={[
+                    props.state.position.x,
+                    props.state.position.y,
+                    Priority.Normal + SubPriority.Shape,
+                ]}
             >
                 <meshBasicMaterial color={materialColor()} vertexColors />
             </mesh>

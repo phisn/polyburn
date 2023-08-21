@@ -23,7 +23,7 @@ export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shap
 
     /*
     const vertices = shape.vertices.map(v => ({
-        point: { x: v.x, y: v.y },
+        position: { x: v.x, y: v.y },
         color: v.color ?? 0x000000,
     }))
     */
@@ -36,18 +36,18 @@ export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shap
 }
 
 function verticesForShape(vertices: ShapeVertex[]): [Float32Array, number, number] {
-    const left = vertices.reduce((acc, vertex) => Math.min(acc, vertex.point.x), Infinity)
-    const top = vertices.reduce((acc, vertex) => Math.min(acc, vertex.point.y), Infinity)
+    const left = vertices.reduce((acc, vertex) => Math.min(acc, vertex.position.x), Infinity)
+    const top = vertices.reduce((acc, vertex) => Math.min(acc, vertex.position.y), Infinity)
 
     const verticesRaw = new Float32Array(vertices.length * 2 + 2)
 
     vertices.forEach((vertex, i) => {
-        verticesRaw[i * 2] = vertex.point.x - left
-        verticesRaw[i * 2 + 1] = vertex.point.y - top
+        verticesRaw[i * 2] = vertex.position.x - left
+        verticesRaw[i * 2 + 1] = vertex.position.y - top
     })
 
-    verticesRaw[verticesRaw.length - 2] = vertices[0].point.x - left
-    verticesRaw[verticesRaw.length - 1] = vertices[0].point.y - top
+    verticesRaw[verticesRaw.length - 2] = vertices[0].position.x - left
+    verticesRaw[verticesRaw.length - 1] = vertices[0].position.y - top
 
     return [verticesRaw, top, left]
 }

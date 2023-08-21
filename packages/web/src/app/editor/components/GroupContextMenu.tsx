@@ -4,14 +4,16 @@ import { Point } from "runtime/src/model/Point"
 import { Vector3 } from "three"
 import { ContextMenu } from "../../../common/components/ContextMenu"
 import { BackArrowSvg } from "../../../common/components/inline-svg/BackArrow"
+import { BoxArrowUpRightSvg } from "../../../common/components/inline-svg/BoxArrowUpRight"
 import { ListTask } from "../../../common/components/inline-svg/ListTask"
 import { X } from "../../../common/components/inline-svg/X"
+import { entityClone } from "../entities/common-mutations/entityClone"
 import { entityRemove } from "../entities/common-mutations/entityRemove"
 import { entitySetGroup } from "../entities/common-mutations/entitySetGroup"
 import { EntityState } from "../models/EntityState"
+import { Priority } from "../models/Priority"
 import { WorldState } from "../models/WorldState"
 import { MutationGenerator, useEditorStore } from "../store/EditorStore"
-import { Priority } from "../store/EventStore"
 
 export function EntityContextMenu(props: { state: EntityState; position: Point }) {
     const world = useEditorStore(store => store.state).world
@@ -68,6 +70,12 @@ export function EntityContextMenuRaw(props: {
                         <a onClick={() => setGroupMenu(true)}>
                             <ListTask width="16" height="16" />
                             <div>Group</div>
+                        </a>
+                    </li>
+                    <li>
+                        <a onClick={() => props.dispatch(entityClone(props.state))}>
+                            <BoxArrowUpRightSvg width="16" height="16" />
+                            <div>Clone</div>
                         </a>
                     </li>
                     <li>

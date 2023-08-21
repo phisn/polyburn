@@ -1,8 +1,9 @@
 import { Html } from "@react-three/drei"
 import { useState } from "react"
 import { Point } from "runtime/src/model/Point"
+import { Priority } from "../../models/Priority"
 import { useEditorStore } from "../../store/EditorStore"
-import { ConsumeEvent, Priority, useEventListener } from "../../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../../store/EventStore"
 import { CreateEntityMenu } from "./CreateEntityMenu"
 
 interface ModeNone {

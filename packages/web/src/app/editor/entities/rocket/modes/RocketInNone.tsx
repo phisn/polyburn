@@ -4,8 +4,9 @@ import { Euler, MeshBasicMaterial, Object3D } from "three"
 import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
+import { Priority, SubPriority } from "../../../models/Priority"
 import { isPointInsideEntity } from "../../../models/isPointInsideEntity"
-import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { RocketMode } from "../Rocket"
 import { RocketState } from "../RocketState"
 
@@ -72,7 +73,7 @@ export function RocketInNone(props: {
                 return ConsumeEvent
             }
         },
-        Priority.Normal,
+        Priority.Normal + SubPriority.Rocket,
         true,
     )
 
@@ -81,7 +82,11 @@ export function RocketInNone(props: {
             <Suspense>
                 <Svg
                     ref={svgRef as any}
-                    position={[props.state.position.x, props.state.position.y, 0]}
+                    position={[
+                        props.state.position.x,
+                        props.state.position.y,
+                        Priority.Normal + SubPriority.Rocket,
+                    ]}
                     rotation={new Euler(0, 0, props.state.rotation)}
                     src={graphicEntry.src}
                     scale={graphicEntry.scale}

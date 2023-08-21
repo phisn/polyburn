@@ -2,7 +2,6 @@ import { Line } from "@react-three/drei"
 import { forwardRef, Fragment, useImperativeHandle, useRef } from "react"
 import { Point } from "runtime/src/model/Point"
 import { Line2 } from "three-stdlib"
-import { Priority } from "../../store/EventStore"
 import { CameraSide, cameraSides } from "./CameraSide"
 import { cameraLinesFromLevel, LevelState } from "./LevelState"
 
@@ -16,7 +15,7 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
         state: LevelState
         color: string
         colorCustom?: { [key in string]: string }
-        priority: Priority
+        priority: number
         dashed?: boolean
         alwaysShowDashed?: CameraSide
     },

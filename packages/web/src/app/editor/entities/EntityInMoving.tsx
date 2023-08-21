@@ -1,8 +1,9 @@
 import { useRef } from "react"
 import { Object3D } from "three"
 import { EntityState } from "../models/EntityState"
+import { Priority } from "../models/Priority"
 import { useEditorStore } from "../store/EditorStore"
-import { ConsumeEvent, Priority, useEventListener } from "../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../store/EventStore"
 
 export interface EntityModeMoving {
     type: "moving"

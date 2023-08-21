@@ -5,8 +5,9 @@ import { Euler, Object3D } from "three"
 import { entityGraphicRegistry } from "../../../../../game/runtime-view/graphics/EntityGraphicRegistry"
 import { EntityGraphicType } from "../../../../../game/runtime-view/graphics/EntityGraphicType"
 import { findLocationForEntity } from "../../../models/EntityWithLocation"
+import { Priority, SubPriority } from "../../../models/Priority"
 import { useEditorStore } from "../../../store/EditorStore"
-import { ConsumeEvent, Priority, useEventListener } from "../../../store/EventStore"
+import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { RocketMode } from "../Rocket"
 import { RocketState } from "../RocketState"
 import { rocketMove } from "../mutations/rocketMove"
@@ -68,7 +69,7 @@ export function RocketInMoving(props: {
                 svgRef.current?.position.set(
                     positionRef.current.position.x,
                     positionRef.current.position.y,
-                    Priority.Action,
+                    Priority.Action + SubPriority.Rocket,
                 )
 
                 svgRef.current?.rotation.set(0, 0, positionRef.current.rotation)
@@ -76,7 +77,7 @@ export function RocketInMoving(props: {
 
             return ConsumeEvent
         },
-        Priority.Action,
+        Priority.Action + SubPriority.Rocket,
         true,
     )
 
@@ -85,7 +86,11 @@ export function RocketInMoving(props: {
             <Suspense>
                 <Svg
                     ref={svgRef as any}
-                    position={[positionRef.current.position.x, positionRef.current.position.y, 0]}
+                    position={[
+                        positionRef.current.position.x,
+                        positionRef.current.position.y,
+                        Priority.Action + SubPriority.Rocket,
+                    ]}
                     rotation={new Euler(0, 0, positionRef.current.rotation)}
                     src={graphicEntry.src}
                     scale={graphicEntry.scale}

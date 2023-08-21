@@ -1,6 +1,6 @@
 import { Point } from "runtime/src/model/Point"
-import { BufferGeometry, Float32BufferAttribute, ShapeUtils } from "three"
-import { ShapeVertex } from "./ShapeState"
+import { ShapeVertex } from "runtime/src/model/ShapeModel"
+import { BufferGeometry, Color, Float32BufferAttribute, ShapeUtils } from "three"
 
 function IterateInOrder(vertices: Point[], callback: (i: number, vertex: Point) => void) {
     for (let i = 0; i < vertices.length; i++) {
@@ -37,14 +37,21 @@ export class MutatableShapeGeometry extends BufferGeometry {
         const buffer = new Float32Array(vertices.length * 3)
         const bufferColors = new Float32Array(vertices.length * 3)
 
+        const color = new Color()
         iterate(vertices, (i, vertex) => {
             buffer[i * 3 + 0] = vertex.x
             buffer[i * 3 + 1] = vertex.y
             buffer[i * 3 + 2] = 0
 
-            bufferColors[i * 3 + 0] = ((shapeVertices[i].color >> 16) & 0xff) / 255
-            bufferColors[i * 3 + 1] = ((shapeVertices[i].color >> 8) & 0xff) / 255
-            bufferColors[i * 3 + 2] = ((shapeVertices[i].color >> 0) & 0xff) / 255
+            color.r = ((shapeVertices[i].color >> 16) & 0xff) / 255
+            color.g = ((shapeVertices[i].color >> 8) & 0xff) / 255
+            color.b = ((shapeVertices[i].color >> 0) & 0xff) / 255
+
+            color.convertSRGBToLinear()
+
+            bufferColors[i * 3 + 0] = color.r
+            bufferColors[i * 3 + 1] = color.g
+            bufferColors[i * 3 + 2] = color.b
         })
 
         this.setIndex(indices)

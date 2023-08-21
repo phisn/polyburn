@@ -2,7 +2,8 @@ import { OrthographicCamera } from "@react-three/drei"
 import { useThree } from "@react-three/fiber"
 import { useEffect, useRef, useState } from "react"
 import { OrthographicCamera as ThreeOrthographicCamera } from "three"
-import { ConsumeEvent, Priority, useEventListener } from "../store/EventStore"
+import { Priority } from "../models/Priority"
+import { ConsumeEvent, useEventListener } from "../store/EventStore"
 
 interface ModeNone {
     type: "none"

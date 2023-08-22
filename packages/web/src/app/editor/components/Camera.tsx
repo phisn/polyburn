@@ -25,6 +25,7 @@ export function Camera() {
 
     const canvas = useThree(state => state.gl.domElement)
     const canvasSize = useThree(state => state.size)
+    const invalidate = useThree(state => state.invalidate)
 
     const [mode, setMode] = useState<Mode>({ type: "none" })
 
@@ -102,6 +103,8 @@ export function Camera() {
 
             raw.stopPropagation()
             raw.preventDefault()
+
+            invalidate()
         }
 
         canvas.addEventListener("wheel", onScroll)

@@ -40,6 +40,8 @@ export function EventHandler() {
     const camera = useThree(state => state.camera)
     const pointer = useThree(state => state.pointer)
 
+    const invalidate = useThree(state => state.invalidate)
+
     const position = new Vector3()
 
     const dispatchEvent = useEventDispatch()
@@ -99,6 +101,8 @@ export function EventHandler() {
                 raw.stopPropagation()
                 raw.preventDefault()
             }
+
+            invalidate()
         }
 
         canvas.addEventListener("pointerdown", onPointerEvent)

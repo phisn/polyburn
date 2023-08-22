@@ -43,7 +43,7 @@ function InnerEditor() {
         <>
             <div className="relative h-max w-full grow">
                 <div className="absolute bottom-0 left-0 right-0 top-0">
-                    <Canvas className="" style={{}}>
+                    <Canvas frameloop="demand">
                         <Camera />
 
                         <Entities />

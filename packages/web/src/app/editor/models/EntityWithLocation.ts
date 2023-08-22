@@ -1,7 +1,7 @@
 import { EntityType } from "runtime/proto/world"
-import { entityRegistry } from "runtime/src/model/EntityRegistry"
 import { Point } from "runtime/src/model/Point"
 import { changeAnchor } from "runtime/src/model/changeAnchor"
+import { entityRegistry } from "runtime/src/model/entityRegistry"
 import { snapDistance } from "../../../common/Values"
 import { EditorEvent } from "../EventHandler"
 import { ShapeState, findClosestEdge } from "../entities/shape/ShapeState"

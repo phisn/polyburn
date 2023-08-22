@@ -1,7 +1,7 @@
 import { BrowserView } from "react-device-detect"
 import { Link } from "react-router-dom"
-import { PencilSquare } from "../common/components/inline-svg/PencilSquare"
-import { Person } from "../common/components/inline-svg/Person"
+import { PencilSquare } from "../../common/components/inline-svg/PencilSquare"
+import { Person } from "../../common/components/inline-svg/Person"
 
 export function NavbarUtility() {
     return (

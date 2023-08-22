@@ -8,7 +8,7 @@ import Game from "../../game/Game"
 import { Gamemode, GamemodeStats } from "./Gamemode"
 import { World, WorldInfo } from "./World"
 
-export default function Campaign() {
+export function Campaign() {
     const modes: GamemodeStats[] = [
         {
             name: "Normal",

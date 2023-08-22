@@ -102,6 +102,9 @@ export function EventHandler() {
                 raw.preventDefault()
             }
 
+            // on demand rendering only renders if the scene changes. usually the scene is changed directly
+            // so we need to manually trigger a render after each user interaction. the scene does not change
+            // without user interaction so we only need invalidate here
             invalidate()
         }
 

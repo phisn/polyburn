@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-import { AlertProps } from "../app/Alert"
+import { AlertProps } from "../app/layout/Alert"
 
 export interface GlobalStore {
     alerts: AlertProps[]

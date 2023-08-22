@@ -101,9 +101,12 @@ export function Camera() {
                 )
             }
 
+            // prevent browser scrolling
             raw.stopPropagation()
             raw.preventDefault()
 
+            // camera zooming is not triggered by event listener so we have to
+            // invalidate manually
             invalidate()
         }
 

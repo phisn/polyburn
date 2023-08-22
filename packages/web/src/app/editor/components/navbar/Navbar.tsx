@@ -57,14 +57,14 @@ function UndoRedo() {
     return (
         <div className="join">
             <button
-                className="join-item btn btn-square btn-ghost disabled:bg-base-300 disabled:text-base-200 bg-opacity-60"
+                className="join-item btn btn-square btn-ghost disabled:bg-base-300 disabled:text-base-200 bg-opacity-60 disabled:bg-opacity-0"
                 disabled={!canUndo}
                 onClick={undo}
             >
                 <ArrowCounterClockwise width="20" height="20" />
             </button>
             <button
-                className="join-item btn btn-square btn-ghost disabled:bg-base-300 disabled:text-base-200 bg-opacity-60"
+                className="join-item btn btn-square btn-ghost disabled:bg-base-300 disabled:text-base-200 bg-opacity-60 disabled:bg-opacity-0"
                 disabled={!canRedo}
                 onClick={redo}
             >

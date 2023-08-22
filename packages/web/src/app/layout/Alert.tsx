@@ -69,13 +69,7 @@ const warningSvg = (
     </svg>
 )
 
-function Alert(props: AlertProps) {
-    /*TODO:
-    Make animation that fills the alert with a solid color from the left
-    to the right. After the animation is done, remove the alert from the
-    DOM.
-    */
-
+export function Alert(props: AlertProps) {
     return (
         <div className="relative">
             <div className={`alert ${alertClassName(props.type)} bg-clip-border`}>
@@ -124,5 +118,3 @@ function alertClassName(type: AlertType) {
             return "alert-warning"
     }
 }
-
-export default Alert

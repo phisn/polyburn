@@ -1,13 +1,10 @@
 import { Navigate, Route, Routes } from "react-router-dom"
-import useGlobalStore from "../common/GlobalStore"
-import { Layout } from "./Layout"
 import { NotFound } from "./NotFound"
-import Campaign from "./campaign/Campaign"
+import { Campaign } from "./campaign/Campaign"
 import { Editor } from "./editor/Editor"
+import { Layout } from "./layout/Layout"
 
 function App() {
-    const alerts = useGlobalStore(state => state.alerts)
-
     return (
         <Routes>
             <Route path="/" element={<Layout />}>

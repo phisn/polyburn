@@ -23,7 +23,7 @@ interface GamemodeRankProps {
 export function Gamemode(props: GamemodeProps) {
     return (
         <div
-            className={`relative mx-auto w-full max-w-md rounded-2xl ${props.rank && "pb-6"}`}
+            className={`relative mx-auto w-full rounded-2xl ${props.rank && "pb-6"}`}
             onClick={e => e.stopPropagation()}
         >
             <div className="join relative z-10 flex rounded-2xl bg-zinc-900">
@@ -46,7 +46,7 @@ export function Gamemode(props: GamemodeProps) {
 
 function LockedOverlay() {
     return (
-        <div className="group absolute bottom-0 left-0 right-0 top-0 z-20 flex rounded-2xl backdrop-blur ">
+        <div className="group absolute inset-0 z-20 flex rounded-2xl backdrop-blur ">
             <div className="flex w-full items-center justify-center group-hover:hidden">
                 <div className="mr-2">Locked</div>
                 <LockedSvg width="24" height="24" />
@@ -84,7 +84,7 @@ function RankInfo(props: GamemodeRankProps) {
     return (
         <div
             // margin of one pixel to prevent the border shining through
-            className={`absolute bottom-0 left-0 right-0 top-0 m-[1px] flex items-end rounded-2xl rounded-t-3xl hover:cursor-pointer ${color} ${colorHover} ${colorClick}`}
+            className={`absolute inset-0 m-[1px] flex items-end rounded-2xl rounded-t-3xl hover:cursor-pointer ${color} ${colorHover} ${colorClick}`}
         >
             <div
                 className={

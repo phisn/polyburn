@@ -42,7 +42,7 @@ function InnerEditor() {
     return (
         <>
             <div className="relative h-max w-full grow">
-                <div className="absolute bottom-0 left-0 right-0 top-0">
+                <div className="absolute inset-0">
                     <Canvas frameloop="demand">
                         <Camera />
 
@@ -79,7 +79,7 @@ function GameInEditor() {
     }
 
     return (
-        <div className="absolute bottom-0 left-0 right-0 top-0 ">
+        <div className="absolute inset-0 ">
             <Game world={worldModel} gamemode={gamemode.name} />
 
             <div

@@ -18,7 +18,7 @@ export function Modal(props: {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-black bg-opacity-30 " />
+                    <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-[2px]" />
                 </Transition.Child>
 
                 <div className="fixed inset-0 flex items-center justify-center p-4 py-8">

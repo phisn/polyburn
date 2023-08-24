@@ -26,17 +26,32 @@ export function Gamemode(props: GamemodeProps) {
             className={`relative mx-auto w-full rounded-2xl ${props.rank && "pb-6"}`}
             onClick={e => e.stopPropagation()}
         >
-            <div className="join relative z-10 flex rounded-2xl bg-zinc-900">
-                <button
-                    className="join-item hover:bg-base-100 hxs:p-6 w-full p-4 px-6 text-left transition active:bg-slate-600"
-                    onClick={() => props.onClick()}
-                >
-                    {props.name}
-                </button>
-                <button className="join-item hover:bg-base-100 hxs:p-6 p-4 px-6 transition active:bg-slate-600">
-                    <TrophySvg className="rounded-r-none" width="24" height="24" />
-                </button>
-            </div>
+            {props.locked && (
+                <div className="relative z-10 flex overflow-hidden rounded-2xl border border-zinc-600">
+                    <div className="join bg-base-300 w-full transform-gpu blur">
+                        <div className="join-item hxs:p-6 w-full p-4 px-6 text-left">
+                            {props.name}
+                        </div>
+                        <div className="join-item hxs:p-6 p-4 px-6">
+                            <TrophySvg className="rounded-r-none" width="24" height="24" />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {!props.locked && (
+                <div className="join bg-base-300 relative z-10 flex rounded-2xl border border-zinc-600">
+                    <button
+                        className="join-item hover:bg-base-100 hxs:p-6 w-full p-4 px-6 text-left outline-none transition active:bg-slate-600"
+                        onClick={() => props.onClick()}
+                    >
+                        {props.name}
+                    </button>
+                    <button className="join-item hover:bg-base-100 hxs:p-6 p-4 px-6 transition active:bg-slate-600">
+                        <TrophySvg className="rounded-r-none" width="24" height="24" />
+                    </button>
+                </div>
+            )}
 
             {props.locked && <LockedOverlay />}
             {props.rank && <RankInfo {...props.rank} />}
@@ -46,7 +61,7 @@ export function Gamemode(props: GamemodeProps) {
 
 function LockedOverlay() {
     return (
-        <div className="group absolute inset-0 z-20 flex rounded-2xl backdrop-blur ">
+        <div className="group absolute inset-0 z-20 flex rounded-2xl">
             <div className="flex w-full items-center justify-center group-hover:hidden">
                 <div className="mr-2">Locked</div>
                 <LockedSvg width="24" height="24" />

@@ -11,52 +11,79 @@ export interface WorldInfo {
     maxProgress: number
 }
 
-export interface WorldProps extends WorldInfo {
+export interface WorldProps {
+    info: WorldInfo
     onClick?: () => void
 }
 
 export function World(props: WorldProps) {
+    console.log(props.info)
     return (
-        <div className={`relative isolate flex aspect-[7/4] max-w-[28rem] rounded-2xl`}>
-            <div className="absolute inset-0 isolate">
-                <div className="w-fit rounded-2xl bg-zinc-800 p-3 px-8 text-xl text-zinc-200">
-                    {props.name}
-                </div>
-
-                <div className="absolute bottom-0 right-0 rounded-2xl bg-zinc-800">
-                    <div className="grid">
-                        <div className="steps items-center py-2">
-                            {Array.from({ length: props.maxProgress }, (_, i) => (
-                                <WorldProgressStep key={i} index={i} progress={props.progress} />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div className={`relative isolate flex max-w-[28rem] rounded-2xl`}>
             <div
-                className="absolute inset-0 rounded-2xl opacity-10 transition hover:cursor-pointer hover:bg-white active:opacity-30"
+                className="absolute inset-0 z-10 rounded-2xl opacity-30 transition hover:cursor-pointer hover:bg-white active:opacity-70"
                 onClick={props.onClick}
             ></div>
-            <div className="flex p-3">
-                <img className="w-full rounded-2xl" src="/static/background.png" />
+            <div className="w-full p-4">
+                <div
+                    className={`border-base-200 relative w-full overflow-hidden rounded-2xl border-2 ${
+                        props.info.progress && ""
+                    }`}
+                >
+                    <img
+                        className={`w-full ${!props.info.progress && " transform-gpu blur-3xl"}`}
+                        src="/static/background.png"
+                    />
+                    <div className="absolute inset-0 rounded-2xl bg-black opacity-5"></div>
+                </div>
             </div>
-            {!props.progress && <LockedOverlay />}
+            <Overlay info={props.info} />
+            {!props.info.progress && <LockedOverlay />}
         </div>
     )
 }
 
 function LockedOverlay() {
     return (
-        <div className="group absolute inset-0 z-20 flex rounded-2xl backdrop-blur-2xl">
-            <div className="absolute inset-0 rounded-2xl bg-white opacity-5"></div>
-            <div className="absolute inset-0 flex w-full items-center justify-center text-zinc-200 group-hover:hidden">
-                <div className="mr-2">Locked</div>
-                <LockedSvg width="24" height="24" />
+        <div className="group absolute inset-0 z-20 flex rounded-2xl text-zinc-300">
+            <div className="absolute inset-0 flex w-full items-center justify-center group-hover:hidden">
+                <div className="flex rounded p-4 drop-shadow">
+                    <LockedSvg width="24" height="24" />
+                </div>
             </div>
-            <div className="absolute inset-0 hidden w-full select-none items-center justify-center p-6 text-zinc-200 group-hover:flex">
+            <div className="absolute inset-0 hidden w-full select-none items-center justify-center p-6 group-hover:flex">
                 <LockedSvg width="24" height="24" />
                 <div className="ml-2">Beat the previous map!</div>
             </div>
+        </div>
+    )
+}
+
+function Overlay(props: { info: WorldInfo }) {
+    return (
+        <div className="absolute inset-0 isolate">
+            <div className="absolute left-1/2 -translate-x-1/2 transform">
+                <div
+                    className={`w-fit rounded-2xl  p-3 px-8 text-xl shadow ${
+                        props.info.progress ? "bg-white text-black" : "bg-base-200 text-zinc-300"
+                    }`}
+                >
+                    {!props.info.progress && "Locked"}
+                    {props.info.progress && props.info.name}
+                </div>
+            </div>
+
+            {/*
+            <div className="bg-base-100 absolute bottom-0 right-0 rounded-2xl">
+                <div className="grid">
+                    <div className="steps items-center py-2">
+                        {Array.from({ length: props.info.maxProgress }, (_, i) => (
+                            <WorldProgressStep key={i} index={i} progress={props.info.progress} />
+                        ))}
+                    </div>
+                </div>
+            </div>
+                        */}
         </div>
     )
 }

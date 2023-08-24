@@ -7,16 +7,9 @@ export function WorldSelection(props: {
     return (
         <div className="relative h-full">
             <div className={`flex h-full w-full justify-center pt-4`}>
-                <div className="grid h-min w-full gap-8 p-4 sm:grid-cols-2">
+                <div className="xs:grid-cols-2 grid h-min grid-cols-1 flex-wrap gap-8 p-4">
                     {props.worlds.map((world, i) => (
-                        <div
-                            key={i}
-                            className={`justify-self-center ${
-                                i % 2 === 0 ? "sm:justify-self-end" : "sm:justify-self-start"
-                            }`}
-                        >
-                            <World {...world} onClick={() => props.onSelected(world)} />
-                        </div>
+                        <World info={world} onClick={() => props.onSelected(world)} />
                     ))}
                 </div>
             </div>

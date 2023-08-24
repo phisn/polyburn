@@ -22,17 +22,17 @@ export function GamemodeModal(props: {
             rank: { rank: "Diamond", time: "01:03.023", position: 41 },
         },
         {
-            name: "Hard",
-            rank: { rank: "Gold", time: "06:23.442", position: 355 },
+            name: "Reverse",
+            // rank: { rank: "Gold", time: "06:23.442", position: 355 },
         },
-        { name: "Reverse" },
+        { name: "Hard", locked: true },
         { name: "Low gravity", locked: true },
         { name: "Third Gamemode", locked: true },
     ]
 
     return (
         <Modal open={props.openWithWorld !== undefined} closeDialog={() => props.onCancel()}>
-            <div className="mb-20 grid w-screen max-w-[32rem] gap-6 rounded-2xl bg-white bg-opacity-5 p-4 shadow-2xl backdrop-blur-2xl">
+            <div className="grid w-screen max-w-[32rem] gap-6 rounded-2xl p-8 px-16 pb-16 backdrop-blur">
                 <div className="flex justify-self-center backdrop-blur-2xl">
                     <div className="text-xl text-white">{worldInfo?.name}</div>
                 </div>

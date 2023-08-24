@@ -41,7 +41,7 @@ function InnerEditor() {
 
     return (
         <>
-            <div className="relative h-max w-full grow">
+            <div className="h-max w-full grow">
                 <div className="absolute inset-0">
                     <Canvas frameloop="demand">
                         <Camera />

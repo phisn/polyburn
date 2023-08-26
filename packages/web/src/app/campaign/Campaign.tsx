@@ -1,5 +1,6 @@
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { WorldModel } from "runtime/proto/world"
+import { useModalView } from "../../common/GlobalStore"
 import { Navbar } from "../../common/components/Navbar"
 import { StopSvg } from "../../common/components/inline-svg/Stop"
 import Game from "../../game/Game"
@@ -25,6 +26,8 @@ export function Campaign() {
     const [worldSelected, setWorldSelected] = useState<WorldInfo | undefined>()
     const [gamemodeSelected, setGamemodeSelected] = useState<string>()
 
+    useModalView(worldSelected !== undefined && gamemodeSelected === undefined)
+
     function onWorldSelected(name: WorldInfo | undefined) {
         setWorldSelected(name)
         setGamemodeSelected(undefined)
@@ -33,12 +36,8 @@ export function Campaign() {
     }
 
     function onGamemodeSelected(gamemode: GamemodeStats) {
-        startTransition(() => {
-            setGamemodeSelected(gamemode.name)
-        })
+        setGamemodeSelected(gamemode.name)
     }
-
-    const [isPending, startTransition] = useTransition()
 
     if (worldSelected && gamemodeSelected) {
         const map = WorldModel.decode(
@@ -81,6 +80,7 @@ export function Campaign() {
     return (
         <>
             <WorldSelection worlds={worlds} onSelected={world => onWorldSelected(world)} />
+
             <GamemodeModal
                 openWithWorld={worldSelected}
                 onSelected={gamemode => onGamemodeSelected(gamemode)}

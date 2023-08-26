@@ -1,6 +1,6 @@
+import { BrowserView, isMobile } from "react-device-detect"
 import { LockedSvg } from "../../common/components/inline-svg/Locked"
 import { TrophySvg } from "../../common/components/inline-svg/Trophy"
-import { UnlockedSvg } from "../../common/components/inline-svg/Unlocked"
 
 type Rank = "Diamond" | "Platinum" | "Gold" | "Silver" | "Bronze" | "Iron"
 
@@ -23,31 +23,22 @@ interface GamemodeRankProps {
 export function Gamemode(props: GamemodeProps) {
     return (
         <div
-            className={`relative mx-auto w-full rounded-2xl ${props.rank && "pb-6"}`}
+            className={`relative mx-auto h-fit w-full rounded-2xl ${props.rank && "pb-6"}`}
             onClick={e => e.stopPropagation()}
         >
             {props.locked && (
-                <div className="relative z-10 flex overflow-hidden rounded-2xl border border-zinc-600">
-                    <div className="join bg-base-300 w-full transform-gpu blur">
-                        <div className="join-item hxs:p-6 w-full p-4 px-6 text-left">
-                            {props.name}
-                        </div>
-                        <div className="join-item hxs:p-6 p-4 px-6">
-                            <TrophySvg className="rounded-r-none" width="24" height="24" />
-                        </div>
-                    </div>
-                </div>
+                <div className="join bg-base-300 relative z-10 flex h-16 rounded-2xl border border-zinc-700"></div>
             )}
 
             {!props.locked && (
-                <div className="join bg-base-300 relative z-10 flex rounded-2xl border border-zinc-600">
+                <div className="join bg-base-300 relative z-10 flex h-16 rounded-2xl border border-zinc-600">
                     <button
-                        className="join-item hover:bg-base-100 hxs:p-6 w-full p-4 px-6 text-left outline-none transition active:bg-slate-600"
+                        className="join-item hover:bg-base-100 w-full rounded-[0.9rem] px-6 text-left outline-none transition active:bg-slate-600"
                         onClick={() => props.onClick()}
                     >
                         {props.name}
                     </button>
-                    <button className="join-item hover:bg-base-100 hxs:p-6 p-4 px-6 transition active:bg-slate-600">
+                    <button className="join-item hover:bg-base-100 rounded-[0.9rem] px-6 transition active:bg-slate-600">
                         <TrophySvg className="rounded-r-none" width="24" height="24" />
                     </button>
                 </div>
@@ -61,14 +52,24 @@ export function Gamemode(props: GamemodeProps) {
 
 function LockedOverlay() {
     return (
-        <div className="group absolute inset-0 z-20 flex rounded-2xl">
-            <div className="flex w-full items-center justify-center group-hover:hidden">
-                <div className="mr-2">Locked</div>
+        <div className="group absolute inset-0 z-20 flex justify-between rounded-2xl">
+            <BrowserView renderWithFragment>
+                <div className="flex w-full items-center p-6 group-hover:hidden">
+                    <LockedSvg width="24" height="24" />
+                    <div className="ml-2">Locked</div>
+                </div>
+            </BrowserView>
+            <div
+                className={`w-full items-center p-6 ${
+                    isMobile ? "flex" : "hidden group-hover:flex"
+                }`}
+            >
                 <LockedSvg width="24" height="24" />
-            </div>
-            <div className="hidden w-full select-none items-center p-6 group-hover:flex">
-                <UnlockedSvg width="24" height="24" />
                 <div className="ml-2">Beat the previous gamemode!</div>
+            </div>
+
+            <div className="text-base-200 my-auto px-6 transition">
+                <TrophySvg className="rounded-r-none" width="24" height="24" />
             </div>
         </div>
     )

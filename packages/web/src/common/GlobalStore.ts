@@ -1,20 +1,19 @@
 import { create } from "zustand"
 
+import { useEffect } from "react"
 import { AlertProps } from "../app/layout/Alert"
 
 type Modal = (props: { onClose: () => void }) => React.ReactNode
 
 export interface GlobalStore {
     alerts: AlertProps[]
-    modals: Modal[]
+    modalCount: number
     newAlert: (alert: AlertProps) => void
-    newModal: (modal: Modal, onClose: () => void) => void
-    popModal: () => void
 }
 
 const useGlobalStore = create<GlobalStore>(set => ({
     alerts: [],
-    modals: [],
+    modalCount: 0,
     newAlert: (alert: AlertProps) => {
         setTimeout(() => {
             set(state => ({
@@ -26,17 +25,22 @@ const useGlobalStore = create<GlobalStore>(set => ({
             alerts: [...state.alerts, alert],
         }))
     },
-    newModal: (modal: Modal, onClose: () => void) => {
-        set(state => ({
-            modals: [...state.modals, modal],
-        }))
-    },
-    popModal: () => {
-        // pop front
-        set(state => ({
-            modals: state.modals.slice(1),
-        }))
-    },
 }))
+
+export function useModalView(open: boolean) {
+    useEffect(() => {
+        if (open) {
+            useGlobalStore.setState(state => ({
+                modalCount: state.modalCount + 1,
+            }))
+        }
+
+        return () => {
+            useGlobalStore.setState(state => ({
+                modalCount: state.modalCount - 1,
+            }))
+        }
+    }, [open])
+}
 
 export default useGlobalStore

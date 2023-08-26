@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Modal } from "../../common/components/Modal"
+import { Modal, ModalPanel } from "../../common/components/Modal"
 import { Gamemode, GamemodeStats } from "./Gamemode"
 import { WorldInfo } from "./World"
 
@@ -26,19 +26,34 @@ export function GamemodeModal(props: {
             // rank: { rank: "Gold", time: "06:23.442", position: 355 },
         },
         { name: "Hard", locked: true },
+        /*
         { name: "Low gravity", locked: true },
         { name: "Third Gamemode", locked: true },
+        */
     ]
 
+    console.log(worldInfo)
+
     return (
-        <Modal open={props.openWithWorld !== undefined} closeDialog={() => props.onCancel()}>
-            <div className="grid w-screen max-w-[32rem] gap-6 rounded-2xl p-8 px-16 pb-16 backdrop-blur">
-                <div className="flex justify-self-center backdrop-blur-2xl">
-                    <div className="text-xl text-white">{worldInfo?.name}</div>
+        <Modal
+            open={props.openWithWorld !== undefined}
+            closeDialog={() => props.onCancel()}
+            className="flex items-center justify-center rounded-2xl p-6"
+        >
+            <div className="hxs:flex-col flex h-min w-full max-w-[40rem] flex-row">
+                <div className="hxs:h-auto flex h-min justify-center justify-self-center p-6">
+                    <div className="whitespace-nowrap text-xl text-white">{worldInfo?.name}</div>
                 </div>
-                {modes.map((gamemode, i) => (
-                    <Gamemode key={i} onClick={() => props.onSelected(gamemode)} {...gamemode} />
-                ))}
+
+                <ModalPanel className="flex h-min w-full flex-col space-y-4 px-4">
+                    {modes.map((gamemode, i) => (
+                        <Gamemode
+                            key={i}
+                            onClick={() => props.onSelected(gamemode)}
+                            {...gamemode}
+                        />
+                    ))}
+                </ModalPanel>
             </div>
         </Modal>
     )

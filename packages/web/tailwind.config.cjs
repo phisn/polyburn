@@ -3,9 +3,7 @@ module.exports = {
     content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx,mdx}"],
 
     theme: {
-        fontFamily: {
-            sans: ["Andale Mono"],
-        },
+        fontFamily: {},
         extend: {
             screens: {
                 xs: "560px",

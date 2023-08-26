@@ -1,3 +1,4 @@
+import { BrowserView, isMobile } from "react-device-detect"
 import { LockedSvg } from "../../common/components/inline-svg/Locked"
 
 export interface WorldProgress {
@@ -46,12 +47,18 @@ export function World(props: WorldProps) {
 function LockedOverlay() {
     return (
         <div className="group absolute inset-0 z-20 flex rounded-2xl text-zinc-300">
-            <div className="absolute inset-0 flex w-full items-center justify-center group-hover:hidden">
-                <div className="flex rounded p-4 drop-shadow">
-                    <LockedSvg width="24" height="24" />
+            <BrowserView>
+                <div className="absolute inset-0 flex w-full items-center justify-center group-hover:hidden">
+                    <div className="flex rounded p-4 drop-shadow">
+                        <LockedSvg width="24" height="24" />
+                    </div>
                 </div>
-            </div>
-            <div className="absolute inset-0 hidden w-full select-none items-center justify-center p-6 group-hover:flex">
+            </BrowserView>
+            <div
+                className={`absolute inset-0 w-full select-none items-center justify-center p-6 ${
+                    isMobile ? "flex" : "hidden group-hover:flex"
+                }`}
+            >
                 <LockedSvg width="24" height="24" />
                 <div className="ml-2">Beat the previous map!</div>
             </div>
@@ -64,7 +71,7 @@ function Overlay(props: { info: WorldInfo }) {
         <div className="absolute inset-0 isolate">
             <div className="absolute left-1/2 -translate-x-1/2 transform">
                 <div
-                    className={`w-fit rounded-2xl  p-3 px-8 text-xl shadow ${
+                    className={`w-fit  rounded-2xl  p-3 px-8 text-xl shadow ${
                         props.info.progress ? "bg-white text-black" : "bg-base-200 text-zinc-300"
                     }`}
                 >

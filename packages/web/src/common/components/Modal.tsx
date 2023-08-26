@@ -5,10 +5,11 @@ export function Modal(props: {
     open: boolean
     closeDialog: () => void
     children: React.ReactNode
+    className?: string
 }) {
     return (
         <Transition show={props.open} as={Fragment}>
-            <NativeDialog onClose={() => props.closeDialog()} as="div" className="relative z-10">
+            <NativeDialog onClose={() => props.closeDialog()} as="div" className="relative z-50">
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-200"
@@ -18,10 +19,10 @@ export function Modal(props: {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-[2px]" />
+                    <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur" />
                 </Transition.Child>
 
-                <div className="fixed inset-0 flex items-center justify-center p-4 py-8">
+                <div className={`fixed inset-0 ${props.className}`}>
                     <Transition.Child
                         as={Fragment}
                         enter="ease-out duration-200 translate transform"
@@ -31,10 +32,12 @@ export function Modal(props: {
                         leaveFrom="opacity-100 translate-y-0"
                         leaveTo="opacity-0 translate-y-2"
                     >
-                        <NativeDialog.Panel>{props.children}</NativeDialog.Panel>
+                        {props.children}
                     </Transition.Child>
                 </div>
             </NativeDialog>
         </Transition>
     )
 }
+
+export const ModalPanel = NativeDialog.Panel

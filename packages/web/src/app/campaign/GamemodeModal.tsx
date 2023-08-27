@@ -54,6 +54,7 @@ export function GamemodeModal(props: {
                         />
                     ))}
                 </ModalPanel>
+                <div className="h-20" />
             </div>
         </Modal>
     )

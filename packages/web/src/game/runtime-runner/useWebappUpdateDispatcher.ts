@@ -18,13 +18,13 @@ export function useWebappUpdateDispatcher(store: EntityStore<WebappComponents>) 
         }
     }
 
-    function updateGraphics(time: number, ticked: boolean) {
+    function updateGraphics(frameProgress: number, delta: number, ticked: boolean) {
         for (const entity of entities) {
-            interpolateEntity(entity, time)
+            interpolateEntity(entity, frameProgress)
         }
 
         for (const listener of listeners) {
-            listener.current(ticked)
+            listener.current(ticked, delta)
         }
     }
 

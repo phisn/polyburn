@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react"
 import { useGameStore } from "./GameStore"
 
 // ticked indicates whether the physics engine ticked since the last frame
-export function useGraphicUpdate(listener: (ticked: boolean) => void) {
+export function useGraphicUpdate(listener: (ticked: boolean, delta: number) => void) {
     const listenerRef = useRef(listener)
     const subscribe = useGameStore(store => store.subscribeGraphicUpdate)
 

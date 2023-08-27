@@ -15,13 +15,13 @@ export const useGameLoop = (
     events: {
         update: () => void
         afterUpdate: () => void
-        afterFrame: (time: number, ticked: boolean) => void
+        afterFrame: (frameProgress: number, time: number, ticked: boolean) => void
     },
     tickRate: number,
 ) => {
     let timer = performance.now()
 
-    useFrame(() => {
+    useFrame((_, delta) => {
         let now = performance.now()
 
         if (now - timer >= tickRate) {
@@ -41,12 +41,12 @@ export const useGameLoop = (
                 console.log("skipped " + (frames - 1) + " frames")
             }
 
-            events.afterFrame(getDelta(), true)
+            events.afterFrame(getFrameProgress(), delta, true)
         } else {
-            events.afterFrame(getDelta(), false)
+            events.afterFrame(getFrameProgress(), delta, false)
         }
 
-        function getDelta() {
+        function getFrameProgress() {
             let delta = (performance.now() - timer) / tickRate
 
             if (delta > 1) {

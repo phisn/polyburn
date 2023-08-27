@@ -7,3 +7,15 @@
     webkituserselect: "none";
     webkittaphighlightcolor: "rgba(255,255,255,0)";
 }
+
+@media (orientation: portrait) {
+    .Game {
+        transform: rotate(-90deg);
+    }
+}
+
+@media (orientation: landscape) {
+    .Game {
+        transform: rotate(0deg);
+    }
+}

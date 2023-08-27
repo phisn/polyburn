@@ -10,7 +10,7 @@ interface GameState {
 
 export interface GameStore extends GameState {
     get systemContext(): WebappFactoryContext
-    get graphicListeners(): React.MutableRefObject<(ticked: boolean) => void>[]
+    get graphicListeners(): React.MutableRefObject<(ticked: boolean, delta: number) => void>[]
 
     get performance(): number
     get started(): boolean
@@ -20,7 +20,9 @@ export interface GameStore extends GameState {
     setPerformance(performance: number): void
 
     // ticked indicates whether the physics engine ticked since the last frame
-    subscribeGraphicUpdate(listener: React.MutableRefObject<(ticked: boolean) => void>): () => void
+    subscribeGraphicUpdate(
+        listener: React.MutableRefObject<(ticked: boolean, delta: number) => void>,
+    ): () => void
 
     zoomIn(): void
     zoomOut(): void

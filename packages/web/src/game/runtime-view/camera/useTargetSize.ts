@@ -56,6 +56,8 @@ export function useSizeWithRotation() {
                     setRotation(270)
                     break
             }
+
+            alert("change to " + screen.orientation.type)
         }
 
         screen.orientation.addEventListener("change", listener)

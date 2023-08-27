@@ -10,7 +10,7 @@ import { gameCameraTransitionSpeed } from "../../../common/Values"
 import { useGameStore } from "../../store/GameStore"
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
-import { findCameraTargetPosition } from "./findCameraTargetPosition"
+import { findCameraTargetPosition as findCameraPositionForEntity } from "./findCameraPositionForEntity"
 import { moveCameraTo } from "./moveCameraTo"
 import { moveSourceTo } from "./moveSourceTo"
 import { useTargetSize } from "./useTargetSize"
@@ -24,37 +24,39 @@ export function Camera(props: { store: EntityStore<WebappComponents> }) {
 export function CameraWithEntity(props: {
     rocket: EntityWith<WebappComponents, "interpolation" | (typeof RocketEntityComponents)[number]>
 }) {
+    const [animating, setAnimating] = useState(false)
     const [cameraBounds, setCameraBounds] = useState(
         props.rocket.components.rocket.currentLevel.components.level.camera,
     )
 
-    const [animating, setAnimating] = useState(false)
-
     const zoom = useGameStore(store => store.zoom)
     const { targetSize, sizeRotated } = useTargetSize(cameraBounds, zoom)
 
-    const previousRocketPosition = useRef<Point>(null!)
     const cameraRef = useRef<ThreeOrthographicCamera>(null!)
 
     useGraphicUpdate((_, delta) => {
-        if (props.rocket.components.rocket.currentLevel.components.level.camera !== cameraBounds) {
+        const newCameraBounds = props.rocket.components.rocket.currentLevel.components.level.camera
+
+        if (newCameraBounds !== cameraBounds) {
             setAnimating(true)
-            setCameraBounds(props.rocket.components.rocket.currentLevel.components.level.camera)
+            setCameraBounds(newCameraBounds)
         }
 
-        const targetPosition = findCameraTargetPosition(
+        // determine the target position of the camera depending on the rocket position
+        const targetPosition = findCameraPositionForEntity(
             props.rocket.components.interpolation.position,
             targetSize,
-            cameraBounds,
+            newCameraBounds,
         )
 
         if (animating) {
-            animateCamera(delta * gameCameraTransitionSpeed, targetPosition)
+            animateCameraSizeAndPosition(delta * gameCameraTransitionSpeed, targetPosition)
         } else {
             cameraRef.current.position.set(targetPosition.x, targetPosition.y, 10)
         }
     })
 
+    // ensure camera still works when level changes
     useEffect(() => {
         updateCameraFrustum({
             top: targetSize.y / 2,
@@ -63,7 +65,7 @@ export function CameraWithEntity(props: {
             right: targetSize.x / 2,
         })
 
-        const targetPosition = findCameraTargetPosition(
+        const targetPosition = findCameraPositionForEntity(
             props.rocket.components.interpolation.position,
             targetSize,
             cameraBounds,
@@ -72,7 +74,7 @@ export function CameraWithEntity(props: {
         cameraRef.current.position.set(targetPosition.x, targetPosition.y, 10)
     }, [targetSize, sizeRotated])
 
-    function animateCamera(distance: number, targetPosition: Point) {
+    function animateCameraSizeAndPosition(distance: number, targetPosition: Point) {
         const { newWidth, newHeight, overflow } = moveCameraTo(
             distance,
             getCameraFrustumSize(),

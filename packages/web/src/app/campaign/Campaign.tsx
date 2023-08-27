@@ -37,7 +37,6 @@ export function Campaign() {
 
     function onGamemodeSelected(gamemode: GamemodeStats) {
         setGamemodeSelected(gamemode.name)
-
         /*
         const runner = async () => {
             if (!document.fullscreenElement && document.fullscreenEnabled) {
@@ -47,7 +46,7 @@ export function Campaign() {
             }
 
             if ("orientation" in screen && "lock" in screen.orientation) {
-                await screen.orientation.lock("landscape-primary")
+                await screen.orientation.lock("landscape")
             }
         }
 

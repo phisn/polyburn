@@ -8,7 +8,7 @@ export function useTargetSize(
     },
     zoom: number,
 ) {
-    const { size, rotation } = useSizeWithRotation()
+    const { size, rotated } = useSizeWithRotation()
     const aspect = size.width / size.height
 
     const cameraSize = {
@@ -32,34 +32,29 @@ export function useTargetSize(
 
     return {
         targetSize,
-        rotation,
+        rotated,
     }
 }
 
 export function useSizeWithRotation() {
-    const [rotation, setRotation] = useState(0)
+    const [rotated, setRotated] = useState(false)
     const size = useThree(state => state.size)
 
     useEffect(() => {
         const listener = () => {
             switch (screen.orientation.type) {
                 case "landscape-primary":
-                    setRotation(0)
-                    break
                 case "landscape-secondary":
-                    setRotation(180)
+                    setRotated(false)
                     break
                 case "portrait-primary":
-                    setRotation(90)
-                    break
                 case "portrait-secondary":
-                    setRotation(270)
+                    setRotated(true)
                     break
             }
-
-            alert("change to " + screen.orientation.type)
         }
 
+        listener()
         screen.orientation.addEventListener("change", listener)
 
         return () => {
@@ -67,18 +62,18 @@ export function useSizeWithRotation() {
         }
     })
 
-    if (rotation == 0 || rotation == 180) {
+    if (rotated) {
         return {
-            size,
-            rotation,
+            size: {
+                width: size.height,
+                height: size.width,
+            },
+            rotated,
         }
     }
 
     return {
-        size: {
-            width: size.height,
-            height: size.width,
-        },
-        rotation,
+        size,
+        rotated,
     }
 }

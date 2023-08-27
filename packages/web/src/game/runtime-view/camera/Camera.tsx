@@ -30,7 +30,7 @@ export function CameraWithEntity(props: {
     )
 
     const zoom = useGameStore(store => store.zoom)
-    const { targetSize, rotation } = useTargetSize(cameraBounds, zoom)
+    const { targetSize, rotated } = useTargetSize(cameraBounds, zoom)
 
     const cameraRef = useRef<ThreeOrthographicCamera>(null!)
 
@@ -72,7 +72,7 @@ export function CameraWithEntity(props: {
         )
 
         cameraRef.current.position.set(targetPosition.x, targetPosition.y, 10)
-    }, [targetSize, rotation])
+    }, [targetSize, rotated])
 
     function animateCameraSizeAndPosition(distance: number, targetPosition: Point) {
         const { newWidth, newHeight, overflow } = moveCameraTo(
@@ -104,7 +104,7 @@ export function CameraWithEntity(props: {
         left: number
         right: number
     }) {
-        if (rotation === 90 || rotation === 270) {
+        if (rotated) {
             cameraRef.current.top = bounds.left
             cameraRef.current.bottom = bounds.right
             cameraRef.current.left = -bounds.bottom
@@ -114,9 +114,10 @@ export function CameraWithEntity(props: {
             cameraRef.current.bottom = bounds.bottom
             cameraRef.current.left = bounds.left
             cameraRef.current.right = bounds.right
+
+            cameraRef.current.rotation.z = 0
         }
 
-        cameraRef.current.rotation.z = (rotation * Math.PI) / 180
         cameraRef.current.updateProjectionMatrix()
     }
 
@@ -124,9 +125,7 @@ export function CameraWithEntity(props: {
         const width = cameraRef.current.right - cameraRef.current.left
         const height = cameraRef.current.top - cameraRef.current.bottom
 
-        return rotation === 90 || rotation === 270
-            ? { width: height, height: width }
-            : { width, height }
+        return rotated ? { width: height, height: width } : { width, height }
     }
 
     return <OrthographicCamera makeDefault manual ref={cameraRef} />

@@ -38,6 +38,7 @@ export function Campaign() {
     function onGamemodeSelected(gamemode: GamemodeStats) {
         setGamemodeSelected(gamemode.name)
 
+        /*
         const runner = async () => {
             if (!document.fullscreenElement && document.fullscreenEnabled) {
                 await document.documentElement.requestFullscreen({
@@ -53,6 +54,7 @@ export function Campaign() {
         runner().catch(e => {
             console.error(e)
         })
+        */
     }
 
     if (worldSelected && gamemodeSelected) {

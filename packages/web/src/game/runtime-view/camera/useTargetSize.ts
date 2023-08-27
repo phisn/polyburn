@@ -1,5 +1,5 @@
 import { useThree } from "@react-three/fiber"
-import { updateSizeByOrientation } from "./updateSizeByOrientation"
+import { useEffect, useState } from "react"
 
 export function useTargetSize(
     cameraBounds: {
@@ -8,8 +8,7 @@ export function useTargetSize(
     },
     zoom: number,
 ) {
-    const { size, sizeRotated } = updateSizeByOrientation(useThree(state => state.size))
-
+    const { size, rotation } = useSizeWithRotation()
     const aspect = size.width / size.height
 
     const cameraSize = {
@@ -33,6 +32,51 @@ export function useTargetSize(
 
     return {
         targetSize,
-        sizeRotated,
+        rotation,
+    }
+}
+
+export function useSizeWithRotation() {
+    const [rotation, setRotation] = useState(0)
+    const size = useThree(state => state.size)
+
+    useEffect(() => {
+        const listener = () => {
+            switch (screen.orientation.type) {
+                case "landscape-primary":
+                    setRotation(0)
+                    break
+                case "landscape-secondary":
+                    setRotation(180)
+                    break
+                case "portrait-primary":
+                    setRotation(90)
+                    break
+                case "portrait-secondary":
+                    setRotation(270)
+                    break
+            }
+        }
+
+        screen.orientation.addEventListener("change", listener)
+
+        return () => {
+            screen.orientation.removeEventListener("change", listener)
+        }
+    })
+
+    if (rotation == 0 || rotation == 180) {
+        return {
+            size,
+            rotation,
+        }
+    }
+
+    return {
+        size: {
+            width: size.height,
+            height: size.width,
+        },
+        rotation,
     }
 }

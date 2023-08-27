@@ -7,12 +7,12 @@ export function updateSizeByOrientation(size: { width: number; height: number })
                 width: size.height,
                 height: size.width,
             },
-            sizeRotated: true,
+            rotation: true,
         }
     }
 
     return {
         size,
-        sizeRotated: false,
+        rotation: 0,
     }
 }

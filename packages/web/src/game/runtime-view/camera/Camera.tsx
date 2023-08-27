@@ -30,7 +30,7 @@ export function CameraWithEntity(props: {
     )
 
     const zoom = useGameStore(store => store.zoom)
-    const { targetSize, sizeRotated } = useTargetSize(cameraBounds, zoom)
+    const { targetSize, rotation } = useTargetSize(cameraBounds, zoom)
 
     const cameraRef = useRef<ThreeOrthographicCamera>(null!)
 
@@ -72,7 +72,7 @@ export function CameraWithEntity(props: {
         )
 
         cameraRef.current.position.set(targetPosition.x, targetPosition.y, 10)
-    }, [targetSize, sizeRotated])
+    }, [targetSize, rotation])
 
     function animateCameraSizeAndPosition(distance: number, targetPosition: Point) {
         const { newWidth, newHeight, overflow } = moveCameraTo(
@@ -104,22 +104,19 @@ export function CameraWithEntity(props: {
         left: number
         right: number
     }) {
-        if (sizeRotated) {
+        if (rotation === 90 || rotation === 270) {
             cameraRef.current.top = bounds.left
             cameraRef.current.bottom = bounds.right
             cameraRef.current.left = -bounds.bottom
             cameraRef.current.right = -bounds.top
-
-            cameraRef.current.rotation.z = Math.PI / 2
         } else {
             cameraRef.current.top = bounds.top
             cameraRef.current.bottom = bounds.bottom
             cameraRef.current.left = bounds.left
             cameraRef.current.right = bounds.right
-
-            cameraRef.current.rotation.z = 0
         }
 
+        cameraRef.current.rotation.z = (rotation * Math.PI) / 180
         cameraRef.current.updateProjectionMatrix()
     }
 
@@ -127,7 +124,9 @@ export function CameraWithEntity(props: {
         const width = cameraRef.current.right - cameraRef.current.left
         const height = cameraRef.current.top - cameraRef.current.bottom
 
-        return sizeRotated ? { width: height, height: width } : { width, height }
+        return rotation === 90 || rotation === 270
+            ? { width: height, height: width }
+            : { width, height }
     }
 
     return <OrthographicCamera makeDefault manual ref={cameraRef} />

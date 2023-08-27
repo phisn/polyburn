@@ -33,9 +33,19 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({ config, store, phys
                 return
             }
 
-            physics.contactPair(rocketCollider, collider, (contact, flipped) =>
-                handleRocketContact(contact, flipped, entity),
-            )
+            physics.contactPair(rocketCollider, collider, (contact, flipped) => {
+                // sometimes of the normals are zero but no idea why. if one is zero then the
+                // other is is some random vector that causes the rocket to die. therefore we
+                // just ignore the contact in this case
+                if (
+                    (contact.localNormal1().x == 0 && contact.localNormal1().y == 0) ||
+                    (contact.localNormal2().x == 0 && contact.localNormal2().y == 0)
+                ) {
+                    return
+                }
+
+                handleRocketContact(contact, flipped, entity)
+            })
         })
     }
 
@@ -66,7 +76,16 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({ config, store, phys
         const distance = sqrt(dx * dx + dy * dy)
 
         if (distance > config.explosionAngle) {
-            // console.warn(`death because ${distance} > 0.3`)
+            console.warn(`death because ${distance} > ${config.explosionAngle}, values are
+                rotation: ${rocket.components.rigidBody.rotation()},
+                upVector: ${JSON.stringify(upVector)},
+                otherNormal: ${JSON.stringify(otherNormal)},
+                otherNormalLength: ${otherNormalLength},
+                otherNormalNormalized: ${JSON.stringify(otherNormalNormalized)},q
+                dx: ${dx},
+                dy: ${dy},
+                distance: ${distance},
+            `)
             respawnRocket(rocket)
         }
     }

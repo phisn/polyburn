@@ -2,8 +2,8 @@ import RAPIER from "@dimforge/rapier2d-compat"
 
 import { EntityType, RocketModel } from "../../../proto/world"
 import { Point } from "../../model/Point"
-import { changeAnchor } from "../../model/changeAnchor"
-import { entityRegistry } from "../../model/entityRegistry"
+import { changeAnchor } from "../../model/world/changeAnchor"
+import { entityRegistry } from "../../model/world/entityRegistry"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
 import { RocketEntity } from "./RocketEntity"
@@ -68,6 +68,8 @@ export const newRocket = (
             spawnRotation: rocket.rotation,
 
             currentLevel: firstLevel,
+
+            framesSinceLastDeath: 0,
         },
 
         entityType: EntityType.ROCKET,

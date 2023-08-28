@@ -1,5 +1,5 @@
 import { Point } from "runtime/src/model/Point"
-import { ShapeVertex } from "runtime/src/model/ShapeModel"
+import { ShapeVertex } from "runtime/src/model/world/ShapeModel"
 import { BufferGeometry, Color, Float32BufferAttribute, ShapeUtils } from "three"
 
 function IterateInOrder(vertices: Point[], callback: (i: number, vertex: Point) => void) {

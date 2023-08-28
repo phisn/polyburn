@@ -7,7 +7,7 @@ import useGlobalStore from "../../common/GlobalStore"
 import { useGameStore } from "../store/GameStore"
 
 export default function Replay() {
-    const { store, messageStore } = useGameStore(state => state.systemContext)
+    const { store, messageStore, replayCaptureService } = useGameStore(state => state.systemContext)
 
     const [finished, setFinished] = useState(false)
 
@@ -29,7 +29,7 @@ export default function Replay() {
             return
         }
 
-        return compressToBase64(JSON.stringify(world.components.world.replay))
+        return compressToBase64(JSON.stringify(replayCaptureService.replay))
     }, [finished, store])
 
     if (base64) {

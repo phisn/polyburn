@@ -1,5 +1,5 @@
 import { EntityType } from "runtime/proto/world"
-import { entityRegistry } from "runtime/src/model/entityRegistry"
+import { entityRegistry } from "runtime/src/model/world/entityRegistry"
 import { baseZoomFactor } from "../../../common/Values"
 import { EntityGraphicType } from "./EntityGraphicType"
 

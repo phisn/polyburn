@@ -4,7 +4,7 @@ import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 import { Object3D } from "three"
 
 import { Entity } from "runtime-framework"
-import { changeAnchor } from "runtime/src/model/changeAnchor"
+import { changeAnchor } from "runtime/src/model/world/changeAnchor"
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 import { entityGraphicRegistry } from "./EntityGraphicRegistry"

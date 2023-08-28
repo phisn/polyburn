@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { EntityType, LevelModel } from "../../../proto/world"
-import { captureBox } from "../../model/LevelModel"
+import { captureBox } from "../../model/world/LevelModel"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
 

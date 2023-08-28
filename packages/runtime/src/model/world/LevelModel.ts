@@ -1,4 +1,4 @@
-import { EntityType, LevelModel } from "../../proto/world"
+import { EntityType, LevelModel } from "../../../proto/world"
 import { changeAnchor } from "./changeAnchor"
 import { entityRegistry } from "./entityRegistry"
 

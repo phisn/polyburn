@@ -1,5 +1,4 @@
-import { RuntimeSystemStack } from "runtime/src/core/RuntimeSystemStack"
-
+import { WebappSystemStack } from "../runtime-view/webapp-runtime/WebappSystemStack"
 import { useGameStore } from "../store/GameStore"
 import { useControls } from "./useControls"
 import { useGameLoop } from "./useGameLoop"
@@ -7,7 +6,7 @@ import { useWebappUpdateDispatcher } from "./useWebappUpdateDispatcher"
 
 const tickrate = 16.6667
 
-export function useWebappRuntime(stack: RuntimeSystemStack) {
+export function useWebappRuntime(stack: WebappSystemStack) {
     const controls = useControls()
 
     const { store } = useGameStore(store => store.systemContext)
@@ -37,9 +36,14 @@ export function useWebappRuntime(stack: RuntimeSystemStack) {
             return
         }
 
+        const rotationAfterCapture = stack.factoryContext.replayCaptureService.captureFrame({
+            thrust: controls.current.thrust,
+            rotation: controls.current.rotation,
+        })
+
         stack.step({
             thrust: controls.current.thrust,
-            rotation: Math.fround(controls.current.rotation),
+            rotation: rotationAfterCapture,
         })
     }
 

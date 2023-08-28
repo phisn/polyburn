@@ -1,9 +1,9 @@
 import { RocketEntity } from "runtime/src/core/rocket/RocketEntity"
-import { changeAnchor } from "runtime/src/model/changeAnchor"
+import { changeAnchor } from "runtime/src/model/world/changeAnchor"
 import { randInt } from "three/src/math/MathUtils"
 
 import { EntityType } from "runtime/proto/world"
-import { entityRegistry } from "runtime/src/model/entityRegistry"
+import { entityRegistry } from "runtime/src/model/world/entityRegistry"
 import { Gradient, rgpRemixGradient } from "../particle/Gradient"
 import { ParticleConfiguration } from "../particle/ParticleSource"
 

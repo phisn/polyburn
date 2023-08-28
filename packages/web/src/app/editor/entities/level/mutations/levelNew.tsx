@@ -1,7 +1,7 @@
 import { EntityType } from "runtime/proto/world"
 import { Point } from "runtime/src/model/Point"
-import { changeAnchor } from "runtime/src/model/changeAnchor"
-import { entityRegistry } from "runtime/src/model/entityRegistry"
+import { changeAnchor } from "runtime/src/model/world/changeAnchor"
+import { entityRegistry } from "runtime/src/model/world/entityRegistry"
 import { WorldState } from "../../../models/WorldState"
 import { LevelState } from "../LevelState"
 

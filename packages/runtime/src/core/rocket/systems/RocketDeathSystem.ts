@@ -9,7 +9,12 @@ import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { respawnRocket } from "../respawnRocket"
 import { RocketEntityComponents } from "../RocketEntity"
 
-export const newRocketDeathSystem: RuntimeSystemFactory = ({ config, store, physics }) => {
+export const newRocketDeathSystem: RuntimeSystemFactory = ({
+    config,
+    store,
+    physics,
+    messageStore,
+}) => {
     const rockets = store.newSet(...RocketEntityComponents)
 
     return () => {
@@ -17,6 +22,8 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({ config, store, phys
             if (entity.components.rocket.collisionCount == 0) {
                 continue
             }
+
+            entity.components.rocket.framesSinceLastDeath++
 
             for (let i = 0; i < entity.components.rigidBody.numColliders(); ++i) {
                 handleRocketCollider(entity.components.rigidBody.collider(i), entity)
@@ -75,7 +82,8 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({ config, store, phys
 
         const distance = sqrt(dx * dx + dy * dy)
 
-        if (distance > config.explosionAngle) {
+        if (distance > config.explosionAngle && rocket.components.rocket.framesSinceLastDeath > 8) {
+            /*
             console.warn(`death because ${distance} > ${config.explosionAngle}, values are
                 rotation: ${rocket.components.rigidBody.rotation()},
                 upVector: ${JSON.stringify(upVector)},
@@ -86,6 +94,16 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({ config, store, phys
                 dy: ${dy},
                 distance: ${distance},
             `)
+            */
+
+            rocket.components.rocket.framesSinceLastDeath = 0
+
+            messageStore.publish("rocketDeath", {
+                position: rocket.components.rigidBody.translation(),
+                rotation: rocket.components.rigidBody.rotation(),
+                normal: otherNormalNormalized,
+            })
+
             respawnRocket(rocket)
         }
     }

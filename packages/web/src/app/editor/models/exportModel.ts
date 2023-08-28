@@ -1,5 +1,5 @@
 import { EntityType, WorldModel } from "runtime/proto/world"
-import { verticesToBytes } from "runtime/src/model/ShapeModel"
+import { verticesToBytes } from "runtime/src/model/world/ShapeModel"
 import { WorldState } from "./WorldState"
 
 export function exportModel(world: WorldState): WorldModel {
@@ -65,7 +65,7 @@ export function exportModel(world: WorldState): WorldModel {
     return model
 }
 
-function bytesToBase64(bytes: Uint8Array) {
+export function bytesToBase64(bytes: Uint8Array) {
     const binString = Array.from(bytes, x => String.fromCodePoint(x)).join("")
     return btoa(binString)
 }

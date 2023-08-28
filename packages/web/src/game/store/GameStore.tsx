@@ -3,23 +3,23 @@ import { createStore, useStore } from "zustand"
 
 import { WebappFactoryContext } from "../runtime-view/webapp-runtime/WebappFactoryContext"
 import { ZoomSteps } from "./ZoomSteps"
+import { ReplayCaptureService } from "runtime/src/model/replay/ReplayCaptureService"
 
 interface GameState {
     zoomIndex: number
 }
 
 export interface GameStore extends GameState {
-    get systemContext(): WebappFactoryContext
-    get graphicListeners(): React.MutableRefObject<(ticked: boolean, delta: number) => void>[]
+    systemContext: WebappFactoryContext
 
-    get performance(): number
-    get started(): boolean
-
+    started: boolean
     start(): void
 
+    performance: number
     setPerformance(performance: number): void
 
     // ticked indicates whether the physics engine ticked since the last frame
+    graphicListeners: React.MutableRefObject<(ticked: boolean, delta: number) => void>[]
     subscribeGraphicUpdate(
         listener: React.MutableRefObject<(ticked: boolean, delta: number) => void>,
     ): () => void

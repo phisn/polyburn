@@ -4,7 +4,6 @@ import { Canvas, useThree } from "@react-three/fiber"
 import { Suspense, use, useEffect, useRef } from "react"
 import { isMobile } from "react-device-detect"
 import { WorldModel } from "runtime/proto/world"
-import { RuntimeSystemStack } from "runtime/src/core/RuntimeSystemStack"
 import tunnel from "tunnel-rat"
 import useGlobalStore from "../common/GlobalStore"
 import "./Game.css"
@@ -12,6 +11,7 @@ import Overlay from "./overlay/Overlay"
 import { useWebappRuntime } from "./runtime-runner/useWebappRuntime"
 import { RuntimeView } from "./runtime-view/RuntimeView"
 import { newWebappRuntime } from "./runtime-view/webapp-runtime/WebappRuntime"
+import { WebappSystemStack } from "./runtime-view/webapp-runtime/WebappSystemStack"
 import { ProvideGameStore, useGameStore } from "./store/GameStore"
 
 const rapierInit = RAPIER.init()
@@ -81,10 +81,10 @@ function Game(props: { world: WorldModel; gamemode: string }) {
         }
     }, [])
 
-    const { context, stack } = newWebappRuntime(props.world, props.gamemode)
+    const stack = newWebappRuntime(props.world, props.gamemode)
 
     return (
-        <ProvideGameStore systemContext={context}>
+        <ProvideGameStore systemContext={stack.factoryContext}>
             <div
                 className="h-full select-none"
                 style={{
@@ -134,7 +134,7 @@ function Game(props: { world: WorldModel; gamemode: string }) {
     )
 }
 
-function GameInThree(props: { stack: RuntimeSystemStack }) {
+function GameInThree(props: { stack: WebappSystemStack }) {
     useWebappRuntime(props.stack)
 
     const camera = useThree(state => state.camera) as THREE.OrthographicCamera

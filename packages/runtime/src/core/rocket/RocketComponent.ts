@@ -11,4 +11,5 @@ export interface RocketComponent {
     spawnRotation: number
 
     currentLevel: EntityWith<RuntimeComponents, "level">
+    framesSinceLastDeath: number
 }

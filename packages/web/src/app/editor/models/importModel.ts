@@ -1,5 +1,5 @@
 import { EntityType, WorldModel } from "runtime/proto/world"
-import { bytesToVertices } from "runtime/src/model/ShapeModel"
+import { bytesToVertices } from "runtime/src/model/world/ShapeModel"
 import { Vector2 } from "three"
 import { LevelState } from "../entities/level/LevelState"
 import { RocketState } from "../entities/rocket/RocketState"
@@ -69,7 +69,7 @@ export function importModel(model: WorldModel): WorldState {
     return k
 }
 
-function base64ToBytes(base64: string) {
+export function base64ToBytes(base64: string) {
     return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
 }
 

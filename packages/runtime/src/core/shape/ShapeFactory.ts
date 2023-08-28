@@ -1,7 +1,7 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
 import { EntityType, ShapeModel } from "../../../proto/world"
-import { ShapeVertex, bytesToVertices } from "../../model/ShapeModel"
+import { ShapeVertex, bytesToVertices } from "../../model/world/ShapeModel"
 import { RuntimeComponents } from "../RuntimeComponents"
 import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
 

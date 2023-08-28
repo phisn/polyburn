@@ -56,15 +56,11 @@ export const newRuntime = <Components extends RuntimeComponents>(
     rocket.components.rocket.currentLevel.components.level.hideFlag = true
 
     context.store.world.components.world = {
-        replay: [],
         ticks: 0,
         finished: false,
     }
 
-    return {
-        context,
-        stack: new SystemStack<RuntimeFactoryContext<RuntimeComponents>, RuntimeSystemContext>(
+    return new SystemStack<RuntimeFactoryContext<RuntimeComponents>, RuntimeSystemContext>(
             context,
-        ).add(...runtimeSystemFactories),
-    }
+        ).add(...runtimeSystemFactories)
 }

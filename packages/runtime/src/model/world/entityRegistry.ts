@@ -1,4 +1,4 @@
-import { EntityType } from "../../proto/world"
+import { EntityType } from "../../../proto/world"
 
 interface Entry {
     width: number

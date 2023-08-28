@@ -1,8 +1,8 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 
 import { EntityType } from "../../../proto/world"
-import { changeAnchor } from "../../model/changeAnchor"
-import { entityRegistry } from "../../model/entityRegistry"
+import { changeAnchor } from "../../model/world/changeAnchor"
+import { entityRegistry } from "../../model/world/entityRegistry"
 
 const rayDir = new RAPIER.Vector2(0, 1)
 const ray = new RAPIER.Ray(new RAPIER.Vector2(0, 0), new RAPIER.Vector2(0, 1))

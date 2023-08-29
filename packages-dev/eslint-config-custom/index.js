@@ -2,12 +2,13 @@ module.exports = {
     extends: [
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
-        "plugin:react/jsx-runtime",
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
         "turbo",
         "prettier",
     ],
     rules: {
-        "@next/next/no-html-link-for-pages": "off",
+        "react-refresh/only-export-components": "warn",
     },
     parser: "@typescript-eslint/parser",
     plugins: ["prettier", "react", "turbo", "@typescript-eslint"],

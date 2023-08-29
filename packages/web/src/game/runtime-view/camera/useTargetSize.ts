@@ -1,5 +1,5 @@
 import { useThree } from "@react-three/fiber"
-import { useEffect, useState } from "react"
+import { useRotateScreen } from "./useRotateScreen"
 
 export function useTargetSize(
     cameraBounds: {
@@ -37,30 +37,8 @@ export function useTargetSize(
 }
 
 export function useSizeWithRotation() {
-    const [rotated, setRotated] = useState(false)
+    const rotated = useRotateScreen()
     const size = useThree(state => state.size)
-
-    useEffect(() => {
-        const listener = () => {
-            switch (screen.orientation.type) {
-                case "landscape-primary":
-                case "landscape-secondary":
-                    setRotated(false)
-                    break
-                case "portrait-primary":
-                case "portrait-secondary":
-                    setRotated(true)
-                    break
-            }
-        }
-
-        listener()
-        screen.orientation.addEventListener("change", listener)
-
-        return () => {
-            screen.orientation.removeEventListener("change", listener)
-        }
-    })
 
     if (rotated) {
         return {

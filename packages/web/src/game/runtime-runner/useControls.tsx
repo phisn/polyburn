@@ -1,5 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber"
 import { useEffect, useRef } from "react"
+import { useRotateScreen } from "../runtime-view/camera/useRotateScreen"
 
 interface ControlsRef {
     thrust: boolean
@@ -63,7 +64,11 @@ export function useControls() {
         type: PointerStateType.None,
     })
 
-    const canvas = useThree(state => state.gl.domElement)
+    const canvas = useThree().gl.domElement
+
+    const rotated = useRotateScreen()
+
+    console.log("rotated: " + true)
 
     useFrame((_, delta) => {
         if (stateRef.current.type === PointerStateType.Mouse) {
@@ -127,7 +132,10 @@ export function useControls() {
                             " and rpid " + stateRef.current.rotatePointer?.pointerId,
                         )
 
-                        if (touch.clientX > window.innerWidth / 2) {
+                        if (
+                            (rotated && touch.clientY > window.innerWidth / 2) ||
+                            (!rotated && touch.clientX > window.innerWidth / 2)
+                        ) {
                             if (stateRef.current.thrustPointer === undefined) {
                                 stateRef.current.thrustPointer = {
                                     pointerId: touch.identifier,

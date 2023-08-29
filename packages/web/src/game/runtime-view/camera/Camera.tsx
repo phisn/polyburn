@@ -106,9 +106,6 @@ export function CameraWithEntity(props: {
         const x = moveSourceTo(distance, cameraRef.current.position.x, targetPosition.x)
         const y = moveSourceTo(distance, cameraRef.current.position.y, targetPosition.y)
 
-        console.log("x from ", cameraRef.current.position.x, "to", x.result)
-        console.log("y from ", cameraRef.current.position.y, "to", y.result)
-
         cameraRef.current.position.set(x.result, y.result, 10)
 
         if (overflow && x.overflow && y.overflow) {
@@ -142,8 +139,8 @@ export function CameraWithEntity(props: {
     }
 
     function getCameraFrustumSize() {
-        const width = cameraRef.current.right - cameraRef.current.left
-        const height = cameraRef.current.top - cameraRef.current.bottom
+        const width = Math.abs(cameraRef.current.right - cameraRef.current.left)
+        const height = Math.abs(cameraRef.current.top - cameraRef.current.bottom)
 
         return rotated ? { width: height, height: width } : { width, height }
     }

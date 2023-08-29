@@ -20,7 +20,7 @@ export const newCaptureParticleSpawnSystem: WebappSystemFactory = ({
 
     const captures = messageStore.collect("levelCaptured")
 
-    const particlePerFrame = 20
+    const particlePerFrame = 40
 
     return () => {
         for (const capture of captures) {

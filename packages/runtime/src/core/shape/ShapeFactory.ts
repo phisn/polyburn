@@ -7,11 +7,19 @@ import { RuntimeFactoryContext } from "../RuntimeFactoryContext"
 
 export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shape: ShapeModel) => {
     const vertices = bytesToVertices(shape.vertices)
+    const rigidBody = createShapeRigidBody(context.physics, vertices)
+
+    return context.store.create({
+        entityType: EntityType.SHAPE,
+        rigidBody,
+        shape: { vertices },
+    })
+}
+
+export function createShapeRigidBody(physics: RAPIER.World, vertices: ShapeVertex[]) {
     const [verticesRaw, top, left] = verticesForShape(vertices)
 
-    const body = context.physics.createRigidBody(
-        RAPIER.RigidBodyDesc.fixed().setTranslation(left, top),
-    )
+    const body = physics.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(left, top))
 
     const collider = RAPIER.ColliderDesc.polyline(verticesRaw).setCollisionGroups(0x0002_0005)
 
@@ -19,23 +27,12 @@ export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shap
         throw new Error("Failed to create collider")
     }
 
-    context.physics.createCollider(collider, body)
+    physics.createCollider(collider, body)
 
-    /*
-    const vertices = shape.vertices.map(v => ({
-        position: { x: v.x, y: v.y },
-        color: v.color ?? 0x000000,
-    }))
-    */
-
-    return context.store.create({
-        entityType: EntityType.SHAPE,
-        rigidBody: body,
-        shape: { vertices },
-    })
+    return body
 }
 
-function verticesForShape(vertices: ShapeVertex[]): [Float32Array, number, number] {
+export function verticesForShape(vertices: ShapeVertex[]): [Float32Array, number, number] {
     const left = vertices.reduce((acc, vertex) => Math.min(acc, vertex.position.x), Infinity)
     const top = vertices.reduce((acc, vertex) => Math.min(acc, vertex.position.y), Infinity)
 

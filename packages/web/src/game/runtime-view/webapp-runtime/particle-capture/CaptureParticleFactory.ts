@@ -1,9 +1,16 @@
 import { LevelEntity } from "runtime/src/core/level/LevelEntity"
 
+import { EntityType } from "runtime/proto/world"
+import { changeAnchor } from "runtime/src/model/world/changeAnchor"
+import { entityRegistry } from "runtime/src/model/world/entityRegistry"
 import { Gradient } from "../particle/Gradient"
 import { ParticleConfiguration } from "../particle/ParticleSource"
 
-const velocity = 20
+const minAngle = Math.PI * 2 - Math.PI / 3
+const maxAngle = Math.PI / 3
+
+const minVelocity = 5
+const maxVelocity = 20
 
 const minLifetime = 50
 const maxLifetime = 250
@@ -17,15 +24,25 @@ const gradient: Gradient = [
 ]
 
 export const newCaptureParticleFactory = (level: LevelEntity) => (): ParticleConfiguration => {
-    const randomAngle = randomValueBetween(0, 2 * Math.PI)
+    const velocity = randomValueBetween(minVelocity, maxVelocity)
+
+    const spawnPosition = changeAnchor(
+        level.components.level.flag,
+        level.components.level.flagRotation,
+        entityRegistry[EntityType.ROCKET],
+        { x: 0.5, y: 0.5 },
+        { x: 0.5, y: 0.0 },
+    )
+
+    const randomAngle = randomValueBetween(minAngle, maxAngle)
 
     const spawnVelocity = {
-        x: velocity * Math.sin(randomAngle),
-        y: velocity * Math.cos(randomAngle),
+        x: velocity * Math.sin(level.components.level.flagRotation + randomAngle),
+        y: velocity * Math.cos(level.components.level.flagRotation + randomAngle) * -1,
     }
 
     return {
-        spawnPosition: level.components.level.flag,
+        spawnPosition,
 
         spawnVelocity,
         additionalVelocity: { x: 0, y: 0 },

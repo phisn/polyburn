@@ -3,6 +3,7 @@ import { SystemStack } from "runtime-framework"
 import { WorldModel } from "runtime/proto/world"
 import { newRuntime } from "runtime/src/Runtime"
 import { RuntimeSystemContext } from "runtime/src/core/RuntimeSystemStack"
+import { createShapeRigidBody } from "runtime/src/core/shape/ShapeFactory"
 import { ReplayCaptureService } from "runtime/src/model/replay/ReplayCaptureService"
 import { defaultConfig } from "../../../../../runtime/src/core/RuntimeConfig"
 import { WebappComponents } from "./WebappComponents"
@@ -20,22 +21,10 @@ import { newParticleStepSystem } from "./particle/ParticleStepSystem"
 export const newWebappRuntime = (world: WorldModel, gamemode: string): WebappSystemStack => {
     const stack = newRuntime<WebappComponents>(world, gamemode)
 
-    const particlePhysics = RAPIER.World.restoreSnapshot(
-        stack.factoryContext.physics.takeSnapshot(),
-    )
+    const particlePhysics = new RAPIER.World(stack.factoryContext.physics.gravity)
 
-    particlePhysics.forEachRigidBody(body => {
-        if (body.isFixed() === false) {
-            particlePhysics.removeRigidBody(body)
-        }
-    })
-
-    for (const level of stack.factoryContext.store.find("level")) {
-        const bounds = level.components.level.boundsCollider.parent()
-
-        if (bounds) {
-            particlePhysics.removeRigidBody(bounds)
-        }
+    for (const entity of stack.factoryContext.store.find("shape")) {
+        createShapeRigidBody(particlePhysics, entity.components.shape.vertices)
     }
 
     const stackExtended: SystemStack<WebappFactoryContext, RuntimeSystemContext> = stack.extend({

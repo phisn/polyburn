@@ -25,7 +25,6 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({
                 continue
             }
 
-            entity.components.rigidBody.worldCom
             for (let i = 0; i < entity.components.rigidBody.numColliders(); ++i) {
                 handleRocketCollider(entity.components.rigidBody.collider(i), entity)
             }
@@ -103,6 +102,7 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({
                 fsld: ${rocket.components.rocket.framesSinceLastDeath}
             `)
             */
+
             rocket.components.rocket.framesSinceLastDeath = 0
 
             messageStore.publish("rocketDeath", {

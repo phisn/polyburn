@@ -3,12 +3,12 @@ import { Camera } from "./camera/Camera"
 import EntityGraphics from "./graphics/EntityGraphics"
 
 export function RuntimeView() {
-    const { store } = useGameStore(store => store.systemContext)
+    const context = useGameStore(store => store.systemContext)
 
     return (
         <>
-            <EntityGraphics store={store} />
-            <Camera store={store} />
+            <EntityGraphics store={context.store} />
+            <Camera context={context} />
         </>
     )
 }

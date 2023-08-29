@@ -5,6 +5,8 @@ import { WebappComponents } from "../WebappComponents"
 
 export type InterpolatedEntity = EntityWith<WebappComponents, "interpolation" | "rigidBody">
 
+export const interpolationThreshold = 0.25
+
 export function interpolateEntity(entity: InterpolatedEntity, delta: number) {
     entity.components.interpolation.position.set(
         MathUtils.lerp(
@@ -32,14 +34,27 @@ export function updateInterpolatedEntity(entity: InterpolatedEntity) {
         return
     }
 
-    entity.components.interpolation.previousPosition.set(
-        entity.components.interpolation.newPosition.x,
-        entity.components.interpolation.newPosition.y,
-        0,
-    )
-    entity.components.interpolation.previousRotation = entity.components.interpolation.newRotation
-
     const position = entity.components.rigidBody.translation()
+
+    if (
+        Math.abs(entity.components.interpolation.newPosition.x - position.x) >
+            interpolationThreshold ||
+        Math.abs(entity.components.interpolation.newPosition.y - position.y) >
+            interpolationThreshold
+    ) {
+        console.log("resetting interpolation")
+        entity.components.interpolation.previousPosition.set(position.x, position.y, 0)
+        entity.components.interpolation.previousRotation = entity.components.rigidBody.rotation()
+    } else {
+        entity.components.interpolation.previousPosition.set(
+            entity.components.interpolation.newPosition.x,
+            entity.components.interpolation.newPosition.y,
+            0,
+        )
+
+        entity.components.interpolation.previousRotation =
+            entity.components.interpolation.newRotation
+    }
 
     entity.components.interpolation.newPosition.set(position.x, position.y, 0)
     entity.components.interpolation.newRotation = entity.components.rigidBody.rotation()

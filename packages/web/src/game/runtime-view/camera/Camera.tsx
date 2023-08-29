@@ -4,24 +4,28 @@ import { EntityWith } from "runtime-framework/src/NarrowProperties"
 import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 
-import { EntityStore } from "runtime-framework"
 import { Point } from "runtime/src/model/Point"
 import { gameCameraTransitionSpeed } from "../../../common/Values"
 import { useGameStore } from "../../store/GameStore"
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
+import { WebappFactoryContext } from "../webapp-runtime/WebappFactoryContext"
+import { interpolationThreshold } from "../webapp-runtime/interpolation/InterpolatedEntity"
 import { findCameraTargetPosition as findCameraPositionForEntity } from "./findCameraPositionForEntity"
 import { moveCameraTo } from "./moveCameraTo"
 import { moveSourceTo } from "./moveSourceTo"
 import { useTargetSize } from "./useTargetSize"
 
-export function Camera(props: { store: EntityStore<WebappComponents> }) {
-    const [rocket] = props.store.find("interpolation", ...RocketEntityComponents)
+const cameraAnimationThreshold = interpolationThreshold
 
-    return <CameraWithEntity rocket={rocket} />
+export function Camera(props: { context: WebappFactoryContext }) {
+    const [rocket] = props.context.store.find("interpolation", ...RocketEntityComponents)
+
+    return <CameraWithEntity context={props.context} rocket={rocket} />
 }
 
 export function CameraWithEntity(props: {
+    context: WebappFactoryContext
     rocket: EntityWith<WebappComponents, "interpolation" | (typeof RocketEntityComponents)[number]>
 }) {
     const [cameraBounds, setCameraBounds] = useState(
@@ -50,6 +54,13 @@ export function CameraWithEntity(props: {
             targetSize,
             newCameraBounds,
         )
+
+        if (
+            Math.abs(targetPosition.x - cameraRef.current.position.x) > cameraAnimationThreshold ||
+            Math.abs(targetPosition.y - cameraRef.current.position.y) > cameraAnimationThreshold
+        ) {
+            animatingRef.current = true
+        }
 
         if (animatingRef.current) {
             animateCameraSizeAndPosition(delta * gameCameraTransitionSpeed, targetPosition)

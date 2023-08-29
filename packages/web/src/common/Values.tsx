@@ -21,4 +21,4 @@ export const shapeColorSelectedHighlighted = "#ebc894"
 
 export const mousePointerhintLayer = 1
 
-export const gameCameraTransitionSpeed = 30
+export const gameCameraTransitionSpeed = 50

@@ -17,6 +17,7 @@ export function App() {
     )
 }
 
+/*
 import RAPIER from "@dimforge/rapier2d-compat"
 import { decompressFromBase64 } from "lz-string"
 import { WorldModel } from "runtime/proto/world"
@@ -55,6 +56,7 @@ function logstat(str: string) {
 
 logstat(raw3)
 logstat(raw5)
+*/
 
 /*
 for (let i = 0; i < 50; i++) {
@@ -66,13 +68,15 @@ for (let i = 0; i < 50; i++) {
 }
 */
 
-const map = new Map<number, number>()
+// const map = new Map<number, number>()
 
 /*
 replays.forEach((r, i) => {
     map.set(r.rotation, (map.get(r.rotation) ?? 0) + 1)
 })
 */
+
+/*
 
 console.log([...map.keys()].length)
 
@@ -92,7 +96,7 @@ let plotderive3y: number[] = []
 function clamp(num: number, min: number, max: number) {
     return num <= min ? min : num >= max ? max : num
 }
-
+*/
 /*
 replays.forEach((replay, i) => {
     i++

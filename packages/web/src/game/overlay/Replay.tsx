@@ -1,27 +1,15 @@
 import { useMemo, useState } from "react"
-import { useMessage } from "runtime-framework"
 
 import { ReplayModel } from "runtime/proto/replay"
 import { bytesToBase64 } from "../../app/editor/models/exportModel"
 import useGlobalStore from "../../common/GlobalStore"
 import Dialog from "../../common/components/Dialog"
-import { trpc } from "../../common/trpc/trpc"
 import { useGameStore } from "../store/GameStore"
 
 export default function Replay() {
-    const { store, messageStore, replayCaptureService } = useGameStore(state => state.systemContext)
+    const { store, replayCaptureService } = useGameStore(state => state.systemContext)
 
     const [finished, setFinished] = useState(false)
-    const validateReplay = trpc.validateReplay.useMutation()
-
-    useMessage(messageStore, "finished", () => {
-        setFinished(true)
-        validateReplay.mutate({
-            world: "",
-            gamemode: "",
-            replay: bytesToBase64(ReplayModel.encode(replayCaptureService.replay).finish()),
-        })
-    })
 
     const base64 = useMemo(() => {
         if (finished === false) return

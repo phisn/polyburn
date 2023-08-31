@@ -124,6 +124,20 @@ export function useControls() {
             }
 
             for (const touch of event.changedTouches) {
+                let touchPosition
+
+                if (rotated) {
+                    touchPosition = {
+                        x: touch.clientY,
+                        y: window.innerWidth - touch.clientX,
+                    }
+                } else {
+                    touchPosition = {
+                        x: touch.clientX,
+                        y: touch.clientY,
+                    }
+                }
+
                 switch (event.type) {
                     case "touchstart":
                         console.log(
@@ -132,10 +146,7 @@ export function useControls() {
                             " and rpid " + stateRef.current.rotatePointer?.pointerId,
                         )
 
-                        if (
-                            (rotated && touch.clientY > window.innerWidth / 2) ||
-                            (!rotated && touch.clientX > window.innerWidth / 2)
-                        ) {
+                        if (touchPosition.x > window.innerWidth / 2) {
                             if (stateRef.current.thrustPointer === undefined) {
                                 stateRef.current.thrustPointer = {
                                     pointerId: touch.identifier,
@@ -149,7 +160,7 @@ export function useControls() {
                             if (stateRef.current.rotatePointer === undefined) {
                                 stateRef.current.rotatePointer = {
                                     pointerId: touch.identifier,
-                                    startPointerX: touch.clientX,
+                                    startPointerX: touchPosition.x,
                                     startRotation: controlsRef.current.rotation,
                                 }
                             }
@@ -163,7 +174,7 @@ export function useControls() {
                         ) {
                             controlsRef.current.rotation =
                                 stateRef.current.rotatePointer.startRotation -
-                                (touch.clientX - stateRef.current.rotatePointer.startPointerX) *
+                                (touchPosition.x - stateRef.current.rotatePointer.startPointerX) *
                                     0.005
                         }
 

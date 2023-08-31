@@ -129,7 +129,7 @@ export function CameraWithEntity(props: {
             cameraRef.current.left = -bounds.bottom
             cameraRef.current.right = -bounds.top
 
-            cameraRef.current.rotation.z = Math.PI / 2
+            cameraRef.current.rotation.z = -Math.PI / 2
         } else {
             cameraRef.current.top = bounds.top
             cameraRef.current.bottom = bounds.bottom

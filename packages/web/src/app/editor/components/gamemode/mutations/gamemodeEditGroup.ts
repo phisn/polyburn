@@ -11,7 +11,7 @@ export function gamemodeEditGroup(previousName: string, newName: string) {
                 }
             }
 
-            for (const [_, entity] of state.entities) {
+            for (const [, entity] of state.entities) {
                 if (entity.group === previousName) {
                     entity.group = newName
                 }

@@ -6,13 +6,15 @@
             "outputs": [".proto/**"]
         },
         "build": {
-            "dependsOn": ["proto", "^build"],
+            "dependsOn": ["proto", "lint", "^build"],
             "outputs": [".dist/**"]
         },
         "test": {
             "dependsOn": ["^test"]
         },
-        "lint": {},
+        "lint": {
+            "dependsOn": ["^lint"]
+        },
         "dev": {
             "dependsOn": ["proto"],
             "cache": false,

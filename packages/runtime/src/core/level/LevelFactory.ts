@@ -39,7 +39,7 @@ export const newLevel = (
         ]),
     )
 
-    if (colliderDesc == null) {
+    if (colliderDesc === null) {
         throw new Error("Failed to create collider")
     }
 
@@ -54,7 +54,7 @@ export const newLevel = (
         .setRotation(level.rotation)
         .setSensor(true)
 
-    if (captureColliderDesc == null) {
+    if (captureColliderDesc === null) {
         throw new Error("Failed to create collider")
     }
 

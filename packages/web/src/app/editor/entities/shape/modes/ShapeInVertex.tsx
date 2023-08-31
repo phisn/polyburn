@@ -90,7 +90,7 @@ export function ShapeInVertex(props: {
             Priority.Action + SubPriority.Shape,
         )
 
-        let duplicateIndex = verticesRef.current.findIndex(
+        const duplicateIndex = verticesRef.current.findIndex(
             (v, i) =>
                 v.position.x === verticesRef.current[vertexIndexRef.current].position.x &&
                 v.position.y === verticesRef.current[vertexIndexRef.current].position.y &&

@@ -3,7 +3,6 @@ import { createStore, useStore } from "zustand"
 
 import { WebappFactoryContext } from "../runtime-view/webapp-runtime/WebappFactoryContext"
 import { ZoomSteps } from "./ZoomSteps"
-import { ReplayCaptureService } from "runtime/src/model/replay/ReplayCaptureService"
 
 interface GameState {
     zoomIndex: number
@@ -84,7 +83,7 @@ export const createGameStore = (systemContext: WebappFactoryContext) =>
         },
     }))
 
-const GameStoreContext = createContext<ReturnType<typeof createGameStore>>(null!)
+const GameStoreContext = createContext<ReturnType<typeof createGameStore> | undefined>(undefined)
 
 export const ProvideGameStore = (props: {
     children: React.ReactNode

@@ -3,7 +3,8 @@
     "scripts": {
         "install": "pnpm run proto",
         "test": "vitest run",
-        "proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./proto --ts_proto_opt=unrecognizedEnum=false --ts_proto_opt=oneof=unions -I=./proto ./proto/*.proto"
+        "proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./proto --ts_proto_opt=unrecognizedEnum=false --ts_proto_opt=oneof=unions -I=./proto ./proto/*.proto",
+        "lint": "eslint \"src/**/*.{tsx,ts}\""
     },
     "dependencies": {
         "@dimforge/rapier2d-compat": "^0.11.2",

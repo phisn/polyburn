@@ -1,8 +1,4 @@
 {
-    "extends": "tsconfig/react.json",
-    "compilerOptions": {
-        "inlineSources": true
-    },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules"]
+    "extends": "tsconfig/vite.json",
+    "include": ["src"]
 }

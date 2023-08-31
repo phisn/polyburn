@@ -1,4 +1,4 @@
-import { GamemodeState, WorldState } from "../../../models/WorldState"
+import { GamemodeState } from "../../../models/WorldState"
 
 export function gamemodeToggleGroup(gamemode: GamemodeState, group: string) {
     const toggle = () => {
@@ -12,10 +12,10 @@ export function gamemodeToggleGroup(gamemode: GamemodeState, group: string) {
     }
 
     return {
-        do(state: WorldState) {
+        do() {
             toggle()
         },
-        undo(state: WorldState) {
+        undo() {
             toggle()
         },
     }

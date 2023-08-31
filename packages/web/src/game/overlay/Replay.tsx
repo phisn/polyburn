@@ -30,7 +30,7 @@ export default function Replay() {
         }
 
         return compressToBase64(JSON.stringify(replayCaptureService.replay))
-    }, [finished, store])
+    }, [finished, store, replayCaptureService])
 
     if (base64) {
         console.log(base64)
@@ -38,7 +38,7 @@ export default function Replay() {
 
     const onCopy = () => {
         if (base64) {
-            navigator.clipboard.writeText(base64)
+            navigator.clipboard.writeText(base64).catch(console.error)
 
             useGlobalStore.getState().newAlert({
                 type: "info",

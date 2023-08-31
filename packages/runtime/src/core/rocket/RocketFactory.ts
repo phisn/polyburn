@@ -44,7 +44,7 @@ export const newRocket = (
 
         collider
             .setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
-            .setMass(i == 0 ? 20 : 0.5)
+            .setMass(i === 0 ? 20 : 0.5)
             .setCollisionGroups(0x0001_0002)
 
         context.physics.createCollider(collider, body)

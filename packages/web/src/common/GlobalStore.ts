@@ -3,8 +3,6 @@ import { create } from "zustand"
 import { useEffect } from "react"
 import { AlertProps } from "../app/layout/Alert"
 
-type Modal = (props: { onClose: () => void }) => React.ReactNode
-
 export interface GlobalStore {
     alerts: AlertProps[]
     modalCount: number

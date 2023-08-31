@@ -10,12 +10,6 @@ export function ShapeGraphic(props: { entity: Entity<WebappComponents> }) {
         throw new Error("Got invalid entity graphic type")
     }
 
-    const threeShape = new THREE.Shape(
-        props.entity.components.shape.vertices.map(
-            vertex => new THREE.Vector2(vertex.position.x, vertex.position.y),
-        ),
-    )
-
     const geometryRef = useRef(
         new MutatableShapeGeometry(
             props.entity.components.shape.vertices.map(vertex => ({

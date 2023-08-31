@@ -38,8 +38,8 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
             {!props.entity.components.level.hideFlag && (
                 <Suspense>
                     <Svg
-                        src={entry.src as string}
-                        scale={entry.scale as number}
+                        src={entry.src}
+                        scale={entry.scale}
                         position={[
                             props.entity.components.level.flag.x,
                             props.entity.components.level.flag.y,

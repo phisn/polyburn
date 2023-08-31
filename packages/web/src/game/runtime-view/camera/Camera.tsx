@@ -70,24 +70,28 @@ export function CameraWithEntity(props: {
     })
 
     // ensure camera still works when level changes
-    useEffect(() => {
-        if (animatingRef.current === false) {
-            updateCameraFrustum({
-                top: targetSize.y / 2,
-                bottom: -targetSize.y / 2,
-                left: -targetSize.x / 2,
-                right: targetSize.x / 2,
-            })
+    useEffect(
+        () => {
+            if (animatingRef.current === false) {
+                updateCameraFrustum({
+                    top: targetSize.y / 2,
+                    bottom: -targetSize.y / 2,
+                    left: -targetSize.x / 2,
+                    right: targetSize.x / 2,
+                })
 
-            const targetPosition = findCameraPositionForEntity(
-                props.rocket.components.interpolation.position,
-                targetSize,
-                cameraBounds,
-            )
+                const targetPosition = findCameraPositionForEntity(
+                    props.rocket.components.interpolation.position,
+                    targetSize,
+                    cameraBounds,
+                )
 
-            cameraRef.current.position.set(targetPosition.x, targetPosition.y, 10)
-        }
-    }, [targetSize, rotated])
+                cameraRef.current.position.set(targetPosition.x, targetPosition.y, 10)
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [targetSize, rotated],
+    )
 
     function animateCameraSizeAndPosition(distance: number, targetPosition: Point) {
         const { newWidth, newHeight, overflow } = moveCameraTo(

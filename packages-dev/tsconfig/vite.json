@@ -1,20 +1,16 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
     "extends": "./base.json",
     "compilerOptions": {
-        "allowJs": true,
         "declaration": false,
         "declarationMap": false,
-        "incremental": true,
+        "useDefineForClassFields": true,
+        "module": "ESNext",
         "jsx": "preserve",
         "lib": ["dom", "dom.iterable", "esnext"],
-        "module": "esnext",
-        "noEmit": true,
+        "sourceMap": true,
         "resolveJsonModule": true,
-        "strict": true,
-        "target": "ESNext",
+        "noEmit": true,
         "types": ["react/experimental"]
     },
-    "include": ["src"],
-    "exclude": ["node_modules", "dist"]
+    "exclude": ["node_modules"]
 }

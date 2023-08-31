@@ -3,7 +3,8 @@
     "main": "src/index.ts",
     "types": "src/index.ts",
     "scripts": {
-        "test": "vitest run"
+        "test": "vitest run",
+        "lint": "eslint \"src/\""
     },
     "dependencies": {
         "react": "^18.2.0",

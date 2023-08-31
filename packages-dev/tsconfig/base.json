@@ -2,6 +2,7 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "display": "Default",
     "compilerOptions": {
+        "target": "ESNext",
         "composite": false,
         "declaration": true,
         "declarationMap": true,
@@ -9,14 +10,12 @@
         "forceConsistentCasingInFileNames": true,
         "inlineSources": false,
         "isolatedModules": true,
-        "lib": ["DOM", "DOM.Iterable", "ESNext"],
         "moduleResolution": "node",
-        "noImplicitAny": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
         "preserveWatchOutput": true,
         "skipLibCheck": true,
-        "strict": true,
-        "target": "ESNext",
-        "sourceMap": true
+        "strict": true
     },
     "exclude": ["node_modules"]
 }

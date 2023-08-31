@@ -68,6 +68,7 @@ export function bytesToVertices(bytes: Uint8Array) {
     return vertices
 }
 
+/*
 function color32ToColor16(color: number): number {
     return (((color >> 19) & 0x1f) << 11) | (((color >> 10) & 0x1f) << 6) | ((color >> 3) & 0x1f)
 }
@@ -75,3 +76,4 @@ function color32ToColor16(color: number): number {
 function color16ToColor32(color: number): number {
     return (((color >> 11) & 0x1f) << 19) | (((color >> 6) & 0x1f) << 10) | ((color & 0x1f) << 3)
 }
+*/

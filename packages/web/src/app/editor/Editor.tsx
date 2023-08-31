@@ -70,11 +70,13 @@ function GameInEditor() {
 
     const stop = useEditorStore(store => store.stop)
 
-    if (gamemode === undefined) {
-        useEffect(() => {
+    useEffect(() => {
+        if (gamemode === undefined) {
             stop()
-        }, [])
+        }
+    }, [gamemode, stop])
 
+    if (gamemode === undefined) {
         return null
     }
 

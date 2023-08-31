@@ -1,11 +1,10 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { PerformanceMonitor } from "@react-three/drei"
-import { Canvas, useThree } from "@react-three/fiber"
-import { Suspense, use, useEffect, useRef } from "react"
+import { Canvas } from "@react-three/fiber"
+import { Suspense, use, useEffect } from "react"
 import { isMobile } from "react-device-detect"
 import { WorldModel } from "runtime/proto/world"
 import tunnel from "tunnel-rat"
-import useGlobalStore from "../common/GlobalStore"
 import "./Game.css"
 import Overlay from "./overlay/Overlay"
 import { useWebappRuntime } from "./runtime-runner/useWebappRuntime"
@@ -20,6 +19,7 @@ const overlay = tunnel()
 function Game(props: { world: WorldModel; gamemode: string }) {
     use(rapierInit)
 
+    /*
     const newAlert = useGlobalStore(state => state.newAlert)
 
     enum FullscreenState {
@@ -29,6 +29,7 @@ function Game(props: { world: WorldModel; gamemode: string }) {
     }
 
     const fullscrenStateRef = useRef<FullscreenState>(FullscreenState.None)
+    */
 
     useEffect(() => {
         if (isMobile) {
@@ -137,8 +138,6 @@ function Game(props: { world: WorldModel; gamemode: string }) {
 function GameInThree(props: { stack: WebappSystemStack }) {
     useWebappRuntime(props.stack)
 
-    const camera = useThree(state => state.camera) as THREE.OrthographicCamera
-
     const setPerformance = useGameStore(state => state.setPerformance)
 
     return (
@@ -146,7 +145,7 @@ function GameInThree(props: { stack: WebappSystemStack }) {
             <PerformanceMonitor onChange={api => setPerformance(api.factor)} />
 
             <overlay.In>
-                <Overlay camera={camera} />
+                <Overlay />
             </overlay.In>
 
             <RuntimeView />

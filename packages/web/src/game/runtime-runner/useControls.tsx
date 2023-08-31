@@ -235,7 +235,7 @@ export function useControls() {
                 controlsRef.current.thrust = true
             }
 
-            if (event.key == "p") {
+            if (event.key === "p") {
                 controlsRef.current.pause = !controlsRef.current.pause
             }
 

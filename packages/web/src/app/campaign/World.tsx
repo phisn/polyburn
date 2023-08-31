@@ -94,6 +94,7 @@ function Overlay(props: { info: WorldInfo }) {
         </div>
     )
 }
+/*
 
 function WorldProgressStep(props: { index: number; progress: WorldProgress | undefined }) {
     return (
@@ -103,3 +104,5 @@ function WorldProgressStep(props: { index: number; progress: WorldProgress | und
         ></div>
     )
 }
+
+*/

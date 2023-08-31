@@ -10,7 +10,7 @@ export const newDeathParticleSpawnSystem: WebappSystemFactory = ({
 }) => {
     const deaths = messageStore.collect("rocketDeath")
 
-    return context => {
+    return () => {
         for (const death of deaths) {
             const deathSource = store.create({
                 particleSource: newParticleSourceComponent(1000, newDeathParticleFactory(death)),

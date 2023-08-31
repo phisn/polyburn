@@ -109,7 +109,10 @@ export function useEventListener(callback: Callback, priority: number, triggerPr
         listenerRef.current.priority = priority
     }, [callback, priority])
 
-    useEffect(() => store.subscribeEvent(listenerRef, triggerPrevious), [store, priority])
+    useEffect(
+        () => store.subscribeEvent(listenerRef, triggerPrevious),
+        [store, priority, triggerPrevious],
+    )
 }
 
 export function useEventDispatch() {

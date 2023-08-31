@@ -21,7 +21,7 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({
         for (const entity of rockets) {
             entity.components.rocket.framesSinceLastDeath++
 
-            if (entity.components.rocket.collisionCount == 0) {
+            if (entity.components.rocket.collisionCount === 0) {
                 continue
             }
 

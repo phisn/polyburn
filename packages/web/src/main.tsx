@@ -9,7 +9,13 @@ import "./main.css"
 // https://vite-pwa-org.netlify.app/guide/periodic-sw-updates.html
 registerSW({ immediate: true })
 
-createRoot(document.getElementById("root")!).render(
+const root = document.getElementById("root")
+
+if (!root) {
+    throw new Error("No root element found")
+}
+
+createRoot(root).render(
     <StrictMode>
         <BrowserRouter>
             <App />

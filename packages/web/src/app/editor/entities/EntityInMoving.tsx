@@ -2,7 +2,6 @@ import { useRef } from "react"
 import { Object3D } from "three"
 import { EntityState } from "../models/EntityState"
 import { Priority } from "../models/Priority"
-import { useEditorStore } from "../store/EditorStore"
 import { ConsumeEvent, useEventListener } from "../store/EventStore"
 
 export interface EntityModeMoving {
@@ -19,8 +18,6 @@ export function EntityInMoving(props: {
 }) {
     const entityRef = useRef<Object3D>()
     const positionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
-
-    const dispatchMutation = useEditorStore(store => store.mutation)
 
     useEventListener(event => {
         if (!entityRef.current) {

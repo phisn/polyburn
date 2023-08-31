@@ -1,13 +1,13 @@
-import { GamemodeState, WorldState } from "../../../models/WorldState"
+import { GamemodeState } from "../../../models/WorldState"
 
 export function gamemodeRename(gamemode: GamemodeState, name: string) {
     const previousName = gamemode.name
 
     return {
-        do(state: WorldState) {
+        do() {
             gamemode.name = name
         },
-        undo(state: WorldState) {
+        undo() {
             gamemode.name = previousName
         },
     }

@@ -15,7 +15,7 @@ export const newRocketCollisionSystem: RuntimeSystemFactory = ({ messageStore })
                 collision.target.components.rocket.collisionCount--
             }
 
-            if (collision.target.components.rocket.collisionCount == 0) {
+            if (collision.target.components.rocket.collisionCount === 0) {
                 collision.target.components.rocket.rotationWithoutInput =
                     collision.target.components.rigidBody.rotation() - context.rotation
             }

@@ -1,4 +1,3 @@
-import { OrthographicCamera } from "three"
 import { shallow } from "zustand/shallow"
 
 import { ZoomInSvg } from "../../common/components/inline-svg/ZoomIn"
@@ -8,7 +7,7 @@ import { canZoomIn, canZoomOut } from "../store/ZoomSteps"
 import Replay from "./Replay"
 import { Starting } from "./Starting"
 
-export default function Overlay(props: { camera: OrthographicCamera }) {
+export default function Overlay() {
     const [zoomIndex, zoomIn, zoomOut] = useGameStore(
         state => [state.zoomIndex, state.zoomIn, state.zoomOut],
         shallow,

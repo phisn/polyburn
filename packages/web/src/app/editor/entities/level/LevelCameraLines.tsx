@@ -1,5 +1,5 @@
 import { Line } from "@react-three/drei"
-import { forwardRef, Fragment, useImperativeHandle, useRef } from "react"
+import { forwardRef, Fragment, useImperativeHandle, useMemo, useRef } from "react"
 import { Point } from "runtime/src/model/Point"
 import { Line2 } from "three-stdlib"
 import { CameraSide, cameraSides } from "./CameraSide"
@@ -23,19 +23,29 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
 ) {
     const lines = cameraLinesFromLevel(props.state)
 
-    const linesRef = {
-        top: useRef<Line2>(null!),
-        right: useRef<Line2>(null!),
-        bottom: useRef<Line2>(null!),
-        left: useRef<Line2>(null!),
-    }
+    const top = useRef<Line2>(null!)
+    const right = useRef<Line2>(null!)
+    const bottom = useRef<Line2>(null!)
+    const left = useRef<Line2>(null!)
 
+    const linesRef = useMemo(
+        () => ({
+            top,
+            right,
+            bottom,
+            left,
+        }),
+        [],
+    )
+
+    /*
     const linesDashedRef = {
         top: useRef<Line2>(null!),
         right: useRef<Line2>(null!),
         bottom: useRef<Line2>(null!),
         left: useRef<Line2>(null!),
     }
+    */
 
     useImperativeHandle(
         ref,
@@ -143,7 +153,7 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
                 })
             },
         }),
-        [],
+        [lines, props.priority, linesRef],
     )
 
     return (
@@ -152,7 +162,7 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
                 <Fragment key={side}>
                     <Line
                         ref={linesRef[side]}
-                        points={lines[side].map(([p1, p2]) => [p1, p2, props.priority as number])}
+                        points={lines[side].map(([p1, p2]) => [p1, p2, props.priority])}
                         color={props.colorCustom?.[side] || props.color}
                         dashed={props.dashed}
                         lineWidth={3}
@@ -165,7 +175,7 @@ export const LevelCameraLines = forwardRef(function LevelCameraLines(
                     points={lines[props.alwaysShowDashed].map(([p1, p2]) => [
                         p1,
                         p2,
-                        (props.priority as number) - 0.001,
+                        props.priority - 0.001,
                     ])}
                     color={props.color}
                     dashed

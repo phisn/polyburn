@@ -3,7 +3,7 @@ import { WorldState } from "../../models/WorldState"
 
 export const entityClone = (entity: EntityState, group?: string) => (world: WorldState) => {
     const id = [...world.entities.keys()].reduce((max, id) => Math.max(max, id), 0) + 1
-    const deepcopy = JSON.parse(JSON.stringify(entity))
+    const deepcopy = JSON.parse(JSON.stringify(entity)) as EntityState
 
     deepcopy.id = id
     deepcopy.group = group

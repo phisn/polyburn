@@ -15,11 +15,11 @@ export function ExportDialog(props: { open: boolean; closeDialog: () => void }) 
         }
 
         return exportModelString(world)
-    }, [props.open])
+    }, [props.open, world])
 
     const onCopy = () => {
         if (base64) {
-            navigator.clipboard.writeText(base64)
+            navigator.clipboard.writeText(base64).catch(console.error)
 
             newAlert({
                 type: "info",

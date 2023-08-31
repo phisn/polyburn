@@ -16,7 +16,6 @@ export const newThrustParticleSpawnSystem: WebappSystemFactory = ({ store, parti
     const rockets = store.newSet("particleSource", ...RocketEntityComponents)
 
     const particlePerFrame = 3
-    let aggregate = 0
 
     return context => {
         if (context.thrust) {

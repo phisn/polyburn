@@ -94,7 +94,7 @@ function GamemodeOption(props: { first: boolean; gamemode: GamemodeState; select
         if (!props.selected && mode !== GamemodeOptionType.None) {
             setMode(GamemodeOptionType.None)
         }
-    }, [props.selected])
+    }, [props.selected, mode])
 
     useUnclick(ref, () => {
         if (mode !== GamemodeOptionType.None) {
@@ -311,7 +311,7 @@ function Group(props: { name: string; gamemode: GamemodeState; selected: boolean
                         <input
                             type="checkbox"
                             className="checkbox checkbox-success checkbox-sm border-zinc-400"
-                            onChange={e => {
+                            onChange={() => {
                                 dispatch(gamemodeToggleGroup(props.gamemode, props.name))
                             }}
                             checked={props.selected}
@@ -444,7 +444,7 @@ function GamemodeRenamer(props: {
         window.addEventListener("pointerdown", listener)
 
         return () => void window.removeEventListener("pointerdown", listener)
-    }, [])
+    }, [props])
 
     return (
         <div className="join-item flex" ref={ref}>

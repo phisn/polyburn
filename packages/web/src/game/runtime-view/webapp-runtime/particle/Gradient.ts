@@ -6,7 +6,7 @@ export interface GradientEntry {
 }
 
 export function colorInGradient(gradient: Gradient, position: number): [number, number, number] {
-    if (gradient.length == 0) {
+    if (gradient.length === 0) {
         return gradient[0].color
     }
 

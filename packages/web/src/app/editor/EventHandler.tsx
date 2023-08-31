@@ -1,6 +1,6 @@
 import { useThree } from "@react-three/fiber"
 import { useEffect, useRef } from "react"
-import { Camera, Vector3 } from "three"
+import { Vector3 } from "three"
 import { useEventDispatch } from "./store/EventStore"
 
 export interface EditorEvent {
@@ -25,20 +25,11 @@ export interface EditorEvent {
     consumed: boolean
 }
 
-function canvasToWorld(
-    position: { x: number; y: number },
-    camera: Camera,
-    canvas: HTMLCanvasElement,
-) {
-    return
-}
-
 export function EventHandler() {
     const lastNativeEventRef = useRef<EditorEvent | undefined>()
 
     const canvas = useThree(state => state.gl.domElement)
     const camera = useThree(state => state.camera)
-    const pointer = useThree(state => state.pointer)
 
     const invalidate = useThree(state => state.invalidate)
 

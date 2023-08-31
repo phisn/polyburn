@@ -1,6 +1,4 @@
-import { EntityType } from "runtime/proto/world"
 import { RocketDeathMessage } from "runtime/src/core/rocket/RocketDeathMessage"
-import { entityRegistry } from "runtime/src/model/world/entityRegistry"
 import { Gradient } from "../particle/Gradient"
 import { ParticleConfiguration } from "../particle/ParticleSource"
 
@@ -25,8 +23,6 @@ const gradient: Gradient = [
 ]
 
 export const newDeathParticleFactory = (death: RocketDeathMessage) => (): ParticleConfiguration => {
-    const rocketEntry = entityRegistry[EntityType.ROCKET]
-
     const angle = Math.random() * (maxAngle - minAngle) + minAngle
     const velocity = Math.random() * (maxVelocity - minVelocity) + minVelocity
 

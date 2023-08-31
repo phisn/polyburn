@@ -1,6 +1,6 @@
 #Unclickable > * {
     mstouchaction: "manipulation";
-    touchaction: "none" f;
+    touchaction: "none";
     userselect: "none";
 
     webkittouchcallout: "none";

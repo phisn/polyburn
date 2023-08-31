@@ -30,12 +30,12 @@ export function VertexContext(props: {
 
     useEffect(() => {
         setColor(colorToHex(props.state.vertices[props.vertexIndex].color))
-    }, [props.vertexIndex])
+    }, [props.vertexIndex, props.state.vertices])
 
     useEffect(() => {
         props.state.vertices[props.vertexIndex].color = hexToColor(color)
         props.geometryRef.current.update(props.state.vertices)
-    }, [color])
+    })
 
     useEffect(() => {
         const listener = (event: KeyboardEvent) => {
@@ -44,19 +44,22 @@ export function VertexContext(props: {
                 switch (event.key) {
                     case "c":
                         console.log("copying color")
-                        navigator.clipboard.writeText(color)
+                        navigator.clipboard.writeText(color).catch(console.error)
 
                         break
 
                     case "v":
                         console.log("pasting color")
-                        navigator.clipboard.readText().then(text => {
-                            const trimmed = text.trim()
+                        navigator.clipboard
+                            .readText()
+                            .then(text => {
+                                const trimmed = text.trim()
 
-                            if (trimmed.length === 7 && trimmed.startsWith("#")) {
-                                setColor(trimmed)
-                            }
-                        })
+                                if (trimmed.length === 7 && trimmed.startsWith("#")) {
+                                    setColor(trimmed)
+                                }
+                            })
+                            .catch(console.error)
 
                         break
                 }

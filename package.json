@@ -8,10 +8,8 @@
         "preview": "turbo run preview"
     },
     "devDependencies": {
-        "@turbo/gen": "^1.10.12",
-        "eslint": "^8.47.0",
-        "eslint-config-custom": "workspace:*",
-        "prettier": "^3.0.2",
+        "eslint": "^8.48.0",
+        "prettier": "^3.0.3",
         "prettier-plugin-organize-imports": "^3.2.3",
         "prettier-plugin-tailwindcss": "^0.4.1",
         "turbo": "latest"

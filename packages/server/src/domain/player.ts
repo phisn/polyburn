@@ -1,3 +1,4 @@
+/*
 interface Player {
     name: string
 }
@@ -5,3 +6,4 @@ interface Player {
 function renamePlayer(name: string): Partial<Player> {
     return { name }
 }
+*/

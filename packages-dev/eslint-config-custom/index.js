@@ -27,5 +27,5 @@ module.exports = {
         eqeqeq: "error",
         "no-var": "error",
     },
-    ignorePatterns: ["*.cjs"],
+    ignorePatterns: ["*.cjs", "vite.config.ts"],
 }

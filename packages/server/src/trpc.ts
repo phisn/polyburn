@@ -1,12 +1,14 @@
-import { initTRPC } from "@trpc/server"
-import { z } from "zod"
+import { inferAsyncReturnType, initTRPC } from "@trpc/server"
+import * as trpcExpress from "@trpc/server/adapters/express"
 
-export const t = initTRPC.create()
-
-export const appRouter = t.router({
-    hello: t.procedure.input(z.string()).query(opts => {
-        return `Hello ${opts.input}!`
-    }),
+export const createContext = ({ req, res }: trpcExpress.CreateExpressContextOptions) => ({
+    req,
+    res,
 })
 
-export type AppRouter = typeof appRouter
+type Context = inferAsyncReturnType<typeof createContext>
+const t = initTRPC.context<Context>().create()
+
+export const middleware = t.middleware
+export const router = t.router
+export const publicProcedure = t.procedure

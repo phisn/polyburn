@@ -18,7 +18,11 @@ import { newThrustParticleSpawnSystem } from "./particle-thrust/ThrustParticleSp
 import { newParticleAgeSystem } from "./particle/ParticleAgeSystem"
 import { newParticleStepSystem } from "./particle/ParticleStepSystem"
 
-export const newWebappRuntime = (world: WorldModel, gamemode: string): WebappSystemStack => {
+export const newWebappRuntime = (
+    name: string,
+    world: WorldModel,
+    gamemode: string,
+): WebappSystemStack => {
     const stack = newRuntime<WebappComponents>(world, gamemode)
 
     const particlePhysics = new RAPIER.World(stack.factoryContext.physics.gravity)
@@ -31,6 +35,10 @@ export const newWebappRuntime = (world: WorldModel, gamemode: string): WebappSys
         particlePhysics,
         replayCaptureService: new ReplayCaptureService(),
         config: defaultConfig,
+        meta: {
+            name,
+            gamemode,
+        },
     })
 
     stackExtended.add(

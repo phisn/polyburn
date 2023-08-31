@@ -1,0 +1,16 @@
+{
+    "private": true,
+    "name": "shared",
+    "scripts": {
+        "test": "vitest run",
+        "lint": "eslint \"src/**/*.{tsx,ts}\""
+    },
+    "dependencies": {
+        "typescript": "latest"
+    },
+    "devDependencies": {
+        "eslint-config-custom": "workspace:*",
+        "tsconfig": "workspace:*",
+        "runtime": "workspace:*"
+    }
+}

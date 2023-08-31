@@ -6,6 +6,7 @@ import { isMobile } from "react-device-detect"
 import { WorldModel } from "runtime/proto/world"
 import tunnel from "tunnel-rat"
 import "./Game.css"
+import { useGameHook } from "./GameHook"
 import Overlay from "./overlay/Overlay"
 import { useWebappRuntime } from "./runtime-runner/useWebappRuntime"
 import { RuntimeView } from "./runtime-view/RuntimeView"
@@ -16,7 +17,7 @@ import { ProvideGameStore, useGameStore } from "./store/GameStore"
 const rapierInit = RAPIER.init()
 const overlay = tunnel()
 
-function Game(props: { world: WorldModel; gamemode: string }) {
+function Game(props: { name: string; world: WorldModel; gamemode: string }) {
     use(rapierInit)
 
     /*
@@ -82,7 +83,7 @@ function Game(props: { world: WorldModel; gamemode: string }) {
         }
     }, [])
 
-    const stack = newWebappRuntime(props.world, props.gamemode)
+    const stack = newWebappRuntime(props.name, props.world, props.gamemode)
 
     return (
         <ProvideGameStore systemContext={stack.factoryContext}>
@@ -139,6 +140,13 @@ function GameInThree(props: { stack: WebappSystemStack }) {
     useWebappRuntime(props.stack)
 
     const setPerformance = useGameStore(state => state.setPerformance)
+    const gameHook = useGameHook()
+
+    useEffect(() =>
+        props.stack.factoryContext.messageStore.listenTo("finished", () => {
+            gameHook?.finished?.(props.stack.factoryContext.replayCaptureService.replay)
+        }),
+    )
 
     return (
         <>

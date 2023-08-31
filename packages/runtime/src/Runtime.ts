@@ -57,10 +57,11 @@ export const newRuntime = <Components extends RuntimeComponents>(
 
     context.store.world.components.world = {
         ticks: 0,
+        deaths: 0,
         finished: false,
     }
 
     return new SystemStack<RuntimeFactoryContext<RuntimeComponents>, RuntimeSystemContext>(
-            context,
-        ).add(...runtimeSystemFactories)
+        context,
+    ).add(...runtimeSystemFactories)
 }

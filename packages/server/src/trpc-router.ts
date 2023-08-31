@@ -1,10 +1,12 @@
-import { z } from "zod"
-import { publicProcedure, router } from "./trpc"
+import { replayRouter } from "./query/replay-router"
+import { worldRouter } from "./query/world-router"
+import { router } from "./trpc"
+import { validateReplayProcedure } from "./usecase/validate-replay"
 
 export const appRouter = router({
-    hello: publicProcedure.input(z.string()).query(opts => {
-        return { message: `Hello ${opts.input}!` }
-    }),
+    world: worldRouter,
+    replay: replayRouter,
+    validateReplay: validateReplayProcedure,
 })
 
 export type AppRouter = typeof appRouter

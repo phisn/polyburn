@@ -5,10 +5,6 @@ export interface ReplayFrame {
     thrust: boolean
 }
 
-export interface Replay {
-    frames: ReplayFrame[]
-}
-
 interface Packet {
     write: (view: DataView, offset: number) => number
     size: number

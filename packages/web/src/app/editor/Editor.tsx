@@ -82,7 +82,7 @@ function GameInEditor() {
 
     return (
         <div className="absolute inset-0 ">
-            <Game world={worldModel} gamemode={gamemode.name} />
+            <Game name={"missing"} world={worldModel} gamemode={gamemode.name} />
 
             <div
                 className="absolute left-0 top-0 p-4"

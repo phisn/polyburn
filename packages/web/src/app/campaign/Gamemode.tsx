@@ -1,42 +1,30 @@
 import { BrowserView, isMobile } from "react-device-detect"
+import { ReplayStats } from "runtime/src/model/replay/ReplayStats"
+import { GamemodeView } from "shared/src/views/GamemodeView"
 import { LockedSvg } from "../../common/components/inline-svg/Locked"
 import { TrophySvg } from "../../common/components/inline-svg/Trophy"
 
-type Rank = "Diamond" | "Platinum" | "Gold" | "Silver" | "Bronze" | "Iron"
+const todoLockedFeature = false
 
-export interface GamemodeStats {
-    name: string
-    rank?: GamemodeRankProps
-    locked?: boolean
-}
-
-interface GamemodeProps extends GamemodeStats {
-    onClick: () => void
-}
-
-interface GamemodeRankProps {
-    rank: Rank
-    time: string
-    position: number
-}
-
-export function Gamemode(props: GamemodeProps) {
+export function Gamemode(props: { gamemode: GamemodeView; onSelected: () => void }) {
     return (
         <div
-            className={`relative mx-auto h-fit w-full rounded-2xl ${props.rank && "pb-6"}`}
+            className={`relative mx-auto h-fit w-full rounded-2xl ${
+                props.gamemode.replayStats && "pb-6"
+            }`}
             onClick={e => e.stopPropagation()}
         >
-            {props.locked && (
+            {todoLockedFeature && (
                 <div className="join bg-base-300 relative z-10 flex h-16 rounded-2xl border border-zinc-700"></div>
             )}
 
-            {!props.locked && (
+            {!todoLockedFeature && (
                 <div className="join bg-base-300 relative z-10 flex h-16 rounded-2xl border border-zinc-600">
                     <button
                         className="join-item hover:bg-base-100 w-full rounded-[0.9rem] px-6 text-left outline-none transition active:bg-slate-600"
-                        onClick={() => props.onClick()}
+                        onClick={() => props.onSelected()}
                     >
-                        {props.name}
+                        {props.gamemode.name}
                     </button>
                     <button className="join-item hover:bg-base-100 rounded-[0.9rem] px-6 transition active:bg-slate-600">
                         <TrophySvg className="rounded-r-none" width="24" height="24" />
@@ -44,10 +32,40 @@ export function Gamemode(props: GamemodeProps) {
                 </div>
             )}
 
-            {props.locked && <LockedOverlay />}
-            {props.rank && <RankInfo {...props.rank} />}
+            {todoLockedFeature && <LockedOverlay />}
+            {props.gamemode.replayStats && (
+                <ReplayStatsDisplay stats={props.gamemode.replayStats} />
+            )}
         </div>
     )
+}
+
+function ReplayStatsDisplay(props: { stats: ReplayStats }) {
+    return (
+        <div
+            // margin of one pixel to prevent the border shining through
+            className="absolute inset-0 m-[1px] flex items-end rounded-2xl rounded-t-3xl bg-zinc-300 hover:cursor-pointer"
+        >
+            <div
+                className={
+                    "grid h-6 w-full grid-cols-3 items-center justify-between px-6 text-left text-sm text-black"
+                }
+            >
+                <div>Global Record</div>
+                <div className="flex justify-center">
+                    {secondsToMMSS((props.stats.ticks * 16.66667) | 0)}
+                </div>
+                <div className="flex justify-end">{props.stats.deaths} Deaths</div>
+            </div>
+        </div>
+    )
+}
+
+export const secondsToMMSS = (seconds: number) => {
+    const HH = `${Math.floor(seconds / (1000 * 60))}`.padStart(2, "0")
+    const MM = `${Math.floor(seconds / 1000) % 60}`.padStart(2, "0")
+    const SS = `${Math.floor(seconds % 1000)}`.padStart(3, "0")
+    return [HH, MM, SS].join(":")
 }
 
 function LockedOverlay() {
@@ -73,6 +91,26 @@ function LockedOverlay() {
             </div>
         </div>
     )
+}
+
+/*
+
+type Rank = "Diamond" | "Platinum" | "Gold" | "Silver" | "Bronze" | "Iron"
+
+export interface GamemodeStats {
+    name: string
+    rank?: GamemodeRankProps
+    locked?: boolean
+}
+
+interface GamemodeProps extends GamemodeStats {
+    onClick: () => void
+}
+
+interface GamemodeRankProps {
+    rank: Rank
+    time: string
+    position: number
 }
 
 function RankInfo(props: GamemodeRankProps) {
@@ -114,3 +152,4 @@ function RankInfo(props: GamemodeRankProps) {
         </div>
     )
 }
+*/

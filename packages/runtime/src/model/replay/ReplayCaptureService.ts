@@ -1,32 +1,32 @@
 import { f16round } from "@petamoriken/float16"
+import { ReplayModel } from "../../../proto/replay"
 import { RuntimeSystemContext } from "../../core/RuntimeSystemStack"
-import { Replay } from "./Replay"
+import { ReplayFrame, replayFramesToBytes } from "./Replay"
 
 export class ReplayCaptureService {
-    private _replay: Replay = {
-        frames: [],
-    }
-
-    private _accRotation = 0
+    private frames: ReplayFrame[] = []
+    private accRotation = 0
 
     get replay() {
-        return this._replay
+        return ReplayModel.create({
+            frames: replayFramesToBytes(this.frames),
+        })
     }
 
     captureFrame(context: RuntimeSystemContext) {
-        let diff = f16round(context.rotation - this._accRotation)
+        let diff = f16round(context.rotation - this.accRotation)
 
         if (Math.abs(diff) < 0.0001) {
             diff = 0
         }
 
-        this._accRotation += diff
+        this.accRotation += diff
 
-        this._replay.frames.push({
+        this.frames.push({
             diff,
             thrust: context.thrust,
         })
 
-        return this._accRotation
+        return this.accRotation
     }
 }

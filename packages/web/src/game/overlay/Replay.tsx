@@ -1,18 +1,26 @@
-import { compressToBase64 } from "lz-string"
 import { useMemo, useState } from "react"
 import { useMessage } from "runtime-framework"
 
-import Dialog from "../../common/components/Dialog"
+import { ReplayModel } from "runtime/proto/replay"
+import { bytesToBase64 } from "../../app/editor/models/exportModel"
 import useGlobalStore from "../../common/GlobalStore"
+import Dialog from "../../common/components/Dialog"
+import { trpc } from "../../common/trpc/trpc"
 import { useGameStore } from "../store/GameStore"
 
 export default function Replay() {
     const { store, messageStore, replayCaptureService } = useGameStore(state => state.systemContext)
 
     const [finished, setFinished] = useState(false)
+    const validateReplay = trpc.validateReplay.useMutation()
 
     useMessage(messageStore, "finished", () => {
         setFinished(true)
+        validateReplay.mutate({
+            world: "",
+            gamemode: "",
+            replay: bytesToBase64(ReplayModel.encode(replayCaptureService.replay).finish()),
+        })
     })
 
     const base64 = useMemo(() => {
@@ -29,7 +37,7 @@ export default function Replay() {
             return
         }
 
-        return compressToBase64(JSON.stringify(replayCaptureService.replay))
+        return bytesToBase64(ReplayModel.encode(replayCaptureService.replay).finish())
     }, [finished, store, replayCaptureService])
 
     if (base64) {
@@ -49,28 +57,26 @@ export default function Replay() {
 
     return (
         <>
-            {finished && (
-                <Dialog open={finished} closeDialog={() => setFinished(false)}>
-                    <div className="text-xl text-white">Export world as base64</div>
+            <Dialog open={finished} closeDialog={() => setFinished(false)}>
+                <div className="text-xl text-white">Export world as base64</div>
 
-                    <textarea
-                        readOnly
-                        value={base64}
-                        spellCheck="false"
-                        rows={4}
-                        className="textarea textarea-bordered scrollbar-none h-auto w-full resize-none"
-                    ></textarea>
+                <textarea
+                    readOnly
+                    value={base64}
+                    spellCheck="false"
+                    rows={4}
+                    className="textarea textarea-bordered scrollbar-none h-auto w-full resize-none"
+                ></textarea>
 
-                    <div className="space-x-4">
-                        <button className="btn" onClick={onCopy}>
-                            Copy
-                        </button>
-                        <button className="btn btn-ghost" onClick={() => setFinished(false)}>
-                            Cancel
-                        </button>
-                    </div>
-                </Dialog>
-            )}
+                <div className="space-x-4">
+                    <button className="btn" onClick={onCopy}>
+                        Copy
+                    </button>
+                    <button className="btn btn-ghost" onClick={() => setFinished(false)}>
+                        Cancel
+                    </button>
+                </div>
+            </Dialog>
         </>
     )
 }

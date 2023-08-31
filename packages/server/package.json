@@ -19,12 +19,15 @@
         "tsx": "^3.12.7"
     },
     "dependencies": {
+        "@dimforge/rapier2d-compat": "^0.11.2",
         "@trpc/server": "^10.38.1",
         "@types/cors": "^2.8.13",
         "@types/express": "^4.17.17",
         "@types/node": "^20.5.7",
         "cors": "^2.8.5",
+        "shared": "workspace:*",
         "express": "^4.18.2",
+        "runtime": "workspace:*",
         "tsconfig": "workspace:*",
         "typescript": "^5.2.2",
         "zod": "^3.22.2"

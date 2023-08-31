@@ -117,6 +117,9 @@ importers:
 
   packages/server:
     dependencies:
+      '@dimforge/rapier2d-compat':
+        specifier: ^0.11.2
+        version: 0.11.2
       '@trpc/server':
         specifier: ^10.38.1
         version: 10.38.1
@@ -135,6 +138,12 @@ importers:
       express:
         specifier: ^4.18.2
         version: 4.18.2
+      runtime:
+        specifier: workspace:*
+        version: link:../runtime
+      shared:
+        specifier: workspace:*
+        version: link:../shared
       tsconfig:
         specifier: workspace:*
         version: link:../../packages-dev/tsconfig
@@ -160,6 +169,22 @@ importers:
       tsx:
         specifier: ^3.12.7
         version: 3.12.7
+
+  packages/shared:
+    dependencies:
+      typescript:
+        specifier: latest
+        version: 5.2.2
+    devDependencies:
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../../packages-dev/eslint-config-custom
+      runtime:
+        specifier: workspace:*
+        version: link:../runtime
+      tsconfig:
+        specifier: workspace:*
+        version: link:../../packages-dev/tsconfig
 
   packages/web:
     dependencies:
@@ -241,6 +266,9 @@ importers:
       runtime-framework:
         specifier: workspace:*
         version: link:../runtime-framework
+      shared:
+        specifier: workspace:*
+        version: link:../shared
       tailwind-scrollbar:
         specifier: ^3.0.5
         version: 3.0.5(tailwindcss@3.3.3)
@@ -272,9 +300,6 @@ importers:
       autoprefixer:
         specifier: ^10.4.15
         version: 10.4.15(postcss@8.4.29)
-      dotenv-cli:
-        specifier: ^7.3.0
-        version: 7.3.0
       eslint-config-custom:
         specifier: workspace:*
         version: link:../../packages-dev/eslint-config-custom

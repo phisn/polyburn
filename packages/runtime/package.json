@@ -1,4 +1,5 @@
 {
+    "private": true,
     "name": "runtime",
     "scripts": {
         "install": "pnpm run proto",

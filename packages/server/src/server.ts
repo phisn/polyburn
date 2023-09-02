@@ -21,6 +21,8 @@ const env = z
     })
     .parse(process.env)
 
+// app.use(morgan("dev"))
+
 app.use(
     cors({
         credentials: true,

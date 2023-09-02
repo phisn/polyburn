@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber"
-import { Fragment, useEffect } from "react"
+import { Fragment, useEffect, useMemo } from "react"
 import { EntityType } from "runtime/proto/world"
 import { Navbar } from "../../common/components/Navbar"
 import { StopSvg } from "../../common/components/inline-svg/Stop"
@@ -66,7 +66,7 @@ function GameInEditor() {
     const gamemode = useEditorStore(store => store.gamemode)
 
     const world = useEditorStore(store => store.state).world
-    const worldModel = exportModel(world)
+    const worldModel = useMemo(() => exportModel(world), [world])
 
     const stop = useEditorStore(store => store.stop)
 
@@ -82,7 +82,13 @@ function GameInEditor() {
 
     return (
         <div className="absolute inset-0 ">
-            <Game name={"missing"} world={worldModel} gamemode={gamemode.name} />
+            <Game
+                runtimeProps={{
+                    world: worldModel,
+                    name: "name-missing",
+                    gamemode: gamemode.name,
+                }}
+            />
 
             <div
                 className="absolute left-0 top-0 p-4"

@@ -6,11 +6,11 @@ export const replayRouter = router({
     get: publicProcedure
         .input(
             z.object({
-                map: z.string(),
+                world: z.string(),
                 gamemode: z.string(),
             }),
         )
         .query(opts => {
-            return replays[replayKeyFrom(opts.input.map, opts.input.gamemode)]
+            return replays[replayKeyFrom(opts.input.world, opts.input.gamemode)]
         }),
 })

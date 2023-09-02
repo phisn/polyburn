@@ -1,12 +1,17 @@
+import { ReplayModel } from "runtime/proto/replay"
+import { WorldModel } from "runtime/proto/world"
 import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 import { runtimeFromReplay } from "runtime/src/model/replay/runtimeFromReplay"
-import { ReplayPrepareProps } from "./ReplayPrepareProps"
 import { PreparedFrame, ReplayPrepared } from "./ReplayPrepared"
 
-onmessage = (event: MessageEvent<ReplayPrepareProps>) => {
+export function prepareReplay(
+    replay: ReplayModel,
+    world: WorldModel,
+    gamemode: string,
+): ReplayPrepared {
     const frames: PreparedFrame[] = []
 
-    runtimeFromReplay(event.data.replay, event.data.world, event.data.gamemode, stack => {
+    runtimeFromReplay(replay, world, gamemode, stack => {
         const [entity] = stack.factoryContext.store.find(...RocketEntityComponents)
 
         frames.push({
@@ -15,9 +20,7 @@ onmessage = (event: MessageEvent<ReplayPrepareProps>) => {
         })
     })
 
-    const prepared: ReplayPrepared = {
+    return {
         frames,
     }
-
-    postMessage(prepared)
 }

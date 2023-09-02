@@ -1,17 +1,9 @@
 import { useState } from "react"
-import { ReplayModel } from "runtime/proto/replay"
-import { WorldModel } from "runtime/proto/world"
-import { base64ToBytes } from "runtime/src/model/base64ToBytes"
 import { GamemodeView } from "shared/src/views/GamemodeView"
 import { WorldView } from "shared/src/views/WorldView"
 import { useModalView } from "../../common/GlobalStore"
-import { Navbar } from "../../common/components/Navbar"
-import { StopSvg } from "../../common/components/inline-svg/Stop"
-import { trpc } from "../../common/trpc/trpc"
-import Game from "../../game/Game"
-import { ProvideGameHook } from "../../game/GameHook"
-import { bytesToBase64 } from "../editor/models/exportModel"
 import { GamemodeModal } from "./GamemodeModal"
+import { Play } from "./Play"
 import { WorldSelection } from "./WorldSelection"
 
 export function Campaign() {
@@ -31,11 +23,9 @@ export function Campaign() {
     */
 
     const [worldSelected, setWorldSelected] = useState<WorldView | undefined>()
-    const [gamemodeSelected, setGamemodeSelected] = useState<string>()
+    const [gamemodeSelected, setGamemodeSelected] = useState<GamemodeView | undefined>()
 
     useModalView(worldSelected !== undefined && gamemodeSelected === undefined)
-
-    const validateReplay = trpc.validateReplay.useMutation()
 
     function onWorldSelected(name: WorldView | undefined) {
         setWorldSelected(name)
@@ -45,7 +35,7 @@ export function Campaign() {
     }
 
     function onGamemodeSelected(gamemode: GamemodeView) {
-        setGamemodeSelected(gamemode.name)
+        setGamemodeSelected(gamemode)
         /*
         const runner = async () => {
             if (!document.fullscreenElement && document.fullscreenEnabled) {
@@ -66,50 +56,15 @@ export function Campaign() {
     }
 
     if (worldSelected && gamemodeSelected) {
-        const map = WorldModel.decode(base64ToBytes(worldSelected.model))
-
         return (
-            <div className="absolute inset-0">
-                <ProvideGameHook
-                    value={{
-                        finished: replay => {
-                            validateReplay.mutate({
-                                world: worldSelected.id.name,
-                                gamemode: gamemodeSelected,
-                                replay: bytesToBase64(ReplayModel.encode(replay).finish()),
-                            })
-                        },
-                    }}
-                >
-                    <Game name={worldSelected.id.name} world={map} gamemode={gamemodeSelected} />
-                </ProvideGameHook>
-
-                <div
-                    className="absolute left-0 top-0 p-4"
-                    style={{
-                        touchAction: "none",
-                        userSelect: "none",
-
-                        // Prevent canvas selection on ios
-                        // https://github.com/playcanvas/editor/issues/160
-                        WebkitTouchCallout: "none",
-                        WebkitUserSelect: "none",
-                        WebkitTapHighlightColor: "rgba(255,255,255,0)",
-                    }}
-                >
-                    <Navbar>
-                        <button
-                            className="btn btn-square btn-ghost"
-                            onClick={() => {
-                                setGamemodeSelected(undefined)
-                                setWorldSelected(undefined)
-                            }}
-                        >
-                            <StopSvg width="16" height="16" />
-                        </button>
-                    </Navbar>
-                </div>
-            </div>
+            <Play
+                worldSelected={worldSelected}
+                gamemodeSelected={gamemodeSelected}
+                onCancel={() => {
+                    setWorldSelected(undefined)
+                    setGamemodeSelected(undefined)
+                }}
+            />
         )
     }
 

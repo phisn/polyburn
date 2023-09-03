@@ -53,6 +53,7 @@ export default ({ mode }) => {
         ],
         build: {
             sourcemap: "inline",
+            outDir: "../../dist",
         },
         server: {
             port: parseInt(process.env.CLIENT_PORT || "3000"),

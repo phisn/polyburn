@@ -32,13 +32,17 @@ function Test() {
 
     const validateReplay = trpc.validateReplay.useMutation()
 
-    useEffect(() => {
-        validateReplay.mutate({
-            replay: raw5,
-            world: "map1",
-            gamemode: "Normal",
-        })
-    }, [])
+    useEffect(
+        () => {
+            validateReplay.mutate({
+                replay: raw5,
+                world: "map1",
+                gamemode: "Normal",
+            })
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
+    )
 
     console.log("doneeeeeee")
     /*

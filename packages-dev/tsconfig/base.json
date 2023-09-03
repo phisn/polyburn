@@ -11,6 +11,7 @@
         "inlineSources": false,
         "isolatedModules": true,
         "moduleResolution": "node",
+        "noEmit": true,
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "preserveWatchOutput": true,

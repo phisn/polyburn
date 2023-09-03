@@ -1,3 +1,39 @@
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
+import { appRouter } from "./trpc-router"
+
+const headers = {
+    "Access-Control-Allow-Origin": "http://localhost:3000",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Credentials": "true",
+}
+
+export default {
+    async fetch(request: Request): Promise<Response> {
+        console.log("fetch", request.method, request.url)
+
+        if (request.method === "OPTIONS") {
+            return new Response(null, {
+                headers,
+            })
+        }
+
+        const response = await fetchRequestHandler({
+            endpoint: "/trpc",
+            req: request,
+            router: appRouter,
+            createContext: () => ({}),
+        })
+
+        Object.entries(headers).forEach(([key, value]) => {
+            response.headers.set(key, value)
+        })
+
+        return response
+    },
+}
+
+/*
 import * as trpcExpress from "@trpc/server/adapters/express"
 import cors from "cors"
 import express from "express"
@@ -21,8 +57,6 @@ const env = z
     })
     .parse(process.env)
 
-// app.use(morgan("dev"))
-
 app.use(
     cors({
         credentials: true,
@@ -41,3 +75,4 @@ app.use(
 app.listen(env.SERVER_PORT, () => {
     console.log(`Server running on port ${env.SERVER_PORT}`)
 })
+*/

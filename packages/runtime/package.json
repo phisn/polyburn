@@ -3,7 +3,9 @@
     "scripts": {
         "install": "pnpm run proto",
         "test": "vitest run",
-        "proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./proto --ts_proto_opt=unrecognizedEnum=false --ts_proto_opt=oneof=unions -I=./proto ./proto/*.proto",
+        "proto": "run-script-os",
+        "proto:default": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./proto --ts_proto_opt=unrecognizedEnum=false --ts_proto_opt=oneof=unions -I=./proto ./proto/*.proto",
+        "proto:win32": "protoc --plugin=protoc-gen-ts_proto=\".\\node_modules\\.bin\\protoc-gen-ts_proto.cmd\" --ts_proto_out=./proto --ts_proto_opt=unrecognizedEnum=false --ts_proto_opt=oneof=unions -I=./proto ./proto/*.proto",
         "lint": "eslint \"src/**/*.{tsx,ts}\""
     },
     "dependencies": {
@@ -20,6 +22,7 @@
     "devDependencies": {
         "@protobuf-ts/protoc": "^2.9.1",
         "eslint-config-custom": "workspace:*",
+        "run-script-os": "^1.1.6",
         "tsconfig": "workspace:*",
         "vitest": "^0.31.4"
     }

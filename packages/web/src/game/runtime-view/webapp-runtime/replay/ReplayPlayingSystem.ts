@@ -5,7 +5,14 @@ export const newReplayPlayingSystem: WebappSystemFactory = ({ store }) => {
 
     return () => {
         for (const replay of replays) {
-            replay.components.replay.frame++
+            if (
+                replay.components.replay.frame + 1 >=
+                replay.components.replay.prepared.frames.length
+            ) {
+                store.remove(replay.id)
+            } else {
+                replay.components.replay.frame++
+            }
         }
     }
 }

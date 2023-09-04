@@ -1,16 +1,20 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 import { appRouter } from "./trpc-router"
 
-const headers = {
-    "Access-Control-Allow-Origin": "http://localhost:3000",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Credentials": "true",
+interface Env {
+    ASSETS: Fetcher
+    CF_PAGES_URL: string
+    DEV: string
 }
 
 export default {
-    async fetch(request: Request): Promise<Response> {
-        console.log("fetch", request.method, request.url)
+    async fetch(request: Request, env: Env): Promise<Response> {
+        const headers = {
+            "Access-Control-Allow-Origin": `${env.CF_PAGES_URL}`,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Credentials": "true",
+        }
 
         if (request.method === "OPTIONS") {
             return new Response(null, {
@@ -24,6 +28,10 @@ export default {
             router: appRouter,
             createContext: () => ({}),
         })
+
+        if (response.status === 404 && env.DEV !== "true") {
+            return env.ASSETS.fetch(request)
+        }
 
         Object.entries(headers).forEach(([key, value]) => {
             response.headers.set(key, value)

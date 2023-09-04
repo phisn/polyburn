@@ -1,5 +1,6 @@
 import RAPIER from "@dimforge/rapier2d-compat"
 import { SystemStack } from "runtime-framework"
+import { ReplayModel } from "runtime/proto/replay"
 import { WorldModel } from "runtime/proto/world"
 import { newRuntime } from "runtime/src/Runtime"
 import { RuntimeSystemContext } from "runtime/src/core/RuntimeSystemStack"
@@ -8,7 +9,9 @@ import { ReplayCaptureService } from "runtime/src/model/replay/ReplayCaptureServ
 import { defaultConfig } from "../../../../../runtime/src/core/RuntimeConfig"
 import { WebappComponents } from "./WebappComponents"
 import { WebappFactoryContext } from "./WebappFactoryContext"
+import { WebappRuntimeHook } from "./WebappRuntimeHook"
 import { WebappSystemStack } from "./WebappSystemStack"
+import { newCallFinishHookSystem } from "./common/CallFinishHookSystem"
 import { newRegisterGraphicsSystem } from "./graphic/RegisterGraphicsSystem"
 import { newInjectInterpolationSystem } from "./interpolation/InjectInterpolationSystem"
 import { newCaptureParticleSpawnSystem } from "./particle-capture/CaptureParticleSpawnSystem"
@@ -17,9 +20,23 @@ import { newDeathParticleSpawnSystem } from "./particle-death/DeathParticleSpawn
 import { newThrustParticleSpawnSystem } from "./particle-thrust/ThrustParticleSpawnSystem"
 import { newParticleAgeSystem } from "./particle/ParticleAgeSystem"
 import { newParticleStepSystem } from "./particle/ParticleStepSystem"
+import { newReplay } from "./replay/ReplayFactory"
+import { newReplayPlayingSystem } from "./replay/ReplayPlayingSystem"
+import { prepareReplay } from "./replay/prepare/prepareReplay"
 
-export const newWebappRuntime = (world: WorldModel, gamemode: string): WebappSystemStack => {
-    const stack = newRuntime<WebappComponents>(world, gamemode)
+export interface WebappRuntimeProps {
+    world: WorldModel
+
+    name: string
+    gamemode: string
+
+    replay?: ReplayModel
+
+    hook?: WebappRuntimeHook
+}
+
+export const newWebappRuntime = (props: WebappRuntimeProps): WebappSystemStack => {
+    const stack = newRuntime<WebappComponents>(props.world, props.gamemode)
 
     const particlePhysics = new RAPIER.World(stack.factoryContext.physics.gravity)
 
@@ -31,7 +48,17 @@ export const newWebappRuntime = (world: WorldModel, gamemode: string): WebappSys
         particlePhysics,
         replayCaptureService: new ReplayCaptureService(),
         config: defaultConfig,
+        meta: {
+            name: props.name,
+            gamemode: props.gamemode,
+        },
+        hook: props.hook,
     })
+
+    if (props.replay) {
+        const prepared = prepareReplay(props.replay, props.world, props.gamemode)
+        newReplay(stackExtended.factoryContext, prepared)
+    }
 
     stackExtended.add(
         newParticleStepSystem,
@@ -42,6 +69,8 @@ export const newWebappRuntime = (world: WorldModel, gamemode: string): WebappSys
         newRegisterGraphicsSystem,
         newDeathParticleSpawnSystem,
         newDeathParticleRemoverSystem,
+        newReplayPlayingSystem,
+        newCallFinishHookSystem,
     )
 
     return stackExtended

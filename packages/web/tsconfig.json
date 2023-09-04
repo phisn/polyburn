@@ -1,4 +1,9 @@
 {
     "extends": "tsconfig/vite.json",
-    "include": ["src"]
+    "compilerOptions": {
+        "noEmit": true,
+    },
+    "include": [
+        "src"
+    ]
 }

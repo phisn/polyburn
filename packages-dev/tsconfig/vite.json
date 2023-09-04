@@ -7,7 +7,6 @@
         "lib": ["dom", "dom.iterable", "esnext"],
         "sourceMap": true,
         "resolveJsonModule": true,
-        "noEmit": true,
         "types": ["react/experimental"]
     },
     "exclude": ["node_modules"]

@@ -19,7 +19,7 @@ export const newLevelCaptureInProgressSystem: RuntimeSystemFactory = ({ store, m
                 const velocity = entity.components.rigidBody.linvel()
 
                 if (Math.abs(velocity.x) > 0.001 || Math.abs(velocity.y) > 0.001) {
-                    entity.components.levelCapturing.timeToCapture = 100
+                    entity.components.levelCapturing.timeToCapture = 60
                     continue
                 }
 

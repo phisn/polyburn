@@ -3,20 +3,19 @@ import { PerformanceMonitor } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { Suspense, use, useEffect } from "react"
 import { isMobile } from "react-device-detect"
-import { WorldModel } from "runtime/proto/world"
 import tunnel from "tunnel-rat"
 import "./Game.css"
 import Overlay from "./overlay/Overlay"
 import { useWebappRuntime } from "./runtime-runner/useWebappRuntime"
 import { RuntimeView } from "./runtime-view/RuntimeView"
-import { newWebappRuntime } from "./runtime-view/webapp-runtime/WebappRuntime"
+import { WebappRuntimeProps, newWebappRuntime } from "./runtime-view/webapp-runtime/WebappRuntime"
 import { WebappSystemStack } from "./runtime-view/webapp-runtime/WebappSystemStack"
 import { ProvideGameStore, useGameStore } from "./store/GameStore"
 
 const rapierInit = RAPIER.init()
 const overlay = tunnel()
 
-function Game(props: { world: WorldModel; gamemode: string }) {
+function Game(props: { runtimeProps: WebappRuntimeProps }) {
     use(rapierInit)
 
     /*
@@ -82,7 +81,7 @@ function Game(props: { world: WorldModel; gamemode: string }) {
         }
     }, [])
 
-    const stack = newWebappRuntime(props.world, props.gamemode)
+    const stack = newWebappRuntime(props.runtimeProps)
 
     return (
         <ProvideGameStore systemContext={stack.factoryContext}>

@@ -24,7 +24,7 @@ export const newLevelCaptureStartSystem: RuntimeSystemFactory = ({ messageStore 
 function startCapture(rocketEntity: RocketEntity, level: LevelEntity) {
     rocketEntity.components.levelCapturing = {
         level,
-        timeToCapture: 100,
+        timeToCapture: 60,
     }
 
     level.components.level.inCapture = true

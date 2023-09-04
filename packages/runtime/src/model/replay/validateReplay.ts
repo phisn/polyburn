@@ -1,20 +1,22 @@
-import { WorldModel } from "../../../proto/world";
-import { newRuntime } from "../../Runtime";
-import { Replay } from "./Replay";
+import { ReplayModel } from "../../../proto/replay"
+import { WorldModel } from "../../../proto/world"
+import { ReplayStats } from "./ReplayStats"
+import { runtimeFromReplay } from "./runtimeFromReplay"
 
-export function validateReplay(replay: Replay, world: WorldModel, gamemode: string) {
-    const stack = newRuntime(world, gamemode)
+export function validateReplay(
+    replay: ReplayModel,
+    world: WorldModel,
+    gamemode: string,
+): ReplayStats | false {
+    const runtime = runtimeFromReplay(replay, world, gamemode)
+    const worldComponent = runtime.factoryContext.store.world.components.world
 
-    let accumulator = 0
-
-    for (const frame of replay.frames) {
-        accumulator += frame.diff
-
-        stack.step({
-            rotation: accumulator,
-            thrust: frame.thrust,
-        })
+    if (worldComponent?.finished) {
+        return {
+            ticks: worldComponent.ticks,
+            deaths: worldComponent.deaths,
+        }
     }
 
-    return stack.factoryContext.store.world.components.world?.finished ?? false
+    return false
 }

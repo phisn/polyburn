@@ -1,45 +1,27 @@
 import { BrowserView, isMobile } from "react-device-detect"
+import { WorldView } from "shared/src/views/WorldView"
 import { LockedSvg } from "../../common/components/inline-svg/Locked"
 
-export interface WorldProgress {
-    modes: number
-}
+const todoProgressFeature = true
 
-export interface WorldInfo {
-    raw: string
-    name: string
-    progress?: WorldProgress
-    maxProgress: number
-}
-
-export interface WorldProps {
-    info: WorldInfo
-    onClick?: () => void
-}
-
-export function World(props: WorldProps) {
-    console.log(props.info)
+export function World(props: { world: WorldView; onSelected: () => void }) {
     return (
         <div className={`relative isolate flex max-w-[28rem] rounded-2xl`}>
             <div
                 className="absolute inset-0 z-10 rounded-2xl opacity-30 transition hover:cursor-pointer hover:bg-white active:opacity-70"
-                onClick={props.onClick}
+                onClick={() => props.onSelected()}
             ></div>
             <div className="w-full p-4">
-                <div
-                    className={`border-base-200 relative w-full overflow-hidden rounded-2xl border-2 ${
-                        props.info.progress && ""
-                    }`}
-                >
+                <div className="border-base-200 relative w-full overflow-hidden rounded-2xl border-2">
                     <img
-                        className={`w-full ${!props.info.progress && " transform-gpu blur-3xl"}`}
+                        className={`w-full ${!todoProgressFeature && " transform-gpu blur-3xl"}`}
                         src="/static/background.png"
                     />
                     <div className="absolute inset-0 rounded-2xl bg-black opacity-5"></div>
                 </div>
             </div>
-            <Overlay info={props.info} />
-            {!props.info.progress && <LockedOverlay />}
+            <Overlay world={props.world} />
+            {!todoProgressFeature && <LockedOverlay />}
         </div>
     )
 }
@@ -66,17 +48,17 @@ function LockedOverlay() {
     )
 }
 
-function Overlay(props: { info: WorldInfo }) {
+function Overlay(props: { world: WorldView }) {
     return (
         <div className="absolute inset-0 isolate">
             <div className="absolute left-1/2 -translate-x-1/2 transform">
                 <div
                     className={`w-fit  rounded-2xl  p-3 px-8 text-xl shadow ${
-                        props.info.progress ? "bg-white text-black" : "bg-base-200 text-zinc-300"
+                        todoProgressFeature ? "bg-white text-black" : "bg-base-200 text-zinc-300"
                     }`}
                 >
-                    {!props.info.progress && "Locked"}
-                    {props.info.progress && props.info.name}
+                    {!todoProgressFeature && "Locked"}
+                    {todoProgressFeature && props.world.id.name}
                 </div>
             </div>
 
@@ -90,7 +72,7 @@ function Overlay(props: { info: WorldInfo }) {
                     </div>
                 </div>
             </div>
-                        */}
+            */}
         </div>
     )
 }

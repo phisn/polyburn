@@ -1,4 +1,13 @@
 {
     "extends": "tsconfig/base.json",
-    "include": ["src"]
+    "compilerOptions": {
+        "noEmit": true,
+        "types": [
+            "@cloudflare/workers-types",
+            "node"
+        ]
+    },
+    "include": [
+        "src"
+    ],
 }

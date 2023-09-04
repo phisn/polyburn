@@ -1,11 +1,7 @@
 {
     "extends": "tsconfig/base.json",
     "compilerOptions": {
-        "target": "esnext",
-        "module": "esnext",
-        "lib": [
-            "esnext"
-        ],
+        "noEmit": true,
         "types": [
             "@cloudflare/workers-types",
             "node"

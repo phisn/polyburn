@@ -6,7 +6,7 @@
     "scripts": {
         "with-env": "dotenv -e ../../.env.* --",
         "dev": "pnpm with-env wrangler dev src/index.ts --live-reload --port=3002 --var=CF_PAGES_URL:http://localhost:3000 DEV:true",
-        "build": "tsc && esbuild src/index.ts --bundle --platform=node --target=node16 --outfile=../../dist/_worker.js",
+        "build": "tsc && esbuild src/index.ts --bundle --platform=neutral --target=node16 --outfile=../../dist/_worker.js",
         "lint": "eslint \"src/**/*.{tsx,ts}\""
     },
     "keywords": [],

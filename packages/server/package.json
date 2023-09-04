@@ -6,7 +6,7 @@
     "scripts": {
         "with-env": "dotenv -e ../../.env.* --",
         "dev": "pnpm with-env wrangler dev src/index.ts --live-reload --port=3002 --var=CF_PAGES_URL:http://localhost:3000 DEV:true",
-        "build": "tsc && esbuild src/index.ts --bundle --platform=neutral --target=node16 --outfile=../../dist/_worker.js",
+        "build": "pnpm esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2020 --outfile=../../dist/_worker.js --minify --legal-comments=none",
         "lint": "eslint \"src/**/*.{tsx,ts}\""
     },
     "keywords": [],

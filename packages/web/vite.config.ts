@@ -52,7 +52,6 @@ export default ({ mode }) => {
             }),
         ],
         build: {
-            sourcemap: "inline",
             outDir: "../../dist",
         },
         server: {

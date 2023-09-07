@@ -5,6 +5,7 @@ import { validateReplay } from "runtime/src/model/replay/validateReplay"
 import { z } from "zod"
 import { replayKeyFrom, replays } from "../domain/replays"
 import { worlds } from "../domain/worlds"
+import { prisma } from "../prisma"
 import { publicProcedure } from "../trpc"
 
 export const validateReplayProcedure = publicProcedure
@@ -21,17 +22,21 @@ export const validateReplayProcedure = publicProcedure
         const world = worlds.find(world => world.id.name === opts.input.world)
 
         if (!world) {
+            console.log("world not found: " + opts.input.world)
             throw new Error(`World not found: ${opts.input.world}`)
         }
 
         await RAPIER.init()
 
-        const replayModel = ReplayModel.decode(Buffer.from(opts.input.replay, "base64"))
+        const replayBuffer = Buffer.from(opts.input.replay, "base64")
+
+        const replayModel = ReplayModel.decode(replayBuffer)
         const worldModel = WorldModel.decode(Buffer.from(world.model, "base64"))
 
         const stats = validateReplay(replayModel, worldModel, opts.input.gamemode)
 
         if (!stats) {
+            console.log("replay is invalid")
             throw new Error("Replay is invalid")
         }
 
@@ -47,6 +52,28 @@ export const validateReplayProcedure = publicProcedure
                 stats,
                 model: opts.input.replay,
             }
+
+            prisma.replay.upsert({
+                where: {
+                    world_gamemode: {
+                        world: opts.input.world,
+                        gamemode: opts.input.gamemode,
+                    },
+                },
+                create: {
+                    world: opts.input.world,
+                    gamemode: opts.input.gamemode,
+
+                    deaths: stats.deaths,
+                    ticks: stats.ticks,
+                    model: replayBuffer,
+                },
+                update: {
+                    deaths: stats.deaths,
+                    ticks: stats.ticks,
+                    model: replayBuffer,
+                },
+            })
 
             console.log("result: " + JSON.stringify(replays[replayKey]))
         }

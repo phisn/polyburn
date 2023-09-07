@@ -1,0 +1,7 @@
+{
+    "name": "compose",
+    "private": true,
+    "scripts": {
+        "dev": "docker compose up --no-log-prefix"
+    }
+}

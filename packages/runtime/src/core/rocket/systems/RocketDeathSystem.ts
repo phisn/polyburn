@@ -9,6 +9,8 @@ import { RuntimeSystemFactory } from "../../RuntimeSystemFactory"
 import { respawnRocket } from "../respawnRocket"
 import { RocketEntityComponents } from "../RocketEntity"
 
+const invincibilityFrames = 30
+
 export const newRocketDeathSystem: RuntimeSystemFactory = ({
     config,
     store,
@@ -77,7 +79,10 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({
 
         const distance = sqrt(dx * dx + dy * dy)
 
-        if (distance > config.explosionAngle && rocket.components.rocket.framesSinceLastDeath > 8) {
+        if (
+            distance > config.explosionAngle &&
+            rocket.components.rocket.framesSinceLastDeath > invincibilityFrames
+        ) {
             /*
             const numcontactsrange = Array.from({ length: contact.numContacts() }, (_, i) => i)
 

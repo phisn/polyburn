@@ -3,7 +3,7 @@ import { Gradient } from "../particle/Gradient"
 import { ParticleConfiguration } from "../particle/ParticleSource"
 
 const minVelocity = 5
-const maxVelocity = 15
+const maxVelocity = 30
 
 const minAngle = 0
 const maxAngle = 2 * Math.PI

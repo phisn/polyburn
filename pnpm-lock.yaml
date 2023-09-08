@@ -181,6 +181,9 @@ importers:
 
   packages/web:
     dependencies:
+      '@dimforge/rapier2d':
+        specifier: ^0.11.2
+        version: 0.11.2
       '@dimforge/rapier2d-compat':
         specifier: ^0.11.2
         version: 0.11.2

@@ -15,6 +15,10 @@ if (!root) {
     throw new Error("No root element found")
 }
 
+const RAPIER = await import("@dimforge/rapier2d")
+const world = new RAPIER.World(new RAPIER.Vector2(3, 2))
+console.log(world.gravity.x * world.gravity.y)
+
 createRoot(root).render(
     <StrictMode>
         <BrowserRouter>

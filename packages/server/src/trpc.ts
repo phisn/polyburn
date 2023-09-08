@@ -12,7 +12,7 @@ export const logger = middleware(async opts => {
     try {
         // format date as HH:MM:SS
         console.log(`Req ${new Date().toISOString()}: ${opts.path}`)
-        return opts.next()
+        return await opts.next()
     } catch (e) {
         console.error(e)
         throw e

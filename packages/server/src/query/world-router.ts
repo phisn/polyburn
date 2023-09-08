@@ -1,3 +1,4 @@
+import RAPIER from "@dimforge/rapier2d-compat"
 import { TRPCError } from "@trpc/server"
 import { WorldView } from "shared/src/views/WorldView"
 import { z } from "zod"
@@ -31,7 +32,14 @@ export const worldRouter = router({
             }),
         )
     }),
-    list: publicProcedure.query(() => {
+    list: publicProcedure.query(async () => {
+        try {
+            await RAPIER.init()
+        } catch (e) {
+            console.error(e)
+            throw e
+        }
+
         return worlds.map(world => world.id.name)
     }),
 })

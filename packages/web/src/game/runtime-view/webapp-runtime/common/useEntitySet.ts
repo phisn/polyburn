@@ -1,8 +1,5 @@
 import { useSyncExternalStore } from "react"
-
-import { EntityId } from "./Entity"
-import { EntityStore } from "./EntityStore"
-import { EntityWith } from "./NarrowProperties"
+import { EntityId, EntityStore, EntityWith } from "runtime-framework"
 
 export function useEntitySet<Components extends object, T extends (keyof Components)[]>(
     store: EntityStore<Components>,

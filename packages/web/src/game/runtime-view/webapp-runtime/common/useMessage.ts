@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react"
-
-import { MessageStore } from "./MessageStore"
+import { MessageStore } from "runtime-framework"
 
 export function useMessage<
     Components extends object,

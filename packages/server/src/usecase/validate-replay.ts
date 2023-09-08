@@ -1,6 +1,5 @@
 import { ReplayModel } from "runtime/proto/replay"
 import { WorldModel } from "runtime/proto/world"
-import { base64ToBytes } from "runtime/src/model/base64ToBytes"
 import { validateReplay } from "runtime/src/model/replay/validateReplay"
 import { z } from "zod"
 import { replayKeyFrom, replays } from "../domain/replays"
@@ -26,10 +25,10 @@ export const validateReplayProcedure = publicProcedure
             throw new Error(`World not found: ${opts.input.world}`)
         }
 
-        const replayBuffer = base64ToBytes(opts.input.replay)
+        const replayBuffer = Buffer.from(opts.input.replay, "base64")
 
         const replayModel = ReplayModel.decode(replayBuffer)
-        const worldModel = WorldModel.decode(base64ToBytes(world.model))
+        const worldModel = WorldModel.decode(Buffer.from(world.model, "base64"))
 
         const stats = validateReplay(replayModel, worldModel, opts.input.gamemode)
 

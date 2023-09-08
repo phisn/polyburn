@@ -4,10 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "with-env": "dotenv -e ../../.env.* --",
-        "dev": "pnpm with-env wrangler dev src/index.ts --live-reload --port=3002 --var=CF_PAGES_URL:http://localhost:3000 DEV:true",
+        "dev": "wrangler dev src/index.ts --live-reload --port=3002",
         "migrate-dev": "dotenv -e ./.env.development -- prisma migrate dev",
-        "build": "pnpm esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2020 --outfile=../../dist/_worker.js --minify --legal-comments=none",
         "lint": "eslint \"src/**/*.{tsx,ts}\""
     },
     "keywords": [],
@@ -15,8 +13,8 @@
     "license": "ISC",
     "devDependencies": {
         "@cloudflare/workers-types": "^4.20230821.0",
+        "@types/node": "^20.5.7",
         "dotenv-cli": "^7.3.0",
-        "esbuild": "^0.19.2",
         "eslint-config-custom": "workspace:^",
         "prisma": "^5.2.0",
         "typescript": "^5.2.2",

@@ -1,12 +1,6 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 import { appRouter } from "./trpc-router"
 
-interface Env {
-    ASSETS: Fetcher
-    CF_PAGES_URL: string
-    DEV: string
-}
-
 /*
 export function base64ToBytes(base64: string) {
     return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
@@ -32,9 +26,7 @@ console.log(JSON.stringify(listAllProperties(multiply)))
 const instance = await WebAssembly.instantiate(multiply)
 
 console.log((instance.exports as any).multiply(2, 2))
-*/
 
-/*
 await import("@dimforge/rapier2d")
     .then(() => {
         console.log("done")
@@ -44,10 +36,18 @@ await import("@dimforge/rapier2d")
     })
 */
 
+interface Env {
+    CLIENT_URL: string
+}
+
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
+        if (env.CLIENT_URL === undefined) {
+            throw new Error("CLIENT_URL is not defined")
+        }
+
         const headers = {
-            "Access-Control-Allow-Origin": `${env.CF_PAGES_URL}`,
+            "Access-Control-Allow-Origin": `${env.CLIENT_URL}`,
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type",
             "Access-Control-Allow-Credentials": "true",
@@ -65,10 +65,6 @@ export default {
             router: appRouter,
             createContext: () => ({}),
         })
-
-        if (response.status === 404 && env.DEV !== "true") {
-            return env.ASSETS.fetch(request)
-        }
 
         Object.entries(headers).forEach(([key, value]) => {
             response.headers.set(key, value)

@@ -1,4 +1,5 @@
-import { EntityStore, EntityWith, useEntitySet } from "runtime-framework"
+import { EntityStore, EntityWith } from "runtime-framework"
+import { useEntitySet } from "../webapp-runtime/common/useEntitySet"
 
 import { WebappComponents } from "../webapp-runtime/WebappComponents"
 import { ParticleSourceGraphic } from "./ParticleSourceGraphic"

@@ -1,0 +1,9 @@
+name = "rocket-game-worker"
+main = "src/index.ts"
+compatibility_date = "2023-09-08"
+
+# Prisma uses buffers
+compatibility_flags = [ "nodejs_compat" ]
+
+[vars]
+CLIENT_URL = "http://localhost:3000"

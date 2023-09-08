@@ -1,11 +1,11 @@
 {
     "private": true,
     "scripts": {
-        "build": "turbo run build",
+        "build": "turbo run build --no-daemon",
         "dev": "turbo run dev --no-daemon",
-        "lint": "turbo run lint",
+        "lint": "turbo run lint --no-daemon",
         "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-        "preview": "turbo run preview"
+        "preview": "turbo run preview --no-daemon"
     },
     "devDependencies": {
         "eslint": "^8.48.0",

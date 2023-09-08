@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dev": "wrangler dev src/index.ts --live-reload --port=3002",
+        "dev": "wrangler dev src/index.ts --live-reload --port=3002 --var=CLIENT_URL:http://localhost:3000",
         "migrate-dev": "dotenv -e ./.env.development -- prisma migrate dev",
         "lint": "eslint \"src/**/*.{tsx,ts}\""
     },

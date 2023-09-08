@@ -59,5 +59,26 @@
         "vite-plugin-wasm": "^3.2.2",
         "workbox-window": "^7.0.0"
     },
-    "main": "index.js"
+    "main": "index.js",
+    "eslintConfig": {
+        "root": true,
+        "extends": [
+            "custom"
+        ]
+    },
+    "postcss": {
+        "plugins": {
+            "tailwindcss": {},
+            "autoprefixer": {}
+        }
+    },
+    "tailwind": {
+        "extends": "tsconfig/vite.json",
+        "compilerOptions": {
+            "noEmit": true
+        },
+        "include": [
+            "src"
+        ]
+    }
 }

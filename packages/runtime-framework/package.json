@@ -13,5 +13,11 @@
         "eslint-config-custom": "workspace:*",
         "tsconfig": "workspace:*",
         "vitest": "^0.33.0"
+    },
+    "eslintConfig": {
+        "root": true,
+        "extends": [
+            "custom"
+        ]
     }
 }

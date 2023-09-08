@@ -29,5 +29,11 @@
         "shared": "workspace:*",
         "tsconfig": "workspace:*",
         "zod": "^3.22.2"
+    },
+    "eslintConfig": {
+        "root": true,
+        "extends": [
+            "custom"
+        ]
     }
 }

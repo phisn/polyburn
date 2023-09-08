@@ -25,5 +25,11 @@
         "run-script-os": "^1.1.6",
         "tsconfig": "workspace:*",
         "vitest": "^0.31.4"
+    },
+    "eslintConfig": {
+        "root": true,
+        "extends": [
+            "custom"
+        ]
     }
 }

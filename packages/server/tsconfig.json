@@ -4,7 +4,6 @@
         "noEmit": true,
         "types": [
             "@cloudflare/workers-types",
-            "node"
         ]
     },
     "include": [

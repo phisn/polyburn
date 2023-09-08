@@ -1,6 +1,8 @@
 import react from "@vitejs/plugin-react"
 import { defineConfig, loadEnv } from "vite"
 import { VitePWA } from "vite-plugin-pwa"
+import topLevelAwait from "vite-plugin-top-level-await"
+import wasm from "vite-plugin-wasm"
 
 export default ({ mode }) => {
     process.env = { ...process.env, ...loadEnv(mode, "../../", "") }
@@ -8,6 +10,8 @@ export default ({ mode }) => {
     return defineConfig({
         envDir: "../../",
         plugins: [
+            wasm(),
+            topLevelAwait(),
             react(),
             VitePWA({
                 registerType: "autoUpdate",

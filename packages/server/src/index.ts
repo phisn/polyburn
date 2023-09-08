@@ -7,6 +7,43 @@ interface Env {
     DEV: string
 }
 
+/*
+export function base64ToBytes(base64: string) {
+    return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
+}
+
+import multiply from "./../wasm/multiply.wasm"
+function listAllProperties(o: any) {
+    let objectToInspect
+    let result: any[] = []
+
+    for (
+        objectToInspect = o;
+        objectToInspect !== null;
+        objectToInspect = Object.getPrototypeOf(objectToInspect)
+    ) {
+        result = result.concat(Object.getOwnPropertyNames(objectToInspect))
+    }
+
+    return result
+}
+console.log(JSON.stringify(listAllProperties(multiply)))
+
+const instance = await WebAssembly.instantiate(multiply)
+
+console.log((instance.exports as any).multiply(2, 2))
+*/
+
+/*
+await import("@dimforge/rapier2d")
+    .then(() => {
+        console.log("done")
+    })
+    .catch(err => {
+        console.log(err)
+    })
+*/
+
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
         const headers = {

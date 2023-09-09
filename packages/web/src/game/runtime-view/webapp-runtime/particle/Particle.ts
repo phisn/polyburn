@@ -1,4 +1,4 @@
-import RAPIER from "@dimforge/rapier2d-compat"
+import RAPIER from "@dimforge/rapier2d"
 
 import { Gradient } from "./Gradient"
 import { ParticleSourceComponent } from "./ParticleSource"

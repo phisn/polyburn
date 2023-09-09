@@ -10,7 +10,6 @@
     },
     "dependencies": {
         "@dimforge/rapier2d": "^0.11.2",
-        "@dimforge/rapier2d-compat": "^0.11.2",
         "@headlessui/react": "^1.7.17",
         "@petamoriken/float16": "^3.8.3",
         "@react-three/drei": "^9.80.9",

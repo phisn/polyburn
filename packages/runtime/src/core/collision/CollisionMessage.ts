@@ -1,4 +1,4 @@
-import RAPIER from "@dimforge/rapier2d-compat"
+import RAPIER from "@dimforge/rapier2d"
 import { Entity } from "runtime-framework"
 import { MessageWithTarget } from "runtime-framework/src/MessageWithTarget"
 

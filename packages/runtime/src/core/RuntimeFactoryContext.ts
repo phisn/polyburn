@@ -1,6 +1,5 @@
-import RAPIER from "@dimforge/rapier2d-compat"
+import RAPIER from "@dimforge/rapier2d"
 import { EntityStoreState, MessageStore } from "runtime-framework"
-
 import { RuntimeComponents } from "./RuntimeComponents"
 import { RuntimeConfig } from "./RuntimeConfig"
 import { RuntimeMessages } from "./RuntimeMessages"

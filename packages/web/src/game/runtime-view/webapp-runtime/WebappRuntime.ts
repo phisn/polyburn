@@ -1,4 +1,4 @@
-import RAPIER from "@dimforge/rapier2d-compat"
+import RAPIER from "@dimforge/rapier2d"
 import { SystemStack } from "runtime-framework"
 import { ReplayModel } from "runtime/proto/replay"
 import { WorldModel } from "runtime/proto/world"

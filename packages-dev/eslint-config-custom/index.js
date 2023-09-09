@@ -27,5 +27,5 @@ module.exports = {
         eqeqeq: "error",
         "no-var": "error",
     },
-    ignorePatterns: ["*.cjs", "vite.config.ts"],
+    ignorePatterns: ["*.cjs", "vite.config.ts", "rollup.config.mjs"],
 }

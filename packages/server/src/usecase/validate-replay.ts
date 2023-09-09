@@ -1,10 +1,11 @@
+import { TRPCError } from "@trpc/server"
+import { Buffer } from "node:buffer"
 import { ReplayModel } from "runtime/proto/replay"
 import { WorldModel } from "runtime/proto/world"
 import { validateReplay } from "runtime/src/model/replay/validateReplay"
 import { z } from "zod"
 import { replayKeyFrom, replays } from "../domain/replays"
 import { worlds } from "../domain/worlds"
-import { prisma } from "../prisma"
 import { publicProcedure } from "../trpc"
 
 export const validateReplayProcedure = publicProcedure
@@ -22,7 +23,11 @@ export const validateReplayProcedure = publicProcedure
 
         if (!world) {
             console.log("world not found: " + opts.input.world)
-            throw new Error(`World not found: ${opts.input.world}`)
+
+            throw new TRPCError({
+                message: "World not found",
+                code: "BAD_REQUEST",
+            })
         }
 
         const replayBuffer = Buffer.from(opts.input.replay, "base64")
@@ -34,7 +39,11 @@ export const validateReplayProcedure = publicProcedure
 
         if (!stats) {
             console.log("replay is invalid")
-            throw new Error("Replay is invalid")
+
+            throw new TRPCError({
+                message: "Replay is invalid",
+                code: "BAD_REQUEST",
+            })
         }
 
         const replayKey = replayKeyFrom(opts.input.world, opts.input.gamemode)
@@ -50,27 +59,34 @@ export const validateReplayProcedure = publicProcedure
                 model: opts.input.replay,
             }
 
-            prisma.replay.upsert({
-                where: {
-                    world_gamemode: {
+            try {
+                /*
+                const r = await prisma.replay.upsert({
+                    where: {
+                        world_gamemode: {
+                            world: opts.input.world,
+                            gamemode: opts.input.gamemode,
+                        },
+                    },
+                    create: {
                         world: opts.input.world,
                         gamemode: opts.input.gamemode,
-                    },
-                },
-                create: {
-                    world: opts.input.world,
-                    gamemode: opts.input.gamemode,
 
-                    deaths: stats.deaths,
-                    ticks: stats.ticks,
-                    model: replayBuffer,
-                },
-                update: {
-                    deaths: stats.deaths,
-                    ticks: stats.ticks,
-                    model: replayBuffer,
-                },
-            })
+                        deaths: stats.deaths,
+                        ticks: stats.ticks,
+                        model: replayBuffer,
+                    },
+                    update: {
+                        deaths: stats.deaths,
+                        ticks: stats.ticks,
+                        model: replayBuffer,
+                    },
+                })
+                */
+                // console.log("upserted: " + JSON.stringify(r))
+            } catch (e) {
+                console.log(e)
+            }
 
             console.log("result: " + JSON.stringify(replays[replayKey]))
         }

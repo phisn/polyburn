@@ -1,4 +1,4 @@
-import { Rotation } from "@dimforge/rapier2d-compat"
+import { Rotation } from "@dimforge/rapier2d"
 import { Vector3 } from "three"
 
 export interface InterpolationComponent {

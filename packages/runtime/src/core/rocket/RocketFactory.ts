@@ -1,4 +1,4 @@
-import RAPIER from "@dimforge/rapier2d-compat"
+import RAPIER from "@dimforge/rapier2d"
 
 import { EntityType, RocketModel } from "../../../proto/world"
 import { Point } from "../../model/Point"

@@ -1,5 +1,4 @@
-import RAPIER from "@dimforge/rapier2d-compat"
-
+import RAPIER from "@dimforge/rapier2d"
 import { SystemStack, createEntityStore } from "../../runtime-framework/src"
 import { createMessageStore } from "../../runtime-framework/src/MessageStore"
 import { WorldModel } from "../proto/world"

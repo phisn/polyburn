@@ -1,6 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+import { integer, sqliteTable } from "drizzle-orm/sqlite-core"
 
+/*
 generator client {
   provider = "prisma-client-js"
 }
@@ -27,3 +27,8 @@ model Replay {
 
   @@unique([world, gamemode])
 }
+*/
+
+sqliteTable("replays", {
+    id: integer("id").primaryKey(),
+})

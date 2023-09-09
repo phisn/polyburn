@@ -1,4 +1,4 @@
-import RAPIER from "@dimforge/rapier2d-compat"
+import RAPIER from "@dimforge/rapier2d"
 
 import { EntityType, ShapeModel } from "../../../proto/world"
 import { ShapeVertex, bytesToVertices } from "../../model/world/ShapeModel"

@@ -9,7 +9,7 @@
         "lint": "eslint \"src/**/*.{tsx,ts}\""
     },
     "dependencies": {
-        "@dimforge/rapier2d-compat": "^0.11.2",
+        "@dimforge/rapier2d": "^0.11.2",
         "@petamoriken/float16": "^3.8.3",
         "@stdlib/math": "^0.0.11",
         "lz-string": "^1.5.0",

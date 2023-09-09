@@ -1,7 +1,6 @@
-import RAPIER from "@dimforge/rapier2d-compat"
 import { PerformanceMonitor } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
-import { Suspense, use, useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { isMobile } from "react-device-detect"
 import tunnel from "tunnel-rat"
 import "./Game.css"
@@ -12,12 +11,9 @@ import { WebappRuntimeProps, newWebappRuntime } from "./runtime-view/webapp-runt
 import { WebappSystemStack } from "./runtime-view/webapp-runtime/WebappSystemStack"
 import { ProvideGameStore, useGameStore } from "./store/GameStore"
 
-const rapierInit = RAPIER.init()
 const overlay = tunnel()
 
 function Game(props: { runtimeProps: WebappRuntimeProps }) {
-    use(rapierInit)
-
     /*
     const newAlert = useGlobalStore(state => state.newAlert)
 

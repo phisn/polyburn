@@ -54,7 +54,7 @@ importers:
 
   packages/runtime:
     dependencies:
-      '@dimforge/rapier2d-compat':
+      '@dimforge/rapier2d':
         specifier: ^0.11.2
         version: 0.11.2
       '@petamoriken/float16':
@@ -121,10 +121,13 @@ importers:
         version: 0.11.2
       '@prisma/client':
         specifier: 5.2.0
-        version: 5.2.0(prisma@5.2.0)
+        version: 5.2.0
       '@trpc/server':
         specifier: ^10.38.1
         version: 10.38.1
+      drizzle-orm:
+        specifier: ^0.28.6
+        version: 0.28.6(@cloudflare/workers-types@4.20230821.0)
       morgan:
         specifier: ^1.10.0
         version: 1.10.0
@@ -153,9 +156,6 @@ importers:
       eslint-config-custom:
         specifier: workspace:^
         version: link:../../packages-dev/eslint-config-custom
-      prisma:
-        specifier: ^5.2.0
-        version: 5.2.0
       typescript:
         specifier: ^5.2.2
         version: 5.2.2
@@ -182,9 +182,6 @@ importers:
   packages/web:
     dependencies:
       '@dimforge/rapier2d':
-        specifier: ^0.11.2
-        version: 0.11.2
-      '@dimforge/rapier2d-compat':
         specifier: ^0.11.2
         version: 0.11.2
       '@headlessui/react':
@@ -1590,11 +1587,6 @@ packages:
 
   /@cloudflare/workers-types@4.20230821.0:
     resolution: {integrity: sha512-lVQSyr5E4CEkQw7WIdsrMTj+kHjsm28mJ0B5AhNFByKR+16KTFsU/RW/nGLKHHW2jxT5lvYI+HjNQMzC9QR8Ng==}
-    dev: true
-
-  /@dimforge/rapier2d-compat@0.11.2:
-    resolution: {integrity: sha512-HOyo/akJqvZhgB4iaIzeysBiXrewpIHVDpf71HDxC6UwfjL5hFS8CKoW4Lex30KD+ntA865Yz3664e24QJPpqA==}
-    dev: false
 
   /@dimforge/rapier2d@0.11.2:
     resolution: {integrity: sha512-sCq8Kdg4w+J8XwE1Jkb0Un5eduVXOuLWzBTZfiiwY4CZu12QfJE+2zUdZs3bYsNREP1Ois8IxpiEIL8ZBEyesg==}
@@ -2219,7 +2211,7 @@ packages:
     resolution: {integrity: sha512-Mdk+vUACbQvjd0m/1JJjOOafmkp/EpmHjISsopEz5Av44CBq7rPC05HHNbYGKVyNUF2zmEoBS/TT0pd0SPFFyw==}
     dev: false
 
-  /@prisma/client@5.2.0(prisma@5.2.0):
+  /@prisma/client@5.2.0:
     resolution: {integrity: sha512-AiTjJwR4J5Rh6Z/9ZKrBBLel3/5DzUNntMohOy7yObVnVoTNVFi2kvpLZlFuKO50d7yDspOtW6XBpiAd0BVXbQ==}
     engines: {node: '>=16.13'}
     requiresBuild: true
@@ -2230,16 +2222,11 @@ packages:
         optional: true
     dependencies:
       '@prisma/engines-version': 5.2.0-25.2804dc98259d2ea960602aca6b8e7fdc03c1758f
-      prisma: 5.2.0
     dev: false
 
   /@prisma/engines-version@5.2.0-25.2804dc98259d2ea960602aca6b8e7fdc03c1758f:
     resolution: {integrity: sha512-jsnKT5JIDIE01lAeCj2ghY9IwxkedhKNvxQeoyLs6dr4ZXynetD0vTy7u6wMJt8vVPv8I5DPy/I4CFaoXAgbtg==}
     dev: false
-
-  /@prisma/engines@5.2.0:
-    resolution: {integrity: sha512-dT7FOLUCdZmq+AunLqB1Iz+ZH/IIS1Fz2THmKZQ6aFONrQD/BQ5ecJ7g2wGS2OgyUFf4OaLam6/bxmgdOBDqig==}
-    requiresBuild: true
 
   /@protobuf-ts/protoc@2.9.1:
     resolution: {integrity: sha512-/q2iVDwVDijfZlFZnnm3W6ALbybNskNSww88TfYBaJH49PuQMqhcXUPRu28UouJr9sc/Lr5k6t0TB9Nff3UIsA==}
@@ -4490,6 +4477,71 @@ packages:
     dependencies:
       abs-svg-path: 0.1.1
       normalize-svg-path: 0.1.0
+    dev: false
+
+  /drizzle-orm@0.28.6(@cloudflare/workers-types@4.20230821.0):
+    resolution: {integrity: sha512-yBe+F9htrlYER7uXgDJUQsTHFoIrI5yMm5A0bg0GiZ/kY5jNXTWoEy4KQtg35cE27sw1VbgzoMWHAgCckUUUww==}
+    peerDependencies:
+      '@aws-sdk/client-rds-data': '>=3'
+      '@cloudflare/workers-types': '>=3'
+      '@libsql/client': '*'
+      '@neondatabase/serverless': '>=0.1'
+      '@opentelemetry/api': ^1.4.1
+      '@planetscale/database': '>=1'
+      '@types/better-sqlite3': '*'
+      '@types/pg': '*'
+      '@types/sql.js': '*'
+      '@vercel/postgres': '*'
+      better-sqlite3: '>=7'
+      bun-types: '*'
+      knex: '*'
+      kysely: '*'
+      mysql2: '>=2'
+      pg: '>=8'
+      postgres: '>=3'
+      sql.js: '>=1'
+      sqlite3: '>=5'
+    peerDependenciesMeta:
+      '@aws-sdk/client-rds-data':
+        optional: true
+      '@cloudflare/workers-types':
+        optional: true
+      '@libsql/client':
+        optional: true
+      '@neondatabase/serverless':
+        optional: true
+      '@opentelemetry/api':
+        optional: true
+      '@planetscale/database':
+        optional: true
+      '@types/better-sqlite3':
+        optional: true
+      '@types/pg':
+        optional: true
+      '@types/sql.js':
+        optional: true
+      '@vercel/postgres':
+        optional: true
+      better-sqlite3:
+        optional: true
+      bun-types:
+        optional: true
+      knex:
+        optional: true
+      kysely:
+        optional: true
+      mysql2:
+        optional: true
+      pg:
+        optional: true
+      postgres:
+        optional: true
+      sql.js:
+        optional: true
+      sqlite3:
+        optional: true
+    dependencies:
+      '@cloudflare/workers-types': 4.20230821.0
     dev: false
 
   /dtype@2.0.0:
@@ -6953,14 +7005,6 @@ packages:
   /printable-characters@1.0.42:
     resolution: {integrity: sha512-dKp+C4iXWK4vVYZmYSd0KBH5F/h1HoZRsbJ82AVKRO3PEo8L4lBS/vLwhVtpwwuYcoIsVY+1JYKR268yn480uQ==}
     dev: true
-
-  /prisma@5.2.0:
-    resolution: {integrity: sha512-FfFlpjVCkZwrqxDnP4smlNYSH1so+CbfjgdpioFzGGqlQAEm6VHAYSzV7jJgC3ebtY9dNOhDMS2+4/1DDSM7bQ==}
-    engines: {node: '>=16.13'}
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      '@prisma/engines': 5.2.0
 
   /probe-image-size@7.2.3:
     resolution: {integrity: sha512-HubhG4Rb2UH8YtV4ba0Vp5bQ7L78RTONYu/ujmCu5nBI8wGv24s4E9xSKBi0N1MowRpxk76pFCpJtW0KPzOK0w==}

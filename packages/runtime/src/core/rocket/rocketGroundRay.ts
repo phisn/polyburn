@@ -1,11 +1,11 @@
-import RAPIER from "@dimforge/rapier2d-compat"
+import RAPIER from "@dimforge/rapier2d"
 
 import { EntityType } from "../../../proto/world"
 import { changeAnchor } from "../../model/world/changeAnchor"
 import { entityRegistry } from "../../model/world/entityRegistry"
 
-const rayDir = new RAPIER.Vector2(0, 1)
-const ray = new RAPIER.Ray(new RAPIER.Vector2(0, 0), new RAPIER.Vector2(0, 1))
+let rayDir: RAPIER.Vector | undefined
+let ray: RAPIER.Ray | undefined
 
 export const rocketGroundRayRaw = (
     physics: RAPIER.World,
@@ -29,6 +29,11 @@ export const rocketGroundRayRaw = (
         { x: 0.5, y: 0.5 },
         { x: 0.5, y: -1 },
     )
+
+    if (ray === undefined || rayDir === undefined) {
+        rayDir = new RAPIER.Vector2(0, 1)
+        ray = new RAPIER.Ray(new RAPIER.Vector2(0, 0), new RAPIER.Vector2(0, 1))
+    }
 
     rayDir.x = rayTarget.x - rayStart.x
     rayDir.y = rayTarget.y - rayStart.y

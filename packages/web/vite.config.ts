@@ -53,6 +53,7 @@ export default defineConfig({
     ],
     build: {
         sourcemap: "inline",
+        minify: false,
     },
     server: {
         port: parseInt(process.env.CLIENT_PORT || "3000"),

@@ -1,4 +1,4 @@
-import { Vector2 } from "@dimforge/rapier2d-compat"
+import { Vector2 } from "@dimforge/rapier2d"
 import { f16round, getFloat16, setFloat16 } from "@petamoriken/float16"
 
 export interface ShapeVertex {

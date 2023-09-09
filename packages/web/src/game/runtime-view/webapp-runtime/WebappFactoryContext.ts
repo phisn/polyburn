@@ -1,4 +1,4 @@
-import RAPIER from "@dimforge/rapier2d-compat"
+import RAPIER from "@dimforge/rapier2d"
 import { RuntimeFactoryContext } from "runtime/src/core/RuntimeFactoryContext"
 
 import { ReplayCaptureService } from "runtime/src/model/replay/ReplayCaptureService"

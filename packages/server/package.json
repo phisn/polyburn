@@ -5,8 +5,8 @@
     "main": "index.js",
     "scripts": {
         "postinstall": "node ./tools/postprocess-rapier2d.mjs",
+        "migrate:local": "wrangler d1 migrations apply rocket-game-d1 --local",
         "dev": "wrangler dev src/index.ts --live-reload",
-        "migrate-dev": "dotenv -e ./.env.development -- prisma migrate dev",
         "lint": "eslint \"src/**/*.{tsx,ts}\""
     },
     "keywords": [],
@@ -16,6 +16,7 @@
         "@cloudflare/workers-types": "^4.20230821.0",
         "@types/node": "^20.5.7",
         "dotenv-cli": "^7.3.0",
+        "drizzle-kit": "^0.19.13",
         "eslint-config-custom": "workspace:^",
         "typescript": "^5.2.2",
         "wrangler": "^3.6.0"

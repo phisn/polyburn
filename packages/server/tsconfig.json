@@ -9,6 +9,7 @@
     },
     "include": [
         "src",
-        "tools"
+        "tools",
+        "drizzle.config.ts"
     ],
 }

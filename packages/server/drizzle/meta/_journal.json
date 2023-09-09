@@ -1,0 +1,13 @@
+{
+    "version": "5",
+    "dialect": "sqlite",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "5",
+            "when": 1694297259980,
+            "tag": "0000_early_franklin_richards",
+            "breakpoints": true
+        }
+    ]
+}

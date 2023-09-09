@@ -3,6 +3,7 @@ import { appRouter } from "./trpc-router"
 
 interface Env {
     CLIENT_URL: string
+    DB: D1Database
 }
 
 export default {
@@ -28,7 +29,7 @@ export default {
             endpoint: "/trpc",
             req: request,
             router: appRouter,
-            createContext: () => ({}),
+            createContext: createContext(env.DB),
         })
 
         Object.entries(headers).forEach(([key, value]) => {
@@ -42,5 +43,6 @@ export default {
 // initialize rapier wasm special for cloudflare workers
 import * as imports from "@dimforge/rapier2d/rapier_wasm2d_bg"
 import _wasm from "../node_modules/@dimforge/rapier2d/rapier_wasm2d_bg.wasm"
+import { createContext } from "./trpc"
 
 imports.__setWasm(new WebAssembly.Instance(_wasm, { "./rapier_wasm2d_bg.js": imports }).exports)

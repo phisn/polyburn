@@ -1,12 +1,18 @@
 name = "rocket-game-worker"
 main = "src/index.ts"
 compatibility_date = "2023-09-08"
+node_compat = true
 
 # usage_model = "unbound"
-compatibility_flags = [ "nodejs_compat" ]
 
 [dev]
 port = 3002
 
 [env]
-CLIENT_URL="https://new.rocketgame.app"
+CLIENT_URL = "https://new.rocketgame.app"
+
+[[d1_databases]]
+migrations_dir = "drizzle"
+binding = "DB"
+database_name = "rocket-game-d1"
+database_id = "d64d6d5a-6daa-434c-94e1-8412c195f839"

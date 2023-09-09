@@ -1,8 +1,11 @@
 import { inferAsyncReturnType, initTRPC } from "@trpc/server"
+import { drizzle } from "drizzle-orm/d1"
 
-export const createContext = () => ({})
+export const createContext = (db: D1Database) => () => ({
+    db: drizzle(db),
+})
 
-type Context = inferAsyncReturnType<typeof createContext>
+type Context = inferAsyncReturnType<inferAsyncReturnType<typeof createContext>>
 const t = initTRPC.context<Context>().create()
 
 export const middleware = t.middleware

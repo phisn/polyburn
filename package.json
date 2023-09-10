@@ -8,6 +8,7 @@
         "format": "prettier --write \"**/*.{ts,tsx,md}\"",
         "preview": "turbo run preview --no-daemon"
     },
+    "packageManager": "yarn@1.22.19",
     "devDependencies": {
         "eslint": "^8.48.0",
         "prettier": "^3.0.3",

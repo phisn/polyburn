@@ -1,5 +1,6 @@
 {
     "private": true,
+    "version": "0.0.0",
     "name": "shared",
     "scripts": {
         "test": "vitest run",
@@ -9,8 +10,8 @@
         "typescript": "latest"
     },
     "devDependencies": {
-        "eslint-config-custom": "workspace:*",
-        "tsconfig": "workspace:*",
-        "runtime": "workspace:*"
+        "eslint-config-custom": "*",
+        "tsconfig": "*",
+        "runtime": "*"
     }
 }

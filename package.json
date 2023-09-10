@@ -1,6 +1,7 @@
 {
     "private": true,
     "scripts": {
+        "postinstall": "yarn workspace server postinstall",
         "build": "turbo run build --no-daemon",
         "dev": "turbo run dev --no-daemon",
         "lint": "turbo run lint --no-daemon",
@@ -14,8 +15,11 @@
         "prettier-plugin-tailwindcss": "^0.4.1",
         "turbo": "latest"
     },
-    "packageManager": "pnpm@7.15.0",
     "name": "rocket-game",
+    "workspaces": [
+        "packages/*",
+        "packages-dev/*"
+    ],
     "prettier": {
         "printWidth": 100,
         "tabWidth": 4,

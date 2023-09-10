@@ -1,6 +1,6 @@
 import { PerformanceMonitor } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
-import { Suspense, useEffect } from "react"
+import { Suspense, use, useEffect } from "react"
 import { isMobile } from "react-device-detect"
 import tunnel from "tunnel-rat"
 import "./Game.css"
@@ -13,7 +13,11 @@ import { ProvideGameStore, useGameStore } from "./store/GameStore"
 
 const overlay = tunnel()
 
+const rapier = import("@dimforge/rapier2d")
+
 function Game(props: { runtimeProps: WebappRuntimeProps }) {
+    use(rapier)
+
     /*
     const newAlert = useGlobalStore(state => state.newAlert)
 

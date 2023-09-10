@@ -1,10 +1,11 @@
 import { TRPCError } from "@trpc/server"
+import { and, eq } from "drizzle-orm"
 import { Buffer } from "node:buffer"
 import { ReplayModel } from "runtime/proto/replay"
 import { WorldModel } from "runtime/proto/world"
 import { validateReplay } from "runtime/src/model/replay/validateReplay"
 import { z } from "zod"
-import { replayKeyFrom, replays } from "../domain/replays"
+import { replays } from "../db-schema"
 import { worlds } from "../domain/worlds"
 import { publicProcedure } from "../trpc"
 
@@ -18,11 +19,11 @@ export const validateReplayProcedure = publicProcedure
             })
             .required(),
     )
-    .mutation(async opts => {
-        const world = worlds.find(world => world.id.name === opts.input.world)
+    .mutation(async ({ input, ctx: { db } }) => {
+        const world = worlds.find(world => world.id.name === input.world)
 
         if (!world) {
-            console.log("world not found: " + opts.input.world)
+            console.log("world not found: " + input.world)
 
             throw new TRPCError({
                 message: "World not found",
@@ -30,12 +31,12 @@ export const validateReplayProcedure = publicProcedure
             })
         }
 
-        const replayBuffer = Buffer.from(opts.input.replay, "base64")
+        const replayBuffer = Buffer.from(input.replay, "base64")
 
         const replayModel = ReplayModel.decode(replayBuffer)
         const worldModel = WorldModel.decode(Buffer.from(world.model, "base64"))
 
-        const stats = validateReplay(replayModel, worldModel, opts.input.gamemode)
+        const stats = validateReplay(replayModel, worldModel, input.gamemode)
 
         if (!stats) {
             console.log("replay is invalid")
@@ -46,49 +47,41 @@ export const validateReplayProcedure = publicProcedure
             })
         }
 
-        const replayKey = replayKeyFrom(opts.input.world, opts.input.gamemode)
-        const currentReplay = replays[replayKey]
+        const [currentReplay] = await db
+            .select({
+                id: replays.id,
+                ticks: replays.ticks,
+            })
+            .from(replays)
+            .where(and(eq(replays.world, input.world), eq(replays.gamemode, input.gamemode)))
+            .limit(1)
+            .execute()
 
-        console.log("ticks in" + stats.ticks + " < " + currentReplay?.stats.ticks)
+        if (currentReplay === undefined || stats.ticks < currentReplay.ticks) {
+            console.log(`replay is better, existing ${currentReplay?.ticks}, new ${stats.ticks}`)
 
-        if (currentReplay === undefined || stats.ticks < currentReplay.stats.ticks) {
-            replays[replayKey] = {
-                world: opts.input.world,
-                gamemode: opts.input.gamemode,
-                stats,
-                model: opts.input.replay,
+            const update = {
+                deaths: stats.deaths,
+                ticks: stats.ticks,
+
+                model: replayBuffer,
             }
 
-            try {
-                /*
-                const r = await prisma.replay.upsert({
-                    where: {
-                        world_gamemode: {
-                            world: opts.input.world,
-                            gamemode: opts.input.gamemode,
-                        },
-                    },
-                    create: {
-                        world: opts.input.world,
-                        gamemode: opts.input.gamemode,
+            await db
+                .insert(replays)
+                .values({
+                    world: input.world,
+                    gamemode: input.gamemode,
 
-                        deaths: stats.deaths,
-                        ticks: stats.ticks,
-                        model: replayBuffer,
-                    },
-                    update: {
-                        deaths: stats.deaths,
-                        ticks: stats.ticks,
-                        model: replayBuffer,
-                    },
+                    ...update,
                 })
-                */
-                // console.log("upserted: " + JSON.stringify(r))
-            } catch (e) {
-                console.log(e)
-            }
-
-            console.log("result: " + JSON.stringify(replays[replayKey]))
+                .onConflictDoUpdate({
+                    target: replays.id,
+                    set: update,
+                })
+                .execute()
+        } else {
+            console.log(`replay is worse, existing ${currentReplay.ticks}, new ${stats.ticks}`)
         }
 
         return stats

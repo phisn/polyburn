@@ -1,46 +1,19 @@
 import { blob, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
 
-/*
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-model Player {
-  id    Int    @id @default(autoincrement())
-  token String @unique
-}
-
-model Replay {
-  id Int @id @default(autoincrement())
-
-  world    String
-  gamemode String
-
-  deaths Int
-  ticks  Int
-  model  Bytes
-
-  @@unique([world, gamemode])
-}
-*/
-
 export const replays = sqliteTable(
     "replays",
     {
-        id: integer("id").primaryKey(),
+        id: integer("id").primaryKey({
+            autoIncrement: true,
+        }),
 
-        world: text("world"),
-        gamemode: text("gamemode"),
+        world: text("world").notNull(),
+        gamemode: text("gamemode").notNull(),
 
-        deaths: integer("deaths"),
-        ticks: integer("ticks"),
+        deaths: integer("deaths").notNull(),
+        ticks: integer("ticks").notNull(),
 
-        modell: blob("modell"),
+        model: blob("model", { mode: "buffer" }).notNull(),
     },
     replays => ({
         gamemodeWorld: uniqueIndex("gamemodeWorld").on(replays.gamemode, replays.world),

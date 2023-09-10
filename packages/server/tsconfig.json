@@ -5,7 +5,8 @@
         "types": [
             "@cloudflare/workers-types",
             "node"
-        ]
+        ],
+        "noUncheckedIndexedAccess": true
     },
     "include": [
         "src",

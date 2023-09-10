@@ -1,7 +1,8 @@
 {
     "name": "runtime",
+    "version": "0.0.0",
     "scripts": {
-        "install": "pnpm run proto",
+        "install": "yarn run proto",
         "test": "vitest run",
         "proto": "run-script-os",
         "proto:default": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./proto --ts_proto_opt=unrecognizedEnum=false --ts_proto_opt=oneof=unions -I=./proto ./proto/*.proto",
@@ -15,15 +16,15 @@
         "lz-string": "^1.5.0",
         "mnemonist": "^0.39.5",
         "protobufjs": "^7.2.4",
-        "runtime-framework": "workspace:*",
+        "runtime-framework": "*",
         "ts-proto": "^1.156.6",
         "typescript": "latest"
     },
     "devDependencies": {
         "@protobuf-ts/protoc": "^2.9.1",
-        "eslint-config-custom": "workspace:*",
+        "eslint-config-custom": "*",
         "run-script-os": "^1.1.6",
-        "tsconfig": "workspace:*",
+        "tsconfig": "*",
         "vitest": "^0.31.4"
     },
     "eslintConfig": {

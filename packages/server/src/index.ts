@@ -1,4 +1,5 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
+import { createContext } from "./trpc"
 import { appRouter } from "./trpc-router"
 
 interface Env {
@@ -42,7 +43,6 @@ export default {
 
 // initialize rapier wasm special for cloudflare workers
 import * as imports from "@dimforge/rapier2d/rapier_wasm2d_bg"
-import _wasm from "../node_modules/@dimforge/rapier2d/rapier_wasm2d_bg.wasm"
-import { createContext } from "./trpc"
+import _wasm from "../../../node_modules/@dimforge/rapier2d/rapier_wasm2d_bg.wasm"
 
 imports.__setWasm(new WebAssembly.Instance(_wasm, { "./rapier_wasm2d_bg.js": imports }).exports)

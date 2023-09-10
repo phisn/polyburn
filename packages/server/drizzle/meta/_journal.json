@@ -1,13 +1,13 @@
 {
-    "version": "5",
-    "dialect": "sqlite",
-    "entries": [
-        {
-            "idx": 0,
-            "version": "5",
-            "when": 1694297259980,
-            "tag": "0000_early_franklin_richards",
-            "breakpoints": true
-        }
-    ]
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1694344849475,
+      "tag": "0000_light_the_fallen",
+      "breakpoints": true
+    }
+  ]
 }

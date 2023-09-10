@@ -9,7 +9,7 @@ compatibility_flags = [ "nodejs_compat" ]
 [dev]
 port = 3002
 
-[env]
+[vars]
 CLIENT_URL = "https://new.rocketgame.app"
 
 [[d1_databases]]

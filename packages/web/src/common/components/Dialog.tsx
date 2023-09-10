@@ -35,7 +35,7 @@ function Dialog(props: DialogProps) {
                             leaveTo="opacity-0 scale-95"
                         >
                             <NativeDialog.Panel className="bg-base-300 w-full max-w-lg space-y-4 rounded-xl bg-opacity-70 p-6 backdrop-blur-xl">
-                                {props.children}
+                                <>{props.children}</>
                             </NativeDialog.Panel>
                         </Transition.Child>
                     </div>

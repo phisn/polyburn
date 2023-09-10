@@ -32,7 +32,7 @@ export function Modal(props: {
                         leaveFrom="opacity-100 translate-y-0"
                         leaveTo="opacity-0 translate-y-2"
                     >
-                        {props.children}
+                        <>{props.children}</>
                     </Transition.Child>
                 </div>
             </NativeDialog>

@@ -76,7 +76,7 @@ export function Alert(props: AlertProps) {
                 {/*
                 <Transition
                     appear={true} show={true}
-                    as={Fragment}
+                    as={(Fragment as any) as undefined}
                     enter="transition-[width] ease-out duration-[3000ms]"
                     enterFrom="transform w-full"
                     enterTo="transform w-0">

@@ -26,7 +26,9 @@ const queryClient = new QueryClient()
 export function TrpcProvider(props: { children: React.ReactNode }) {
     return (
         <trpc.Provider client={client} queryClient={queryClient}>
-            <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
+            <QueryClientProvider client={queryClient}>
+                <>{props.children}</>
+            </QueryClientProvider>
         </trpc.Provider>
     )
 }

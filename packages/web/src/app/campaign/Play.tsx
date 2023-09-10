@@ -25,7 +25,7 @@ export function Play(props: {
     const validateReplay = trpc.validateReplay.useMutation()
 
     const replayModel = useMemo(
-        () => replay && ReplayModel.decode(base64ToBytes(replay.model)),
+        () => (replay && ReplayModel.decode(base64ToBytes(replay.model))) || undefined,
         [replay],
     )
 

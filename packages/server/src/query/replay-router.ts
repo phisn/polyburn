@@ -2,7 +2,6 @@ import { and, eq } from "drizzle-orm"
 import { Buffer } from "node:buffer"
 import { z } from "zod"
 import { replays } from "../db-schema"
-import { Replay } from "../domain/replay"
 import { publicProcedure, router } from "../trpc"
 
 export const replayRouter = router({
@@ -13,7 +12,7 @@ export const replayRouter = router({
                 gamemode: z.string(),
             }),
         )
-        .query(async ({ input, ctx: { db } }): Promise<Replay | undefined> => {
+        .query(async ({ input, ctx: { db } }) => {
             const [replay] = await db
                 .select()
                 .from(replays)
@@ -21,16 +20,18 @@ export const replayRouter = router({
                 .limit(1)
                 .execute()
 
-            return (
-                replay && {
-                    world: replay.world,
-                    gamemode: replay.gamemode,
-                    stats: {
-                        deaths: replay.deaths,
-                        ticks: replay.ticks,
-                    },
-                    model: Buffer.from(replay.model).toString("base64"),
-                }
-            )
+            if (!replay) {
+                return null
+            }
+
+            return {
+                world: replay.world,
+                gamemode: replay.gamemode,
+                stats: {
+                    deaths: replay.deaths,
+                    ticks: replay.ticks,
+                },
+                model: Buffer.from(replay.model).toString("base64"),
+            }
         }),
 })

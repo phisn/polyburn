@@ -29,6 +29,7 @@
         "morgan": "^1.10.0",
         "runtime": "*",
         "shared": "*",
+        "superjson": "^1.13.1",
         "tsconfig": "*",
         "zod": "^3.22.2"
     },

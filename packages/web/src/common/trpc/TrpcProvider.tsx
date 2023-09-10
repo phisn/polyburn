@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { httpBatchLink } from "@trpc/client"
+import superjson from "superjson"
 import { trpc } from "./trpc"
 
 console.log(`Calling api at "${import.meta.env.VITE_SERVER_URL}/trpc/"`)
@@ -17,6 +18,7 @@ const client = trpc.createClient({
             },
         }),
     ],
+    transformer: superjson,
 })
 
 const queryClient = new QueryClient()

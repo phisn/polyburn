@@ -37,6 +37,7 @@
         "runtime": "*",
         "runtime-framework": "*",
         "shared": "*",
+        "superjson": "^1.13.1",
         "tailwind-scrollbar": "^3.0.5",
         "three": "^0.155.0",
         "three-stdlib": "^2.25.0",

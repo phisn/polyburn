@@ -1,12 +1,15 @@
 import { inferAsyncReturnType, initTRPC } from "@trpc/server"
 import { drizzle } from "drizzle-orm/d1"
+import superjson from "superjson"
 
 export const createContext = (db: D1Database) => () => ({
     db: drizzle(db),
 })
 
 type Context = inferAsyncReturnType<inferAsyncReturnType<typeof createContext>>
-const t = initTRPC.context<Context>().create()
+const t = initTRPC.context<Context>().create({
+    transformer: superjson,
+})
 
 export const middleware = t.middleware
 export const router = t.router

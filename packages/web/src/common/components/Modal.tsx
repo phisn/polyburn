@@ -22,19 +22,18 @@ export function Modal(props: {
                     <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur" />
                 </Transition.Child>
 
-                <div className={`fixed inset-0 ${props.className}`}>
-                    <Transition.Child
-                        as={Fragment}
-                        enter="ease-out duration-200 translate transform"
-                        enterFrom="opacity-0 translate-y-2"
-                        enterTo="opacity-100 translate-y-0"
-                        leave="ease-in duration-100"
-                        leaveFrom="opacity-100 translate-y-0"
-                        leaveTo="opacity-0 translate-y-2"
-                    >
-                        <>{props.children}</>
-                    </Transition.Child>
-                </div>
+                <Transition.Child
+                    as={"div"}
+                    className={`fixed inset-0 ${props.className}`}
+                    enter="ease-out duration-200 translate transform"
+                    enterFrom="opacity-0 translate-y-2"
+                    enterTo="opacity-100 translate-y-0"
+                    leave="ease-in duration-100"
+                    leaveFrom="opacity-100 translate-y-0"
+                    leaveTo="opacity-0 translate-y-2"
+                >
+                    {props.children}
+                </Transition.Child>
             </NativeDialog>
         </Transition>
     )

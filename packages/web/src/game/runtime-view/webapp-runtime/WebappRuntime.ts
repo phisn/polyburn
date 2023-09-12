@@ -20,9 +20,7 @@ import { newDeathParticleSpawnSystem } from "./particle-death/DeathParticleSpawn
 import { newThrustParticleSpawnSystem } from "./particle-thrust/ThrustParticleSpawnSystem"
 import { newParticleAgeSystem } from "./particle/ParticleAgeSystem"
 import { newParticleStepSystem } from "./particle/ParticleStepSystem"
-import { newReplay } from "./replay/ReplayFactory"
 import { newReplayPlayingSystem } from "./replay/ReplayPlayingSystem"
-import { prepareReplay } from "./replay/prepare/prepareReplay"
 
 export interface WebappRuntimeProps {
     world: WorldModel
@@ -54,11 +52,6 @@ export const newWebappRuntime = (props: WebappRuntimeProps): WebappSystemStack =
         },
         hook: props.hook,
     })
-
-    if (props.replay) {
-        const prepared = prepareReplay(props.replay, props.world, props.gamemode)
-        newReplay(stackExtended.factoryContext, prepared)
-    }
 
     stackExtended.add(
         newParticleStepSystem,

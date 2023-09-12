@@ -47,6 +47,19 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
                         ]}
                         rotation={new Euler(0, 0, props.entity.components.level.flagRotation)}
                     />
+                    {/*
+                    <mesh
+                        position={[
+                            props.entity.components.level.captureCollider.translation().x,
+                            props.entity.components.level.captureCollider.translation().y,
+                            1,
+                        ]}
+                        rotation={[0, 0, 0]}
+                    >
+                        <planeGeometry args={[10, 0.05]} />
+                        <meshBasicMaterial color={"red"} />
+                    </mesh>
+                    */}
                 </Suspense>
             )}
         </>

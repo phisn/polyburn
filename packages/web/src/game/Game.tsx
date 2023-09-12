@@ -1,6 +1,6 @@
 import { PerformanceMonitor } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
-import { Suspense, use, useEffect } from "react"
+import { Suspense, use, useEffect, useMemo, useState } from "react"
 import { isMobile } from "react-device-detect"
 import tunnel from "tunnel-rat"
 import "./Game.css"
@@ -9,6 +9,8 @@ import { useWebappRuntime } from "./runtime-runner/useWebappRuntime"
 import { RuntimeView } from "./runtime-view/RuntimeView"
 import { WebappRuntimeProps, newWebappRuntime } from "./runtime-view/webapp-runtime/WebappRuntime"
 import { WebappSystemStack } from "./runtime-view/webapp-runtime/WebappSystemStack"
+import { newReplay } from "./runtime-view/webapp-runtime/replay/ReplayFactory"
+import { prepareReplay } from "./runtime-view/webapp-runtime/replay/prepare/prepareReplay"
 import { ProvideGameStore, useGameStore } from "./store/GameStore"
 
 const overlay = tunnel()
@@ -81,7 +83,39 @@ function Game(props: { runtimeProps: WebappRuntimeProps }) {
         }
     }, [])
 
-    const stack = newWebappRuntime(props.runtimeProps)
+    const replayPrepared = useMemo(() => {
+        if (props.runtimeProps.replay === undefined) {
+            return undefined
+        }
+
+        return prepareReplay(
+            props.runtimeProps.replay,
+            props.runtimeProps.world,
+            props.runtimeProps.gamemode,
+        )
+    }, [props.runtimeProps])
+
+    const [stack, setStack] = useState(newWebappRuntime(props.runtimeProps))
+
+    useEffect(
+        () =>
+            stack.factoryContext.messageStore.listenTo("rocketDeath", () => {
+                if (
+                    stack.factoryContext.store
+                        .find("level")
+                        .filter(level => level.components.level.captured).length <= 1
+                ) {
+                    setStack(newWebappRuntime(props.runtimeProps))
+                }
+            }),
+        [stack, props.runtimeProps],
+    )
+
+    useEffect(() => {
+        if (replayPrepared !== undefined) {
+            newReplay(stack.factoryContext, replayPrepared)
+        }
+    }, [stack, replayPrepared])
 
     return (
         <ProvideGameStore systemContext={stack.factoryContext}>

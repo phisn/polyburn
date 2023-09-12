@@ -68,8 +68,6 @@ export function useControls() {
 
     const rotated = useRotateScreen()
 
-    console.log("rotated: " + true)
-
     useFrame((_, delta) => {
         if (stateRef.current.type === PointerStateType.Mouse) {
             const hasLeft = stateRef.current.a || stateRef.current.left

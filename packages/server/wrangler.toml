@@ -4,7 +4,7 @@ compatibility_date = "2023-09-08"
 
 compatibility_flags = [ "nodejs_compat" ]
 
-# usage_model = "unbound"
+usage_model = "unbound"
 
 [dev]
 port = 3002

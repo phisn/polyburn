@@ -12,9 +12,26 @@ export const newLevelCaptureStartSystem: RuntimeSystemFactory = ({ messageStore 
         for (const collision of collisions) {
             if (isCollisionWithCapture(collision, collision.other)) {
                 if (collision.started) {
-                    startCapture(collision.target, collision.other)
+                    if (collision.target.has("levelCapturing")) {
+                        collision.target.components.levelCapturing.collidersInside += 1
+                    } else {
+                        startCapture(collision.target, collision.other)
+                    }
                 } else {
-                    stopCapture(collision.target, collision.other)
+                    if (collision.target.has("levelCapturing")) {
+                        collision.target.components.levelCapturing.collidersInside -= 1
+
+                        console.log(
+                            "collidersInside end",
+                            collision.target.components.levelCapturing.collidersInside,
+                        )
+
+                        if (collision.target.components.levelCapturing.collidersInside <= 0) {
+                            stopCapture(collision.target, collision.other)
+                        }
+                    } else {
+                        console.log("stopCapture")
+                    }
                 }
             }
         }
@@ -25,6 +42,7 @@ function startCapture(rocketEntity: RocketEntity, level: LevelEntity) {
     rocketEntity.components.levelCapturing = {
         level,
         timeToCapture: 60,
+        collidersInside: 1,
     }
 
     level.components.level.inCapture = true

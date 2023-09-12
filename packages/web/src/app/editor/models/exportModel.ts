@@ -44,7 +44,10 @@ export function exportModel(world: WorldState): WorldModel {
                 group.shapes.push({
                     vertices: verticesToBytes(
                         entity.vertices.map(v => ({
-                            position: { x: v.position.x, y: v.position.y },
+                            position: {
+                                x: v.position.x + entity.position.x,
+                                y: v.position.y + entity.position.y,
+                            },
                             color: v.color,
                         })),
                     ),

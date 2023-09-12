@@ -22,8 +22,8 @@ export const levelNew = (position: Point, rotation: number) => (world: WorldStat
         cameraTopLeft: { x: center.x - 4, y: center.y + 4 },
         cameraBottomRight: { x: center.x + 4, y: center.y - 4 },
 
-        captureLeft: 0,
-        captureRight: 0,
+        captureLeft: 2,
+        captureRight: 2,
     }
 
     return {

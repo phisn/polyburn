@@ -21,16 +21,9 @@ export const newLevelCaptureStartSystem: RuntimeSystemFactory = ({ messageStore 
                     if (collision.target.has("levelCapturing")) {
                         collision.target.components.levelCapturing.collidersInside -= 1
 
-                        console.log(
-                            "collidersInside end",
-                            collision.target.components.levelCapturing.collidersInside,
-                        )
-
                         if (collision.target.components.levelCapturing.collidersInside <= 0) {
                             stopCapture(collision.target, collision.other)
                         }
-                    } else {
-                        console.log("stopCapture")
                     }
                 }
             }

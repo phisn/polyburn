@@ -3,29 +3,23 @@ import { Suspense, useRef } from "react"
 import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 import { Object3D } from "three"
 
-import { Entity } from "runtime-framework"
+import { EntityWith } from "runtime-framework"
 import { changeAnchor } from "runtime/src/model/world/changeAnchor"
+import { WebappComponents } from "../../runtime-webapp/WebappComponents"
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
-import { WebappComponents } from "../webapp-runtime/WebappComponents"
-import { entityGraphicRegistry } from "./EntityGraphicRegistry"
-import { EntityGraphicType } from "./EntityGraphicType"
+import { entityGraphicRegistry } from "../graphics-assets/EntityGraphicRegistry"
+import { EntityGraphicType } from "../graphics-assets/EntityGraphicType"
+import { withEntityStore } from "./withEntityStore"
 
-export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
-    if (!props.entity.has(...RocketEntityComponents)) {
-        throw new Error("Got invalid entity graphic type")
-    }
-
+function RocketGraphic(props: {
+    entity: EntityWith<WebappComponents, (typeof RocketEntityComponents)[number] | "interpolation">
+}) {
     const svgRef = useRef<Object3D>()
     // const lineRef = useRef<any>(null!)
 
     const graphicEntry = entityGraphicRegistry[EntityGraphicType.Rocket]
 
     useGraphicUpdate(() => {
-        if (!props.entity.has("interpolation")) {
-            console.error("Entity is missing interpolation component")
-            return
-        }
-
         // svgref might be undefined while in suspense
         if (svgRef.current === undefined) {
             return
@@ -88,3 +82,9 @@ export function RocketGraphic(props: { entity: Entity<WebappComponents> }) {
         </Suspense>
     )
 }
+
+export const RocketGraphics = withEntityStore(
+    RocketGraphic,
+    "interpolation",
+    ...RocketEntityComponents,
+)

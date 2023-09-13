@@ -49,8 +49,6 @@ export const newLevel = (
 
     const { size, transformed } = captureBox(level)
 
-    console.log("flag box: ", JSON.stringify(size), JSON.stringify(transformed))
-
     const captureColliderDesc = RAPIER.ColliderDesc.cuboid(size.width, size.height)
         .setTranslation(transformed.x, transformed.y)
         .setRotation(level.rotation)

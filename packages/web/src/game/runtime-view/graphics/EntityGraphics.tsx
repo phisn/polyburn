@@ -1,30 +1,20 @@
-import { EntityStore, EntityWith } from "runtime-framework"
-import { useEntitySet } from "../webapp-runtime/common/useEntitySet"
+import { EntityStore } from "runtime-framework"
 
-import { WebappComponents } from "../webapp-runtime/WebappComponents"
-import { ParticleSourceGraphic } from "./ParticleSourceGraphic"
+import { WebappComponents } from "../../runtime-webapp/WebappComponents"
+import { FlagGraphics } from "./FlagGraphic"
+import { ParticleSourceGraphics } from "./ParticleSourceGraphic"
+import { ReplayGraphics } from "./ReplayGraphic"
+import { RocketGraphics } from "./RocketGraphic"
+import { ShapeGraphics } from "./ShapeGraphic"
 
 export default function EntityGraphics(props: { store: EntityStore<WebappComponents> }) {
-    const entities = useEntitySet(props.store, "graphic")
-    const particleSources = useEntitySet(props.store, "particleSource")
-
     return (
         <>
-            {entities.map(entity => (
-                <EntityGraphic key={entity.id} entity={entity} />
-            ))}
-
-            {particleSources.map(entity => (
-                <ParticleSourceGraphic key={entity.id} entity={entity} />
-            ))}
-        </>
-    )
-}
-
-function EntityGraphic(props: { entity: EntityWith<WebappComponents, "graphic"> }) {
-    return (
-        <>
-            <props.entity.components.graphic entity={props.entity} />
+            <ShapeGraphics store={props.store} />
+            <RocketGraphics store={props.store} />
+            <FlagGraphics store={props.store} />
+            <ParticleSourceGraphics store={props.store} />
+            <ReplayGraphics store={props.store} />
         </>
     )
 }

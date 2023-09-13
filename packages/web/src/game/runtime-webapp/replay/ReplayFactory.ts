@@ -1,4 +1,3 @@
-import { ReplayGraphic } from "../../graphics/ReplayGraphic"
 import { WebappFactoryContext } from "../WebappFactoryContext"
 import { ReplayPrepared } from "./prepare/ReplayPrepared"
 
@@ -8,6 +7,5 @@ export function newReplay(context: WebappFactoryContext, prepared: ReplayPrepare
             prepared,
             frame: 0,
         },
-        graphic: ReplayGraphic,
     })
 }

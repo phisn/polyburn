@@ -1,16 +1,15 @@
 import { useLayoutEffect, useRef } from "react"
-import { Entity } from "runtime-framework"
+import { EntityWith } from "runtime-framework"
 import * as THREE from "three"
 
+import { WebappComponents } from "../../runtime-webapp/WebappComponents"
+import { colorInGradient } from "../../runtime-webapp/particle/Gradient"
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
-import { WebappComponents } from "../webapp-runtime/WebappComponents"
-import { colorInGradient } from "../webapp-runtime/particle/Gradient"
+import { withEntityStore } from "./withEntityStore"
 
-export function ParticleSourceGraphic(props: { entity: Entity<WebappComponents> }) {
-    if (!props.entity.has("particleSource")) {
-        throw new Error("Got invalid entity graphic type")
-    }
-
+export function ParticleSourceGraphic(props: {
+    entity: EntityWith<WebappComponents, "particleSource">
+}) {
     const entity = props.entity
 
     const instanceMeshRef = useRef<THREE.InstancedMesh>(null!)
@@ -93,3 +92,5 @@ export function ParticleSourceGraphic(props: { entity: Entity<WebappComponents> 
         */
     )
 }
+
+export const ParticleSourceGraphics = withEntityStore(ParticleSourceGraphic, "particleSource")

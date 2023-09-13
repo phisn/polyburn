@@ -79,8 +79,6 @@ const createEditorStore = (world: WorldState) =>
             }))
         },
         undo() {
-            console.log("undo with remaining done mutations: ", get().state.done.length)
-
             const last = get().state.done[get().state.done.length - 1]
             last.undo(get().state.world)
 
@@ -96,7 +94,6 @@ const createEditorStore = (world: WorldState) =>
         },
 
         selectGamemode(gamemode: GamemodeState) {
-            console.log("select gamemode", gamemode.name)
             set({ gamemode })
         },
 

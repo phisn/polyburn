@@ -11,7 +11,6 @@ const animals = [
     "Snake",
     "Shark",
     "Pig",
-    "Ele",
 ]
 
 const adjectives = [

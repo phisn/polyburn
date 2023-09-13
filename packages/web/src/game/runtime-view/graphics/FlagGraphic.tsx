@@ -1,15 +1,13 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useState } from "react"
-import { Entity } from "runtime-framework"
-import { LevelEntityComponents } from "runtime/src/core/level/LevelEntity"
+import { LevelEntity, LevelEntityComponents } from "runtime/src/core/level/LevelEntity"
 import { Euler } from "three"
-
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
-import { WebappComponents } from "../webapp-runtime/WebappComponents"
-import { entityGraphicRegistry } from "./EntityGraphicRegistry"
-import { EntityGraphicType } from "./EntityGraphicType"
+import { entityGraphicRegistry } from "../graphics-assets/EntityGraphicRegistry"
+import { EntityGraphicType } from "../graphics-assets/EntityGraphicType"
+import { withEntityStore } from "./withEntityStore"
 
-export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
+function FlagGraphic(props: { entity: LevelEntity }) {
     if (!props.entity.has(...LevelEntityComponents)) {
         throw new Error("Got invalid entity graphic type")
     }
@@ -65,3 +63,5 @@ export function FlagGraphic(props: { entity: Entity<WebappComponents> }) {
         </>
     )
 }
+
+export const FlagGraphics = withEntityStore(FlagGraphic, ...LevelEntityComponents)

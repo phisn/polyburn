@@ -6,13 +6,12 @@ import { newRuntime } from "runtime/src/Runtime"
 import { RuntimeSystemContext } from "runtime/src/core/RuntimeSystemStack"
 import { createShapeRigidBody } from "runtime/src/core/shape/ShapeFactory"
 import { ReplayCaptureService } from "runtime/src/model/replay/ReplayCaptureService"
-import { defaultConfig } from "../../../../../runtime/src/core/RuntimeConfig"
+import { defaultConfig } from "../../../../runtime/src/core/RuntimeConfig"
 import { WebappComponents } from "./WebappComponents"
 import { WebappFactoryContext } from "./WebappFactoryContext"
 import { WebappRuntimeHook } from "./WebappRuntimeHook"
 import { WebappSystemStack } from "./WebappSystemStack"
 import { newCallFinishHookSystem } from "./common/CallFinishHookSystem"
-import { newRegisterGraphicsSystem } from "./graphic/RegisterGraphicsSystem"
 import { newInjectInterpolationSystem } from "./interpolation/InjectInterpolationSystem"
 import { newCaptureParticleSpawnSystem } from "./particle-capture/CaptureParticleSpawnSystem"
 import { newDeathParticleRemoverSystem } from "./particle-death/DeathParticleRemoverSystem"
@@ -59,7 +58,6 @@ export const newWebappRuntime = (props: WebappRuntimeProps): WebappSystemStack =
         newInjectInterpolationSystem,
         newParticleAgeSystem,
         newThrustParticleSpawnSystem,
-        newRegisterGraphicsSystem,
         newDeathParticleSpawnSystem,
         newDeathParticleRemoverSystem,
         newReplayPlayingSystem,

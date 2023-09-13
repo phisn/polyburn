@@ -1,4 +1,4 @@
-import { WebappSystemStack } from "../runtime-view/webapp-runtime/WebappSystemStack"
+import { WebappSystemStack } from "../runtime-webapp/WebappSystemStack"
 import { useGameStore } from "../store/GameStore"
 import { useControls } from "./useControls"
 import { useGameLoop } from "./useGameLoop"

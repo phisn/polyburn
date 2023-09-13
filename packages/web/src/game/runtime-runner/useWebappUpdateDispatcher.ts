@@ -4,8 +4,8 @@ import { EntityStore } from "runtime-framework"
 import {
     interpolateEntity,
     updateInterpolatedEntity,
-} from "../runtime-view/webapp-runtime/interpolation/InterpolatedEntity"
-import { WebappComponents } from "../runtime-view/webapp-runtime/WebappComponents"
+} from "../runtime-webapp/interpolation/InterpolatedEntity"
+import { WebappComponents } from "../runtime-webapp/WebappComponents"
 import { useGameStore } from "../store/GameStore"
 
 export function useWebappUpdateDispatcher(store: EntityStore<WebappComponents>) {

@@ -1,11 +1,11 @@
-import { Entity } from "runtime-framework"
-import * as THREE from "three"
-
 import { useRef } from "react"
+import { EntityWith } from "runtime-framework"
+import * as THREE from "three"
 import { MutatableShapeGeometry } from "../../../app/editor/entities/shape/MutatableShapeGeometry"
-import { WebappComponents } from "../webapp-runtime/WebappComponents"
+import { WebappComponents } from "../../runtime-webapp/WebappComponents"
+import { withEntityStore } from "./withEntityStore"
 
-export function ShapeGraphic(props: { entity: Entity<WebappComponents> }) {
+export function ShapeGraphic(props: { entity: EntityWith<WebappComponents, "shape"> }) {
     if (!props.entity.has("shape")) {
         throw new Error("Got invalid entity graphic type")
     }
@@ -27,3 +27,5 @@ export function ShapeGraphic(props: { entity: Entity<WebappComponents> }) {
         </>
     )
 }
+
+export const ShapeGraphics = withEntityStore(ShapeGraphic, "shape")

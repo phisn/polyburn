@@ -64,8 +64,6 @@ export function importModel(model: WorldModel): WorldState {
         ),
     }
 
-    console.log("k has " + k.entities.size + " entities")
-
     return k
 }
 

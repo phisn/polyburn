@@ -2,18 +2,15 @@ import { Svg } from "@react-three/drei"
 import { Suspense, useRef } from "react"
 import { MeshBasicMaterial, Object3D } from "three"
 
-import { Entity } from "runtime-framework"
 import { changeAnchor } from "runtime/src/model/world/changeAnchor"
+import { EntityWith } from "../../../../../runtime-framework/src/NarrowProperties"
+import { WebappComponents } from "../../runtime-webapp/WebappComponents"
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
-import { WebappComponents } from "../webapp-runtime/WebappComponents"
-import { entityGraphicRegistry } from "./EntityGraphicRegistry"
-import { EntityGraphicType } from "./EntityGraphicType"
+import { entityGraphicRegistry } from "../graphics-assets/EntityGraphicRegistry"
+import { EntityGraphicType } from "../graphics-assets/EntityGraphicType"
+import { withEntityStore } from "./withEntityStore"
 
-export function ReplayGraphic(props: { entity: Entity<WebappComponents> }) {
-    if (!props.entity.has("replay")) {
-        throw new Error("Got invalid entity graphic type")
-    }
-
+export function ReplayGraphic(props: { entity: EntityWith<WebappComponents, "replay"> }) {
     const entity = props.entity
 
     const svgRef = useRef<Object3D>()
@@ -65,3 +62,5 @@ export function ReplayGraphic(props: { entity: Entity<WebappComponents> }) {
         </Suspense>
     )
 }
+
+export const ReplayGraphics = withEntityStore(ReplayGraphic, "replay")

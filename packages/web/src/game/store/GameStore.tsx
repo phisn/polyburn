@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react"
 import { createStore, useStore } from "zustand"
 
-import { WebappFactoryContext } from "../runtime-view/webapp-runtime/WebappFactoryContext"
+import { WebappFactoryContext } from "../runtime-webapp/WebappFactoryContext"
 import { ZoomSteps } from "./ZoomSteps"
 
 interface GameState {

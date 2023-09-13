@@ -1,16 +1,15 @@
 import { OrthographicCamera } from "@react-three/drei"
 import { useEffect, useRef, useState } from "react"
+import { EntityStore } from "runtime-framework"
 import { EntityWith } from "runtime-framework/src/NarrowProperties"
 import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
-import { OrthographicCamera as ThreeOrthographicCamera } from "three"
-
 import { Point } from "runtime/src/model/Point"
+import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 import { gameCameraTransitionSpeed } from "../../../common/Values"
+import { WebappComponents } from "../../runtime-webapp/WebappComponents"
+import { interpolationThreshold } from "../../runtime-webapp/interpolation/InterpolatedEntity"
 import { useGameStore } from "../../store/GameStore"
 import { useGraphicUpdate } from "../../store/useGraphicUpdate"
-import { WebappComponents } from "../webapp-runtime/WebappComponents"
-import { WebappFactoryContext } from "../webapp-runtime/WebappFactoryContext"
-import { interpolationThreshold } from "../webapp-runtime/interpolation/InterpolatedEntity"
 import { findCameraTargetPosition as findCameraPositionForEntity } from "./findCameraPositionForEntity"
 import { moveCameraTo } from "./moveCameraTo"
 import { moveSourceTo } from "./moveSourceTo"
@@ -18,14 +17,13 @@ import { useTargetSize } from "./useTargetSize"
 
 const cameraAnimationThreshold = interpolationThreshold
 
-export function Camera(props: { context: WebappFactoryContext }) {
-    const [rocket] = props.context.store.find("interpolation", ...RocketEntityComponents)
+export function Camera(props: { store: EntityStore<WebappComponents> }) {
+    const [rocket] = props.store.find("interpolation", ...RocketEntityComponents)
 
-    return <CameraWithEntity context={props.context} rocket={rocket} />
+    return <CameraWithEntity rocket={rocket} />
 }
 
 export function CameraWithEntity(props: {
-    context: WebappFactoryContext
     rocket: EntityWith<WebappComponents, "interpolation" | (typeof RocketEntityComponents)[number]>
 }) {
     const [cameraBounds, setCameraBounds] = useState(

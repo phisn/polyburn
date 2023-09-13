@@ -1,16 +1,15 @@
 import { PerformanceMonitor } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { Suspense, use, useEffect, useMemo, useState } from "react"
-import { isMobile } from "react-device-detect"
 import tunnel from "tunnel-rat"
 import "./Game.css"
 import Overlay from "./overlay/Overlay"
 import { useWebappRuntime } from "./runtime-runner/useWebappRuntime"
 import { RuntimeView } from "./runtime-view/RuntimeView"
-import { WebappRuntimeProps, newWebappRuntime } from "./runtime-view/webapp-runtime/WebappRuntime"
-import { WebappSystemStack } from "./runtime-view/webapp-runtime/WebappSystemStack"
-import { newReplay } from "./runtime-view/webapp-runtime/replay/ReplayFactory"
-import { prepareReplay } from "./runtime-view/webapp-runtime/replay/prepare/prepareReplay"
+import { WebappRuntimeProps, newWebappRuntime } from "./runtime-webapp/WebappRuntime"
+import { WebappSystemStack } from "./runtime-webapp/WebappSystemStack"
+import { newReplay } from "./runtime-webapp/replay/ReplayFactory"
+import { prepareReplay } from "./runtime-webapp/replay/prepare/prepareReplay"
 import { ProvideGameStore, useGameStore } from "./store/GameStore"
 
 const overlay = tunnel()
@@ -19,69 +18,6 @@ const rapier = import("@dimforge/rapier2d")
 
 function Game(props: { runtimeProps: WebappRuntimeProps }) {
     use(rapier)
-
-    /*
-    const newAlert = useGlobalStore(state => state.newAlert)
-
-    enum FullscreenState {
-        None,
-        Fullscreen,
-        ErrorOrDenied,
-    }
-
-    const fullscrenStateRef = useRef<FullscreenState>(FullscreenState.None)
-    */
-
-    useEffect(() => {
-        if (isMobile) {
-            /*
-            console.log("Mobile detected")
-
-            const requestFullscreen = async () => {
-                if (!document.fullscreenElement && document.fullscreenEnabled) {
-                    await document.documentElement.requestFullscreen({
-                        navigationUI: "hide",
-                    })
-
-                }
-            }
-
-            const requestOrientationLock = async () => {
-                if ("orientation" in screen && "lock" in screen.orientation) {
-                    await screen.orientation.lock("landscape-primary")
-                }
-            }
-
-            const runner = async () => {
-                await requestFullscreen()
-                await requestOrientationLock()
-            }
-
-            runner().catch(e => {
-                console.error(e)
-
-                newAlert({
-                    message: "Failed to enter fullscreen",
-                    type: "error",
-                })
-
-                fullscrenStateRef.current = FullscreenState.ErrorOrDenied
-            })
-
-            screen.orientation.addEventListener("change", () => {})
-
-            return () => {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen()
-                }
-
-                if ("orientation" in screen && "unlock" in screen.orientation) {
-                    screen.orientation.unlock()
-                }
-            }
-            */
-        }
-    }, [])
 
     const replayPrepared = useMemo(() => {
         if (props.runtimeProps.replay === undefined) {
@@ -181,9 +117,74 @@ function GameInThree(props: { stack: WebappSystemStack }) {
                 <Overlay />
             </overlay.In>
 
-            <RuntimeView />
+            <RuntimeView store={props.stack.factoryContext.store} />
         </>
     )
 }
 
 export default Game
+
+/*
+
+    /*
+    const newAlert = useGlobalStore(state => state.newAlert)
+
+    enum FullscreenState {
+        None,
+        Fullscreen,
+        ErrorOrDenied,
+    }
+
+    const fullscrenStateRef = useRef<FullscreenState>(FullscreenState.None)
+    */
+
+//    useEffect(() => {
+//        if (isMobile) {
+/*
+            console.log("Mobile detected")
+
+            const requestFullscreen = async () => {
+                if (!document.fullscreenElement && document.fullscreenEnabled) {
+                    await document.documentElement.requestFullscreen({
+                        navigationUI: "hide",
+                    })
+
+                }
+            }
+
+            const requestOrientationLock = async () => {
+                if ("orientation" in screen && "lock" in screen.orientation) {
+                    await screen.orientation.lock("landscape-primary")
+                }
+            }
+
+            const runner = async () => {
+                await requestFullscreen()
+                await requestOrientationLock()
+            }
+
+            runner().catch(e => {
+                console.error(e)
+
+                newAlert({
+                    message: "Failed to enter fullscreen",
+                    type: "error",
+                })
+
+                fullscrenStateRef.current = FullscreenState.ErrorOrDenied
+            })
+
+            screen.orientation.addEventListener("change", () => {})
+
+            return () => {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen()
+                }
+
+                if ("orientation" in screen && "unlock" in screen.orientation) {
+                    screen.orientation.unlock()
+                }
+            }
+            */
+//        }
+//    }, [])

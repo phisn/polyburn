@@ -1,8 +1,0 @@
-{
-    "name": "compose",
-    "version": "0.0.0",
-    "private": true,
-    "scripts": {
-        "dev": "docker compose up --no-log-prefix"
-    }
-}

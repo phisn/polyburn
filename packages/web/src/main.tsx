@@ -15,9 +15,6 @@ if (!root) {
     throw new Error("No root element found")
 }
 
-// TODO: implement loading screen later around game/players
-await import("@dimforge/rapier2d")
-
 createRoot(root).render(
     <StrictMode>
         <BrowserRouter>

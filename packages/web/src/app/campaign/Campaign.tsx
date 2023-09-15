@@ -7,6 +7,10 @@ import { GameHandlerProps } from "./player-handlers/GameHandler"
 import { Player } from "./player-handlers/Player"
 import { ReplayHandlerProps } from "./player-handlers/ReplayHandler"
 
+// TODO: implement loading screen later around game/players
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const rapier = import("@dimforge/rapier2d")
+
 export function Campaign() {
     const [worldSelected, setWorldSelected] = useState<WorldView | undefined>()
     const [handler, setHandler] = useState<GameHandlerProps | ReplayHandlerProps | undefined>()

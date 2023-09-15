@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "6a7a1801-6ab4-4318-8bfe-eed9de7b24bb",
+  "id": "a13658d7-fddc-4c6d-ac84-1a42cb27283e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "leaderboard": {
@@ -64,14 +64,14 @@
             "gamemode",
             "world"
           ],
-          "isUnique": true
+          "isUnique": false
         },
         "userId": {
           "name": "userId",
           "columns": [
             "userId"
           ],
-          "isUnique": true
+          "isUnique": false
         }
       },
       "foreignKeys": {},

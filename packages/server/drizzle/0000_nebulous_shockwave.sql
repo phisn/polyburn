@@ -8,5 +8,5 @@ CREATE TABLE `leaderboard` (
 	`model` blob NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `gamemodeWorld` ON `leaderboard` (`gamemode`,`world`);--> statement-breakpoint
-CREATE UNIQUE INDEX `userId` ON `leaderboard` (`userId`);
+CREATE INDEX `gamemodeWorld` ON `leaderboard` (`gamemode`,`world`);--> statement-breakpoint
+CREATE INDEX `userId` ON `leaderboard` (`userId`);

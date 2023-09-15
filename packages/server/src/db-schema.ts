@@ -1,4 +1,4 @@
-import { blob, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
+import { blob, index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 
 export const leaderboard = sqliteTable(
     "leaderboard",
@@ -17,8 +17,8 @@ export const leaderboard = sqliteTable(
         model: blob("model", { mode: "buffer" }).notNull(),
     },
     leaderboard => ({
-        gamemodeWorld: uniqueIndex("gamemodeWorld").on(leaderboard.gamemode, leaderboard.world),
-        userId: uniqueIndex("userId").on(leaderboard.userId),
+        gamemodeWorld: index("gamemodeWorld").on(leaderboard.gamemode, leaderboard.world),
+        userId: index("userId").on(leaderboard.userId),
     }),
 )
 

@@ -185,7 +185,7 @@ function ReplayStatsDisplay(props: { stats: ReplayStats; onSelected: () => void 
                     "grid h-6 w-full grid-cols-3 items-center justify-between px-6 text-left text-sm text-black"
                 }
             >
-                <div>Global Record</div>
+                <div>Your Record</div>
                 <div className="flex justify-center">
                     {secondsToMMSS((props.stats.ticks * 16.66667) | 0)}
                 </div>

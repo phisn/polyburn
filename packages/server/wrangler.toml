@@ -14,6 +14,6 @@ CLIENT_URL = "https://new.rocketgame.app"
 
 [[d1_databases]]
 migrations_dir = "drizzle"
-binding = "DB"
+binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "rocket-game-d1"
-database_id = "d64d6d5a-6daa-434c-94e1-8412c195f839"
+database_id = "0057ecf2-ede7-4876-ba0d-4542a665d209"

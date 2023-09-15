@@ -15,7 +15,7 @@ export function useRuntimeRunner(
     store: EntityStore<WebappComponents>,
     step: () => void,
 ): ViewUpdatesContext {
-    const interpolationEntities = useEntitySet(store, "interpolation", "rigidBody")
+    const interpolationEntities = useEntitySet(store, "interpolation")
 
     const graphicListenersRef = useRef<GraphicListener[]>([])
     const runtimeListenersRef = useRef<RuntimeListener[]>([])

@@ -9,6 +9,10 @@ export const newInjectInterpolationSystem: WebappSystemFactory = ({ store }) => 
             const rotation = entity.components.rigidBody.rotation()
 
             entity.components.interpolation = {
+                currentActive: () => entity.components.rigidBody.isSleeping() === false,
+                currentTranslation: () => entity.components.rigidBody.translation(),
+                currentRotation: () => entity.components.rigidBody.rotation(),
+
                 position: new Vector3(position.x, position.y),
                 rotation,
 

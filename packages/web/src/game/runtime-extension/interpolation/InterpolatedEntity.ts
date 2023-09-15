@@ -3,9 +3,9 @@ import { MathUtils } from "three"
 
 import { WebappComponents } from "../WebappComponents"
 
-export type InterpolatedEntity = EntityWith<WebappComponents, "interpolation" | "rigidBody">
+export type InterpolatedEntity = EntityWith<WebappComponents, "interpolation">
 
-export const interpolationThreshold = 0.25
+export const interpolationThreshold = 1
 
 export function interpolateEntity(entity: InterpolatedEntity, delta: number) {
     entity.components.interpolation.position.set(
@@ -30,11 +30,11 @@ export function interpolateEntity(entity: InterpolatedEntity, delta: number) {
 }
 
 export function updateInterpolatedEntity(entity: InterpolatedEntity) {
-    if (entity.components.rigidBody.isSleeping()) {
+    if (entity.components.interpolation.currentActive() === false) {
         return
     }
 
-    const position = entity.components.rigidBody.translation()
+    const position = entity.components.interpolation.currentTranslation()
 
     if (
         Math.abs(entity.components.interpolation.newPosition.x - position.x) >
@@ -43,8 +43,10 @@ export function updateInterpolatedEntity(entity: InterpolatedEntity) {
             interpolationThreshold
     ) {
         console.log("resetting interpolation")
+
         entity.components.interpolation.previousPosition.set(position.x, position.y, 0)
-        entity.components.interpolation.previousRotation = entity.components.rigidBody.rotation()
+        entity.components.interpolation.previousRotation =
+            entity.components.interpolation.currentRotation()
     } else {
         entity.components.interpolation.previousPosition.set(
             entity.components.interpolation.newPosition.x,
@@ -57,5 +59,5 @@ export function updateInterpolatedEntity(entity: InterpolatedEntity) {
     }
 
     entity.components.interpolation.newPosition.set(position.x, position.y, 0)
-    entity.components.interpolation.newRotation = entity.components.rigidBody.rotation()
+    entity.components.interpolation.newRotation = entity.components.interpolation.currentRotation()
 }

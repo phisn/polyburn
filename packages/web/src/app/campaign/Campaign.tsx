@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { WorldView } from "shared/src/views/WorldView"
-import { useModalView } from "../../common/GlobalStore"
+import { useAppStore } from "../../common/storage/AppStore"
+import { useModalView } from "../../common/storage/useModalView"
 import { GamemodeModal } from "./GamemodeModal"
 import { WorldSelection } from "./WorldSelection"
 import { GameHandlerProps } from "./player-handlers/GameHandler"
@@ -16,6 +17,9 @@ export function Campaign() {
     const [handler, setHandler] = useState<GameHandlerProps | ReplayHandlerProps | undefined>()
 
     useModalView(worldSelected !== undefined && handler === undefined)
+
+    const userName = useAppStore(state => state.userName())
+    console.log(userName)
 
     function onWorldSelected(name: WorldView | undefined) {
         setWorldSelected(name)

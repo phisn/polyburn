@@ -1,13 +1,13 @@
 import { useMemo } from "react"
-import useGlobalStore from "../../../../common/GlobalStore"
-import Dialog from "../../../../common/components/Dialog"
+import { Dialog } from "../../../../common/components/Dialog"
+import { useAppStore } from "../../../../common/storage/AppStore"
 import { exportModelString } from "../../models/exportModel"
 import { useEditorStore } from "../../store/EditorStore"
 
 export function ExportDialog(props: { open: boolean; closeDialog: () => void }) {
     const world = useEditorStore(store => store.state).world
 
-    const newAlert = useGlobalStore(store => store.newAlert)
+    const newAlert = useAppStore(store => store.newAlert)
 
     const base64 = useMemo(() => {
         if (props.open === false) {

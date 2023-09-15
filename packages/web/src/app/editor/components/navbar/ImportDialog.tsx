@@ -1,6 +1,6 @@
 import { useRef } from "react"
-import useGlobalStore from "../../../../common/GlobalStore"
-import Dialog from "../../../../common/components/Dialog"
+import { Dialog } from "../../../../common/components/Dialog"
+import { useAppStore } from "../../../../common/storage/AppStore"
 import { WorldState } from "../../models/WorldState"
 import { importModelString } from "../../models/importModel"
 import { useEditorStore } from "../../store/EditorStore"
@@ -41,7 +41,7 @@ export function ImportDialog(props: { open: boolean; closeDialog: () => void }) 
             props.closeDialog()
             console.log("imported world")
         } catch (e) {
-            useGlobalStore.getState().newAlert({
+            useAppStore.getState().newAlert({
                 type: "error",
                 message: "Failed to import world",
             })

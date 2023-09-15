@@ -7,7 +7,7 @@ interface DialogProps {
     children: React.ReactNode
 }
 
-function Dialog(props: DialogProps) {
+export function Dialog(props: DialogProps) {
     return (
         <Transition show={props.open} as={Fragment}>
             <NativeDialog onClose={() => props.closeDialog()} as="div" className="relative z-10">
@@ -44,5 +44,3 @@ function Dialog(props: DialogProps) {
         </Transition>
     )
 }
-
-export default Dialog

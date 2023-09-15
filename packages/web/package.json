@@ -23,6 +23,8 @@
         "@vitejs/plugin-react": "^4.0.4",
         "clsx": "^2.0.0",
         "daisyui": "^3.6.4",
+        "dexie": "^3.2.4",
+        "dexie-react-hooks": "^1.1.6",
         "js-sdsl": "^4.4.2",
         "lz-string": "^1.5.0",
         "plotly.js": "^2.26.0",
@@ -45,7 +47,6 @@
         "zustand": "^4.4.1"
     },
     "devDependencies": {
-        "@types/node": "^20.5.7",
         "@types/react": "^18.2.21",
         "@types/react-dom": "^18.2.7",
         "@types/three": "^0.155.1",

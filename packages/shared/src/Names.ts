@@ -7,10 +7,10 @@ const animals = [
     "Bull",
     "Bear",
     "Crocodile",
-    "Whale",
+    "Dog",
     "Snake",
     "Shark",
-    "Pig",
+    "Cat",
 ]
 
 const adjectives = [
@@ -75,7 +75,7 @@ function hash(base: number, str: string) {
         hash = (hash * 31 + str.charCodeAt(i)) | 0
     }
 
-    return hash
+    return Math.abs(hash)
 }
 
 export function nameFromString(str: string) {

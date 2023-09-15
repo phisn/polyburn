@@ -1,9 +1,9 @@
 import { Outlet } from "react-router-dom"
-import useGlobalStore from "../../common/GlobalStore"
+import { useAppStore } from "../../common/storage/AppStore"
 import { Alert } from "./Alert"
 
 export function Layout() {
-    const existsModal = useGlobalStore(state => state.modalCount > 0)
+    const existsModal = useAppStore(state => state.modalCount > 0)
 
     return (
         <div
@@ -18,7 +18,7 @@ export function Layout() {
 }
 
 function LayoutAlerts() {
-    const alerts = useGlobalStore(state => state.alerts)
+    const alerts = useAppStore(state => state.alerts)
 
     return (
         <div className="toast z-50">

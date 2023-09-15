@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
-import { GamemodeView } from "shared/src/views/GamemodeView"
 import { WorldView } from "shared/src/views/WorldView"
 import { Modal, ModalPanel } from "../../common/components/Modal"
 import { Gamemode } from "./Gamemode"
+import { PlayerHandlerProps } from "./player-handlers/Player"
 
 export function GamemodeModal(props: {
     openWithWorld: WorldView | undefined
-    onSelected: (gamemode: GamemodeView) => void
+    onSelected: (handler: PlayerHandlerProps) => void
     onCancel: () => void
 }) {
     const [world, setWorld] = useState<WorldView | undefined>(props.openWithWorld)
@@ -50,7 +50,20 @@ export function GamemodeModal(props: {
                     {world?.gamemodes.map((gamemode, i) => (
                         <Gamemode
                             key={i}
-                            onSelected={() => props.onSelected(gamemode)}
+                            onSelected={() =>
+                                props.onSelected({
+                                    type: "game",
+                                    worldSelected: world,
+                                    gamemodeSelected: gamemode,
+                                })
+                            }
+                            onReplaySelected={() =>
+                                props.onSelected({
+                                    type: "replay",
+                                    worldSelected: world,
+                                    gamemodeSelected: gamemode,
+                                })
+                            }
                             gamemode={gamemode}
                         />
                     ))}

@@ -6,10 +6,9 @@ import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
 import { Point } from "runtime/src/model/Point"
 import { OrthographicCamera as ThreeOrthographicCamera } from "three"
 import { gameCameraTransitionSpeed } from "../../../common/Values"
-import { WebappComponents } from "../../runtime-webapp/WebappComponents"
-import { interpolationThreshold } from "../../runtime-webapp/interpolation/InterpolatedEntity"
-import { useGameStore } from "../../store/GameStore"
-import { useGraphicUpdate } from "../../store/useGraphicUpdate"
+import { WebappComponents } from "../../runtime-extension/WebappComponents"
+import { interpolationThreshold } from "../../runtime-extension/interpolation/InterpolatedEntity"
+import { useGraphicUpdate } from "../ViewUpdates"
 import { findCameraTargetPosition as findCameraPositionForEntity } from "./findCameraPositionForEntity"
 import { moveCameraTo } from "./moveCameraTo"
 import { moveSourceTo } from "./moveSourceTo"
@@ -30,7 +29,7 @@ export function CameraWithEntity(props: {
         props.rocket.components.rocket.currentLevel.components.level.camera,
     )
 
-    const zoom = useGameStore(store => store.zoom)
+    const zoom = 1 // useGameStore(store => store.zoom)
     const { targetSize, rotated } = useTargetSize(cameraBounds, zoom)
 
     // using ref for animating because usegraphicupdate can be called before the state is updated

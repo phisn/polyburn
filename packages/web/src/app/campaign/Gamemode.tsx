@@ -6,7 +6,11 @@ import { TrophySvg } from "../../common/components/inline-svg/Trophy"
 
 const todoLockedFeature = false
 
-export function Gamemode(props: { gamemode: GamemodeView; onSelected: () => void }) {
+export function Gamemode(props: {
+    gamemode: GamemodeView
+    onSelected: () => void
+    onReplaySelected: () => void
+}) {
     return (
         <div
             className={`relative mx-auto h-fit w-full rounded-2xl ${
@@ -34,17 +38,21 @@ export function Gamemode(props: { gamemode: GamemodeView; onSelected: () => void
 
             {todoLockedFeature && <LockedOverlay />}
             {props.gamemode.replayStats && (
-                <ReplayStatsDisplay stats={props.gamemode.replayStats} />
+                <ReplayStatsDisplay
+                    stats={props.gamemode.replayStats}
+                    onSelected={() => props.onReplaySelected()}
+                />
             )}
         </div>
     )
 }
 
-function ReplayStatsDisplay(props: { stats: ReplayStats }) {
+function ReplayStatsDisplay(props: { stats: ReplayStats; onSelected: () => void }) {
     return (
         <div
             // margin of one pixel to prevent the border shining through
-            className="absolute inset-0 m-[1px] flex items-end rounded-2xl rounded-t-3xl bg-zinc-300 hover:cursor-pointer"
+            className="absolute inset-0 m-[1px] flex items-end rounded-2xl rounded-t-3xl bg-zinc-300 transition hover:cursor-pointer hover:bg-zinc-400"
+            onClick={() => props.onSelected()}
         >
             <div
                 className={

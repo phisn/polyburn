@@ -2,9 +2,9 @@ import { useLayoutEffect, useRef } from "react"
 import { EntityWith } from "runtime-framework"
 import * as THREE from "three"
 
-import { WebappComponents } from "../../runtime-webapp/WebappComponents"
-import { colorInGradient } from "../../runtime-webapp/particle/Gradient"
-import { useGraphicUpdate } from "../../store/useGraphicUpdate"
+import { WebappComponents } from "../../runtime-extension/WebappComponents"
+import { colorInGradient } from "../../runtime-extension/particle/Gradient"
+import { useGraphicUpdate } from "../ViewUpdates"
 import { withEntityStore } from "./withEntityStore"
 
 export function ParticleSourceGraphic(props: {

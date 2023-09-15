@@ -6,7 +6,6 @@
         "lib": ["dom", "dom.iterable", "esnext"],
         "sourceMap": true,
         "resolveJsonModule": true,
-        "types": ["react/experimental"]
-    },
-    "exclude": ["node_modules"]
+        "types": ["react/experimental", "vite-plugin-pwa/client"]
+    }
 }

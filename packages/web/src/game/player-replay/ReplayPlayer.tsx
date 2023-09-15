@@ -2,10 +2,11 @@ import { useMemo, useRef } from "react"
 import { ReplayModel } from "runtime/proto/replay"
 import { WorldModel } from "runtime/proto/world"
 import { replayFramesFromBytes } from "runtime/src/model/replay/Replay"
-import { GameCanvas } from "../runtime-runner/GameCanvas"
-import { newWebappRuntime } from "../runtime-webapp/WebappRuntime"
+import { newWebappRuntime } from "../runtime-extension/WebappRuntime"
+import { RuntimePlayer } from "../runtime-player/RuntimePlayer"
+import { withCanvas } from "../runtime-player/withCanvas"
 
-export function ReplayRunner(props: {
+export const ReplayPlayer = withCanvas(function ReplayPlayer(props: {
     replay: ReplayModel
     world: WorldModel
     name: string
@@ -23,6 +24,10 @@ export function ReplayRunner(props: {
 
     const update = useMemo(
         () => () => {
+            if (replayIndexRef.current >= frames.length) {
+                return
+            }
+
             replayRotation.current += frames[replayIndexRef.current].diff
 
             stack.step({
@@ -35,5 +40,5 @@ export function ReplayRunner(props: {
         [stack, frames],
     )
 
-    return <GameCanvas update={update} stack={stack} />
-}
+    return <RuntimePlayer update={update} stack={stack} />
+})

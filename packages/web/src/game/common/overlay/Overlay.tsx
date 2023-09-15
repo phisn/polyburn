@@ -1,20 +1,14 @@
-import { shallow } from "zustand/shallow"
-
-import { ZoomInSvg } from "../../common/components/inline-svg/ZoomIn"
-import { ZoomOutSvg } from "../../common/components/inline-svg/ZoomOut"
-import { useGameStore } from "../store/GameStore"
-import { canZoomIn, canZoomOut } from "../store/ZoomSteps"
-import Replay from "./Replay"
-import { Starting } from "./Starting"
-
 export default function Overlay() {
+    /*
     const [zoomIndex, zoomIn, zoomOut] = useGameStore(
         state => [state.zoomIndex, state.zoomIn, state.zoomOut],
         shallow,
     )
+    */
 
     return (
         <>
+            {/*
             <Starting />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform select-none">
                 <Replay />
@@ -32,7 +26,7 @@ export default function Overlay() {
 
                     {/*
                     <Map camera={props.camera} />
-                    */}
+                    }
 
                     <button
                         className={`btn btn-square btn-ghost select-none ${
@@ -44,8 +38,8 @@ export default function Overlay() {
                     </button>
                 </div>
             </div>
-
-            {/*
+            */
+            /*
             <div className="absolute right-0 top-0 p-4">
                 <div className="flex select-none items-center">
                     <Timer />

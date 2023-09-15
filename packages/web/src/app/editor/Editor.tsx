@@ -3,7 +3,7 @@ import { Fragment, useEffect, useMemo } from "react"
 import { EntityType } from "runtime/proto/world"
 import { Navbar } from "../../common/components/Navbar"
 import { StopSvg } from "../../common/components/inline-svg/Stop"
-import Game from "../../game/Game"
+import { GamePlayer } from "../../game/player-game/GamePlayer"
 import { EventHandler } from "./EventHandler"
 import { editorTunnel } from "./Tunnel"
 import { Camera } from "./components/Camera"
@@ -82,7 +82,7 @@ function GameInEditor() {
 
     return (
         <div className="absolute inset-0 ">
-            <Game
+            <GamePlayer
                 runtimeProps={{
                     world: worldModel,
                     name: "name-missing",

@@ -14,7 +14,6 @@ export const GameLoopContextProvider = GameLoopContext.Provider
 export const useGameLoop = (
     events: {
         update: () => void
-        afterUpdate: () => void
         afterFrame: (frameProgress: number, time: number, ticked: boolean) => void
     },
     tickRate: number,
@@ -30,7 +29,6 @@ export const useGameLoop = (
             do {
                 timer += tickRate
                 events.update()
-                events.afterUpdate()
 
                 frames++
 

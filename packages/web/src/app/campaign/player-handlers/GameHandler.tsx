@@ -4,17 +4,17 @@ import { WorldModel } from "runtime/proto/world"
 import { base64ToBytes } from "runtime/src/model/base64ToBytes"
 import { GamemodeView } from "shared/src/views/GamemodeView"
 import { WorldView } from "shared/src/views/WorldView"
-import { Navbar } from "../../common/components/Navbar"
-import { StopSvg } from "../../common/components/inline-svg/Stop"
-import { trpc } from "../../common/trpc/trpc"
-import Game from "../../game/Game"
-import { bytesToBase64 } from "../editor/models/exportModel"
+import { trpc } from "../../../common/trpc/trpc"
+import { GamePlayer } from "../../../game/player-game/GamePlayer"
+import { bytesToBase64 } from "../../editor/models/exportModel"
 
-export function Play(props: {
+export interface GameHandlerProps {
+    type: "game"
     worldSelected: WorldView
     gamemodeSelected: GamemodeView
-    onCancel: () => void
-}) {
+}
+
+export function GameHandler(props: GameHandlerProps) {
     const worldModel = WorldModel.decode(base64ToBytes(props.worldSelected.model))
 
     const [replay] = trpc.replay.get.useSuspenseQuery({
@@ -31,7 +31,7 @@ export function Play(props: {
 
     return (
         <div className="absolute inset-0">
-            <Game
+            <GamePlayer
                 runtimeProps={{
                     world: worldModel,
                     name: props.worldSelected.id.name,
@@ -50,29 +50,6 @@ export function Play(props: {
                     },
                 }}
             />
-
-            <div
-                className="absolute left-0 top-0 p-4"
-                style={{
-                    touchAction: "none",
-                    userSelect: "none",
-
-                    // Prevent canvas selection on ios
-                    // https://github.com/playcanvas/editor/issues/160
-                    WebkitTouchCallout: "none",
-                    WebkitUserSelect: "none",
-                    WebkitTapHighlightColor: "rgba(255,255,255,0)",
-                }}
-            >
-                <Navbar>
-                    <button
-                        className="btn btn-square btn-ghost"
-                        onClick={() => void props.onCancel()}
-                    >
-                        <StopSvg width="16" height="16" />
-                    </button>
-                </Navbar>
-            </div>
         </div>
     )
 }

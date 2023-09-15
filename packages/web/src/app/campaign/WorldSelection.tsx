@@ -21,9 +21,17 @@ export function WorldSelectionList(props: { onSelected: (world: WorldView) => vo
     const [worldNames] = trpc.world.list.useSuspenseQuery()
     const [worlds] = trpc.world.get.useSuspenseQuery(worldNames)
 
-    return worlds.map(world => (
-        <World key={world.id.name} world={world} onSelected={() => props.onSelected(world)} />
-    ))
+    return (
+        <>
+            {worlds.map(world => (
+                <World
+                    key={world.id.name}
+                    world={world}
+                    onSelected={() => props.onSelected(world)}
+                />
+            ))}
+        </>
+    )
 }
 
 export function WorldSelectionFallback() {

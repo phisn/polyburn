@@ -1,9 +1,11 @@
+export {}
+/*
 import { useMemo, useState } from "react"
 
 import { ReplayModel } from "runtime/proto/replay"
-import { bytesToBase64 } from "../../app/editor/models/exportModel"
-import useGlobalStore from "../../common/GlobalStore"
-import Dialog from "../../common/components/Dialog"
+import { bytesToBase64 } from "../../../app/editor/models/exportModel"
+import useGlobalStore from "../../../common/GlobalStore"
+import Dialog from "../../../common/components/Dialog"
 import { useGameStore } from "../store/GameStore"
 
 export default function Replay() {
@@ -68,3 +70,4 @@ export default function Replay() {
         </>
     )
 }
+*/

@@ -1,13 +1,7 @@
-import { useMemo, useRef } from "react"
-import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
-import { OrthographicCamera } from "three"
-
-import { useGameStore } from "../store/GameStore"
-import { useGraphicUpdate } from "../store/useGraphicUpdate"
-
+export {}
+/*
 export default function Map(props: { camera: OrthographicCamera }) {
-    const { store } = useGameStore(state => state.systemContext)
-
+    
     const rockets = useMemo(() => store.newSet(...RocketEntityComponents), [store])
 
     const containerDivRef = useRef<HTMLDivElement>(null!)
@@ -80,3 +74,4 @@ export default function Map(props: { camera: OrthographicCamera }) {
         </>
     )
 }
+*/

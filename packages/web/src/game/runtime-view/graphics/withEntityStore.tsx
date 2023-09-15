@@ -1,7 +1,7 @@
 import { EntityStore } from "../../../../../runtime-framework/src/EntityStore"
 import { EntityWith } from "../../../../../runtime-framework/src/NarrowProperties"
-import { WebappComponents } from "../../runtime-webapp/WebappComponents"
-import { useEntitySet } from "../../runtime-webapp/common/useEntitySet"
+import { WebappComponents } from "../../runtime-extension/WebappComponents"
+import { useEntitySet } from "../../runtime-extension/common/useEntitySet"
 
 export function withEntityStore<T extends (keyof WebappComponents)[]>(
     Graphic: (props: { entity: EntityWith<WebappComponents, T[number]> }) => JSX.Element,

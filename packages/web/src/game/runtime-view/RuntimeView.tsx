@@ -1,5 +1,5 @@
 import { EntityStore } from "runtime-framework"
-import { WebappComponents } from "../runtime-webapp/WebappComponents"
+import { WebappComponents } from "../runtime-extension/WebappComponents"
 import { Camera } from "./camera/Camera"
 import EntityGraphics from "./graphics/EntityGraphics"
 import { Overlay } from "./overlay/Overlay"

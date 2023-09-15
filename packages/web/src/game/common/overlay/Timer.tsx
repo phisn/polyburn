@@ -1,7 +1,9 @@
+export {}
+/*
 import { useRef } from "react"
+import { useGraphicUpdate } from "../../runtime-view/ViewUpdates"
 
 import { useGameStore } from "../store/GameStore"
-import { useGraphicUpdate } from "../store/useGraphicUpdate"
 
 export function Timer() {
     const { store } = useGameStore(state => state.systemContext)
@@ -24,3 +26,4 @@ export function Timer() {
         </>
     )
 }
+*/

@@ -1,7 +1,7 @@
 import { blob, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core"
 
-export const replays = sqliteTable(
-    "replays",
+export const leaderboard = sqliteTable(
+    "leaderboard",
     {
         id: integer("id").primaryKey({
             autoIncrement: true,
@@ -10,15 +10,17 @@ export const replays = sqliteTable(
         world: text("world").notNull(),
         gamemode: text("gamemode").notNull(),
 
-        deaths: integer("deaths").notNull(),
+        userId: text("userId").notNull(),
         ticks: integer("ticks").notNull(),
+        deaths: integer("deaths").notNull(),
 
         model: blob("model", { mode: "buffer" }).notNull(),
     },
-    replays => ({
-        gamemodeWorld: uniqueIndex("gamemodeWorld").on(replays.gamemode, replays.world),
+    leaderboard => ({
+        gamemodeWorld: uniqueIndex("gamemodeWorld").on(leaderboard.gamemode, leaderboard.world),
+        userId: uniqueIndex("userId").on(leaderboard.userId),
     }),
 )
 
-export type Replay = typeof replays.$inferSelect
-export type InsertReplay = typeof replays.$inferInsert
+export type Leaderboard = typeof leaderboard.$inferSelect
+export type InsertLeaderboard = typeof leaderboard.$inferInsert

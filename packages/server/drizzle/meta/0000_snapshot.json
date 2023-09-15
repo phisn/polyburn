@@ -1,11 +1,11 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "16a6c792-b823-4184-913e-2dc4ff50b62b",
+  "id": "6a7a1801-6ab4-4318-8bfe-eed9de7b24bb",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "replays": {
-      "name": "replays",
+    "leaderboard": {
+      "name": "leaderboard",
       "columns": {
         "id": {
           "name": "id",
@@ -28,15 +28,22 @@
           "notNull": true,
           "autoincrement": false
         },
-        "deaths": {
-          "name": "deaths",
-          "type": "integer",
+        "userId": {
+          "name": "userId",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
         "ticks": {
           "name": "ticks",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "deaths": {
+          "name": "deaths",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -56,6 +63,13 @@
           "columns": [
             "gamemode",
             "world"
+          ],
+          "isUnique": true
+        },
+        "userId": {
+          "name": "userId",
+          "columns": [
+            "userId"
           ],
           "isUnique": true
         }

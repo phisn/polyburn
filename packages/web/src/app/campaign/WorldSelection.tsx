@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { WorldView } from "shared/src/views/WorldView"
+import { useAppStore } from "../../common/storage/AppStore"
 import { trpc } from "../../common/trpc/trpc"
 import { World } from "./World"
 
@@ -18,8 +19,14 @@ export function WorldSelection(props: { onSelected: (world: WorldView) => void }
 }
 
 export function WorldSelectionList(props: { onSelected: (world: WorldView) => void }) {
+    const userId = useAppStore(store => store.userId())
+
     const [worldNames] = trpc.world.list.useSuspenseQuery()
-    const [worlds] = trpc.world.get.useSuspenseQuery(worldNames)
+
+    const [worlds] = trpc.world.get.useSuspenseQuery({
+        names: worldNames,
+        userId,
+    })
 
     return (
         <>

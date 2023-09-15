@@ -1,48 +1,174 @@
+import { Suspense, useState } from "react"
 import { BrowserView, isMobile } from "react-device-detect"
 import { ReplayStats } from "runtime/src/model/replay/ReplayStats"
+import { nameFromString } from "shared/src/Names"
 import { GamemodeView } from "shared/src/views/GamemodeView"
+import { Modal, ModalPanel } from "../../common/components/Modal"
+import { ArrowClockwise } from "../../common/components/inline-svg/ArrowClockwise"
 import { LockedSvg } from "../../common/components/inline-svg/Locked"
+import { PlayFilled } from "../../common/components/inline-svg/PlayFilled"
 import { TrophySvg } from "../../common/components/inline-svg/Trophy"
+import { useAppStore } from "../../common/storage/AppStore"
+import { trpc } from "../../common/trpc/trpc"
+import { useCampaignStore } from "./CampaignStore"
 
 const todoLockedFeature = false
 
-export function Gamemode(props: {
+export function Gamemode(props: { gamemode: GamemodeView }) {
+    const [open, setOpen] = useState(false)
+
+    const selectGameHandler = useCampaignStore(state => state.selectGameHandler)
+    const selectReplayHandler = useCampaignStore(state => state.selectReplayHandler)
+
+    const userId = useAppStore(store => store.userId())
+
+    return (
+        <>
+            <div
+                className={`relative mx-auto h-fit w-full rounded-2xl ${
+                    props.gamemode.replayStats && "pb-6"
+                }`}
+                onClick={e => e.stopPropagation()}
+            >
+                {todoLockedFeature && (
+                    <div className="join bg-base-300 relative z-10 flex h-16 rounded-2xl border border-zinc-700"></div>
+                )}
+
+                {!todoLockedFeature && (
+                    <div className="join bg-base-300 relative z-10 flex h-16 rounded-2xl border border-zinc-600">
+                        <button
+                            className="join-item hover:bg-base-100 w-full rounded-[0.9rem] px-6 text-left outline-none transition active:bg-slate-600"
+                            onClick={() => selectGameHandler(props.gamemode)}
+                        >
+                            {props.gamemode.name}
+                        </button>
+                        <button
+                            className="join-item hover:bg-base-100 rounded-[0.9rem] px-6 transition active:bg-slate-600"
+                            onClick={() => setOpen(true)}
+                        >
+                            <TrophySvg className="rounded-r-none" width="24" height="24" />
+                        </button>
+                    </div>
+                )}
+
+                {todoLockedFeature && <LockedOverlay />}
+                {props.gamemode.replayStats && (
+                    <ReplayStatsDisplay
+                        stats={props.gamemode.replayStats}
+                        onSelected={() => selectReplayHandler(props.gamemode, userId)}
+                    />
+                )}
+            </div>
+            <LeaderboardModal
+                open={open}
+                closeDialog={() => {
+                    setOpen(false)
+                }}
+                gamemode={props.gamemode}
+            />
+        </>
+    )
+}
+
+function LeaderboardModal(props: {
+    open: boolean
     gamemode: GamemodeView
-    onSelected: () => void
-    onReplaySelected: () => void
+    closeDialog: () => void
 }) {
     return (
-        <div
-            className={`relative mx-auto h-fit w-full rounded-2xl ${
-                props.gamemode.replayStats && "pb-6"
-            }`}
-            onClick={e => e.stopPropagation()}
+        <Modal
+            open={props.open}
+            closeDialog={() => {
+                console.log("close leaderboard")
+                props.closeDialog()
+            }}
+            className="flex items-center justify-center rounded-2xl p-6"
         >
-            {todoLockedFeature && (
-                <div className="join bg-base-300 relative z-10 flex h-16 rounded-2xl border border-zinc-700"></div>
-            )}
+            <div className="hxs:flex-col flex h-min w-full max-w-[40rem] flex-row">
+                <div className="hxs:h-auto flex h-min justify-center justify-self-center p-6">
+                    <div className="whitespace-nowrap text-xl text-white">Leaderboard</div>
+                </div>
 
-            {!todoLockedFeature && (
-                <div className="join bg-base-300 relative z-10 flex h-16 rounded-2xl border border-zinc-600">
-                    <button
-                        className="join-item hover:bg-base-100 w-full rounded-[0.9rem] px-6 text-left outline-none transition active:bg-slate-600"
-                        onClick={() => props.onSelected()}
-                    >
-                        {props.gamemode.name}
-                    </button>
-                    <button className="join-item hover:bg-base-100 rounded-[0.9rem] px-6 transition active:bg-slate-600">
-                        <TrophySvg className="rounded-r-none" width="24" height="24" />
-                    </button>
+                <ModalPanel className="bg-base-300 flex h-min w-full flex-col space-y-4 rounded-2xl border border-zinc-700 p-6">
+                    <div className="flex flex-col">
+                        <Suspense fallback={<div>Loading ...</div>}>
+                            <LeaderboardList gamemode={props.gamemode} />
+                        </Suspense>
+                    </div>
+                </ModalPanel>
+                <div className="h-20" />
+            </div>
+        </Modal>
+    )
+}
+
+function LeaderboardList(props: { gamemode: GamemodeView }) {
+    const world = useCampaignStore(state => state.worldSelected)
+
+    const [replays] = trpc.replay.list.useSuspenseQuery({
+        world: world!.id.name,
+        gamemode: props.gamemode.name,
+    })
+
+    const selectGameHandler = useCampaignStore(state => state.selectGameHandler)
+    const selectReplayHandler = useCampaignStore(state => state.selectReplayHandler)
+
+    return (
+        <>
+            {replays.map((row, i) => (
+                <LeaderboardRow
+                    key={i}
+                    rank={i + 1}
+                    time={secondsToMMSS(row.ticks * 16.66667)}
+                    name={nameFromString(row.userId)}
+                    onCompete={() => selectGameHandler(props.gamemode)}
+                    onReplay={() => selectReplayHandler(props.gamemode, row.userId)}
+                />
+            ))}
+            {replays.length === 0 && (
+                <div className="space-y-8 p-12">
+                    <div className="text-center text-xl">
+                        Be the first to complete this gamemode and get your name on the leaderboard!
+                    </div>
                 </div>
             )}
+        </>
+    )
+}
 
-            {todoLockedFeature && <LockedOverlay />}
-            {props.gamemode.replayStats && (
-                <ReplayStatsDisplay
-                    stats={props.gamemode.replayStats}
-                    onSelected={() => props.onReplaySelected()}
-                />
-            )}
+function LeaderboardRow(props: {
+    rank: number
+    time: string
+    name: string
+    onReplay: () => void
+    onCompete: () => void
+}) {
+    return (
+        <div>
+            {props.rank > 1 && <div className="mx-8 mr-12 h-[1px] bg-zinc-800"></div>}
+            <div className="group my-2 grid w-full grid-cols-3 items-center rounded-2xl px-4 py-2 transition ">
+                <div className="flex items-center space-x-4">
+                    <div className="w-12">{props.rank}.</div>
+                    <div className="justify-self-center">{props.time}</div>
+                </div>
+
+                <div className="space-x-1 justify-self-center opacity-0 transition group-hover:opacity-100">
+                    <button
+                        className="btn-square btn-ghost btn m-0"
+                        onClick={() => props.onReplay()}
+                    >
+                        <ArrowClockwise width="16" height="16" />
+                    </button>
+                    <button
+                        className="btn-square btn-ghost btn m-0"
+                        onClick={() => props.onCompete()}
+                    >
+                        <PlayFilled width="16" height="16" />
+                    </button>
+                </div>
+
+                <div className="justify-self-end">{props.name}</div>
+            </div>
         </div>
     )
 }

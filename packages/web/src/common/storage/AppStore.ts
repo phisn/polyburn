@@ -6,7 +6,9 @@ import { AlertProps } from "../../app/layout/Alert"
 import { db } from "./db"
 
 export interface AppStore {
-    userId: string | null
+    token: string
+
+    userId(): string
     userName(): string
 
     alerts: AlertProps[]
@@ -27,11 +29,14 @@ const storage: StateStorage = {
     },
 }
 
+import jsSHA from "jssha"
+
 export const useAppStore = create<AppStore>()(
     persist(
         (set, get) => ({
-            userId: nanoid(),
-            userName: () => nameFromString(get().userId ?? ""),
+            token: nanoid(),
+            userId: () => new jsSHA("SHA-512", "TEXT").update(get().token ?? "").getHash("B64"),
+            userName: () => nameFromString(get().userId()),
 
             alerts: [],
             modalCount: 0,
@@ -49,15 +54,16 @@ export const useAppStore = create<AppStore>()(
         }),
         {
             name: "rocket-game",
+            version: 2,
             storage: createJSONStorage(() => storage),
 
             partialize: state => ({
-                userId: state.userId,
+                token: state.token,
             }),
             onRehydrateStorage: () => state => {
                 console.log(
-                    "User Id: " + state?.userId,
-                    ", User Name: " + nameFromString(state?.userId ?? ""),
+                    "User Id: " + state?.userId(),
+                    ", User Name: " + nameFromString(state?.userId() ?? ""),
                 )
             },
         },

@@ -13,13 +13,10 @@ export const newLevelCaptureInProgressSystem: RuntimeSystemFactory = ({ store, m
 
     return () => {
         for (const entity of entities) {
-            entity.components.levelCapturing.timeToCapture -= 1
-
             if (entity.components.levelCapturing.timeToCapture <= 0) {
                 const velocity = entity.components.rigidBody.linvel()
 
                 if (Math.abs(velocity.x) > 0.001 || Math.abs(velocity.y) > 0.001) {
-                    entity.components.levelCapturing.timeToCapture = 60
                     continue
                 }
 
@@ -32,6 +29,8 @@ export const newLevelCaptureInProgressSystem: RuntimeSystemFactory = ({ store, m
                     level: level,
                     rocket: entity,
                 })
+            } else {
+                entity.components.levelCapturing.timeToCapture -= 1
             }
         }
     }

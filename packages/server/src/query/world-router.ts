@@ -34,7 +34,6 @@ export const worldRouter = router({
                 .where(inArray(leaderboard.world, input.names))
                 .where(eq(leaderboard.userId, input.userId))
                 .orderBy(asc(leaderboard.ticks))
-                .limit(1)
                 .execute()
 
             return requested.map(

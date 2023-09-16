@@ -9,9 +9,11 @@
         "eslint-config-turbo": "^1.10.13",
         "eslint-plugin-prettier": "^5.0.0",
         "eslint-plugin-react": "7.33.2",
-        "eslint-plugin-react-hooks": "^4.6.0"
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "eslint-plugin-unicorn": "^48.0.1"
     },
     "publishConfig": {
         "access": "public"
-    }
+    },
+    "devDependencies": {}
 }

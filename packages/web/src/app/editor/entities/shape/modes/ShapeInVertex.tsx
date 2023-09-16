@@ -5,7 +5,7 @@ import {
     baseZoomFactor,
     highlightColor,
     highlightOverrideColor,
-} from "../../../../../common/Values"
+} from "../../../../../common/constants"
 import { Priority, SubPriority } from "../../../models/Priority"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, useEventListener } from "../../../store/EventStore"

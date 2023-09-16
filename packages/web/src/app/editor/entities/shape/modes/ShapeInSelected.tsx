@@ -6,7 +6,7 @@ import {
     highlightColor,
     highlightDeleteColor,
     snapDistance,
-} from "../../../../../common/Values"
+} from "../../../../../common/constants"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
 import { Priority, SubPriority } from "../../../models/Priority"
 import { useEditorStore } from "../../../store/EditorStore"

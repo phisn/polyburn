@@ -77,11 +77,20 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({
         const dx = otherNormalNormalized.x - upVector.x
         const dy = otherNormalNormalized.y - upVector.y
 
+        const velx = rocket.components.rigidBody.linvel().x
+        const vely = rocket.components.rigidBody.linvel().y
+
+        const speedSquare = velx * velx + vely * vely
+
+        console.log(`speedSquare: ${speedSquare}`)
+
         const distance = sqrt(dx * dx + dy * dy)
 
         if (
-            distance > config.explosionAngle &&
-            rocket.components.rocket.framesSinceLastDeath > invincibilityFrames
+            (speedSquare > 150 &&
+                rocket.components.rocket.framesSinceLastDeath > invincibilityFrames) ||
+            (distance > config.explosionAngle &&
+                rocket.components.rocket.framesSinceLastDeath > invincibilityFrames)
         ) {
             /*
             const numcontactsrange = Array.from({ length: contact.numContacts() }, (_, i) => i)

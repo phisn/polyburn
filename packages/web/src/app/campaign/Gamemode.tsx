@@ -121,7 +121,7 @@ function LeaderboardList(props: { gamemode: GamemodeView }) {
                     rank={i + 1}
                     time={secondsToMMSS(row.ticks * 16.66667)}
                     name={nameFromString(row.userId)}
-                    onCompete={() => selectGameHandler(props.gamemode)}
+                    onCompete={() => selectGameHandler(props.gamemode, row.userId)}
                     onReplay={() => selectReplayHandler(props.gamemode, row.userId)}
                 />
             ))}

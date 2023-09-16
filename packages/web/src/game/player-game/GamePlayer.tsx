@@ -10,6 +10,7 @@ import { useControls } from "./useControls"
 export const GamePlayer = withCanvas(function GamePlayer(props: {
     runtimeProps: WebappRuntimeProps
 }) {
+    // TODO: this should be done outside of the component
     const replayPrepared = useMemo(() => {
         if (props.runtimeProps.replay === undefined) {
             return undefined
@@ -20,7 +21,7 @@ export const GamePlayer = withCanvas(function GamePlayer(props: {
             props.runtimeProps.world,
             props.runtimeProps.gamemode,
         )
-    }, [props.runtimeProps])
+    }, [])
 
     const [stack, setStack] = useState(newWebappRuntime(props.runtimeProps))
     const startedRef = useRef(false)
@@ -40,6 +41,7 @@ export const GamePlayer = withCanvas(function GamePlayer(props: {
 
     useEffect(() => {
         if (replayPrepared !== undefined) {
+            console.log("replay prepared")
             newReplay(stack.factoryContext, replayPrepared)
         }
     }, [stack, replayPrepared])

@@ -87,7 +87,9 @@ export function nameFromString(str: string) {
         case "AYFjDgH8bdKuKaP2oBbaPa8yeCmgtYc2DJSReD75W0QRK4RiWdc6LXHCGPamQW9F+Ncn4k76/UXqBlDqhRof3w==":
             return "Phisn"
         case "B+iYPOXE4ZVl61Yku20ayRq88bdPfQ3dmDhaCFWI203Y1Ui2KugbzcnubVptid8MZIjsnYRiUqYccCQOzu8pyg==":
-            return "Aelynna"
+            return "aelynna"
+        case "/dINfvyPI6uAwoUsr7Q/wItdV0jJUmd/NQJZa9wQgwGswTu1lUpCtgoSKG0Z+PiNaKekvPrqa6jZMUvZ6yJkpQ==":
+            return "joynere"
     }
 
     const base1 = 0x211c9dc5

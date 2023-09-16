@@ -11,7 +11,7 @@ interface CampaignStore {
     handlerSelected: HandlerTypes | undefined
 
     cancelGamemodeSelection: () => void
-    selectGameHandler: (gamemode: GamemodeView) => void
+    selectGameHandler: (gamemode: GamemodeView, userId?: string) => void
     selectReplayHandler: (gamemode: GamemodeView, userId: string) => void
 
     selectWorld: (world: WorldView | undefined) => void
@@ -23,12 +23,13 @@ export const useCampaignStore = create<CampaignStore>(set => ({
     handlerSelected: undefined,
 
     cancelGamemodeSelection: () => set({ worldSelected: undefined }),
-    selectGameHandler: gamemode =>
+    selectGameHandler: (gamemode, userId) =>
         set(state => ({
             handlerSelected: {
                 type: "game",
                 worldSelected: state.worldSelected!,
                 gamemodeSelected: gamemode,
+                userId,
             },
         })),
     selectReplayHandler: (gamemode, userId) =>

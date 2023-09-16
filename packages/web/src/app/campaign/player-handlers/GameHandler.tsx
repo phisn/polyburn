@@ -13,6 +13,7 @@ export interface GameHandlerProps {
     type: "game"
     worldSelected: WorldView
     gamemodeSelected: GamemodeView
+    userId?: string
 }
 
 export function GameHandler(props: GameHandlerProps) {
@@ -21,7 +22,7 @@ export function GameHandler(props: GameHandlerProps) {
     const userId = useAppStore(store => store.userId())
 
     const [replay] = trpc.replay.get.useSuspenseQuery({
-        userId,
+        userId: props.userId || userId,
         world: props.worldSelected.id.name,
         gamemode: props.gamemodeSelected.name,
     })

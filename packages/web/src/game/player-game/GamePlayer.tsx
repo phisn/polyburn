@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { WebappRuntimeProps, newWebappRuntime } from "../runtime-extension/WebappRuntime"
-import { useMessage } from "../runtime-extension/common/useMessage"
-import { newReplay } from "../runtime-extension/replay/ReplayFactory"
-import { prepareReplay } from "../runtime-extension/replay/prepare/prepareReplay"
+import { useMessage } from "../runtime-extension/common/use-message"
+import { prepareReplay } from "../runtime-extension/replay/prepare/prepare-replay"
+import { newReplay } from "../runtime-extension/replay/replay-factory"
+import { WebappRuntimeProps, newWebappRuntime } from "../runtime-extension/webapp-runtime"
 import { RuntimePlayer } from "../runtime-player/RuntimePlayer"
-import { withCanvas } from "../runtime-player/withCanvas"
-import { useControls } from "./useControls"
+import { withCanvas } from "../runtime-player/WithCanvas"
+import { useControls } from "./use-controls"
 
 export const GamePlayer = withCanvas(function GamePlayer(props: {
     runtimeProps: WebappRuntimeProps
@@ -21,6 +21,7 @@ export const GamePlayer = withCanvas(function GamePlayer(props: {
             props.runtimeProps.world,
             props.runtimeProps.gamemode,
         )
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const [stack, setStack] = useState(newWebappRuntime(props.runtimeProps))

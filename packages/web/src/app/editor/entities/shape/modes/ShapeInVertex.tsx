@@ -6,18 +6,18 @@ import {
     highlightColor,
     highlightOverrideColor,
 } from "../../../../../common/constants"
-import { Priority, SubPriority } from "../../../models/Priority"
+import { Priority, SubPriority } from "../../../models/priority"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
+import { shapeChangeVertices } from "../mutations/shape-change-vertices"
 import {
     ShapeState,
     ShapeVertex,
     canRemoveVertex,
     resolveConflictsAround as resolveIntersectionsAround,
-} from "../ShapeState"
-import { shapeChangeVertices } from "../mutations/shapeChangeVertices"
+} from "../shape-state"
 
 export interface ShapeModeVertex {
     type: "vertex"

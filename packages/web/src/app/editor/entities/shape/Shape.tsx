@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { ShapeState } from "./ShapeState"
 import { ShapeInMoving, ShapeModeMoving } from "./modes/ShapeInMoving"
 import { ShapeInNone, ShapeModeNone } from "./modes/ShapeInNone"
 import { ShapeInSelected, ShapeModeSelected } from "./modes/ShapeInSelected"
 import { ShapeInVertex, ShapeModeVertex } from "./modes/ShapeInVertex"
+import { ShapeState } from "./shape-state"
 
 export type ShapeMode = ShapeModeMoving | ShapeModeNone | ShapeModeSelected | ShapeModeVertex
 

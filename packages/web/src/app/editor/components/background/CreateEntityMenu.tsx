@@ -1,13 +1,13 @@
 import { EntityType } from "runtime/proto/world"
 import { Point } from "runtime/src/model/Point"
-import { entityRegistry } from "runtime/src/model/world/entityRegistry"
+import { entityRegistry } from "runtime/src/model/world/entity-registry"
 import { ContextMenu } from "../../../../common/components/ContextMenu"
 import { FlagSvg } from "../../../../common/components/inline-svg/Flag"
 import { RocketSvg } from "../../../../common/components/inline-svg/Rocket"
 import { TriangleSvg } from "../../../../common/components/inline-svg/Triangle"
-import { levelNew } from "../../entities/level/mutations/levelNew"
-import { rocketNew } from "../../entities/rocket/mutations/rocketNew"
-import { shapeNew } from "../../entities/shape/mutations/shapeNew"
+import { levelNew } from "../../entities/level/mutations/LevelNew"
+import { rocketNew } from "../../entities/rocket/mutations/RocketNew"
+import { shapeNew } from "../../entities/shape/mutations/shape-new"
 import { MutationGenerator } from "../../store/EditorStore"
 
 export function CreateEntityMenu(props: {

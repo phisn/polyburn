@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
-import { Priority, SubPriority } from "../../../models/Priority"
+import { Priority, SubPriority } from "../../../models/priority"
 import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
-import { ShapeState, isPointInsideShape } from "../ShapeState"
+import { ShapeState, isPointInsideShape } from "../shape-state"
 
 export interface ShapeModeNone {
     type: "none"

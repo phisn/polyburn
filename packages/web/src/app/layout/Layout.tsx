@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom"
-import { useAppStore } from "../../common/storage/AppStore"
+import { useAppStore } from "../../common/storage/app-store"
 import { Alert } from "./Alert"
 
 export function Layout() {

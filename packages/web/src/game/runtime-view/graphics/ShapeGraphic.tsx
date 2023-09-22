@@ -2,8 +2,8 @@ import { useRef } from "react"
 import { EntityWith } from "runtime-framework"
 import * as THREE from "three"
 import { MutatableShapeGeometry } from "../../../app/editor/entities/shape/MutatableShapeGeometry"
-import { WebappComponents } from "../../runtime-extension/WebappComponents"
-import { withEntityStore } from "./withEntityStore"
+import { WebappComponents } from "../../runtime-extension/webapp-components"
+import { withEntityStore } from "./WithEntityStore"
 
 export function ShapeGraphic(props: { entity: EntityWith<WebappComponents, "shape"> }) {
     if (!props.entity.has("shape")) {

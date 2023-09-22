@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { LevelState } from "./LevelState"
+import { LevelState } from "./level-state"
 import { LevelInMoving, LevelModeMoving } from "./modes/LevelInMoving"
 import { LevelInMovingCamera, LevelModeMovingCamera } from "./modes/LevelInMovingCamera"
 import { LevelInMovingCameraLine, LevelModeMovingCameraLine } from "./modes/LevelInMovingCameraLine"

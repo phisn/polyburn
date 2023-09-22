@@ -1,6 +1,6 @@
 import { EntityStore } from "runtime-framework"
 
-import { WebappComponents } from "../../runtime-extension/WebappComponents"
+import { WebappComponents } from "../../runtime-extension/webapp-components"
 import { FlagGraphics } from "./FlagGraphic"
 import { ParticleSourceGraphics } from "./ParticleSourceGraphic"
 import { ReplayGraphics } from "./ReplayGraphic"

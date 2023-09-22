@@ -1,11 +1,11 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useState } from "react"
-import { LevelEntity, LevelEntityComponents } from "runtime/src/core/level/LevelEntity"
+import { LevelEntity, LevelEntityComponents } from "runtime/src/core/level/level-entity"
 import { Euler } from "three"
 import { useGraphicUpdate } from "../ViewUpdates"
-import { entityGraphicRegistry } from "../graphics-assets/EntityGraphicRegistry"
-import { EntityGraphicType } from "../graphics-assets/EntityGraphicType"
-import { withEntityStore } from "./withEntityStore"
+import { entityGraphicRegistry } from "../graphics-assets/entity-graphic-registry"
+import { EntityGraphicType } from "../graphics-assets/entity-graphic-type"
+import { withEntityStore } from "./WithEntityStore"
 
 function FlagGraphic(props: { entity: LevelEntity }) {
     if (!props.entity.has(...LevelEntityComponents)) {

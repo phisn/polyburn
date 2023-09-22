@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react"
 import { StoreApi, UseBoundStore, create, useStore } from "zustand"
-import { GamemodeState, WorldState } from "../models/WorldState"
+import { GamemodeState, WorldState } from "../models/world-state"
 
 interface State {
     world: WorldState

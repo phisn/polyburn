@@ -1,7 +1,7 @@
 import { useState } from "react"
-import { RocketState } from "./RocketState"
 import { RocketInMoving, RocketModeMoving } from "./modes/RocketInMoving"
 import { RocketInNone, RocketModeNone } from "./modes/RocketInNone"
+import { RocketState } from "./rocket-state"
 
 export type RocketMode = RocketModeNone | RocketModeMoving
 

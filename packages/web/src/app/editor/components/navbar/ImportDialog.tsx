@@ -1,8 +1,8 @@
 import { useRef } from "react"
 import { Dialog } from "../../../../common/components/Dialog"
-import { useAppStore } from "../../../../common/storage/AppStore"
-import { WorldState } from "../../models/WorldState"
-import { importModelString } from "../../models/importModel"
+import { useAppStore } from "../../../../common/storage/app-store"
+import { importModelString } from "../../models/import-model"
+import { WorldState } from "../../models/world-state"
 import { useEditorStore } from "../../store/EditorStore"
 
 const replaceWorld = (newWorld: WorldState) => (world: WorldState) => {

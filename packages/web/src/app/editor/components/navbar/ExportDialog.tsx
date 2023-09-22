@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { Dialog } from "../../../../common/components/Dialog"
-import { useAppStore } from "../../../../common/storage/AppStore"
-import { exportModelString } from "../../models/exportModel"
+import { useAppStore } from "../../../../common/storage/app-store"
+import { exportModelString } from "../../models/export-model"
 import { useEditorStore } from "../../store/EditorStore"
 
 export function ExportDialog(props: { open: boolean; closeDialog: () => void }) {

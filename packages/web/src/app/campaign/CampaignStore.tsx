@@ -1,5 +1,5 @@
-import { GamemodeView } from "shared/src/views/GamemodeView"
-import { WorldView } from "shared/src/views/WorldView"
+import { GamemodeView } from "shared/src/views/gamemode-view"
+import { WorldView } from "shared/src/views/world-view"
 import { create } from "zustand"
 import { GameHandlerProps } from "./player-handlers/GameHandler"
 import { ReplayHandlerProps } from "./player-handlers/ReplayHandler"

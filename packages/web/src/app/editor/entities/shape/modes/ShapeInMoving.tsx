@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react"
 import { Mesh } from "three"
-import { Priority, SubPriority } from "../../../models/Priority"
+import { Priority, SubPriority } from "../../../models/priority"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
-import { ShapeState } from "../ShapeState"
-import { shapeMove } from "../mutations/shapeMove"
+import { shapeMove } from "../mutations/shape-move"
+import { ShapeState } from "../shape-state"
 
 export interface ShapeModeMoving {
     type: "moving"

@@ -8,20 +8,20 @@ import {
     snapDistance,
 } from "../../../../../common/constants"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
-import { Priority, SubPriority } from "../../../models/Priority"
+import { Priority, SubPriority } from "../../../models/priority"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
 import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
+import { Vertex, VertexContext } from "../Vertex"
+import { shapeRemoveVertex } from "../mutations/shape-remove-vertex"
 import {
     ShapeState,
     averageColor,
     findClosestEdge,
     findClosestVertex,
     isPointInsideShape,
-} from "../ShapeState"
-import { Vertex, VertexContext } from "../Vertex"
-import { shapeRemoveVertex } from "../mutations/shapeRemoveVertex"
+} from "../shape-state"
 
 export interface ShapeModeSelected {
     type: "selected"

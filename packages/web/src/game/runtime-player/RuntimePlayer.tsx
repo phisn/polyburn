@@ -2,10 +2,10 @@ import { OrthographicCamera } from "@react-three/drei"
 import { createPortal, useFrame, useThree } from "@react-three/fiber"
 import { useMemo, useRef } from "react"
 import * as THREE from "three"
-import { WebappSystemStack } from "../runtime-extension/WebappSystemStack"
+import { WebappSystemStack } from "../runtime-extension/webapp-system-stack"
 import { RuntimeView } from "../runtime-view/RuntimeView"
 import { ViewUpdatesProvider } from "../runtime-view/ViewUpdates"
-import { useRuntimeRunner as useRuntimeViewRunner } from "./useRuntimeViewRunner"
+import { useRuntimeRunner as useRuntimeViewRunner } from "./use-runtime-view-runner"
 
 export function RuntimePlayer(props: {
     children?: React.ReactNode

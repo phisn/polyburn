@@ -1,13 +1,13 @@
 import { useMemo } from "react"
 import { ReplayModel } from "runtime/proto/replay"
 import { WorldModel } from "runtime/proto/world"
-import { base64ToBytes } from "runtime/src/model/base64ToBytes"
-import { GamemodeView } from "shared/src/views/GamemodeView"
-import { WorldView } from "shared/src/views/WorldView"
-import { useAppStore } from "../../../common/storage/AppStore"
+import { base64ToBytes } from "runtime/src/model/base64-to-bytes"
+import { GamemodeView } from "shared/src/views/gamemode-view"
+import { WorldView } from "shared/src/views/world-view"
+import { useAppStore } from "../../../common/storage/app-store"
 import { trpc } from "../../../common/trpc/trpc"
 import { GamePlayer } from "../../../game/player-game/GamePlayer"
-import { bytesToBase64 } from "../../editor/models/exportModel"
+import { bytesToBase64 } from "../../editor/models/export-model"
 
 export interface GameHandlerProps {
     type: "game"

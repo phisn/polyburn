@@ -1,15 +1,15 @@
 import { Svg } from "@react-three/drei"
 import { Suspense, useRef } from "react"
-import { RocketEntityComponents } from "runtime/src/core/rocket/RocketEntity"
+import { RocketEntityComponents } from "runtime/src/core/rocket/rocket-entity"
 import { Object3D } from "three"
 
 import { EntityWith } from "runtime-framework"
-import { changeAnchor } from "runtime/src/model/world/changeAnchor"
-import { WebappComponents } from "../../runtime-extension/WebappComponents"
+import { changeAnchor } from "runtime/src/model/world/change-anchor"
+import { WebappComponents } from "../../runtime-extension/webapp-components"
 import { useGraphicUpdate } from "../ViewUpdates"
-import { entityGraphicRegistry } from "../graphics-assets/EntityGraphicRegistry"
-import { EntityGraphicType } from "../graphics-assets/EntityGraphicType"
-import { withEntityStore } from "./withEntityStore"
+import { entityGraphicRegistry } from "../graphics-assets/entity-graphic-registry"
+import { EntityGraphicType } from "../graphics-assets/entity-graphic-type"
+import { withEntityStore } from "./WithEntityStore"
 
 function RocketGraphic(props: {
     entity: EntityWith<WebappComponents, (typeof RocketEntityComponents)[number] | "interpolation">

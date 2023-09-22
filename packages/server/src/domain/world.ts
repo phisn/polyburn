@@ -1,4 +1,4 @@
-import { WorldIdentifier } from "shared/src/WorldIdentifier"
+import { WorldIdentifier } from "shared/src/world-identifier"
 
 export interface World {
     id: WorldIdentifier

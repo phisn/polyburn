@@ -1,3 +1,5 @@
 import { Entity } from "./entity"
 
-export type EntitySet<Components extends object> = Iterable<Entity<Components>>
+export interface EntitySet<Components extends object> extends Iterable<Entity<Components>> {
+    free(): void
+}

@@ -1,5 +1,6 @@
 import { Entity, EntityId } from "./entity"
 import { EntitySet } from "./entity-set"
+import { EntityTracker } from "./entity-tracker"
 import { EntityWith, NarrowProperties } from "./narrow-properties"
 
 export interface EntityStoreState<Components extends object> {
@@ -17,6 +18,7 @@ export interface EntityStoreState<Components extends object> {
     newSet<T extends (keyof Components)[]>(
         ...components: [...T]
     ): EntitySet<NarrowProperties<Components, T[number]>>
+    newTracker(): EntityTracker<Components>
 
     listenToNew<T extends (keyof Components)[]>(
         set?: (entity: Entity<NarrowProperties<Components, T[number]>>, isNew: boolean) => void,
@@ -96,7 +98,7 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
 
             const newSet = new Map<EntityId, EntityWith<Components, T[number]>>()
 
-            this.listenTo(
+            const free = this.listenTo(
                 (entity, isNew) => {
                     if (isNew) {
                         newSet.set(entity.id, entity)
@@ -110,7 +112,6 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
                 [Symbol.iterator]() {
                     return newSet.values()
                 },
-                /*
                 free() {
                     newSetCached.referenceCounter--
 
@@ -119,7 +120,6 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
                         free()
                     }
                 },
-                */
             }
 
             const newSetCached = {

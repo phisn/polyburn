@@ -1,5 +1,5 @@
 import { EntityStore, EntityWith } from "runtime-framework"
-import { useEntitySet } from "../../runtime-extension/common/use-entity-set"
+import { useEntitySet } from "../../../common/hooks/use-entity-set"
 import { WebappComponents } from "../../runtime-extension/webapp-components"
 
 export function withEntityStore<T extends (keyof WebappComponents)[]>(

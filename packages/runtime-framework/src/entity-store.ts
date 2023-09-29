@@ -120,6 +120,9 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
                         free()
                     }
                 },
+                size() {
+                    return newSet.size
+                },
             }
 
             const newSetCached = {
@@ -130,6 +133,87 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
             entitySetCache.set(key, newSetCached)
 
             return entitySet
+        },
+        newTracker(): EntityTracker<Components> {
+            const entities = new Map<EntityId, Entity<Components>>()
+            const listeners = new Set<() => void>()
+
+            const onDelEntity = (entity: Entity<Components>) => {
+                entities.delete(entity.id)
+            }
+
+            delEntityListeners.push(onDelEntity)
+
+            return {
+                [Symbol.iterator]() {
+                    return entities.values()
+                },
+                free(): void {
+                    delEntityListeners.splice(delEntityListeners.indexOf(onDelEntity), 1)
+                },
+
+                onChange(callback) {
+                    listeners.add(callback)
+                    return () => void listeners.delete(callback)
+                },
+
+                add(...entitiesArg: Entity<Components>[]): void {
+                    for (const entity of entitiesArg) {
+                        entities.set(entity.id, entity)
+                    }
+
+                    for (const callback of listeners) {
+                        callback()
+                    }
+                },
+                set(...entitiesArg: Entity<Components>[]): void {
+                    entities.clear()
+                    this.add(...entitiesArg)
+                },
+
+                delete(...entitiesArg: EntityId[]): void {
+                    for (const id of entitiesArg) {
+                        entities.delete(id)
+                    }
+
+                    for (const callback of listeners) {
+                        callback()
+                    }
+                },
+
+                clear(): void {
+                    entities.clear()
+
+                    for (const callback of listeners) {
+                        callback()
+                    }
+                },
+
+                components(): (keyof Components)[] {
+                    const entityIterator = entities.values()
+                    const first = entityIterator.next()
+
+                    const collected = new Map<string, number>(
+                        first.done ? [] : Object.keys(first.value.components).map(key => [key, 1]),
+                    )
+
+                    for (const entity of entityIterator) {
+                        for (const key of Object.keys(entity.components)) {
+                            const elementInCollected = collected.get(key)
+
+                            if (elementInCollected === undefined) {
+                                continue
+                            }
+
+                            collected.set(key, elementInCollected + 1)
+                        }
+                    }
+
+                    return [...collected.entries()]
+                        .filter(([, count]) => count === entities.size)
+                        .map(([key]) => key as keyof Components)
+                },
+            }
         },
         listenToNew<T extends (keyof Components)[]>(
             set?: (entity: Entity<NarrowProperties<Components, T[number]>>, isNew: boolean) => void,

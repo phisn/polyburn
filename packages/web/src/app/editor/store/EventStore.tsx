@@ -1,7 +1,7 @@
 import { MutableRefObject, createContext, useContext, useEffect, useMemo, useRef } from "react"
 import { EditorEvent } from "../EventHandler"
 
-export const ConsumeEvent = Symbol("ConsumeEvent")
+export const ConsumeEvent = Symbol("consume-event")
 
 type Callback = (event: EditorEvent) => void | typeof ConsumeEvent
 

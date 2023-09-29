@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useMessage } from "../runtime-extension/common/use-message"
+import { useMessage } from "../runtime-extension/hook/use-message"
 import { prepareReplay } from "../runtime-extension/replay/prepare/prepare-replay"
 import { newReplay } from "../runtime-extension/replay/replay-factory"
 import { WebappRuntimeProps, newWebappRuntime } from "../runtime-extension/webapp-runtime"

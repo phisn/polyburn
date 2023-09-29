@@ -1,5 +1,5 @@
 import { System } from "./System"
 
-export type SystemFactory<FactoryContext, Context> = (
+export type SystemFactory<FactoryContext, Context, K = void> = (
     factoryContext: FactoryContext,
-) => System<Context> | void
+) => System<Context, K> | void

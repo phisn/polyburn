@@ -3,15 +3,15 @@ import { Point } from "runtime/src/model/point"
 import { EditorComponents } from "../../editor-framework-base"
 import { Mutation } from "../../mutation"
 
-export interface ObjectVisuals {
-    setHovered: (hovered: boolean) => void
+export interface ObjectGraphics {
+    hovered: (hovered: boolean) => void
 
-    setPosition: (position: Point) => void
-    setRotation: (rotation: number) => void
+    position: (position: Point) => void
+    rotation: (rotation: number) => void
 }
 
 export interface ObjectComponent {
-    visuals?: ObjectVisuals
+    graphics?: ObjectGraphics
 
     isInside: (point: Point) => boolean
 

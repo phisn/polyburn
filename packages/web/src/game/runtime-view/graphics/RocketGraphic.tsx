@@ -5,11 +5,11 @@ import { Object3D } from "three"
 
 import { EntityWith } from "runtime-framework"
 import { changeAnchor } from "runtime/src/model/world/change-anchor"
+import { withEntityStore } from "../../../common/runtime-framework/WithEntityStore"
 import { WebappComponents } from "../../runtime-extension/webapp-components"
 import { useGraphicUpdate } from "../ViewUpdates"
 import { entityGraphicRegistry } from "../graphics-assets/entity-graphic-registry"
 import { EntityGraphicType } from "../graphics-assets/entity-graphic-type"
-import { withEntityStore } from "./WithEntityStore"
 
 function RocketGraphic(props: {
     entity: EntityWith<WebappComponents, (typeof RocketEntityComponents)[number] | "interpolation">

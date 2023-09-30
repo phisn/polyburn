@@ -6,16 +6,16 @@ export const newDefaultObjectSystem: EditorSystemFactory = ({ store, cursor }) =
 
     return ({ event }) => {
         for (const entity of objects) {
-            const object = entity.components.object
-            const visuals = entity.components.object.visuals
+            const { object } = entity.components
+            const { graphics } = object
 
-            if (visuals === undefined) {
+            if (graphics === undefined) {
                 return
             }
 
             const isInside = object.isInside(event.position)
 
-            visuals.setHovered(isInside)
+            graphics.hovered(isInside)
 
             if (isInside) {
                 if (event.shiftKey) {

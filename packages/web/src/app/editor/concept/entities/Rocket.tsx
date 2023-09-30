@@ -1,24 +1,16 @@
 import { Svg } from "@react-three/drei"
-import { Ref, Suspense, forwardRef, useEffect, useImperativeHandle, useRef } from "react"
+import { Suspense, useEffect, useRef } from "react"
 import { EntityWith } from "runtime-framework"
 import { Point } from "runtime/src/model/point"
 import { Euler, MeshBasicMaterial, Object3D } from "three"
+import { withEntityStore } from "../../../../common/runtime-framework/WithEntityStore"
 import { entityGraphicRegistry } from "../../../../game/runtime-view/graphics-assets/entity-graphic-registry"
 import { EntityGraphicType } from "../../../../game/runtime-view/graphics-assets/entity-graphic-type"
-import { isPointInsideEntity } from "../../models/is-point-inside-entity"
 import { EditorComponents } from "../editor-framework-base"
-import { ObjectVisuals } from "../features/object/object"
 import { EntityPriority } from "./entity-priority"
-import { useEntityAccessor } from "./use-entity-accessor"
+import { useEntityGraphicsProvider } from "./use-entity-graphics-provider"
 
-type RocketRef = ObjectVisuals
-
-export const Rocket = forwardRef(function Rocket(
-    props: {
-        entity: EntityWith<EditorComponents, "object">
-    },
-    ref: Ref<RocketRef>,
-) {
+export function Rocket(props: { entity: EntityWith<EditorComponents, "object"> }) {
     const object = props.entity.components.object
     const graphicEntry = entityGraphicRegistry[EntityGraphicType.Rocket]
 
@@ -29,41 +21,17 @@ export const Rocket = forwardRef(function Rocket(
         colorRef.current.color.set(0xffffff)
     })
 
-    useEntityAccessor(props.entity, () => ({
-        drawHovered: (hovered: boolean) => {
+    useEntityGraphicsProvider(props.entity, () => ({
+        hovered: (hovered: boolean) => {
             colorRef.current.color.set(hovered ? 0x5555ff : 0xffffff)
         },
-        drawPosition: (position: Point) => {
+        position: (position: Point) => {
             svgRef.current?.position.set(position.x, position.y, EntityPriority.Rocket)
         },
-        drawRotation: (rotation: number) => {
+        rotation: (rotation: number) => {
             svgRef.current?.rotation.set(0, 0, rotation)
         },
     }))
-
-    useImperativeHandle(
-        ref,
-        () => ({
-            setHovered: (hovered: boolean) => {
-                colorRef.current.color.set(hovered ? 0x5555ff : 0xffffff)
-            },
-            setPosition: (position: Point) => {
-                svgRef.current?.position.set(position.x, position.y, EntityPriority.Rocket)
-            },
-            setRotation: (rotation: number) => {
-                svgRef.current?.rotation.set(0, 0, rotation)
-            },
-            isInside: (position: Point): boolean => {
-                return isPointInsideEntity(
-                    position,
-                    { x: object.position().x, y: object.position().y },
-                    object.rotation(),
-                    EntityGraphicType.Rocket,
-                )
-            },
-        }),
-        [object],
-    )
 
     return (
         <Suspense>
@@ -77,4 +45,6 @@ export const Rocket = forwardRef(function Rocket(
             />
         </Suspense>
     )
-})
+}
+
+export const RocketGraphics = withEntityStore(Rocket, "object")

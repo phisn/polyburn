@@ -13,17 +13,17 @@ export function findClosestEdge(shapeEntities: ShapeEntity[], point: Point, snap
 
         for (let j = 0; j < shape.vertices.length; ++j) {
             const p1 = {
-                x: shape.vertices[j].position.x + shapeObject.position.x,
-                y: shape.vertices[j].position.y + shapeObject.position.y,
+                x: shape.vertices[j].position.x + shapeObject.position().x,
+                y: shape.vertices[j].position.y + shapeObject.position().y,
             }
 
             const p2 = {
                 x:
                     shape.vertices[(j + 1) % shape.vertices.length].position.x +
-                    shapeObject.position.x,
+                    shapeObject.position().x,
                 y:
                     shape.vertices[(j + 1) % shape.vertices.length].position.y +
-                    shapeObject.position.y,
+                    shapeObject.position().y,
             }
 
             const closest = getClosestPointOnLine(p1, p2, point)
@@ -55,8 +55,8 @@ export function findClosestVertex(shapeEntity: ShapeEntity, point: Point, snapDi
 
     for (let i = 0; i < shape.vertices.length; ++i) {
         const vertex = {
-            x: shape.vertices[i].position.x + shapeObject.position.x,
-            y: shape.vertices[i].position.y + shapeObject.position.y,
+            x: shape.vertices[i].position.x + shapeObject.position().x,
+            y: shape.vertices[i].position.y + shapeObject.position().y,
         }
 
         const distance = getDistance(vertex, point)

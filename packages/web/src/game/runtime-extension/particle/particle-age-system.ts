@@ -1,10 +1,7 @@
 import { WebappSystemFactory } from "../webapp-system-factory"
 import { removeParticle } from "./particle"
 
-export const newParticleAgeSystem: WebappSystemFactory = ({
-    store,
-    particlePhysics: visualPhysics,
-}) => {
+export const newParticleAgeSystem: WebappSystemFactory = ({ store, particlePhysics }) => {
     const entities = store.newSet("particleSource")
 
     return () => {
@@ -18,7 +15,7 @@ export const newParticleAgeSystem: WebappSystemFactory = ({
                     particle.age++
 
                     if (particle.age >= particle.lifeTime) {
-                        removeParticle(visualPhysics, entity.components.particleSource, i)
+                        removeParticle(particlePhysics, entity.components.particleSource, i)
                     }
                 }
             }

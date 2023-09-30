@@ -3,11 +3,11 @@ import { Suspense, useRef } from "react"
 import { EntityWith } from "runtime-framework"
 import { changeAnchor } from "runtime/src/model/world/change-anchor"
 import { MeshBasicMaterial, Object3D } from "three"
+import { withEntityStore } from "../../../common/runtime-framework/WithEntityStore"
 import { WebappComponents } from "../../runtime-extension/webapp-components"
 import { useGraphicUpdate } from "../ViewUpdates"
 import { entityGraphicRegistry } from "../graphics-assets/entity-graphic-registry"
 import { EntityGraphicType } from "../graphics-assets/entity-graphic-type"
-import { withEntityStore } from "./WithEntityStore"
 
 export function ReplayGraphic(props: {
     entity: EntityWith<WebappComponents, "replay" | "interpolation">

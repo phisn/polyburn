@@ -75,10 +75,10 @@ export const newDefaultObjectSystem: EditorSystemFactory = ({ store, mutation, c
         }
 
         function updateRef(entity: EntityWith<EditorComponents, "object" | "objectMovingAction">) {
-            entity.components.object.visuals?.setPosition(
+            entity.components.object.graphics?.setPosition(
                 entity.components.objectMovingAction.position,
             )
-            entity.components.object.visuals?.setRotation(
+            entity.components.object.graphics?.setRotation(
                 entity.components.objectMovingAction.rotation,
             )
         }

@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react"
 import { EntityStore } from "runtime-framework"
-import { useEntitySet } from "../../common/hooks/use-entity-set"
+import { useEntitySet } from "../../common/runtime-framework/use-entity-set"
 import {
     interpolateEntity,
     updateInterpolatedEntity,

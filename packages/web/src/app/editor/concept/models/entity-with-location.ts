@@ -1,68 +1,64 @@
+import { EntityType } from "runtime/proto/world"
 import { Point } from "runtime/src/model/Point"
 import { changeAnchor } from "runtime/src/model/world/change-anchor"
-import { snapDistance } from "../../../../../common/constants"
-import { EditorEvent } from "../../../EventHandler"
-import { findClosestEdge } from "../shape/find-closest-edge"
-import { ShapeEntity } from "../shape/shape"
-import { ObjectEntity } from "./object"
+import { entityRegistry } from "runtime/src/model/world/entity-registry"
+import { snapDistance } from "../../../common/constants"
+import { EditorEvent } from "../EventHandler"
+import { ShapeState, findClosestEdge } from "../entities/shape/shape-state"
+import { WorldState } from "./world-state"
 
-export const findLocationForObject = (
-    event: EditorEvent,
-    targetEntity: ObjectEntity,
-    shapeEntities: ShapeEntity[],
-) => {
-    const edge = findEdgeForEntity(event.position, true, shapeEntities)
+export const findLocationForEntity = (world: WorldState, event: EditorEvent, type: EntityType) => {
+    const graphicEntry = entityRegistry[type]
+    const edge = findEdgeForEntity(world, event.position, true)
 
     if (edge) {
         const transposed = changeAnchor(
             edge.point,
             edge.rotation,
-            targetEntity.components.object.size(),
+            graphicEntry,
             { x: 1, y: 0 },
             { x: 0.5, y: 1 },
         )
 
-        return {
-            position: transposed,
-            rotation: edge.rotation,
-        }
+        return [transposed.x, transposed.y, edge.rotation] as const
     }
 
     const transposed = changeAnchor(
         event.positionInGrid,
         0,
-        targetEntity.components.object.size(),
+        graphicEntry,
         { x: 1, y: 0 },
         { x: 0.5, y: 0.5 },
     )
 
-    return {
-        position: transposed,
-        rotation: 0,
-    }
+    return [transposed.x, transposed.y, 0] as const
 }
 
-export const findEdgeForEntity = (position: Point, snap: boolean, shapes: ShapeEntity[]) => {
+export const findEdgeForEntity = (world: WorldState, position: Point, snap: boolean) => {
+    const shapes = [...world.entities.values()].filter(
+        (entity): entity is ShapeState => entity.type === EntityType.SHAPE,
+        position,
+    )
+
     const edge = findClosestEdge(shapes, position, snapDistance)
 
     if (!edge) {
         return edge
     }
 
-    const shape = shapes[edge.shapeIndex].components.shape
-    const shapeObject = shapes[edge.shapeIndex].components.object
+    const shape = shapes[edge.shapeIndex]
 
     // edge.point is the closest point on the edge
     // edge.edge contains the two indices of the edge's vertices
 
     const edgeStart = {
-        x: shape.vertices[edge.edge[0]].position.x + shapeObject.position().x,
-        y: shape.vertices[edge.edge[0]].position.y + shapeObject.position().y,
+        x: shapes[edge.shapeIndex].vertices[edge.edge[0]].position.x + shape.position.x,
+        y: shapes[edge.shapeIndex].vertices[edge.edge[0]].position.y + shape.position.y,
     }
 
     const edgeEnd = {
-        x: shape.vertices[edge.edge[1]].position.x + shapeObject.position().x,
-        y: shape.vertices[edge.edge[1]].position.y + shapeObject.position().y,
+        x: shapes[edge.shapeIndex].vertices[edge.edge[1]].position.x + shape.position.x,
+        y: shapes[edge.shapeIndex].vertices[edge.edge[1]].position.y + shape.position.y,
     }
 
     const rotation = Math.atan2(edgeEnd.y - edgeStart.y, edgeEnd.x - edgeStart.x) + Math.PI

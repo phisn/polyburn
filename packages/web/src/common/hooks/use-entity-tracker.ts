@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react"
 import { Entity } from "runtime-framework"
 import { EntityTracker } from "runtime-framework/src/entity-tracker"
 
-export function useEntitySet<Components extends object>(tracker: EntityTracker<Components>) {
+export function useEntityTracker<Components extends object>(tracker: EntityTracker<Components>) {
     let memoizeValues: [Entity<Components>[], (keyof Components)[]] = [
         [...tracker],
         tracker.components(),

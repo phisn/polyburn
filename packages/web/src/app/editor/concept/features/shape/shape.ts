@@ -2,7 +2,7 @@ import { RefObject } from "react"
 import { EntityWith } from "runtime-framework"
 import { Point } from "runtime/src/model/point"
 import { Vector2 } from "three"
-import { EditorComponents } from "../../editor-components"
+import { EditorComponents } from "../../editor-framework-base"
 
 interface ShapeRef {
     setHovered: (hovered: boolean) => void

@@ -123,6 +123,16 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
                 size() {
                     return newSet.size
                 },
+                add<T extends keyof Components>(componentName: T, component: Components[T]): void {
+                    for (const entity of entities.values()) {
+                        entity.components[componentName] = component
+                    }
+                },
+                remove<T extends keyof Components>(componentName: T): void {
+                    for (const entity of entities.values()) {
+                        delete entity.components[componentName]
+                    }
+                },
             }
 
             const newSetCached = {

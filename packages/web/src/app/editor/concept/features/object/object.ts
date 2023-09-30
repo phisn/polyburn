@@ -1,26 +1,25 @@
-import { RefObject } from "react"
 import { EntityWith } from "runtime-framework"
 import { Point } from "runtime/src/model/point"
-import { EditorComponents } from "../../editor-components"
+import { EditorComponents } from "../../editor-framework-base"
+import { Mutation } from "../../mutation"
 
-interface ObjectRef {
+export interface ObjectVisuals {
     setHovered: (hovered: boolean) => void
 
     setPosition: (position: Point) => void
     setRotation: (rotation: number) => void
-
-    onBeforeGrap: () => void
-    onGrapped: () => void
-
-    isInside: (position: Point) => boolean
 }
 
 export interface ObjectComponent {
-    ref: RefObject<ObjectRef>
+    visuals?: ObjectVisuals
 
-    size: { width: number; height: number }
-    position: Point
-    rotation: number
+    isInside: (point: Point) => boolean
+
+    position: () => Point
+    rotation: () => number
+    size: () => { width: number; height: number }
+
+    mutation(position: Point, rotation: number): Mutation
 }
 
 export interface ObjectMovingActionComponent {

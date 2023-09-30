@@ -1,40 +1,41 @@
 import { ConsumeEvent } from "../../../store/EventStore"
-import { EditorSystemFactory } from "../../editor-system-factory"
+import { EditorSystemFactory } from "../../editor-framework-base"
 
-export const newDefaultObjectSystem: EditorSystemFactory = ({ store }) => {
+export const newDefaultObjectSystem: EditorSystemFactory = ({ store, cursor }) => {
     const objects = store.newSet("object")
 
     return ({ event }) => {
-        for (const object of objects) {
-            const objectRef = object.components.object.ref
+        for (const entity of objects) {
+            const object = entity.components.object
+            const visuals = entity.components.object.visuals
 
-            if (objectRef.current === null) {
+            if (visuals === undefined) {
                 return
             }
 
-            const isInside = objectRef.current.isInside(event.position)
+            const isInside = object.isInside(event.position)
 
-            objectRef.current.setHovered(isInside)
+            visuals.setHovered(isInside)
 
             if (isInside) {
                 if (event.shiftKey) {
                     if (event.leftButtonClicked) {
-                        objectRef.current.onGrapped()
-                        object.components.objectMovingAction = {
+                        cursor.grabbing()
+                        entity.components.objectMovingAction = {
                             offsetPosition: {
-                                x: object.components.object.position.x - event.positionInGrid.x,
-                                y: object.components.object.position.y - event.positionInGrid.y,
+                                x: entity.components.object.position().x - event.positionInGrid.x,
+                                y: entity.components.object.position().y - event.positionInGrid.y,
                             },
-                            offsetRotation: object.components.object.rotation,
+                            offsetRotation: entity.components.object.rotation(),
 
-                            position: object.components.object.position,
-                            rotation: object.components.object.rotation,
+                            position: entity.components.object.position(),
+                            rotation: entity.components.object.rotation(),
                         }
                     } else {
-                        objectRef.current.onBeforeGrap()
+                        cursor.grabbable()
                     }
                 } else if (event.leftButtonClicked) {
-                    object.components.selected = {}
+                    entity.components.selected = {}
                 }
 
                 return ConsumeEvent

@@ -1,10 +1,10 @@
 import { EntityWith } from "runtime-framework"
 import { ConsumeEvent } from "../../../store/EventStore"
-import { EditorComponents } from "../../editor-components"
-import { EditorSystemFactory } from "../../editor-system-factory"
+import { EditorComponents, EditorSystemFactory } from "../../editor-framework-base"
+import { combineMutations } from "../../mutation"
 import { findLocationForObject } from "./find-location-for-object"
 
-export const newDefaultObjectSystem: EditorSystemFactory = ({ store }) => {
+export const newDefaultObjectSystem: EditorSystemFactory = ({ store, mutation, cursor }) => {
     const objects = store.newSet("object", "objectMovingAction")
     const shapes = store.newSet("object", "shape")
 
@@ -14,6 +14,8 @@ export const newDefaultObjectSystem: EditorSystemFactory = ({ store }) => {
         }
 
         if (event.leftButtonDown) {
+            cursor.grabbing()
+
             if (objects.size() === 1) {
                 const [first] = objects
 
@@ -27,6 +29,19 @@ export const newDefaultObjectSystem: EditorSystemFactory = ({ store }) => {
 
             return ConsumeEvent
         } else {
+            cursor.grabbable()
+
+            mutation.dispatch(
+                combineMutations(
+                    ...[...objects].map(object =>
+                        object.components.object.mutation(
+                            object.components.objectMovingAction.position,
+                            object.components.objectMovingAction.rotation,
+                        ),
+                    ),
+                ),
+            )
+
             return ConsumeEvent
         }
 
@@ -59,12 +74,12 @@ export const newDefaultObjectSystem: EditorSystemFactory = ({ store }) => {
             updateRef(single)
         }
 
-        function updateRef(object: EntityWith<EditorComponents, "object" | "objectMovingAction">) {
-            object.components.object.ref.current?.setPosition(
-                object.components.objectMovingAction.position,
+        function updateRef(entity: EntityWith<EditorComponents, "object" | "objectMovingAction">) {
+            entity.components.object.visuals?.setPosition(
+                entity.components.objectMovingAction.position,
             )
-            object.components.object.ref.current?.setRotation(
-                object.components.objectMovingAction.rotation,
+            entity.components.object.visuals?.setRotation(
+                entity.components.objectMovingAction.rotation,
             )
         }
     }

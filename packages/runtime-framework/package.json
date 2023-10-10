@@ -12,6 +12,7 @@
     },
     "devDependencies": {
         "eslint-config-custom": "*",
+        "fast-check": "^3.13.1",
         "tsconfig": "*",
         "vitest": "^0.33.0"
     },

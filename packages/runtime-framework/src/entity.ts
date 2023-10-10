@@ -10,6 +10,8 @@ export interface Entity<Components extends object> {
         ...components: [...T]
     ): this is Entity<NarrowProperties<Components, (typeof components)[number]>>
     extend<T>(): this is Entity<Components & T>
+
+    toString(): string
 }
 
 export type EmptyComponent = Record<string, never>

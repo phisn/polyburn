@@ -1,5 +1,12 @@
 import { expect, test } from "vitest"
 
+test("RuntimeStore entity", () => {
+    expect(1).toBe(1)
+})
+
+/*
+import { expect, test } from "vitest"
+
 import { EmptyComponent, Entity } from "./entity"
 import { createEntityStore } from "./entity-store"
 

@@ -9,6 +9,7 @@ export interface EntityStoreState<Components extends object> {
 
     create<L extends keyof Components = never>(
         base?: NarrowProperties<Components, L>,
+        entityId?: EntityId,
     ): Entity<NarrowProperties<Components, L>>
     remove(id: EntityId): void
 
@@ -31,6 +32,8 @@ export interface EntityStoreState<Components extends object> {
         del?: (entity: Entity<NarrowProperties<Components, T[number]>>) => void,
         ...components: [...T]
     ): () => void
+
+    toString(): string
 }
 
 export const createEntityStore = <Components extends object>(): EntityStoreState<Components> => {
@@ -123,6 +126,11 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
                 size() {
                     return newSet.size
                 },
+
+                map(callback) {
+                    return [...newSet.values()].map(callback)
+                },
+
                 add<T extends keyof Components>(componentName: T, component: Components[T]): void {
                     for (const entity of entities.values()) {
                         entity.components[componentName] = component
@@ -132,6 +140,10 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
                     for (const entity of entities.values()) {
                         delete entity.components[componentName]
                     }
+                },
+
+                toString() {
+                    return `EntitySet(${[...components].join(", ")})`
                 },
             }
 
@@ -312,6 +324,11 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
 
             return free
         },
+
+        toString() {
+            const entitiesStr = [...entities].map(([, entity]) => entity.toString()).join(", ")
+            return `EntityStore(${entitiesStr})`
+        },
     }
 
     function listenToAllEntities(
@@ -344,6 +361,10 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
     function findEntities<T extends (keyof Components)[]>(
         ...components: [...T]
     ): Entity<NarrowProperties<Components, T[number]>>[] {
+        if (components.length === 0) {
+            return [...entities.values()] as Entity<NarrowProperties<Components, T[number]>>[]
+        }
+
         const found = []
 
         for (const [, entity] of entities) {
@@ -357,8 +378,9 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
 
     function newEntity<L extends keyof Components = never>(
         base?: NarrowProperties<Components, L>,
+        suggestEntityId?: EntityId,
     ): Entity<NarrowProperties<Components, L>> {
-        const entityId = nextEntityId++
+        const entityId = suggestEntityId ?? nextEntityId++
 
         // assuming in type assertion that L is never if base is undefined
         const entityComponents = new Proxy(base ?? ({} as NarrowProperties<Components, L>), {
@@ -402,6 +424,12 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
             },
             extend() {
                 return true
+            },
+
+            toString() {
+                return Object.keys(entityComponents).length > 0
+                    ? `Entity(${entityId}: ${Object.keys(entityComponents).join(", ")})`
+                    : `Entity(${entityId})`
             },
         }
 

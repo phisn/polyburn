@@ -1,31 +1,39 @@
 import { applyPatches, enableMapSet, enablePatches, Patch, produce } from "immer"
 import { NarrowProperties } from "runtime-framework"
-import { Entity, entityHas, ImmutableEntity } from "./entity"
-import { EntityComponents } from "./model-entities/entity-components"
-import { Mutation } from "./mutation"
+import { EntityComponents } from "./models-entities/entity-components"
+import { EditorStoreState } from "./models/editor-state"
+import { Entity, entityHas, Immutable, ImmutableEntity } from "./models/entity"
 
 enableMapSet()
 enablePatches()
 
-export interface EntityStore<Components extends object = EntityComponents> {
+export interface EditorStore {
     subscribe(listener: () => void): () => void
 
     undo(): void
     redo(): void
 
-    entities(): Map<number, ImmutableEntity<Components>>
+    selected(): Immutable<Entity[]>
 
-    entitiesWithComponents<T extends (keyof Components)[]>(
+    entities(): Map<number, ImmutableEntity>
+
+    entitiesWithComponents<T extends (keyof EntityComponents)[]>(
         ...componentNames: T
-    ): ImmutableEntity<NarrowProperties<Components, T[number]>>[]
+    ): Immutable<Entity<NarrowProperties<EntityComponents, T[number]>>[]>
 
-    mutate(mutation: Mutation<Components>): void
+    mutate(mutation: (state: EditorStoreState) => void): void
 }
 
-export const createStore = <
-    Components extends object = EntityComponents,
->(): EntityStore<Components> => {
-    let entities = new Map<number, Entity<Components>>()
+export const createEditorStore = (): EditorStore => {
+    // create our initial immutable entities map
+    let state: EditorStoreState = produce(
+        {
+            gamemodes: [],
+            entities: new Map<number, Entity>(),
+            selected: [],
+        },
+        () => {},
+    )
 
     const listeners = new Set<() => void>()
 
@@ -35,11 +43,15 @@ export const createStore = <
     // components => entities. caching all entities with these specific components.
     // unspecific types because value is dependent on key which is not describable in typescript for generics.
     // (especially when the key is a concatenation of multiple strings)
-    const componentCache = new Map<string, ImmutableEntity<Components>[]>()
+    const componentCache = new Map<string, ImmutableEntity[]>()
 
     // we want to fix the caches after an entity changed in it.
     // to know which caches have to be fixed we use a lookup table to see where a specific entity components are used.
     const componentInComponentCache = new Map<PropertyKey, string[]>()
+
+    let selected: ImmutableEntity[] = []
+
+    updateCache(state)
 
     return {
         subscribe(listener) {
@@ -57,7 +69,7 @@ export const createStore = <
             }
 
             redos.push(changes)
-            updateEntities(applyPatches(entities, changes))
+            updateState(applyPatches(state, changes))
         },
         redo() {
             const changes = redos.pop()
@@ -67,12 +79,15 @@ export const createStore = <
             }
 
             undos.push(changes)
-            updateEntities(applyPatches(entities, changes))
+            updateState(applyPatches(state, changes))
+        },
+        selected() {
+            return []
         },
         entities() {
-            return entities
+            return state.entities
         },
-        entitiesWithComponents<T extends (keyof Components)[]>(...componentNames: T) {
+        entitiesWithComponents<T extends (keyof EntityComponents)[]>(...componentNames: T) {
             const joined = componentNames.join(",")
 
             let cached = componentCache.get(joined)
@@ -80,7 +95,7 @@ export const createStore = <
             if (cached === undefined) {
                 cached = []
 
-                for (const entity of entities.values()) {
+                for (const entity of state.entities.values()) {
                     if (entityHas(entity, ...componentNames)) {
                         cached.push(entity)
                     }
@@ -102,13 +117,13 @@ export const createStore = <
                 }
             }
 
-            return cached as ImmutableEntity<NarrowProperties<Components, T[number]>>[]
+            return cached as ImmutableEntity<NarrowProperties<EntityComponents, T[number]>>[]
         },
         mutate(mutation) {
             const changes: Patch[] = []
             const inverseChanges: Patch[] = []
 
-            const newEntities = produce(entities, mutation, (patches, inversePatches) => {
+            const newState = produce(state, mutation, (patches, inversePatches) => {
                 changes.push(...patches)
                 inverseChanges.push(...inversePatches)
             })
@@ -116,29 +131,25 @@ export const createStore = <
             undos.push(inverseChanges)
             redos.length = 0
 
-            updateEntities(newEntities)
+            updateState(newState)
         },
     }
 
-    function updateEntities(newEntities: Map<number, Entity<Components>>) {
-        const previousEntities = entities
-        entities = newEntities
+    function updateState(newState: EditorStoreState) {
+        updateCache(newState)
 
-        notifySubscribers(entities, previousEntities)
+        state = newState
+
+        for (const listener of listeners) {
+            listener()
+        }
     }
 
-    function notifySubscribers(
-        entities: Map<number, Entity<Components>>,
-        previousEntities: Map<number, Entity<Components>>,
-    ) {
-        if (entities === previousEntities) {
-            return
-        }
-
+    function updateCache(newState: EditorStoreState) {
         // we need to fix all caches where the entity is used.
         // fixing means clearing the cache because the mutation might have been more complex.
-        const cachesAffected = [...entities.values()]
-            .filter(entity => entity !== previousEntities.get(entity.id))
+        const cachesAffected = [...newState.entities.values()]
+            .filter(entity => entity !== state.entities.get(entity.id))
             .flatMap(entity => Object.keys(entity))
             .flatMap(componentName => componentInComponentCache.get(componentName) ?? [])
             .filter((value, index, self) => self.indexOf(value) === index)
@@ -147,8 +158,6 @@ export const createStore = <
             componentCache.delete(cache)
         }
 
-        for (const listener of listeners) {
-            listener()
-        }
+        //        selected = newState.selected.map(id => newState.entities.get(id) as ImmutableEntity)
     }
 }

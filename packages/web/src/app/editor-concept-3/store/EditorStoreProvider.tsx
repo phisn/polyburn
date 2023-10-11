@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo } from "react"
-import { EntityStore, createStore } from "./editor-store"
+import { EditorStore, createEditorStore } from "./editor-store"
 
-const context = createContext<EntityStore | undefined>(undefined)
+const context = createContext<EditorStore | undefined>(undefined)
 
 export function useEditorStore() {
     const store = useContext(context)
@@ -14,6 +14,6 @@ export function useEditorStore() {
 }
 
 export function ProvideEditorStore(props: { children: React.ReactNode }) {
-    const store = useMemo(() => createStore(), [])
+    const store = useMemo(() => createEditorStore(), [])
     return <context.Provider value={store}>{props.children}</context.Provider>
 }

@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react"
 import { useEditorStore } from "./EditorStoreProvider"
-import { ImmutableEntity } from "./entity"
+import { ImmutableEntity } from "./models/entity"
 
 export function useEditorEntities<U>(selector: (entities: Map<number, ImmutableEntity>) => U) {
     const store = useEditorStore()

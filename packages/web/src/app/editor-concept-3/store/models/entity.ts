@@ -1,5 +1,5 @@
 import { NarrowProperties } from "runtime-framework"
-import { EntityComponents } from "./model-entities/entity-components"
+import { EntityComponents } from "../models-entities/entity-components"
 
 export type Immutable<T> = { readonly [K in keyof T]: Immutable<T[K]> }
 

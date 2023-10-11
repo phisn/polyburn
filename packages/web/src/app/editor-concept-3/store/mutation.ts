@@ -1,5 +1,5 @@
 import { Draft } from "immer"
-import { Entity } from "./entity"
+import { Entity } from "./models/entity"
 
 export type Mutation<Components extends object> = (
     draft: Draft<Map<number, Entity<Components>>>,

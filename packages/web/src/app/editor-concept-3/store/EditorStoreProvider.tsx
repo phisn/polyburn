@@ -1,19 +1,13 @@
-import { createContext, useContext, useMemo } from "react"
-import { EditorStore, createEditorStore } from "./editor-store"
+const Context = createContext<UseBoundStore<StoreApi<WorldStore>>>(null!)
 
-const context = createContext<EditorStore | undefined>(undefined)
-
-export function useEditorStore() {
-    const store = useContext(context)
-
-    if (!store) {
-        throw new Error("No store provided")
-    }
-
-    return store
+export function ProvideWorldStore(props: { children: React.ReactNode; world: WorldState }) {
+    const store = createEditorStore(props.world)
+    return <Context.Provider value={store}>{props.children}</Context.Provider>
 }
 
-export function ProvideEditorStore(props: { children: React.ReactNode }) {
-    const store = useMemo(() => createEditorStore(), [])
-    return <context.Provider value={store}>{props.children}</context.Provider>
+export function useEditorStore<U>(
+    selector: (state: WorldStore) => U,
+    equalityFn?: (a: U, b: U) => boolean,
+) {
+    return useStore(useContext(Context), selector, equalityFn)
 }

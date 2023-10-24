@@ -1,3 +1,4 @@
+import { EmptyComponent } from "runtime-framework"
 import { EntityType } from "runtime/proto/world"
 import { ObjectComponent } from "./object-component"
 import { ShapeComponent } from "./shape-component"
@@ -8,4 +9,5 @@ export interface BaseComponents {
 
     object?: ObjectComponent
     shape?: ShapeComponent
+    selected?: EmptyComponent
 }

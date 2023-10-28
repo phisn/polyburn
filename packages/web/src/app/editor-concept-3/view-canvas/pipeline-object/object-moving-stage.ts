@@ -1,90 +1,87 @@
-import { EntityWith } from "runtime-framework"
-import { ConsumeEvent } from "../../../store/EventStore"
-import { combineMutations } from "../../runtime-player/mutation"
-import { EditorComponents, EditorSystemFactory } from "../base"
+import { EditorWorldState } from "../../store-world/models/editor-world"
+import { EntityWith } from "../../store-world/models/entity"
+import { ConsumeEvent } from "../canvas-event"
+import { PipelineStageFactory } from "../pipeline"
 import { findLocationForObject } from "./find-location-for-object"
+import { MovingEntityEntry } from "./pipeline-moving-state"
 
-export const newDefaultObjectSystem: EditorSystemFactory = ({ store, mutation, cursor }) => {
-    const objects = store.newSet("object", "objectMovingAction")
-    const shapes = store.newSet("object", "shape")
-
-    return ({ event }) => {
-        if (objects.size() === 0) {
+export const newObjectDefaultStage: PipelineStageFactory =
+    ({ cursor, graphics, state, world }) =>
+    event => {
+        if (state.ref.type !== "moving") {
             return
         }
+
+        const { ref: movingState } = state
 
         if (event.leftButtonDown) {
             cursor.grabbing()
 
-            if (objects.size() === 1) {
-                const [first] = objects
-
-                if (first.has("shape") === false) {
-                    onMoveSingleNonShapeObject(first)
-                    return ConsumeEvent
-                }
+            if (tryClipObjectToShape()) {
+                return ConsumeEvent
             }
 
-            onMoveObjects()
+            for (const entry of movingState.entries) {
+                updateEntryPosition(entry)
+                updateEntryGraphics(entry)
+            }
 
             return ConsumeEvent
         } else {
             cursor.grabbable()
 
-            mutation.dispatch(
-                combineMutations(
-                    ...objects.map(entity =>
-                        entity.components.object.mutation(
-                            entity.components.objectMovingAction.position,
-                            entity.components.objectMovingAction.rotation,
-                        ),
-                    ),
-                ),
-            )
+            world.mutate(moveEntitiesMutation)
 
-            for (const entity of objects) {
-                delete (entity.components as any).objectMovingAction
-            }
+            state.ref = { type: "none" }
 
             return ConsumeEvent
         }
 
-        function onMoveObjects() {
-            for (const object of objects) {
-                object.components.objectMovingAction.position = {
-                    x:
-                        event.positionInGrid.x +
-                        object.components.objectMovingAction.offsetPosition.x,
-                    y:
-                        event.positionInGrid.y +
-                        object.components.objectMovingAction.offsetPosition.y,
-                }
-
-                object.components.objectMovingAction.rotation =
-                    object.components.objectMovingAction.offsetRotation
-
-                updateRef(object)
+        function tryClipObjectToShape() {
+            if (movingState.entries.length !== 1) {
+                return false
             }
+
+            const [first] = movingState.entries
+
+            if ("shape" in first.entity) {
+                return false
+            }
+
+            const { rotation, position } = findLocationForObject(event, first.entity, [
+                ...world.entitiesWithComponents("shape"),
+            ])
+
+            first.position = position
+            first.rotation = rotation
         }
 
-        function onMoveSingleNonShapeObject(
-            single: EntityWith<EditorComponents, "object" | "objectMovingAction">,
-        ) {
-            const { rotation, position } = findLocationForObject(event, single, [...shapes])
+        function updateEntryPosition(entry: MovingEntityEntry) {
+            entry.position = {
+                x: event.positionInGrid.x + entry.offsetPosition.x,
+                y: event.positionInGrid.y + entry.offsetPosition.y,
+            }
 
-            single.components.objectMovingAction.position = position
-            single.components.objectMovingAction.rotation = rotation
-
-            updateRef(single)
+            entry.rotation = 0
         }
 
-        function updateRef(entity: EntityWith<EditorComponents, "object" | "objectMovingAction">) {
-            entity.components.object.graphics?.position(
-                entity.components.objectMovingAction.position,
-            )
-            entity.components.object.graphics?.rotation(
-                entity.components.objectMovingAction.rotation,
-            )
+        function updateEntryGraphics(entry: MovingEntityEntry) {
+            graphics.object(entry.entity.id).position(entry.position)
+            graphics.object(entry.entity.id).rotation(entry.rotation)
+        }
+
+        function moveEntitiesMutation(world: EditorWorldState) {
+            movingState.entries
+                .map(
+                    entry =>
+                        [
+                            entry,
+                            world.entities.get(entry.entity.id) as EntityWith<"object">,
+                        ] as const,
+                )
+                .forEach(([entry, entity]) => {
+                    entity.object.position = entry.position
+                    entity.object.rotation = entry.rotation
+                })
         }
     }
-}

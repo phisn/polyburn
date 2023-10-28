@@ -1,12 +1,16 @@
-const Context = createContext<UseBoundStore<StoreApi<WorldStore>>>(null!)
+import { createContext, useContext, useMemo } from "react"
+import { StoreApi, UseBoundStore, useStore } from "zustand"
+import { EditorStore, createEditorStore } from "./editor-store"
 
-export function ProvideWorldStore(props: { children: React.ReactNode; world: WorldState }) {
-    const store = createEditorStore(props.world)
+const Context = createContext<UseBoundStore<StoreApi<EditorStore>>>(null!)
+
+export function ProvideWorldStore(props: { children: React.ReactNode }) {
+    const store = useMemo(() => createEditorStore(), [])
     return <Context.Provider value={store}>{props.children}</Context.Provider>
 }
 
 export function useEditorStore<U>(
-    selector: (state: WorldStore) => U,
+    selector: (state: EditorStore) => U,
     equalityFn?: (a: U, b: U) => boolean,
 ) {
     return useStore(useContext(Context), selector, equalityFn)

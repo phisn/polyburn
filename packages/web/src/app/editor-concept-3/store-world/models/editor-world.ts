@@ -1,7 +1,7 @@
 import { Entity } from "./entity"
 import { Gamemode } from "./gamemode"
 
-export interface EditorStoreState {
+export interface EditorWorldState {
     gamemodes: Gamemode[]
     entities: Map<number, Entity>
 }

@@ -1,37 +1,47 @@
-import { ConsumeEvent } from "../../../store/EventStore"
-import { EditorSystemFactory } from "../base"
+import { ImmutableEntity, ImmutableEntityWith } from "../../store-world/models/entity"
+import { ConsumeEvent } from "../canvas-event"
+import { PipelineStageFactory } from "../pipeline"
+import { MovingEntityEntry } from "./pipeline-moving-state"
 
-export const newSelectedObjectSystem: EditorSystemFactory = ({ store, cursor }) => {
-    const objects = store.newSet("object", "selected")
+export const newSelectedObjectStage: PipelineStageFactory =
+    ({ cursor, state, store, world }) =>
+    event => {
+        for (const entity of world.entitiesWithComponents("object")) {
+            if (entity.object.isInside(event.position)) {
+                if (event.shiftKey) {
+                    if (event.leftButtonClicked) {
+                        cursor.grabbing()
 
-    return ({ event }) => {
-        for (const entity of objects) {
-            if (entity.components.object.isInside(event.position)) {
-                onInsideOne()
+                        updateStateToMoving()
+                    } else {
+                        cursor.grabbable()
+                    }
+                }
+
                 return ConsumeEvent
             }
         }
 
-        function onInsideOne() {
-            if (event.shiftKey) {
-                if (event.leftButtonClicked) {
-                    for (const object of objects) {
-                        cursor.grabbing()
-                        object.components.objectMovingAction = {
-                            offsetPosition: {
-                                x: object.components.object.position().x - event.positionInGrid.x,
-                                y: object.components.object.position().y - event.positionInGrid.y,
-                            },
-                            offsetRotation: object.components.object.rotation(),
+        function updateStateToMoving() {
+            const entries: MovingEntityEntry[] = store.selected
+                .map(id => world.entities().get(id))
+                .filter((entity): entity is ImmutableEntity => entity !== undefined)
+                .filter((entity): entity is ImmutableEntityWith<"object"> => "object" in entity)
+                .map(entity => ({
+                    entity,
+                    offsetPosition: {
+                        x: entity.object.position.x - event.positionInGrid.x,
+                        y: entity.object.position.y - event.positionInGrid.y,
+                    },
+                    offsetRotation: entity.object.rotation,
 
-                            position: object.components.object.position(),
-                            rotation: object.components.object.rotation(),
-                        }
-                    }
-                } else {
-                    cursor.grabbable()
-                }
+                    position: entity.object.position,
+                    rotation: entity.object.rotation,
+                }))
+
+            state.ref = {
+                type: "moving",
+                entries,
             }
         }
     }
-}

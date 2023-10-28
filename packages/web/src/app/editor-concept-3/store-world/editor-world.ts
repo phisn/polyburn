@@ -1,7 +1,7 @@
 import { applyPatches, enableMapSet, enablePatches, Immutable, Patch, produce } from "immer"
 import { NarrowProperties } from "runtime-framework"
 import { EditorComponents } from "./models/editor-components"
-import { EditorStoreState as EditorWorldState } from "./models/editor-state"
+import { EditorWorldState } from "./models/editor-world"
 import { Entity, ImmutableEntity } from "./models/entity"
 import { Gamemode } from "./models/gamemode"
 

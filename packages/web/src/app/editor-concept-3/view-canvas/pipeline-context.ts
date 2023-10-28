@@ -1,8 +1,10 @@
 import { EditorWorld } from "../store-world/editor-world"
-import { CanvasGraphics } from "./canvas-graphics"
+import { EditorStore } from "../store/editor-store"
+import { CanvasGraphics } from "./canvas-graphics/canvas-graphics"
 import { PipelineMovingState } from "./pipeline-object/pipeline-moving-state"
 
-export type PipelineState = "none" | PipelineMovingState
+export const PipelineStateNone = { type: "none" } as const
+export type PipelineState = typeof PipelineStateNone | PipelineMovingState
 
 export interface Cursor {
     default(): void
@@ -13,6 +15,8 @@ export interface Cursor {
 export interface PipelineConext {
     cursor: Cursor
     state: { ref: PipelineState }
-    store: EditorWorld
     graphics: CanvasGraphics
+
+    world: EditorWorld
+    store: EditorStore
 }

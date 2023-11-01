@@ -1,7 +1,6 @@
-import { EditorWorld } from "../store-world/editor-world"
-import { EditorStore } from "../store/editor-store"
-import { PipelineMovingState } from "./pipeline-object/pipeline-moving-state"
-import { CanvasGraphicsStore } from "./store-graphics/store-graphics"
+import { PipelineMovingState } from "../../../components/object/pipeline-moving-state"
+import { EditorStoreWorld } from "../../store-world/store-world"
+import { EditorStore } from "../../store/editor-store"
 
 export const PipelineStateNone = { type: "none" } as const
 export type PipelineState = typeof PipelineStateNone | PipelineMovingState
@@ -15,8 +14,7 @@ export interface Cursor {
 export interface PipelineConext {
     cursor: Cursor
     state: { ref: PipelineState }
-    graphics: CanvasGraphicsStore
 
-    world: EditorWorld
+    world: EditorStoreWorld
     store: EditorStore
 }

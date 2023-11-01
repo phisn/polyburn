@@ -1,11 +1,11 @@
 import { EditorWorldState } from "../../store-world/models/editor-world"
 import { EntityWith } from "../../store-world/models/entity"
 import { ConsumeEvent } from "../canvas-event"
-import { PipelineStageFactory } from "../pipeline"
+import { PipelineStageFactory } from "../pipeline-stage-factory"
 import { findLocationForObject } from "./find-location-for-object"
 import { MovingEntityEntry } from "./pipeline-moving-state"
 
-export const newObjectDefaultStage: PipelineStageFactory =
+export const newObjectMovingStage: PipelineStageFactory =
     ({ cursor, graphics, state, world }) =>
     event => {
         if (state.ref.type !== "moving") {

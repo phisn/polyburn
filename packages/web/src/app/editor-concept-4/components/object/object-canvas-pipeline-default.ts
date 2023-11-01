@@ -1,16 +1,19 @@
-import { ImmutableEntityWith } from "../../store-world/models/entity"
-import { ConsumeEvent } from "../canvas-event"
-import { PipelineStageFactory } from "../pipeline"
+import { ImmutableEntityWith } from "../../entities/entity"
+import { ConsumeEvent } from "../../modules/views/view-canvas/canvas-event"
+import { PipelineStageFactory } from "../pipeline-stage-factory"
 
 export const newObjectDefaultStage: PipelineStageFactory =
-    ({ cursor, graphics, state, store, world }) =>
+    ({ cursor, state, store, world }) =>
     event => {
         for (const entity of world.entitiesWithComponents("object")) {
             const isInside = entity.object.isInside(event.position)
 
-            graphics.object(entity.id).hovered(isInside)
-
             if (isInside) {
+                store.publish({
+                    type: "object-hover",
+                    entity,
+                })
+
                 if (event.shiftKey) {
                     if (event.leftButtonClicked) {
                         cursor.grabbing()
@@ -20,7 +23,7 @@ export const newObjectDefaultStage: PipelineStageFactory =
                         cursor.grabbable()
                     }
                 } else if (event.leftButtonClicked) {
-                    store.select(entity.id)
+                    store.setSelected([entity.id])
                 }
 
                 return ConsumeEvent

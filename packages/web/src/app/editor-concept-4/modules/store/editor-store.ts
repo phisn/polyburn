@@ -1,7 +1,7 @@
 import { create } from "zustand"
-import { EditorEvent } from "./editor-events/editor-event"
+import { Event } from "../../components/event"
 
-type Listener = (event: EditorEvent) => void
+type Listener = (event: Event) => void
 
 export interface EditorStore {
     selected: number[]
@@ -9,10 +9,11 @@ export interface EditorStore {
 
     listeners: Listener[]
     addListener(listener: Listener): () => void
+    publish(event: Event): void
 }
 
 export const createEditorStore = () =>
-    create<EditorStore>(set => ({
+    create<EditorStore>((set, get) => ({
         selected: [],
         setSelected: selected => set({ selected }),
 
@@ -23,5 +24,8 @@ export const createEditorStore = () =>
                 set(state => ({
                     listeners: state.listeners.filter(l => l !== listener),
                 }))
+        },
+        publish: event => {
+            get().listeners.forEach(l => l(event))
         },
     }))

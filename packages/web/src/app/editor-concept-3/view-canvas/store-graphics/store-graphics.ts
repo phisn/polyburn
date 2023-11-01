@@ -9,7 +9,7 @@ export interface ObjectCanvasGraphics {
 
 export interface ShapeCanvasGraphics {}
 
-export interface CanvasGraphics {
-    object(id: number): ObjectCanvasGraphics
-    shape(id: number): CanvasGraphics
+export interface StoreGraphics {
+    object(id: number): ObjectCanvasGraphics | undefined
+    shape(id: number): ShapeCanvasGraphics | undefined
 }

@@ -1,9 +1,9 @@
 import { ImmutableEntity, ImmutableEntityWith } from "../../store-world/models/entity"
 import { ConsumeEvent } from "../canvas-event"
-import { PipelineStageFactory } from "../pipeline"
+import { PipelineStageFactory } from "../pipeline-stage-factory"
 import { MovingEntityEntry } from "./pipeline-moving-state"
 
-export const newSelectedObjectStage: PipelineStageFactory =
+export const newObjectSelectedStage: PipelineStageFactory =
     ({ cursor, state, store, world }) =>
     event => {
         for (const entity of world.entitiesWithComponents("object")) {

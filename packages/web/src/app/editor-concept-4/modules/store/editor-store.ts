@@ -1,7 +1,7 @@
 import { create } from "zustand"
-import { Event } from "../../components/event"
+import { ComponentEvent } from "../../components/component-event"
 
-type Listener = (event: Event) => void
+export type Listener = React.MutableRefObject<(event: ComponentEvent) => void>
 
 export interface EditorStore {
     selected: number[]
@@ -9,7 +9,7 @@ export interface EditorStore {
 
     listeners: Listener[]
     addListener(listener: Listener): () => void
-    publish(event: Event): void
+    publish(event: ComponentEvent): void
 }
 
 export const createEditorStore = () =>
@@ -26,6 +26,6 @@ export const createEditorStore = () =>
                 }))
         },
         publish: event => {
-            get().listeners.forEach(l => l(event))
+            get().listeners.forEach(l => l.current?.(event))
         },
     }))

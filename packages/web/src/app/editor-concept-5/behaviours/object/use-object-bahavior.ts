@@ -1,7 +1,9 @@
 import { useState } from "react"
 import { useListenerRef } from "../../use-listener"
 
-export function useObjectBehavior(props: {
+export function useObjectBehavior(
+    ImmutableEntityWith<"object">,
+    props: {
     isInside: (x: number, y: number) => boolean
     setPosition: (x: number, y: number) => void
 }) {

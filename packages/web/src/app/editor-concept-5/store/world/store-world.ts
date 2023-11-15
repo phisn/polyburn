@@ -1,9 +1,9 @@
 import { applyPatches, enableMapSet, enablePatches, Immutable, Patch, produce } from "immer"
 import { NarrowProperties } from "runtime-framework"
 import { Entity, ImmutableEntity } from "../../entities/entity"
-import { EntityComponents } from "../../entities/entity-components"
+import { EntityBehaviors } from "../../entities/entity-behaviors"
+import { WorldState } from "../world-state"
 import { Gamemode } from "./gamemode"
-import { EditorStoreWorldState } from "./world"
 
 enableMapSet()
 enablePatches()
@@ -14,19 +14,19 @@ export interface EditorStoreWorld {
     undo(): void
     redo(): void
 
+    selected(): ImmutableEntity[]
+    select(...id: number[]): void
+    deselect(id?: number): void
+
     gamemodes(): Immutable<Gamemode[]>
     entities(): Map<number, ImmutableEntity>
 
-    entitiesWithComponents<T extends (keyof EntityComponents)[]>(
-        ...componentNames: T
-    ): ImmutableEntity<NarrowProperties<EntityComponents, T[number]>>[]
-
-    mutate(mutation: (state: EditorStoreWorldState) => void): void
+    mutate(mutation: (state: WorldState) => void): void
 }
 
 export const createEditorStoreWorld = (): EditorStoreWorld => {
     // create our initial immutable entities map
-    let state: EditorStoreWorldState = produce(
+    let state: WorldState = produce(
         {
             gamemodes: [],
             entities: new Map<number, Entity>(),
@@ -39,14 +39,14 @@ export const createEditorStoreWorld = (): EditorStoreWorld => {
     const undos: Patch[][] = []
     const redos: Patch[][] = []
 
-    // components => entities. caching all entities with these specific components.
+    // behaviors => entities. caching all entities with these specific behaviors.
     // unspecific types because value is dependent on key which is not describable in typescript for generics.
     // (especially when the key is a concatenation of multiple strings)
-    const componentCache = new Map<string, ImmutableEntity[]>()
+    const behaviorCache = new Map<string, ImmutableEntity[]>()
 
     // we want to fix the caches after an entity changed in it.
-    // to know which caches have to be fixed we use a lookup table to see where a specific entity components are used.
-    const componentInComponentCache = new Map<PropertyKey, string[]>()
+    // to know which caches have to be fixed we use a lookup table to see where a specific entity behaviors are used.
+    const behaviorInBehaviorCache = new Map<PropertyKey, string[]>()
 
     updateCache(state)
 
@@ -84,37 +84,37 @@ export const createEditorStoreWorld = (): EditorStoreWorld => {
         entities() {
             return state.entities
         },
-        entitiesWithComponents<T extends (keyof EntityComponents)[]>(...componentNames: T) {
-            const joined = componentNames.sort().join(",")
+        entitiesWithBehaviors<T extends (keyof EntityBehaviors)[]>(...behaviorNames: T) {
+            const joined = behaviorNames.sort().join(",")
 
-            let cached = componentCache.get(joined)
+            let cached = behaviorCache.get(joined)
 
             if (cached === undefined) {
                 cached = []
 
                 for (const entity of state.entities.values()) {
-                    if (componentNames.every(componentName => componentName in entity)) {
+                    if (behaviorNames.every(behaviorName => behaviorName in entity)) {
                         cached.push(entity)
                     }
                 }
 
-                componentCache.set(joined, cached)
+                behaviorCache.set(joined, cached)
 
-                for (const componentName of componentNames) {
-                    let componentCacheKeys = componentInComponentCache.get(componentName)
+                for (const behaviorName of behaviorNames) {
+                    let behaviorCacheKeys = behaviorInBehaviorCache.get(behaviorName)
 
-                    if (componentCacheKeys === undefined) {
-                        componentCacheKeys = []
-                        componentInComponentCache.set(componentName, componentCacheKeys)
-                    } else if (componentCacheKeys.includes(joined)) {
+                    if (behaviorCacheKeys === undefined) {
+                        behaviorCacheKeys = []
+                        behaviorInBehaviorCache.set(behaviorName, behaviorCacheKeys)
+                    } else if (behaviorCacheKeys.includes(joined)) {
                         continue
                     }
 
-                    componentCacheKeys.push(joined)
+                    behaviorCacheKeys.push(joined)
                 }
             }
 
-            return cached as ImmutableEntity<NarrowProperties<EntityComponents, T[number]>>[]
+            return cached as ImmutableEntity<NarrowProperties<EntityBehaviors, T[number]>>[]
         },
         mutate(mutation) {
             const changes: Patch[] = []
@@ -132,7 +132,7 @@ export const createEditorStoreWorld = (): EditorStoreWorld => {
         },
     }
 
-    function updateState(newState: EditorStoreWorldState) {
+    function updateState(newState: WorldState) {
         updateCache(newState)
 
         state = newState
@@ -142,17 +142,17 @@ export const createEditorStoreWorld = (): EditorStoreWorld => {
         }
     }
 
-    function updateCache(newState: EditorStoreWorldState) {
+    function updateCache(newState: WorldState) {
         // we need to fix all caches where the entity is used.
         // fixing means clearing the cache because the mutation might have been more complex.
         const cachesAffected = [...newState.entities.values()]
             .filter(entity => entity !== state.entities.get(entity.id))
             .flatMap(entity => Object.keys(entity))
-            .flatMap(componentName => componentInComponentCache.get(componentName) ?? [])
+            .flatMap(behaviorName => behaviorInBehaviorCache.get(behaviorName) ?? [])
             .filter((value, index, self) => self.indexOf(value) === index)
 
         for (const cache of cachesAffected) {
-            componentCache.delete(cache)
+            behaviorCache.delete(cache)
         }
 
         //        selected = newState.selected.map(id => newState.entities.get(id) as ImmutableEntity)

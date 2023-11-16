@@ -1,12 +1,12 @@
 import { EntityType } from "runtime/proto/world"
-import { BaseComponents } from "../../components/base-components"
-import { ObjectComponent } from "../../components/object/object-component"
+import { BaseBehaviors } from "../../components/behavior"
+import { ObjectBehavior } from "../../components/object/model"
 import { Entity, ImmutableEntity } from "../entity"
 
-export interface RocketComponents extends BaseComponents {
+export interface RocketBehaviors extends BaseBehaviors {
     type: EntityType.ROCKET
-    object: ObjectComponent
+    object: ObjectBehavior
 }
 
-export type RocketEntity = Entity<RocketComponents>
-export type ImmutableRocket = ImmutableEntity<RocketComponents>
+export type RocketEntity = Entity<RocketBehaviors>
+export type ImmutableRocket = ImmutableEntity<RocketBehaviors>

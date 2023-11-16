@@ -1,6 +1,6 @@
 import { Vector2 } from "three"
 
-export interface ShapeComponent {
+export interface ShapeBehavior {
     vertices: EditorShapeVertex[]
 }
 

@@ -1,13 +1,13 @@
 import { EntityType } from "runtime/proto/world"
-import { BaseComponents } from "../../components/base-components"
-import { ObjectComponent } from "../../components/object/object-component"
-import { ShapeComponent } from "../../components/shape/shape-component"
+import { BaseBehaviors } from "../../components/behavior"
+import { ObjectBehavior } from "../../components/object/model"
+import { ShapeBehavior } from "../../components/shape/shape-component"
 import { Entity, ImmutableEntity } from "../entity"
 
-export interface ShapeComponents extends BaseComponents {
+export interface ShapeComponents extends BaseBehaviors {
     type: EntityType.SHAPE
-    shape: ShapeComponent
-    object: ObjectComponent
+    shape: ShapeBehavior
+    object: ObjectBehavior
 }
 
 export type ShapeEntity = Entity<ShapeComponents>

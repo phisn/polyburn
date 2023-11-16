@@ -1,6 +1,6 @@
 import { useStore } from "@react-three/fiber"
 import { useMemo } from "react"
-import { pipelineStageFactories as componentPipelineStages } from "../../../../components/component-pipeline-stages"
+import { pipelineStageFactories as componentPipelineStages } from "../../../../components/behavior-pipeline"
 import { useEditorWorld } from "../../../store-world/EditorWorldProvider"
 import { useEditorStore } from "../../../store/EditorStoreProvider"
 import { pipelineStageBackgroundDefault } from "../background/pipeline-stage-background-default"

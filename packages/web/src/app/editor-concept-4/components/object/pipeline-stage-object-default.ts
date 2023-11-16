@@ -6,7 +6,7 @@ export const pipelineStageObjectDefault: PipelineStage = (
     event,
     { cursor, state, store, world },
 ) => {
-    for (const entity of world.entitiesWithComponents("object")) {
+    for (const entity of world.entitiesWithBehaviors("object")) {
         const isInside = entity.object.isInside(event.position)
 
         if (isInside) {

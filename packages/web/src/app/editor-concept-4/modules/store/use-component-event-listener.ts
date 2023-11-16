@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react"
-import { ComponentEvent } from "../../components/component-event"
+import { BehaviorEvent } from "../../components/behavior-event"
 import { useEditorStore } from "./EditorStoreProvider"
 
-export function useComponentEventListener(listener: (event: ComponentEvent) => void) {
+export function useComponentEventListener(listener: (event: BehaviorEvent) => void) {
     const subscribe = useEditorStore(state => state.addListener)
     const listenerRef = useRef(listener)
 

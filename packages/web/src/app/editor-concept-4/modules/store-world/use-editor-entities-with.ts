@@ -1,14 +1,14 @@
 import { useSyncExternalStore } from "react"
 import { NarrowProperties } from "runtime-framework"
 import { ImmutableEntity } from "../../entities/entity"
-import { EntityComponents } from "../../entities/entity-components"
+import { EntityBehaviors } from "../../entities/entity-behaviors"
 import { useEditorWorld } from "./EditorWorldProvider"
 
-export function useEditorEntitiesWith<T extends (keyof EntityComponents)[]>(
+export function useEditorEntitiesWith<T extends (keyof EntityBehaviors)[]>(
     ...componentNames: T
-): ImmutableEntity<NarrowProperties<EntityComponents, T[number]>>[] {
+): ImmutableEntity<NarrowProperties<EntityBehaviors, T[number]>>[] {
     const store = useEditorWorld()
     return useSyncExternalStore(store.subscribe, () =>
-        store.entitiesWithComponents(...componentNames),
+        store.entitiesWithBehaviors(...componentNames),
     )
 }

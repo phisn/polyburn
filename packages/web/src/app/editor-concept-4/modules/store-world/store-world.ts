@@ -1,7 +1,7 @@
 import { applyPatches, enableMapSet, enablePatches, Immutable, Patch, produce } from "immer"
 import { NarrowProperties } from "runtime-framework"
 import { Entity, ImmutableEntity } from "../../entities/entity"
-import { EntityComponents } from "../../entities/entity-components"
+import { EntityBehaviors } from "../../entities/entity-behaviors"
 import { Gamemode } from "./gamemode"
 import { EditorStoreWorldState } from "./world"
 
@@ -17,9 +17,9 @@ export interface EditorStoreWorld {
     gamemodes(): Immutable<Gamemode[]>
     entities(): Map<number, ImmutableEntity>
 
-    entitiesWithComponents<T extends (keyof EntityComponents)[]>(
+    entitiesWithBehaviors<T extends (keyof EntityBehaviors)[]>(
         ...componentNames: T
-    ): ImmutableEntity<NarrowProperties<EntityComponents, T[number]>>[]
+    ): ImmutableEntity<NarrowProperties<EntityBehaviors, T[number]>>[]
 
     mutate(mutation: (state: EditorStoreWorldState) => void): void
 }
@@ -84,7 +84,7 @@ export const createEditorStoreWorld = (): EditorStoreWorld => {
         entities() {
             return state.entities
         },
-        entitiesWithComponents<T extends (keyof EntityComponents)[]>(...componentNames: T) {
+        entitiesWithBehaviors<T extends (keyof EntityBehaviors)[]>(...componentNames: T) {
             const joined = componentNames.sort().join(",")
 
             let cached = componentCache.get(joined)
@@ -114,7 +114,7 @@ export const createEditorStoreWorld = (): EditorStoreWorld => {
                 }
             }
 
-            return cached as ImmutableEntity<NarrowProperties<EntityComponents, T[number]>>[]
+            return cached as ImmutableEntity<NarrowProperties<EntityBehaviors, T[number]>>[]
         },
         mutate(mutation) {
             const changes: Patch[] = []

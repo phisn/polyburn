@@ -58,7 +58,7 @@ export const pipelineStageObjectMoving: PipelineStage = (
         }
 
         const { rotation, position } = findLocationForObject(event, first.entity, [
-            ...world.entitiesWithComponents("shape"),
+            ...world.entitiesWithBehaviors("shape"),
         ])
 
         first.position = position

@@ -7,7 +7,7 @@ export const pipelineStageObjectSelected: PipelineStage = (
     event,
     { cursor, state, store, world },
 ) => {
-    for (const entity of world.entitiesWithComponents("object")) {
+    for (const entity of world.entitiesWithBehaviors("object")) {
         if (entity.object.isInside(event.position)) {
             if (event.shiftKey) {
                 if (event.leftButtonClicked) {

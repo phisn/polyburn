@@ -1,5 +1,6 @@
 import { Immutable, Patch, applyPatches, produce } from "immer"
 import { MutableRefObject, createContext, useContext } from "react"
+import { Point } from "runtime/src/model/point"
 import { StoreApi, UseBoundStore, create } from "zustand"
 import { BehaviorEvent, BehaviorHighlight } from "../behaviors/behaviors"
 import { Entity } from "../entities/entity"
@@ -16,12 +17,19 @@ export interface EditorStore {
 
     listeners: Map<number, MutableRefObject<(event: BehaviorEvent) => void>[]>
 
+    contextMenu?: {
+        element: () => JSX.Element
+        point: Point
+    }
+
     highlight(highlight: BehaviorHighlight | undefined): void
 
     select(...id: number[]): void
     deselect(id?: number): void
 
     selectedEntities(): Immutable<Entity>[]
+
+    openContextMenu(point: Point, element: () => JSX.Element): void
 
     undo(): void
     redo(): void
@@ -49,6 +57,8 @@ export const createEditorStore = () =>
         selected: [],
 
         listeners: new Map(),
+
+        contextMenu: undefined,
 
         highlight(highlighted) {
             set(state => ({
@@ -81,6 +91,15 @@ export const createEditorStore = () =>
         },
         selectedEntities() {
             return get().selected.map(id => get().world.entities.get(id)!)
+        },
+        openContextMenu(point, element) {
+            set(state => ({
+                ...state,
+                contextMenu: {
+                    element,
+                    point,
+                },
+            }))
         },
         undo() {
             if (get().undos.length === 0) {

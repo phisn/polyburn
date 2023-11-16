@@ -9,4 +9,4 @@ export interface RocketBehaviors extends Behaviors {
 }
 
 export type RocketEntity = Entity<RocketBehaviors>
-export type ImmutableRocket = ImmutableEntity<RocketBehaviors>
+export type ImmutableRocketEntity = ImmutableEntity<RocketBehaviors>

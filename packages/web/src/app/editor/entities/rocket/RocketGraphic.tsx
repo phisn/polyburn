@@ -7,10 +7,11 @@ import { EntityGraphicType } from "../../../../game/runtime-view/graphics-assets
 import { useEventListener } from "../../store/use-event-listener"
 import { useIsHighlighted } from "../../store/use-is-highlighted"
 import { useIsSelected } from "../../store/use-is-selected"
+import { withEntitiesFromStore } from "../WithEntitiesFromStore"
 import { resolveEntityOrder } from "../resolve-entity-order"
-import { RocketEntity } from "./rocket-entity"
+import { ImmutableRocketEntity } from "./rocket-entity"
 
-export function RocketGraphic(props: { entity: RocketEntity }) {
+export function RocketGraphic(props: { entity: ImmutableRocketEntity }) {
     const svgRef = useRef<Object3D>(null)
     const graphicEntry = entityGraphicRegistry[EntityGraphicType.Rocket]
 
@@ -44,3 +45,5 @@ export function RocketGraphic(props: { entity: RocketEntity }) {
         </Suspense>
     )
 }
+
+export const RocketGraphics = withEntitiesFromStore(EntityType.ROCKET, RocketGraphic)

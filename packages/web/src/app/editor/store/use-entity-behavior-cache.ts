@@ -6,21 +6,21 @@ type CacheFunction = <T extends (keyof EntityBehaviors)[]>(...componentNames: T)
 
 export function useEntityBehaviorCache(): CacheFunction {
     interface Cache {
-        entitiesForComponent: Map<string, any>
-        component
+        componentsToEntities: Map<string, any>
+        componentToComponents: Map<string, string>
     }
 
     const world = useEditorStore(store => store.world)
 
     const cacheRef = useRef<Cache>({
-        entitiesForComponent: new Map(),
+        componentToEntities: new Map(),
     })
 
     useEffect(() => {}, world)
 
     return (...behaviors) => {
         const key = behaviors.sort().join(":")
-        const cached = cacheRef.current.entitiesForComponent.get(key)
+        const cached = cacheRef.current.componentToEntities.get(key)
 
         if (cached) {
             return cached
@@ -30,7 +30,8 @@ export function useEntityBehaviorCache(): CacheFunction {
             behaviors.every(behavior => behavior in entity),
         )
 
-        cacheRef.current.entitiesForComponent.set(key, entities)
+        cacheRef.current.componentToEntities.set(key, entities)
+        cacheRef.current.componentToComponents.set(key, behaviors)
 
         return entities
     }

@@ -1,3 +1,3 @@
-import { RocketBehavior } from "./rocket/rocket-behaviors"
+import { RocketBehaviors } from "./rocket/rocket-behaviors"
 
-export type EntityBehaviors = RocketBehavior
+export type EntityBehaviors = RocketBehaviors

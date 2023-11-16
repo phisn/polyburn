@@ -1,5 +1,5 @@
 import { Entity } from "../entities/entity"
-import { Gamemode } from "./world/gamemode"
+import { Gamemode } from "./gamemode"
 
 export interface WorldState {
     gamemodes: Gamemode[]

@@ -1,8 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom"
+import { Editor } from "../../editor/Editor"
 import { TrpcProvider } from "../common/trpc/TrpcProvider"
 import { NotFound } from "./NotFound"
 import { Campaign } from "./campaign/Campaign"
-import { Editor } from "./editor/Editor"
 import { Layout } from "./layout/Layout"
 
 export function App() {

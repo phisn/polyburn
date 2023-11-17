@@ -4,9 +4,9 @@ import { PipelineStage } from "../../views/view-canvas/pipeline/pipeline-stage"
 
 export const pipelineStageObjectDefault: PipelineStage = (
     event,
-    { cursor, state, store, world },
+    { cursor, state, store, entitiesInCacheWith },
 ) => {
-    for (const entity of world.entitiesWithBehaviors("object")) {
+    for (const entity of entitiesInCacheWith("object")) {
         const isInside = entity.object.isInside(event.position)
 
         if (isInside) {

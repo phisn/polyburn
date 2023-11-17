@@ -7,7 +7,7 @@ import { MovingEntityEntry } from "./pipeline-state-moving"
 
 export const pipelineStageObjectMoving: PipelineStage = (
     event,
-    { cursor, store, state, world },
+    { cursor, store, state, entitiesInCacheWith },
 ) => {
     if (state.ref.type !== "moving") {
         return
@@ -38,8 +38,7 @@ export const pipelineStageObjectMoving: PipelineStage = (
     } else {
         cursor.grabbable()
 
-        world.mutate(moveEntitiesMutation)
-
+        store.mutate(moveEntitiesMutation)
         state.ref = { type: "none" }
 
         return ConsumeEvent
@@ -57,7 +56,7 @@ export const pipelineStageObjectMoving: PipelineStage = (
         }
 
         const { rotation, position } = findLocationForObject(event, first.entity, [
-            ...world.entitiesWithBehaviors("shape"),
+            ...entitiesInCacheWith("shape"),
         ])
 
         first.position = position

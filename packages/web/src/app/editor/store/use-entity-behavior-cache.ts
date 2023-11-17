@@ -1,26 +1,45 @@
 import { useEffect, useRef } from "react"
+import { ImmutableEntityWith } from "../entities/entity"
 import { EntityBehaviors } from "../entities/entity-behaviors"
 import { useEditorStore } from "./store"
 
-type CacheFunction = <T extends (keyof EntityBehaviors)[]>(...componentNames: T) => void
+export type EntityCache = <T extends (keyof EntityBehaviors)[]>(
+    ...componentNames: T
+) => ImmutableEntityWith<T[number]>[]
 
-export function useEntityBehaviorCache(): CacheFunction {
+export function useEntityBehaviorCache(): EntityCache {
     interface Cache {
         componentsToEntities: Map<string, any>
         componentToComponents: Map<string, string>
     }
 
-    const world = useEditorStore(store => store.world)
-
     const cacheRef = useRef<Cache>({
-        componentToEntities: new Map(),
+        componentsToEntities: new Map(),
+        componentToComponents: new Map(),
     })
 
-    useEffect(() => {}, world)
+    const world = useEditorStore(store => store.world)
+    const previousWorld = useRef(world)
+
+    useEffect(() => {
+        const componentsAffected = [...world.entities.values()]
+            .filter(entity => entity !== previousWorld.current.entities.get(entity.id))
+            .flatMap(entity => Object.keys(entity))
+            .filter((value, index, self) => self.indexOf(value) === index)
+
+        const cachesAffected = componentsAffected
+            .flatMap(name => cacheRef.current.componentToComponents.get(name) ?? [])
+            .filter((value, index, self) => self.indexOf(value) === index)
+
+        cachesAffected.forEach(cacheRef.current.componentsToEntities.delete)
+        componentsAffected.forEach(cacheRef.current.componentToComponents.delete)
+
+        previousWorld.current = world
+    }, [world])
 
     return (...behaviors) => {
         const key = behaviors.sort().join(":")
-        const cached = cacheRef.current.componentToEntities.get(key)
+        const cached = cacheRef.current.componentsToEntities.get(key)
 
         if (cached) {
             return cached
@@ -30,8 +49,11 @@ export function useEntityBehaviorCache(): CacheFunction {
             behaviors.every(behavior => behavior in entity),
         )
 
-        cacheRef.current.componentToEntities.set(key, entities)
-        cacheRef.current.componentToComponents.set(key, behaviors)
+        cacheRef.current.componentsToEntities.set(key, entities)
+
+        for (const behavior of behaviors) {
+            cacheRef.current.componentToComponents.set(behavior, key)
+        }
 
         return entities
     }

@@ -1,23 +1,14 @@
 import { applyPatches, Immutable, Patch, produce } from "immer"
 import { StateCreator } from "zustand"
-import { BehaviorHighlight } from "../behaviors/behaviors"
 import { Entity } from "../entities/entity"
 import { WorldState } from "./model/world-state"
+import { StoreSliceFocus } from "./store-slice-focus"
 
 export interface StoreSliceWorld {
-    highlighted: BehaviorHighlight | undefined
-    selected: number[]
-
     undos: Patch[][]
     redos: Patch[][]
 
     world: Immutable<WorldState>
-
-    highlight(highlight: BehaviorHighlight | undefined): void
-    select(...id: number[]): void
-    deselect(id?: number): void
-
-    selectedEntities(): Immutable<Entity>[]
 
     undo(): void
     redo(): void
@@ -25,10 +16,12 @@ export interface StoreSliceWorld {
     mutate(mutation: (state: WorldState) => void): void
 }
 
-export const createStoreSliceWorld: StateCreator<StoreSliceWorld> = (set, get) => ({
-    highlighted: undefined,
-    selected: [],
-
+export const createStoreSliceWorld: StateCreator<
+    StoreSliceFocus & StoreSliceWorld,
+    [],
+    [],
+    StoreSliceWorld
+> = (set, get) => ({
     undos: [],
     redos: [],
 
@@ -39,40 +32,6 @@ export const createStoreSliceWorld: StateCreator<StoreSliceWorld> = (set, get) =
         },
         () => {},
     ),
-
-    highlight(highlighted) {
-        set(state => ({
-            ...state,
-            highlighted,
-        }))
-    },
-
-    select(...id) {
-        set(state => {
-            const selected = [...state.selected, ...id].filter((value, index, self) => {
-                return self.indexOf(value) === index && state.world.entities.has(value)
-            })
-
-            return {
-                ...state,
-                selected,
-            }
-        })
-    },
-    deselect(id) {
-        set(state => {
-            const selected = state.selected.filter(value => value !== id)
-
-            return {
-                ...state,
-                selected,
-            }
-        })
-    },
-    selectedEntities() {
-        return get().selected.map(id => get().world.entities.get(id)!)
-    },
-
     undo() {
         if (get().undos.length === 0) {
             return

@@ -2,11 +2,8 @@ import { ImmutableEntityWith } from "../../entities/entity"
 import { ConsumeEvent } from "../../views/view-canvas/pipeline/pipeline-event"
 import { PipelineStage } from "../../views/view-canvas/pipeline/pipeline-stage"
 
-export const pipelineStageObjectDefault: PipelineStage = (
-    event,
-    { cursor, state, store, entitiesInCacheWith },
-) => {
-    for (const entity of entitiesInCacheWith("object")) {
+export const pipelineStageObjectDefault: PipelineStage = (event, { cursor, state, store }) => {
+    for (const entity of store.entitiesWith("object")) {
         const isInside = entity.object.isInside(event.position)
 
         if (isInside) {

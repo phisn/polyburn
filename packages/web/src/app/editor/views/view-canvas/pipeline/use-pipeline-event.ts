@@ -116,6 +116,8 @@ export function usePipelineEvent(onEvent: (event: PipelineEvent) => void) {
 
                     break
             }
+
+            invalidate()
         }
 
         const onKeyUp = (event: KeyboardEvent) => {
@@ -154,6 +156,8 @@ export function usePipelineEvent(onEvent: (event: PipelineEvent) => void) {
 
                     break
             }
+
+            invalidate()
         }
 
         window.addEventListener("keydown", onKeyDown)

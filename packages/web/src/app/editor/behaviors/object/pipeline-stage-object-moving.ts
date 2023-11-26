@@ -5,10 +5,7 @@ import { PipelineStage } from "../../views/view-canvas/pipeline/pipeline-stage"
 import { findLocationForObject } from "./find-location-for-object"
 import { MovingEntityEntry } from "./pipeline-state-moving"
 
-export const pipelineStageObjectMoving: PipelineStage = (
-    event,
-    { cursor, store, state, entitiesInCacheWith },
-) => {
+export const pipelineStageObjectMoving: PipelineStage = (event, { cursor, store, state }) => {
     if (state.ref.type !== "moving") {
         return
     }
@@ -56,7 +53,7 @@ export const pipelineStageObjectMoving: PipelineStage = (
         }
 
         const { rotation, position } = findLocationForObject(event, first.entity, [
-            ...entitiesInCacheWith("shape"),
+            ...store.entitiesWith("shape"),
         ])
 
         first.position = position

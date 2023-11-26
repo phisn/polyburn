@@ -3,11 +3,8 @@ import { ConsumeEvent } from "../../views/view-canvas/pipeline/pipeline-event"
 import { PipelineStage } from "../../views/view-canvas/pipeline/pipeline-stage"
 import { MovingEntityEntry } from "./pipeline-state-moving"
 
-export const pipelineStageObjectSelected: PipelineStage = (
-    event,
-    { cursor, state, store, world },
-) => {
-    for (const entity of world.entitiesWithBehaviors("object")) {
+export const pipelineStageObjectSelected: PipelineStage = (event, { cursor, state, store }) => {
+    for (const entity of store.entitiesWith("object")) {
         if (entity.object.isInside(event.position)) {
             if (event.shiftKey) {
                 if (event.leftButtonClicked) {
@@ -25,7 +22,7 @@ export const pipelineStageObjectSelected: PipelineStage = (
 
     function updateStateToMoving() {
         const entries: MovingEntityEntry[] = store.selected
-            .map(id => world.entities().get(id))
+            .map(id => store.world.entities.get(id))
             .filter((entity): entity is ImmutableEntity => entity !== undefined)
             .filter((entity): entity is ImmutableEntityWith<"object"> => "object" in entity)
             .map(entity => ({

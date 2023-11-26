@@ -25,7 +25,7 @@ export function RocketGraphic(props: { entity: ImmutableRocketEntity }) {
     })
 
     useEventListener("object-move", props.entity.id, event => {
-        svgRef.current!.position.set(event.position.x, event.position.y, order)
+        svgRef.current?.position.set(event.position.x, event.position.y, order)
     })
 
     return (

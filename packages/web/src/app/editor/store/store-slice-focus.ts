@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand"
 import { BehaviorHighlight } from "../behaviors/behaviors"
-import { StoreSliceWorld } from "./store-slice-world"
+import { EditorStore } from "./store"
 
 export interface StoreSliceFocus {
     highlighted: BehaviorHighlight | undefined
@@ -11,12 +11,10 @@ export interface StoreSliceFocus {
     deselect(id?: number): void
 }
 
-export const createStoreSliceWorld: StateCreator<
-    StoreSliceFocus & StoreSliceWorld,
-    [],
-    [],
-    StoreSliceFocus
-> = (set, get) => ({
+export const createStoreSliceFocus: StateCreator<EditorStore, [], [], StoreSliceFocus> = (
+    set,
+    get,
+) => ({
     highlighted: undefined,
     selected: [],
 

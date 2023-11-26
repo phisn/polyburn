@@ -1,14 +1,24 @@
 import { applyPatches, Immutable, Patch, produce } from "immer"
 import { StateCreator } from "zustand"
-import { Entity } from "../entities/entity"
+import { Entity, ImmutableEntityWith } from "../entities/entity"
+import { EntityBehaviors } from "../entities/entity-behaviors"
 import { WorldState } from "./model/world-state"
-import { StoreSliceFocus } from "./store-slice-focus"
+import { EditorStore } from "./store"
 
 export interface StoreSliceWorld {
+    entityCache: {
+        componentsToEntities: Map<string, any>
+        componentToComponents: Map<string, string>
+    }
+
     undos: Patch[][]
     redos: Patch[][]
 
     world: Immutable<WorldState>
+
+    entitiesWith<T extends (keyof EntityBehaviors)[]>(
+        ...componentNames: T
+    ): ImmutableEntityWith<T[number]>[]
 
     undo(): void
     redo(): void
@@ -16,12 +26,43 @@ export interface StoreSliceWorld {
     mutate(mutation: (state: WorldState) => void): void
 }
 
-export const createStoreSliceWorld: StateCreator<
-    StoreSliceFocus & StoreSliceWorld,
-    [],
-    [],
-    StoreSliceWorld
-> = (set, get) => ({
+function stateAfterChange(
+    state: EditorStore,
+    newWorld: Immutable<WorldState>,
+): Partial<EditorStore> {
+    const componentsAffected = [...newWorld.entities.values()]
+        .filter(entity => entity !== newWorld.entities.get(entity.id))
+        .flatMap(entity => Object.keys(entity))
+        .filter((value, index, self) => self.indexOf(value) === index)
+
+    const cachesAffected = componentsAffected
+        .flatMap(name => state.entityCache.componentToComponents.get(name) ?? [])
+        .filter((value, index, self) => self.indexOf(value) === index)
+
+    const componentsToEntities = new Map(state.entityCache.componentsToEntities)
+    const componentToComponents = new Map(state.entityCache.componentToComponents)
+
+    cachesAffected.forEach(componentsToEntities.delete)
+    componentsAffected.forEach(componentToComponents.delete)
+
+    return {
+        entityCache: {
+            componentsToEntities,
+            componentToComponents,
+        },
+        selected: state.selected.filter(id => newWorld.entities.has(id)),
+    }
+}
+
+export const createStoreSliceWorld: StateCreator<EditorStore, [], [], StoreSliceWorld> = (
+    set,
+    get,
+) => ({
+    entityCache: {
+        componentsToEntities: new Map(),
+        componentToComponents: new Map(),
+    },
+
     undos: [],
     redos: [],
 
@@ -32,6 +73,43 @@ export const createStoreSliceWorld: StateCreator<
         },
         () => {},
     ),
+
+    entitiesWith(...behaviors) {
+        const key = behaviors.sort().join(":")
+        const cached = get().entityCache.componentsToEntities.get(key)
+
+        if (cached) {
+            return cached
+        }
+
+        const entities = [...get().world.entities.values()].filter(entity =>
+            behaviors.every(behavior => behavior in entity),
+        )
+
+        set(state => {
+            const componentsToEntities = new Map(state.entityCache.componentsToEntities).set(
+                key,
+                entities,
+            )
+
+            const componentToComponents = new Map(state.entityCache.componentToComponents)
+
+            for (const behavior of behaviors) {
+                componentToComponents.set(behavior, key)
+            }
+
+            return {
+                ...state,
+                entityCache: {
+                    componentsToEntities,
+                    componentToComponents,
+                },
+            }
+        })
+
+        return entities
+    },
+
     undo() {
         if (get().undos.length === 0) {
             return
@@ -42,10 +120,10 @@ export const createStoreSliceWorld: StateCreator<
             const world = applyPatches(state.world, changes)
 
             return {
+                ...stateAfterChange(state, world),
                 undos: [...others],
                 redos: [changes, ...state.redos],
                 world,
-                selected: state.selected.filter(id => world.entities.has(id)),
             }
         })
     },
@@ -59,10 +137,10 @@ export const createStoreSliceWorld: StateCreator<
             const world = applyPatches(state.world, changes)
 
             return {
+                ...stateAfterChange(state, world),
                 undos: [changes, ...state.undos],
                 redos: [...others],
-                world: applyPatches(state.world, changes),
-                selected: state.selected.filter(id => world.entities.has(id)),
+                world,
             }
         })
     },
@@ -77,10 +155,10 @@ export const createStoreSliceWorld: StateCreator<
             })
 
             return {
+                ...stateAfterChange(state, world),
                 undos: [inverseChanges, ...state.undos],
                 redos: [],
                 world,
-                selected: state.selected.filter(id => world.entities.has(id)),
             }
         })
     },

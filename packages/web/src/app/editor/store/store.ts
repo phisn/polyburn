@@ -2,8 +2,10 @@ import { MutableRefObject, createContext, useContext } from "react"
 import { Point } from "runtime/src/model/point"
 import { StoreApi, UseBoundStore, create } from "zustand"
 import { BehaviorEvent } from "../behaviors/behaviors"
+import { StoreSliceFocus, createStoreSliceFocus } from "./store-slice-focus"
+import { StoreSliceWorld, createStoreSliceWorld } from "./store-slice-world"
 
-export interface EditorStore {
+export interface EditorStore extends StoreSliceWorld, StoreSliceFocus {
     listeners: Map<number, MutableRefObject<(event: BehaviorEvent) => void>[]>
 
     contextMenu?: {
@@ -18,7 +20,10 @@ export interface EditorStore {
 }
 
 export const createEditorStore = () =>
-    create<EditorStore>((set, get) => ({
+    create<EditorStore>((set, get, store) => ({
+        ...createStoreSliceWorld(set, get, store),
+        ...createStoreSliceFocus(set, get, store),
+
         highlighted: undefined,
         selected: [],
 

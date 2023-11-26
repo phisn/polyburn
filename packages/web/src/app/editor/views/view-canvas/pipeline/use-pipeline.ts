@@ -1,8 +1,7 @@
 import { useStore } from "@react-three/fiber"
 import { useMemo } from "react"
 import { pipelineStageFactories as componentPipelineStages } from "../../../behaviors/behavior-pipeline"
-import { useEditorWorld } from "../../../store-world/EditorWorldProvider"
-import { useEditorStore } from "../../../store/EditorStoreProvider"
+import { useEditorStore } from "../../../store/store"
 import { pipelineStageBackgroundDefault } from "../background/pipeline-stage-background-default"
 import { pipelineStageBackgroundMoving } from "../background/pipeline-stage-background-moving"
 import { PipelineContext } from "./pipeline-context"
@@ -17,7 +16,6 @@ const pipelineStages = [
 
 export function usePipeline() {
     const threeStore = useStore()
-    const world = useEditorWorld()
     const store = useEditorStore(state => state)
 
     const context = useMemo(
@@ -28,11 +26,9 @@ export function usePipeline() {
                 grabbing: () => void (document.body.style.cursor = "grabbing"),
             },
             state: { ref: { type: "none" } },
-
-            world,
             store,
         }),
-        [world, store],
+        [store],
     ) satisfies Partial<PipelineContext>
 
     usePipelineEvent(event => {

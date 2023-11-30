@@ -1,8 +1,12 @@
 import { ConsumeEvent } from "../pipeline/pipeline-event"
 import { PipelineStage } from "../pipeline/pipeline-stage"
 
-export const pipelineStageBackgroundDefault: PipelineStage = (event, { state, three }) => {
+export const pipelineStageBackgroundDefault: PipelineStage = (event, { store, state, three }) => {
+    store.highlight()
+
     if (event.leftButtonClicked) {
+        store.deselect()
+
         state.ref = {
             type: "moving-camera",
 
@@ -27,11 +31,22 @@ export const pipelineStageBackgroundDefault: PipelineStage = (event, { state, th
             y: three.size.height * 0.5,
         }
 
+        const previousPosition = three.camera.position.clone()
+
         three.camera.position.set(
             event.positionInWindow.x + (canvasCenter.x - event.position.x) / three.camera.zoom,
             event.positionInWindow.y - (canvasCenter.y - event.position.y) / three.camera.zoom,
 
             three.camera.position.z,
+        )
+
+        console.log(
+            "position",
+            previousPosition.x,
+            previousPosition.y,
+            "=>",
+            three.camera.position.x,
+            three.camera.position.y,
         )
     }
 }

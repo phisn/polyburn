@@ -1,4 +1,4 @@
-import { System } from "./System"
+import { System } from "./system"
 import { SystemFactory } from "./system-factory"
 
 export class SystemStack<FactoryContext extends object, Context> {

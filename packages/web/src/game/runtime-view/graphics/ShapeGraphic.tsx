@@ -1,7 +1,7 @@
 import { useRef } from "react"
 import { EntityWith } from "runtime-framework"
 import * as THREE from "three"
-import { MutatableShapeGeometry } from "../../../../editor/entities/shape/MutatableShapeGeometry"
+import { MutatableShapeGeometry } from "../../../app/editor/behaviors/shape/MutatableShapeGeometry"
 import { withEntityStore } from "../../../common/runtime-framework/WithEntityStore"
 import { WebappComponents } from "../../runtime-extension/webapp-components"
 

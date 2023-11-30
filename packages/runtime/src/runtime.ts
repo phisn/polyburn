@@ -10,10 +10,7 @@ import { runtimeSystemFactories } from "./core/runtime-system-factories"
 import { RuntimeSystemContext } from "./core/runtime-system-stack"
 import { newShape } from "./core/shape/shape-factory"
 
-export const newRuntime = <Components extends RuntimeComponents>(
-    world: WorldModel,
-    gamemodeName: string,
-) => {
+export const newRuntime = (world: WorldModel, gamemodeName: string) => {
     const gamemode = world.gamemodes[gamemodeName]
 
     if (gamemode === undefined) {
@@ -22,7 +19,7 @@ export const newRuntime = <Components extends RuntimeComponents>(
 
     const groups = gamemode.groups.map(group => world.groups[group])
 
-    const context: RuntimeFactoryContext<Components> = {
+    const context: RuntimeFactoryContext<RuntimeComponents> = {
         store: createEntityStore(),
         messageStore: createMessageStore(),
 
@@ -60,6 +57,6 @@ export const newRuntime = <Components extends RuntimeComponents>(
     }
 
     return new SystemStack<RuntimeFactoryContext<RuntimeComponents>, RuntimeSystemContext>(
-        context,
+        context as any as RuntimeFactoryContext<RuntimeComponents>,
     ).add(...runtimeSystemFactories)
 }

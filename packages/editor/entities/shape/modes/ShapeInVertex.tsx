@@ -6,10 +6,10 @@ import {
     highlightColor,
     highlightOverrideColor,
 } from "../../../../../common/constants"
+import { MutatableShapeGeometry } from "../../../../web/src/app/editor/behaviors/shape/MutatableShapeGeometry"
 import { Priority, SubPriority } from "../../../models/priority"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
-import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import { shapeChangeVertices } from "../mutations/shape-change-vertices"
 import {

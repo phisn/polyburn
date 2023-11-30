@@ -1,9 +1,12 @@
-import { applyPatches, Immutable, Patch, produce } from "immer"
+import { applyPatches, enableMapSet, enablePatches, Immutable, Patch, produce } from "immer"
 import { StateCreator } from "zustand"
 import { Entity, ImmutableEntityWith } from "../entities/entity"
 import { EntityBehaviors } from "../entities/entity-behaviors"
 import { WorldState } from "./model/world-state"
 import { EditorStore } from "./store"
+
+enableMapSet()
+enablePatches()
 
 export interface StoreSliceWorld {
     entityCache: {

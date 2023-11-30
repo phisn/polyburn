@@ -4,10 +4,14 @@ import { WorldModel } from "runtime/proto/world"
 import { base64ToBytes } from "runtime/src/model/base64-to-bytes"
 import { GamemodeView } from "shared/src/views/gamemode-view"
 import { WorldView } from "shared/src/views/world-view"
-import { bytesToBase64 } from "../../../../editor/models/export-model"
 import { useAppStore } from "../../../common/storage/app-store"
 import { trpc } from "../../../common/trpc/trpc"
 import { GamePlayer } from "../../../game/player-game/GamePlayer"
+
+export function bytesToBase64(bytes: Uint8Array) {
+    const binString = Array.from(bytes, x => String.fromCodePoint(x)).join("")
+    return btoa(binString)
+}
 
 export interface GameHandlerProps {
     type: "game"

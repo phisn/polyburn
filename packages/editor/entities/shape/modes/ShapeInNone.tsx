@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react"
+import { MutatableShapeGeometry } from "../../../../web/src/app/editor/behaviors/shape/MutatableShapeGeometry"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
 import { Priority, SubPriority } from "../../../models/priority"
 import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
-import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import { ShapeState, isPointInsideShape } from "../shape-state"
 

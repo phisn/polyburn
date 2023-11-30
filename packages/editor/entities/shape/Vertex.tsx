@@ -4,7 +4,7 @@ import { forwardRef, useEffect, useState } from "react"
 import { HexColorPicker } from "react-colorful"
 import { Mesh, Vector3 } from "three"
 import { baseZoomFactor } from "../../../../common/constants"
-import { MutatableShapeGeometry } from "./MutatableShapeGeometry"
+import { MutatableShapeGeometry } from "../../../web/src/app/editor/behaviors/shape/MutatableShapeGeometry"
 import { ShapeState, colorToHex, hexToColor } from "./shape-state"
 
 export const Vertex = forwardRef<Mesh, MeshProps>(function Vertex(props, ref) {

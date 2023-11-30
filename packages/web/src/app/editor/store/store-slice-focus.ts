@@ -6,7 +6,7 @@ export interface StoreSliceFocus {
     highlighted: BehaviorHighlight | undefined
     selected: number[]
 
-    highlight(highlight: BehaviorHighlight | undefined): void
+    highlight(highlight?: BehaviorHighlight): void
     select(...id: number[]): void
     deselect(id?: number): void
 }
@@ -39,6 +39,13 @@ export const createStoreSliceFocus: StateCreator<EditorStore, [], [], StoreSlice
     },
     deselect(id) {
         set(state => {
+            if (id === undefined) {
+                return {
+                    ...state,
+                    selected: [],
+                }
+            }
+
             const selected = state.selected.filter(value => value !== id)
 
             return {

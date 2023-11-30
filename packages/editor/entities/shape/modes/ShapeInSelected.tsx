@@ -7,11 +7,11 @@ import {
     highlightDeleteColor,
     snapDistance,
 } from "../../../../../common/constants"
+import { MutatableShapeGeometry } from "../../../../web/src/app/editor/behaviors/shape/MutatableShapeGeometry"
 import { EntityContextMenu } from "../../../components/GroupContextMenu"
 import { Priority, SubPriority } from "../../../models/priority"
 import { useEditorStore } from "../../../store/EditorStore"
 import { ConsumeEvent, useEventListener } from "../../../store/EventStore"
-import { MutatableShapeGeometry } from "../MutatableShapeGeometry"
 import { ShapeMode } from "../Shape"
 import { Vertex, VertexContext } from "../Vertex"
 import { shapeRemoveVertex } from "../mutations/shape-remove-vertex"

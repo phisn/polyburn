@@ -192,7 +192,7 @@ export function usePipelineEvent(onEvent: (event: PipelineEvent) => void) {
         }
 
         canvas.addEventListener("contextmenu", onContextMenu)
-        canvas.addEventListener("wheel", onWheel)
+        window.addEventListener("wheel", onWheel)
 
         return () => {
             canvas.removeEventListener("pointerdown", onPointerEvent)
@@ -203,7 +203,7 @@ export function usePipelineEvent(onEvent: (event: PipelineEvent) => void) {
             window.removeEventListener("keydown", onKeyDown)
             window.removeEventListener("keyup", onKeyUp)
 
-            canvas.removeEventListener("wheel", onWheel)
+            window.removeEventListener("wheel", onWheel)
             canvas.removeEventListener("contextmenu", onContextMenu)
         }
     })

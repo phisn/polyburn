@@ -37,10 +37,12 @@ export function RocketGraphic(props: { entity: ImmutableRocketEntity }) {
                 src={graphicEntry.src}
                 scale={graphicEntry.scale}
                 fillMaterial={
-                    highlighted
-                        ? new MeshBasicMaterial({ color: "#ffff55" })
+                    highlighted && selected
+                        ? new MeshBasicMaterial({ color: "#cc9900" })
+                        : highlighted
+                        ? new MeshBasicMaterial({ color: "#dd7700" })
                         : selected
-                        ? new MeshBasicMaterial({ color: "#ffff00" })
+                        ? new MeshBasicMaterial({ color: "#ffbb00" })
                         : undefined
                 }
             />

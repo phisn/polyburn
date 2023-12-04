@@ -1,5 +1,5 @@
 import { useStore } from "@react-three/fiber"
-import { useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { pipelineStageFactories as componentPipelineStages } from "../../../behaviors/behavior-pipeline"
 import { useEditorStore } from "../../../store/store"
 import { pipelineStageBackgroundDefault } from "../background/pipeline-stage-background-default"
@@ -18,6 +18,12 @@ export function usePipeline() {
     const threeStore = useStore()
     const store = useEditorStore(state => state)
 
+    useEffect(() => {
+        console.log("store changed")
+    }, [store])
+
+    const state = useRef<PipelineContext["state"]>({ ref: { type: "none" } })
+
     const context = useMemo(
         () => ({
             cursor: {
@@ -25,7 +31,6 @@ export function usePipeline() {
                 grabbable: () => void (document.body.style.cursor = "grab"),
                 grabbing: () => void (document.body.style.cursor = "grabbing"),
             },
-            state: { ref: { type: "none" } },
             store,
         }),
         [store],
@@ -35,10 +40,12 @@ export function usePipeline() {
         for (const stage of pipelineStages) {
             const result = stage(event, {
                 ...context,
+                state: state.current,
                 three: threeStore.getState(),
             })
 
             if (result === ConsumeEvent) {
+                console.log("consumed by " + stage)
                 return
             }
         }

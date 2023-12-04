@@ -1,6 +1,7 @@
 import { MutableRefObject, createContext, useContext } from "react"
 import { Point } from "runtime/src/model/point"
 import { StoreApi, UseBoundStore, create } from "zustand"
+import { shallow } from "zustand/shallow"
 import { BehaviorEvent } from "../behaviors/behaviors"
 import { StoreSliceFocus, createStoreSliceFocus } from "./store-slice-focus"
 import { StoreSliceWorld, createStoreSliceWorld } from "./store-slice-world"
@@ -82,5 +83,5 @@ export function useEditorContext() {
 }
 
 export function useEditorStore<T>(selector: (store: EditorStore) => T) {
-    return useEditorContext()(selector)
+    return useEditorContext()(selector, shallow)
 }

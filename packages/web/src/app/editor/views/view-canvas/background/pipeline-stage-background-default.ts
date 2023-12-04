@@ -5,8 +5,6 @@ export const pipelineStageBackgroundDefault: PipelineStage = (event, { store, st
     store.highlight()
 
     if (event.leftButtonClicked) {
-        store.deselect()
-
         state.ref = {
             type: "moving-camera",
 
@@ -14,7 +12,14 @@ export const pipelineStageBackgroundDefault: PipelineStage = (event, { store, st
                 x: three.camera.position.x + event.positionInWindow.x / three.camera.zoom,
                 y: three.camera.position.y - event.positionInWindow.y / three.camera.zoom,
             },
+
+            startPosition: {
+                x: three.camera.position.x,
+                y: three.camera.position.y,
+            },
         }
+
+        console.log("start moving camera")
 
         return ConsumeEvent
     }
@@ -23,7 +28,7 @@ export const pipelineStageBackgroundDefault: PipelineStage = (event, { store, st
         (event.scroll < 0 && three.camera.zoom < 80) ||
         (event.scroll > 0 && three.camera.zoom > 2)
     ) {
-        three.camera.zoom = 2 ** (Math.log2(three.camera.zoom) - event.scroll / 100)
+        three.camera.zoom = 2 ** (Math.log2(three.camera.zoom) - event.scroll / 400)
         three.camera.updateProjectionMatrix()
 
         const canvasCenter = {
@@ -34,8 +39,8 @@ export const pipelineStageBackgroundDefault: PipelineStage = (event, { store, st
         const previousPosition = three.camera.position.clone()
 
         three.camera.position.set(
-            event.positionInWindow.x + (canvasCenter.x - event.position.x) / three.camera.zoom,
-            event.positionInWindow.y - (canvasCenter.y - event.position.y) / three.camera.zoom,
+            event.position.x + (canvasCenter.x - event.positionInWindow.x) / three.camera.zoom,
+            event.position.y - (canvasCenter.y - event.positionInWindow.y) / three.camera.zoom,
 
             three.camera.position.z,
         )

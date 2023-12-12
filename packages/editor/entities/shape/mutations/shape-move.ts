@@ -1,4 +1,4 @@
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { ShapeState } from "../shape-state"
 
 export function shapeMove(state: ShapeState, to: Point) {

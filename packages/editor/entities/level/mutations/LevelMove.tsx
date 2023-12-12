@@ -1,4 +1,4 @@
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { LevelState } from "../level-state"
 
 export function levelMove(state: LevelState, to: Point, rotation: number) {

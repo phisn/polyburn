@@ -1,5 +1,5 @@
 import { Rotation } from "@dimforge/rapier2d"
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { Vector3 } from "three"
 
 export interface InterpolatedComponent {

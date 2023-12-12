@@ -1,6 +1,6 @@
 import { Html } from "@react-three/drei"
 import { useState } from "react"
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { Priority } from "../../models/priority"
 import { useEditorStore } from "../../store/EditorStore"
 import { ConsumeEvent, useEventListener } from "../../store/EventStore"

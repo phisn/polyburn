@@ -1,4 +1,4 @@
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { ShapeVertex } from "runtime/src/model/world/shape-model"
 import { BufferGeometry, Color, Float32BufferAttribute, ShapeUtils } from "three"
 

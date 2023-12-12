@@ -1,4 +1,4 @@
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { RocketState } from "../rocket-state"
 
 export function rocketMove(state: RocketState, to: Point, rotation: number) {

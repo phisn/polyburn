@@ -1,5 +1,5 @@
 import { EntityType } from "runtime/proto/world"
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { entityRegistry } from "runtime/src/model/world/entity-registry"
 import { ContextMenu } from "../../../../common/components/ContextMenu"
 import { FlagSvg } from "../../../../common/components/inline-svg/Flag"

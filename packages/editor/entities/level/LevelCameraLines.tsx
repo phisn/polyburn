@@ -1,6 +1,6 @@
 import { Line } from "@react-three/drei"
 import { forwardRef, Fragment, useImperativeHandle, useMemo, useRef } from "react"
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { Line2 } from "three-stdlib"
 import { CameraSide, cameraSides } from "./camera-side"
 import { cameraLinesFromLevel, LevelState } from "./level-state"

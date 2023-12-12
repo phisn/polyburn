@@ -1,4 +1,4 @@
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 
 import { Gradient } from "./gradient"
 import { Particle } from "./particle"

@@ -1,5 +1,5 @@
 import { EntityType } from "runtime/proto/world"
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { snapDistance } from "../../../../common/constants"
 import { EntityStateBase } from "../../models/entity-state-base"
 import { CameraSide } from "./camera-side"

@@ -1,5 +1,5 @@
 import { EntityType } from "runtime/proto/world"
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { changeAnchor } from "runtime/src/model/world/change-anchor"
 import { entityRegistry } from "runtime/src/model/world/entity-registry"
 import { WorldState } from "../../../models/world-state"

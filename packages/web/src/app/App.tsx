@@ -74,7 +74,7 @@ function Test() {
 import RAPIER from "@dimforge/rapier2d"
 import { decompressFromBase64 } from "lz-string"
 import { WorldModel } from "runtime/proto/world"
-import { Replay, replayFramesFromBytes, replayFramesToBytes } from "runtime/src/model/replay/Replay"
+import { Replay, replayFramesFromBytes, replayFramesToBytes } from "runtime/src/model/replay/replay"
 
 
 const raw2 =

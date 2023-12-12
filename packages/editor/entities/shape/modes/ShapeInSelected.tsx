@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { Mesh, MeshBasicMaterial, Vector2 } from "three"
 import {
     baseZoomFactor,

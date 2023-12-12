@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid"
-import { nameFromString } from "shared/src/Names"
+import { nameFromString } from "shared/src/names"
 import { create } from "zustand"
 import { StateStorage, createJSONStorage, persist } from "zustand/middleware"
 import { AlertProps } from "../../app/layout/Alert"

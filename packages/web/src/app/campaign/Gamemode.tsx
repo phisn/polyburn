@@ -1,7 +1,7 @@
 import { Suspense, useState } from "react"
 import { BrowserView, isMobile } from "react-device-detect"
 import { ReplayStats } from "runtime/src/model/replay/replay-stats"
-import { nameFromString } from "shared/src/Names"
+import { nameFromString } from "shared/src/names"
 import { GamemodeView } from "shared/src/views/gamemode-view"
 import { Modal, ModalPanel } from "../../common/components/Modal"
 import { ArrowClockwise } from "../../common/components/inline-svg/ArrowClockwise"

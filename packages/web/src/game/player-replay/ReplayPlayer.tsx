@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react"
 import { ReplayModel } from "runtime/proto/replay"
 import { WorldModel } from "runtime/proto/world"
-import { replayFramesFromBytes } from "runtime/src/model/replay/Replay"
+import { replayFramesFromBytes } from "runtime/src/model/replay/replay"
 import { newWebappRuntime } from "../runtime-extension/webapp-runtime"
 import { RuntimePlayer } from "../runtime-player/RuntimePlayer"
 import { withCanvas } from "../runtime-player/WithCanvas"

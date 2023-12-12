@@ -1,4 +1,4 @@
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { changeAnchor } from "runtime/src/model/world/change-anchor"
 import { snapDistance } from "../../../../common/constants"
 import { ImmutableEntityWith } from "../../entities/entity"

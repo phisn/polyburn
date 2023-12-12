@@ -1,4 +1,4 @@
-import { Point } from "runtime/src/model/Point"
+import { Point } from "runtime/src/model/point"
 import { changeAnchor } from "runtime/src/model/world/change-anchor"
 import { entityGraphicRegistry } from "../../../game/runtime-view/graphics-assets/entity-graphic-registry"
 import { EntityGraphicType } from "../../../game/runtime-view/graphics-assets/entity-graphic-type"

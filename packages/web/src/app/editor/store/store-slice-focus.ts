@@ -19,8 +19,7 @@ export const createStoreSliceFocus: StateCreator<EditorStore, [], [], StoreSlice
     selected: [],
 
     highlight(highlighted) {
-        set(state => ({
-            ...state,
+        set(() => ({
             highlighted,
         }))
     },
@@ -32,7 +31,6 @@ export const createStoreSliceFocus: StateCreator<EditorStore, [], [], StoreSlice
             })
 
             return {
-                ...state,
                 selected,
             }
         })
@@ -41,7 +39,6 @@ export const createStoreSliceFocus: StateCreator<EditorStore, [], [], StoreSlice
         set(state => {
             if (id === undefined) {
                 return {
-                    ...state,
                     selected: [],
                 }
             }
@@ -49,7 +46,6 @@ export const createStoreSliceFocus: StateCreator<EditorStore, [], [], StoreSlice
             const selected = state.selected.filter(value => value !== id)
 
             return {
-                ...state,
                 selected,
             }
         })

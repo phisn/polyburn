@@ -33,7 +33,7 @@ function stateAfterChange(
     state: EditorStore,
     newWorld: Immutable<WorldState>,
 ): Partial<EditorStore> {
-    const componentsAffected = [...newWorld.entities.values()]
+    const componentsAffected = [...state.world.entities.values()]
         .filter(entity => entity !== newWorld.entities.get(entity.id))
         .flatMap(entity => Object.keys(entity))
         .filter((value, index, self) => self.indexOf(value) === index)
@@ -42,11 +42,15 @@ function stateAfterChange(
         .flatMap(name => state.entityCache.componentToComponents.get(name) ?? [])
         .filter((value, index, self) => self.indexOf(value) === index)
 
+    console.log("caches affected: " + cachesAffected.join(", "))
+    console.log("components affected: " + componentsAffected.join(", "))
+
     const componentsToEntities = new Map(state.entityCache.componentsToEntities)
     const componentToComponents = new Map(state.entityCache.componentToComponents)
 
-    cachesAffected.forEach(componentsToEntities.delete)
-    componentsAffected.forEach(componentToComponents.delete)
+    cachesAffected.forEach(key => componentsToEntities.delete(key))
+    cachesAffected.forEach(key => componentToComponents.delete(key))
+    componentsAffected.forEach(key => componentToComponents.delete(key))
 
     return {
         entityCache: {
@@ -95,14 +99,22 @@ export const createStoreSliceWorld: StateCreator<EditorStore, [], [], StoreSlice
                 entities,
             )
 
+            console.log("key: " + key)
+
             const componentToComponents = new Map(state.entityCache.componentToComponents)
 
             for (const behavior of behaviors) {
                 componentToComponents.set(behavior, key)
             }
 
+            console.log(
+                "cache size: " +
+                    state.entityCache.componentsToEntities.size +
+                    " -> " +
+                    componentsToEntities.size,
+            )
+
             return {
-                ...state,
                 entityCache: {
                     componentsToEntities,
                     componentToComponents,
@@ -157,12 +169,21 @@ export const createStoreSliceWorld: StateCreator<EditorStore, [], [], StoreSlice
                 inverseChanges.push(...inversePatches)
             })
 
-            return {
+            const after = {
                 ...stateAfterChange(state, world),
                 undos: [inverseChanges, ...state.undos],
                 redos: [],
                 world,
             }
+
+            console.log(
+                "..cache size: " +
+                    state.entityCache.componentsToEntities.size +
+                    " -> " +
+                    after.entityCache?.componentsToEntities.size,
+            )
+
+            return after
         })
     },
 })

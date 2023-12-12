@@ -1,7 +1,7 @@
 import { MutableRefObject, createContext, useContext } from "react"
 import { Point } from "runtime/src/model/point"
-import { StoreApi, UseBoundStore, create } from "zustand"
-import { shallow } from "zustand/shallow"
+import { Vector3 } from "three"
+import { StoreApi, createStore, useStore } from "zustand"
 import { BehaviorEvent } from "../behaviors/behaviors"
 import { StoreSliceFocus, createStoreSliceFocus } from "./store-slice-focus"
 import { StoreSliceWorld, createStoreSliceWorld } from "./store-slice-world"
@@ -14,26 +14,30 @@ export interface EditorStore extends StoreSliceWorld, StoreSliceFocus {
         point: Point
     }
 
+    zoomTargetOrientation: { inWorld: Vector3; inWindow: Point }
+    zoomTarget: number
+
     openContextMenu(point: Point, element: () => JSX.Element): void
 
     listen(id: number, listener: MutableRefObject<(event: BehaviorEvent) => void>): () => void
     publish(event: BehaviorEvent): void
+
+    setZoomTarget(zoom: number, orientation: { inWorld: Vector3; inWindow: Point }): void
 }
 
 export const createEditorStore = () =>
-    create<EditorStore>((set, get, store) => ({
+    createStore<EditorStore>((set, get, store) => ({
         ...createStoreSliceWorld(set, get, store),
         ...createStoreSliceFocus(set, get, store),
 
-        highlighted: undefined,
-        selected: [],
-
         listeners: new Map(),
+
+        zoomTarget: 50,
+        zoomTargetOrientation: { inWorld: new Vector3(), inWindow: new Vector3() },
 
         contextMenu: undefined,
         openContextMenu(point, element) {
-            set(state => ({
-                ...state,
+            set(() => ({
                 contextMenu: {
                     element,
                     point,
@@ -42,7 +46,6 @@ export const createEditorStore = () =>
         },
         listen(id, listener) {
             set(state => ({
-                ...state,
                 listeners: new Map(state.listeners).set(id, [
                     ...(state.listeners.get(id) ?? []),
                     listener,
@@ -55,7 +58,6 @@ export const createEditorStore = () =>
                     listeners.delete(id)
 
                     return {
-                        ...state,
                         listeners,
                     }
                 })
@@ -66,11 +68,15 @@ export const createEditorStore = () =>
                 listener.current(event)
             }
         },
+        setZoomTarget(zoom, orientation) {
+            set(() => ({
+                zoomTarget: zoom,
+                zoomTargetOrientation: orientation,
+            }))
+        },
     }))
 
-export const editorStoreContext = createContext<UseBoundStore<StoreApi<EditorStore>> | undefined>(
-    undefined,
-)
+export const editorStoreContext = createContext<StoreApi<EditorStore> | undefined>(undefined)
 
 export function useEditorContext() {
     const store = useContext(editorStoreContext)
@@ -83,5 +89,5 @@ export function useEditorContext() {
 }
 
 export function useEditorStore<T>(selector: (store: EditorStore) => T) {
-    return useEditorContext()(selector, shallow)
+    return useStore(useEditorContext(), selector)
 }

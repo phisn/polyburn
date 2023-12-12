@@ -1,3 +1,4 @@
+import { Vector3 } from "three"
 import { ConsumeEvent } from "../pipeline/pipeline-event"
 import { PipelineStage } from "../pipeline/pipeline-stage"
 
@@ -19,8 +20,6 @@ export const pipelineStageBackgroundDefault: PipelineStage = (event, { store, st
             },
         }
 
-        console.log("start moving camera")
-
         return ConsumeEvent
     }
 
@@ -28,30 +27,11 @@ export const pipelineStageBackgroundDefault: PipelineStage = (event, { store, st
         (event.scroll < 0 && three.camera.zoom < 80) ||
         (event.scroll > 0 && three.camera.zoom > 2)
     ) {
-        three.camera.zoom = 2 ** (Math.log2(three.camera.zoom) - event.scroll / 400)
-        three.camera.updateProjectionMatrix()
+        const zoom = 2 ** (Math.log2(store.zoomTarget) - event.scroll / 400)
 
-        const canvasCenter = {
-            x: three.size.width * 0.5,
-            y: three.size.height * 0.5,
-        }
-
-        const previousPosition = three.camera.position.clone()
-
-        three.camera.position.set(
-            event.position.x + (canvasCenter.x - event.positionInWindow.x) / three.camera.zoom,
-            event.position.y - (canvasCenter.y - event.positionInWindow.y) / three.camera.zoom,
-
-            three.camera.position.z,
-        )
-
-        console.log(
-            "position",
-            previousPosition.x,
-            previousPosition.y,
-            "=>",
-            three.camera.position.x,
-            three.camera.position.y,
-        )
+        store.setZoomTarget(zoom, {
+            inWorld: new Vector3(event.position.x, event.position.y, 0),
+            inWindow: { ...event.positionInWindow },
+        })
     }
 }

@@ -1,8 +1,15 @@
 import { ImmutableEntityWith } from "../../entities/entity"
 import { ConsumeEvent } from "../../views/view-canvas/pipeline/pipeline-event"
 import { PipelineStage } from "../../views/view-canvas/pipeline/pipeline-stage"
+import { pipelineStageObjectMoving } from "./pipeline-stage-object-moving"
 
-export const pipelineStageObjectDefault: PipelineStage = (event, { cursor, state, store }) => {
+export const pipelineStageObjectDefault: PipelineStage = (event, context) => {
+    const { cursor, state, store } = context
+
+    if (event.type === "wheel") {
+        return
+    }
+
     for (const entity of store.entitiesWith("object")) {
         const isInside = entity.object.isInside(event.position)
 
@@ -46,5 +53,7 @@ export const pipelineStageObjectDefault: PipelineStage = (event, { cursor, state
                 },
             ],
         }
+
+        pipelineStageObjectMoving(event, context)
     }
 }

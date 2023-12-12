@@ -11,9 +11,9 @@ export function usePipelineEvent(onEvent: (event: PipelineEvent) => void) {
 
     const invalidate = useThree(state => state.invalidate)
 
-    const position = new Vector3()
-
     useEffect(() => {
+        const position = new Vector3()
+
         const onPointerEvent = (raw: PointerEvent) => {
             // cursor is by default "default". other cursors must be a result of this event handler
             if (window.document.body.style.cursor !== "default") {
@@ -186,7 +186,6 @@ export function usePipelineEvent(onEvent: (event: PipelineEvent) => void) {
             )
 
             event.stopPropagation()
-            event.preventDefault()
 
             invalidate()
         }
@@ -206,5 +205,5 @@ export function usePipelineEvent(onEvent: (event: PipelineEvent) => void) {
             window.removeEventListener("wheel", onWheel)
             canvas.removeEventListener("contextmenu", onContextMenu)
         }
-    })
+    }, [canvas, camera, invalidate, onEvent])
 }

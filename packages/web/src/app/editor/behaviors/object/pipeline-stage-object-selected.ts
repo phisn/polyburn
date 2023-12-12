@@ -1,9 +1,6 @@
-import { ImmutableEntity, ImmutableEntityWith } from "../../entities/entity"
-import { ConsumeEvent } from "../../views/view-canvas/pipeline/pipeline-event"
-import { PipelineStage } from "../../views/view-canvas/pipeline/pipeline-stage"
-import { MovingEntityEntry } from "./pipeline-state-moving"
-
-export const pipelineStageObjectSelected: PipelineStage = (event, { cursor, state, store }) => {
+export {}
+//export const pipelineStageObjectSelected: PipelineStage = (event, { cursor, state, store }) => {
+/*
     for (const entity of store.entitiesWith("object")) {
         if (entity.object.isInside(event.position)) {
             if (event.shiftKey) {
@@ -42,4 +39,5 @@ export const pipelineStageObjectSelected: PipelineStage = (event, { cursor, stat
             entries,
         }
     }
-}
+    */
+//}

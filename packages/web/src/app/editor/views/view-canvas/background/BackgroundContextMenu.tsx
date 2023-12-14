@@ -1,3 +1,7 @@
 export function BackgroundContextMenu() {
-    return <></>
+    return (
+        <div>
+            <div>BackgroundContextMenu</div>
+        </div>
+    )
 }

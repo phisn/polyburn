@@ -18,6 +18,7 @@ export interface EditorStore extends StoreSliceWorld, StoreSliceFocus {
     zoomTarget: number
 
     openContextMenu(point: Point, element: () => JSX.Element): void
+    closeContextMenu(): void
 
     listen(id: number, listener: MutableRefObject<(event: BehaviorEvent) => void>): () => void
     publish(event: BehaviorEvent): void
@@ -42,6 +43,11 @@ export const createEditorStore = () =>
                     element,
                     point,
                 },
+            }))
+        },
+        closeContextMenu() {
+            set(() => ({
+                contextMenu: undefined,
             }))
         },
         listen(id, listener) {

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg"
 	 viewBox="0 0 300 600" height="600" width="300">
-	<path fill="#FFF" opacity="1"
+	<path fill="#000" opacity="1"
 		d=" M 1 502
 			L 3 355
 			C 4 344 4 334 5 324
@@ -16,13 +16,10 @@
 			C 291 297 293 310 295 324
 			C 296 334 296 344 297 355
 			L 299 502
+			L 300 600
+			L 190 502
+			L 110 502
+			L 0 600
 			z"/>
-	<path fill="#FFF" opacity="1"
-		d="M 300 600
-		   L 190 502
-		   L 299 502" />
-	<path fill="#FFF" opacity="1"
-		d="M 0 600
-		   L 1 502
-		   L 110 502" />
 </svg>
+

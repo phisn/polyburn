@@ -1,7 +1,5 @@
 {
     "editor.formatOnSave": true,
-    // enable per-language (here: Prettier as formatter)
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "files.exclude": {
         "**/.turbo": true,
         "**/dist": true,
@@ -11,7 +9,15 @@
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
-	"[prisma]": {
-		"editor.defaultFormatter": "Prisma.prisma"
-	},
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[rust]": {
+        "editor.defaultFormatter": "rust-lang.rust-analyzer",
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "file"
+    }
 }

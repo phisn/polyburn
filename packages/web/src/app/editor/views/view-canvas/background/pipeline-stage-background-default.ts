@@ -1,11 +1,14 @@
 import { Vector3 } from "three"
 import { ConsumeEvent } from "../pipeline/pipeline-event"
 import { PipelineStage } from "../pipeline/pipeline-stage"
+import { BackgroundContextMenu } from "./BackgroundContextMenu"
 
 export const pipelineStageBackgroundDefault: PipelineStage = (event, { store, state, three }) => {
     store.highlight()
 
     if (event.leftButtonClicked) {
+        store.closeContextMenu()
+
         state.ref = {
             type: "moving-camera",
 
@@ -21,6 +24,10 @@ export const pipelineStageBackgroundDefault: PipelineStage = (event, { store, st
         }
 
         return ConsumeEvent
+    }
+
+    if (event.rightButtonClicked) {
+        store.openContextMenu(event.position, BackgroundContextMenu)
     }
 
     if (

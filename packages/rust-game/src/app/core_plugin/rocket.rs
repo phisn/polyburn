@@ -8,10 +8,10 @@ use bevy_rapier2d::{
 };
 
 #[derive(Component, Default)]
-struct Rocket;
+pub struct Rocket;
 
 #[derive(Bundle, Default)]
-struct RocketBundle {
+pub struct RocketBundle {
     rocket: Rocket,
 
     transform: TransformBundle,

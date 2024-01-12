@@ -1,3 +1,10 @@
+mod app;
+
+fn main() {
+    app::run();
+}
+
+/*
 use std::borrow::Borrow;
 
 use base64::Engine;
@@ -378,3 +385,4 @@ fn rocket_input_handler(
         rocket_impulse.impulse = rotated_force.truncate()
     }
 }
+*/

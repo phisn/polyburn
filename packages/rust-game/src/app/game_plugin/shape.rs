@@ -1,11 +1,15 @@
-use bevy::{ecs::component::Component, transform::TransformBundle};
+use bevy::{
+    ecs::{bundle::Bundle, component::Component},
+    transform::TransformBundle,
+};
 use bevy_rapier2d::{dynamics::RigidBody, geometry::Collider};
 
-use super::map_template::shape_template::ShapeTemplate;
+use crate::app::core_plugin::map_template::shape_template::ShapeTemplate;
 
 #[derive(Component)]
 pub struct Shape;
 
+#[derive(Bundle)]
 pub struct ShapeBundle {
     shape: Shape,
 

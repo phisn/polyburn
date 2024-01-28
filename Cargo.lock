@@ -2071,6 +2071,47 @@ dependencies = [
 ]
 
 [[package]]
+name = "i_float"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2b3aac64319802c299819cfb2057e8a9db855a7d8e44f60ea0556f7f728b4094"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "i_overlay"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "39aa90f4fbf5964e3b33825ede99da9922e13fcf638716fa622311042191aeb2"
+dependencies = [
+ "i_float",
+ "i_shape",
+]
+
+[[package]]
+name = "i_shape"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "632e1a6528d693480b992bec346f911ae46e47af2d5d99ff1014dfe5a2c05820"
+dependencies = [
+ "i_float",
+ "serde",
+]
+
+[[package]]
+name = "i_triangle"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "048154ca42bbf1f965ca720c4a99d88fcef8a13ec828920e9dd84e634147074c"
+dependencies = [
+ "i_float",
+ "i_overlay",
+ "i_shape",
+ "serde",
+]
+
+[[package]]
 name = "image"
 version = "0.24.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3230,6 +3271,10 @@ dependencies = [
  "bevy_prototype_lyon",
  "bevy_rapier2d",
  "half",
+ "i_float",
+ "i_overlay",
+ "i_shape",
+ "i_triangle",
  "js-sys",
  "prost",
  "rapier2d",

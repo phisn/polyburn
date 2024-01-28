@@ -1,17 +1,20 @@
-use bevy::ecs::component::Component;
 use bevy::math::Vec2;
-use bevy_rapier2d::geometry::{Collider, VHACDParameters};
-use bevy_rapier2d::math::Rot;
+use bevy_rapier2d::geometry::Collider;
+use i_float::fix_float::{FixConvert, FixMath};
+use i_float::fix_vec::FixVec;
+use i_overlay::bool::fill_rule::FillRule;
+use i_shape::fix_shape::FixShape;
+use i_triangle::triangulation::triangulate::Triangulate;
 use rapier2d::geometry::SharedShape;
 use rapier2d::math::Point;
-use rapier2d::parry::transformation::vhacd::VHACD;
+use rapier2d::parry::transformation::convex_hull;
 
 pub struct ShapeTemplate {
     parts: Vec<Vec<Point<f32>>>,
 }
 
 impl ShapeTemplate {
-    pub fn from_model(shape: &rust_proto::ShapeModel) -> Self {
+    pub fn new(shape: &rust_proto::ShapeModel) -> Self {
         let mut vertices = Vec::new();
 
         let mut x: f32 = f32::from_ne_bytes(shape.vertices[0..4].try_into().unwrap());
@@ -38,15 +41,25 @@ impl ShapeTemplate {
             byte_count += 8;
         }
 
-        let vertices_count = vertices.len() as u32;
+        let shape = FixShape::new_with_contour(
+            vertices
+                .iter()
+                .map(|v| FixVec::new(v.x.fix(), v.y.fix()))
+                .collect::<Vec<_>>(),
+        );
 
-        let indices: Vec<_> = (0..vertices_count)
-            .map(|x| [x, (x + 1) % vertices_count])
+        let parts = shape
+            .to_convex_polygons(Some(FillRule::EvenOdd))
+            .iter()
+            .map(|part| {
+                let part = part
+                    .iter()
+                    .map(|point| Point::new(point.x.f32(), point.y.f32()))
+                    .collect::<Vec<_>>();
+
+                convex_hull(&part)
+            })
             .collect();
-
-        let params = VHACDParameters::default();
-        let parts = VHACD::decompose(&params, &vertices, &indices, true)
-            .compute_exact_convex_hulls(&vertices, &indices);
 
         Self { parts }
     }
@@ -56,7 +69,12 @@ impl ShapeTemplate {
             .parts
             .iter()
             .map(|part| {
-                SharedShape::convex_polyline(part.clone())
+                part.iter()
+                    .map(|point| Point::new(point.x, point.y))
+                    .collect::<Vec<_>>()
+            })
+            .map(|part| {
+                SharedShape::convex_polyline(part)
                     .expect("Failed to create collider in shape from part")
             })
             .collect();

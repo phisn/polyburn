@@ -1,20 +1,16 @@
 use bevy::prelude::*;
+use rust_game_plugin::FrameInput;
 
-use crate::app::game_plugin::replay::FrameInput;
+mod input_state;
+mod input_tracker;
 
-pub enum InputState {
-    Keyboard { rotation: f32 },
-}
-
-impl Default for InputState {
-    fn default() -> Self {
-        InputState::Keyboard { rotation: 0.0 }
-    }
-}
+pub use input_state::*;
+pub use input_tracker::*;
 
 pub fn input_generator(
     mut state: Local<InputState>,
     mut event_writer: EventWriter<FrameInput>,
+    mut input_tracker: ResMut<InputTracker>,
     time: Res<Time>,
     keyboard: Res<Input<KeyCode>>,
 ) {
@@ -30,10 +26,13 @@ pub fn input_generator(
 
             *state = InputState::Keyboard { rotation };
 
-            event_writer.send(FrameInput {
+            let input = FrameInput {
                 rotation,
                 thrust: keyboard.pressed(KeyCode::Up),
-            });
+            };
+
+            event_writer.send(input);
+            input_tracker.push(input);
         }
     }
 }

@@ -4,11 +4,10 @@ use bevy_rapier2d::{
     geometry::{ActiveEvents, ColliderMassProperties},
 };
 
-use crate::app::core_plugin::map_template::MapTemplate;
-
 use super::{rocket::RocketBundle, shape::ShapeBundle};
+use crate::MapTemplate;
 
-pub fn initialize(mut commands: Commands, map: Res<MapTemplate>) {
+pub fn init_system(mut commands: Commands, map: Res<MapTemplate>) {
     commands
         .spawn(RocketBundle::new(map.rocket.position))
         .insert(ActiveEvents::COLLISION_EVENTS)

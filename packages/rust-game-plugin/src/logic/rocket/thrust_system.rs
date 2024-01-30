@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+use crate::{FrameInput, GameConfig};
+
 use super::Rocket;
-use crate::app::core_plugin::game::{game_config::GameConfig, replay::FrameInput};
 
 pub fn thrust_system(
     input: Res<FrameInput>,

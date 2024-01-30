@@ -1,17 +1,15 @@
 use base64::*;
 use bevy::ecs::system::Resource;
-use bevy_rapier2d::geometry::VHACDParameters;
 use prost::Message;
-use rapier2d::{math::Point, parry::transformation::vhacd::VHACD};
 use rust_proto::WorldModel;
-
-use self::{
-    level_template::LevelTemplate, rocket_template::RocketTemplate, shape_template::ShapeTemplate,
-};
 
 mod level_template;
 mod rocket_template;
 mod shape_template;
+
+pub use level_template::*;
+pub use rocket_template::*;
+pub use shape_template::*;
 
 #[derive(Resource)]
 pub struct MapTemplate {

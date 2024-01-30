@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::app::core_plugin::game::replay::FrameInput;
-
 use super::Rocket;
+use crate::FrameInput;
 
 #[derive(Default)]
 pub struct InputHandlerState {

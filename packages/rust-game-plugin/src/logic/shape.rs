@@ -4,7 +4,7 @@ use bevy::{
 };
 use bevy_rapier2d::{dynamics::RigidBody, geometry::Collider};
 
-use crate::app::core_plugin::map_template::shape_template::ShapeTemplate;
+use crate::ShapeTemplate;
 
 #[derive(Component)]
 pub struct Shape;

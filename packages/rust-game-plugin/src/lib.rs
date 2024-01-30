@@ -1,14 +1,28 @@
-use bevy::{ecs::schedule::ScheduleLabel, prelude::*};
+use bevy::{ecs::schedule::ScheduleLabel, prelude::*, utils::intern::Interned};
 use bevy_rapier2d::prelude::*;
 
-#[derive(Default)]
-pub struct GamePlugin;
+mod api;
+pub mod logic;
+
+pub use api::*;
+
+pub struct GamePlugin {
+    runner_schedule: Interned<dyn ScheduleLabel>,
+}
 
 #[derive(SystemSet, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct GamePluginSet;
 
 #[derive(ScheduleLabel, Clone, Debug, Eq, Hash, PartialEq)]
 pub struct GamePluginSchedule;
+
+impl Default for GamePlugin {
+    fn default() -> Self {
+        GamePlugin {
+            runner_schedule: FixedUpdate.intern(),
+        }
+    }
+}
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
@@ -26,14 +40,21 @@ impl Plugin for GamePlugin {
             .init_resource::<GameConfig>()
             .add_plugins(
                 RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0)
-                    .in_schedule(CoreInternalSchedule),
+                    .in_schedule(GamePluginSchedule),
             )
             .add_systems(
-                CoreInternalSchedule,
-                runner::systems().before(PhysicsSet::SyncBackend),
+                GamePluginSchedule,
+                logic::systems().before(PhysicsSet::SyncBackend),
             )
-            .add_systems(FixedUpdate, core_runner.in_set(GamePluginSet))
-            .add_systems(Startup, runner::systems_in_startup());
+            .add_systems(self.runner_schedule, core_runner.in_set(GamePluginSet))
+            .add_systems(Startup, logic::systems_in_startup());
+    }
+}
+
+impl GamePlugin {
+    pub fn in_schedule(mut self, schedule: impl ScheduleLabel) -> Self {
+        self.runner_schedule = schedule.intern();
+        self
     }
 }
 
@@ -46,7 +67,7 @@ pub fn core_runner(world: &mut World) {
                 return;
             }
 
-            world.schedule_scope(CoreInternalSchedule, |world, schedule| {
+            world.schedule_scope(GamePluginSchedule, |world, schedule| {
                 for event in reader.read(&input_events) {
                     world.insert_resource(event.clone());
                     schedule.run(world);

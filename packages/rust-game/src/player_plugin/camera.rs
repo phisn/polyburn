@@ -1,6 +1,8 @@
 use bevy::prelude::*;
+use rust_game_plugin::logic::rocket::Rocket;
 
-use crate::app::game_plugin::rocket::Rocket;
+#[derive(Component)]
+pub struct Camera;
 
 pub fn camera_movement(
     rocket_query: Query<&Transform, With<Rocket>>,

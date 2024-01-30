@@ -1,8 +1,9 @@
 use bevy::prelude::*;
+use rust_game_plugin::MapTemplate;
 
-use crate::app::{game_plugin::map_template::MapTemplate, player_plugin::camera::Camera};
+use crate::player_plugin::camera::Camera;
 
-pub fn initialize(mut commands: Commands, map: ResMut<MapTemplate>) {
+pub fn init_system(mut commands: Commands, map: ResMut<MapTemplate>) {
     commands
         .spawn(Camera2dBundle {
             projection: OrthographicProjection {

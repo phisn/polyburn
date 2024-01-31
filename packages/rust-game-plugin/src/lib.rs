@@ -1,10 +1,15 @@
-use bevy::{ecs::schedule::ScheduleLabel, prelude::*, utils::intern::Interned};
+use bevy::{
+    app::PluginsState, ecs::schedule::ScheduleLabel, prelude::*,
+    tasks::tick_global_task_pools_on_main_thread, utils::intern::Interned,
+};
 use bevy_rapier2d::prelude::*;
 
-mod api;
-pub mod logic;
+mod constants;
+pub mod ecs;
+mod resources;
 
-pub use api::*;
+use ecs::level::LevelCapturedEvent;
+pub use resources::*;
 
 pub struct GamePlugin {
     runner_schedule: Interned<dyn ScheduleLabel>,
@@ -37,6 +42,7 @@ impl Plugin for GamePlugin {
         .insert_resource(Time::from_hz(60.0));
 
         app.add_event::<FrameInput>()
+            .add_event::<LevelCapturedEvent>()
             .init_resource::<GameConfig>()
             .add_plugins(
                 RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0)
@@ -44,10 +50,10 @@ impl Plugin for GamePlugin {
             )
             .add_systems(
                 GamePluginSchedule,
-                logic::systems().before(PhysicsSet::SyncBackend),
+                ecs::systems().before(PhysicsSet::SyncBackend),
             )
-            .add_systems(self.runner_schedule, core_runner.in_set(GamePluginSet))
-            .add_systems(Startup, logic::systems_in_startup());
+            .add_systems(Startup, ecs::startup())
+            .add_systems(self.runner_schedule, core_runner.in_set(GamePluginSet));
     }
 }
 
@@ -77,4 +83,41 @@ pub fn core_runner(world: &mut World) {
             input_events.clear();
         },
     );
+}
+
+pub fn validate(map_template: MapTemplate, inputs: &Vec<FrameInput>) {
+    let mut app = App::new();
+
+    app.add_plugins(MinimalPlugins);
+
+    app.set_runner(move |mut app: App| {
+        while app.plugins_state() == PluginsState::Adding {
+            #[cfg(not(target_arch = "wasm32"))]
+            tick_global_task_pools_on_main_thread();
+        }
+
+        app.finish();
+        app.cleanup();
+
+        app.update();
+    });
+
+    app.insert_resource(map_template)
+        .add_plugins(GamePlugin::default().in_schedule(Update));
+
+    app.world
+        .resource_scope(|_: &mut World, mut input_events: Mut<Events<FrameInput>>| {
+            for input in inputs {
+                input_events.send(input.clone());
+            }
+        });
+
+    while app.plugins_state() == PluginsState::Adding {
+        #[cfg(not(target_arch = "wasm32"))]
+        tick_global_task_pools_on_main_thread();
+    }
+
+    app.finish();
+    app.cleanup();
+    app.update();
 }

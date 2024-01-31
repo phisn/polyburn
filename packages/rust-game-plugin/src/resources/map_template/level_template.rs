@@ -1,9 +1,8 @@
 use bevy::math::{Rect, Vec2};
-use rapier2d::prelude::*;
 use rust_proto::LevelModel;
 
 pub struct LevelTemplate {
-    pub position: Point<f32>,
+    pub position: Vec2,
     pub rotation: f32,
 
     pub camera: Rect,
@@ -15,7 +14,7 @@ pub struct LevelTemplate {
 impl LevelTemplate {
     pub fn new(level: &LevelModel) -> Self {
         Self {
-            position: Point::new(level.position_x, level.position_y),
+            position: Vec2::new(level.position_x, level.position_y),
             rotation: level.rotation,
 
             camera: Rect {

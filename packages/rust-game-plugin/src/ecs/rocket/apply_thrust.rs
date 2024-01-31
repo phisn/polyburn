@@ -5,7 +5,7 @@ use crate::{FrameInput, GameConfig};
 
 use super::Rocket;
 
-pub fn thrust_system(
+pub fn apply_thrust(
     input: Res<FrameInput>,
     mut rocket_query: Query<(Entity, &mut Transform, &mut ExternalImpulse), With<Rocket>>,
     game_config: Res<GameConfig>,

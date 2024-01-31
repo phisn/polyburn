@@ -1,10 +1,7 @@
-use bevy::{
-    ecs::{bundle::Bundle, component::Component},
-    transform::TransformBundle,
-};
-use bevy_rapier2d::{dynamics::RigidBody, geometry::Collider};
+use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 
-use crate::ShapeTemplate;
+use crate::{MapTemplate, ShapeTemplate};
 
 #[derive(Component)]
 pub struct Shape;
@@ -26,5 +23,11 @@ impl ShapeBundle {
             collider: template.create_collider(),
             transform: TransformBundle::IDENTITY,
         }
+    }
+}
+
+pub fn startup(mut commands: Commands, map: Res<MapTemplate>) {
+    for shape in map.shapes.iter() {
+        commands.spawn(ShapeBundle::new(shape));
     }
 }

@@ -9,7 +9,7 @@ pub struct InputHandlerState {
     offset: f32,
 }
 
-pub fn rotation_system(
+pub fn apply_rotation(
     mut state: Local<InputHandlerState>,
     input: Res<FrameInput>,
     mut rocket_query: Query<(&CollidingEntities, &mut Transform), With<Rocket>>,

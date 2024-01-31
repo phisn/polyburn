@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use rust_game_plugin::logic::rocket::Rocket;
+use rust_game_plugin::ecs::rocket::Rocket;
 
 #[derive(Component)]
 pub struct Camera;

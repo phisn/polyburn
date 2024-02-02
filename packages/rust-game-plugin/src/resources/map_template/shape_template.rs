@@ -9,18 +9,29 @@ use rapier2d::geometry::SharedShape;
 use rapier2d::math::Point;
 use rapier2d::parry::transformation::convex_hull;
 
+#[derive(Debug, Clone)]
 pub struct ShapeTemplate {
     parts: Vec<Vec<Point<f32>>>,
+    vertices: Vec<ShapeVertex>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ShapeVertex {
+    pub point: Vec2,
+    pub color: i32,
 }
 
 impl ShapeTemplate {
     pub fn new(shape: &rust_proto::ShapeModel) -> Self {
-        let mut vertices = Vec::new();
+        let mut vertices: Vec<ShapeVertex> = Vec::new();
 
         let mut x: f32 = f32::from_ne_bytes(shape.vertices[0..4].try_into().unwrap());
         let mut y: f32 = f32::from_ne_bytes(shape.vertices[4..8].try_into().unwrap());
 
-        vertices.push(Point::new(x, y));
+        vertices.push(ShapeVertex {
+            point: Vec2::new(x, y),
+            color: i32::from_ne_bytes(shape.vertices[8..12].try_into().unwrap()),
+        });
 
         let mut byte_count = 12;
 
@@ -36,7 +47,14 @@ impl ShapeTemplate {
             ])
             .to_f32();
 
-            vertices.push(Point::new(x, y));
+            vertices.push(ShapeVertex {
+                point: Vec2::new(x, y),
+                color: i32::from_ne_bytes(
+                    shape.vertices[byte_count + 4..byte_count + 8]
+                        .try_into()
+                        .unwrap(),
+                ),
+            });
 
             byte_count += 8;
         }
@@ -44,7 +62,7 @@ impl ShapeTemplate {
         let shape = FixShape::new_with_contour(
             vertices
                 .iter()
-                .map(|v| FixVec::new(v.x.fix(), v.y.fix()))
+                .map(|v| FixVec::new(v.point.x.fix(), v.point.y.fix()))
                 .collect::<Vec<_>>(),
         );
 
@@ -61,7 +79,11 @@ impl ShapeTemplate {
             })
             .collect();
 
-        Self { parts }
+        Self { parts, vertices }
+    }
+
+    pub fn vertices(&self) -> &Vec<ShapeVertex> {
+        &self.vertices
     }
 
     pub fn create_collider(&self) -> Collider {

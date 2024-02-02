@@ -1,22 +1,25 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::constants::ROCKET_MAX_IMPULSE_MAGNITUDE;
+use crate::{constants::ROCKET_MAX_IMPULSE_MAGNITUDE, FrameInput};
 
 use super::Rocket;
 
 pub fn detect_rocket_death(
+    input: Res<FrameInput>,
     rapier_context: Res<RapierContext>,
-    mut rocket_query: Query<(Entity, &Rocket, &mut Transform, &mut Velocity)>,
+    mut rocket_query: Query<(Entity, &mut Rocket, &mut Transform, &mut Velocity)>,
 ) {
-    let (rocket_entity, rocket, mut transform, mut velocity) = rocket_query.single_mut();
+    let (rocket_entity, mut rocket, mut transform, mut velocity) = rocket_query.single_mut();
 
     if is_rocket_dead(rapier_context, rocket_entity, transform.up()) {
+        velocity.linvel = Vec2::ZERO;
+        velocity.angvel = 0.0;
+
         transform.translation = rocket.spawn_point.extend(0.0);
         transform.rotation = Quat::from_rotation_z(0.0);
 
-        velocity.linvel = Vec2::ZERO;
-        velocity.angvel = 0.0;
+        rocket.reset_rotation(&transform, input.rotation);
     }
 }
 

@@ -52,7 +52,7 @@ impl Plugin for GamePlugin {
                 GamePluginSchedule,
                 ecs::systems().before(PhysicsSet::SyncBackend),
             )
-            .add_systems(Startup, ecs::startup())
+            .add_systems(Startup, ecs::startup().in_set(GamePluginSet))
             .add_systems(self.runner_schedule, core_runner.in_set(GamePluginSet));
     }
 }

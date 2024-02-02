@@ -8,10 +8,18 @@ mod apply_rotation;
 mod apply_thrust;
 mod create_rocket_collider;
 mod detect_rocket_death;
+mod update_rocket_spawn;
 
 #[derive(Component, Default)]
 pub struct Rocket {
     pub spawn_point: Vec2,
+    pub input_offset: f32,
+}
+
+impl Rocket {
+    pub fn reset_rotation(&mut self, transform: &Transform, input_rotation: f32) {
+        self.input_offset = transform.rotation.to_euler(EulerRot::YXZ).2 - input_rotation;
+    }
 }
 
 #[derive(Bundle, Default)]
@@ -32,6 +40,7 @@ impl RocketBundle {
         RocketBundle {
             rocket: Rocket {
                 spawn_point: Vec2::new(position.x, position.y),
+                input_offset: 0.0,
             },
 
             transform: TransformBundle::from(Transform::from_xyz(position.x, position.y, 0.0)),
@@ -49,6 +58,7 @@ pub fn systems() -> SystemConfigs {
     (
         apply_rotation::apply_rotation,
         apply_thrust::apply_thrust,
+        update_rocket_spawn::update_rocket_spawn,
         detect_rocket_death::detect_rocket_death,
     )
         .chain()
@@ -65,4 +75,6 @@ pub fn startup(mut commands: Commands, map: Res<MapTemplate>) {
             angular_damping: 0.5,
         })
         .insert(Ccd::enabled());
+
+    println!("Rocket spawned: {:?}", map.rocket.position);
 }

@@ -1,8 +1,17 @@
 use base64::*;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use i_float::{
+    fix_float::{FixConvert, FixMath},
+    fix_vec::FixVec,
+};
+use i_overlay::bool::fill_rule::FillRule;
+use i_shape::fix_shape::FixShape;
+use i_triangle::{
+    delaunay::triangulate::ShapeTriangulate, triangulation::triangulate::Triangulate,
+};
 use player_plugin::InputTracker;
-use rust_game_plugin::{ecs::rocket::Rocket, GamePlugin, MapTemplate};
+use rust_game_plugin::{ecs::rocket::Rocket, GamePlugin, MapTemplate, ShapeVertex};
 
 mod player_plugin;
 

@@ -26,7 +26,7 @@ pub fn rocket_collider() -> Option<Collider> {
 
     let rocket_colliders = rocket_colliders_vertices
         .into_iter()
-        .map(|points| {
+        .map(|points: Vec<(f32, f32)>| {
             Collider::convex_hull(
                 // floatsarray to vec2 array
                 &points

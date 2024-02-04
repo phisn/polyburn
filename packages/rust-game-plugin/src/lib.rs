@@ -4,7 +4,7 @@ use bevy::{
 };
 use bevy_rapier2d::prelude::*;
 
-mod constants;
+pub mod constants;
 pub mod ecs;
 mod resources;
 

@@ -3,10 +3,8 @@ use bevy_svg::SvgPlugin;
 use rust_game_plugin::GamePluginSet;
 
 mod camera;
-mod init;
+mod graphics;
 mod input;
-mod polygon_shape;
-mod shape_graphic;
 
 pub use input::*;
 
@@ -23,8 +21,15 @@ impl Plugin for PlayerPlugin {
             )
             .add_systems(
                 PostUpdate,
-                (camera::camera_movement).chain().in_set(GamePluginSet),
+                (camera::camera_movement, graphics::to_update())
+                    .chain()
+                    .in_set(GamePluginSet),
             )
-            .add_systems(PostStartup, init::init_system.after(GamePluginSet));
+            .add_systems(
+                PostStartup,
+                (graphics::to_startup(), camera::startup)
+                    .chain()
+                    .after(GamePluginSet),
+            );
     }
 }

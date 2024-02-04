@@ -28,24 +28,24 @@ fn is_rocket_dead(
     rocket_entity: Entity,
     rocket_vector: Vec3,
 ) -> bool {
-    for contact in rapier_context.contacts_with(rocket_entity) {
-        let other = if contact.collider1() == rocket_entity {
-            contact.raw.collider2
-        } else {
-            contact.raw.collider1
-        };
-
-        if rapier_context.colliders.get(other).unwrap().is_sensor() {
-            println!("SENSOR");
-            continue;
-        }
-
+    for contact in rapier_context
+        .contacts_with(rocket_entity)
+        .filter(|contact| contact.has_any_active_contacts())
+    {
         if contact.raw.total_impulse_magnitude() > ROCKET_MAX_IMPULSE_MAGNITUDE {
-            println!("Rocket died");
             return true;
         }
 
         for manifold in &contact.raw.manifolds {
+            // this is a bug fix from the original code. it is only needed, if the rocket has a children
+            // component and I have no idea (not even close) why it is triggered. original comment:
+
+            // sometimes some of the normals are zero (same as numcontacts === 0) but no idea why. if one is zero then the
+            // other is is some random vector that causes the rocket to die. therefore we just ignore the contact in this case
+            if manifold.points.len() == 0 {
+                continue;
+            }
+
             let normal_raw = if contact.collider1() == rocket_entity {
                 manifold.local_n2
             } else {

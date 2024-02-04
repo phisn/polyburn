@@ -1,7 +1,7 @@
 use bevy::{ecs::schedule::SystemConfigs, prelude::*};
 use bevy_rapier2d::prelude::*;
 
-use crate::{LevelTemplate, MapTemplate};
+use crate::{constants::*, LevelTemplate, MapTemplate};
 
 mod handle_level_capture;
 mod progress_level_capture;
@@ -68,10 +68,10 @@ pub fn startup(mut commands: Commands, map: Res<MapTemplate>) {
                     .spawn(CaptureCollider)
                     .insert(Collider::cuboid(
                         level.capture_area_left + level.capture_area_right,
-                        0.5,
+                        LEVEL_CAPTURE_HEIGHT,
                     ))
                     .insert(TransformBundle::from(Transform::from_translation(
-                        Vec3::new(0.0, 0.5 + -2.616, 0.0),
+                        Vec3::new(0.0, LEVEL_CAPTURE_HEIGHT - ENTITY_LEVEL_ENTRY.height, 0.0),
                     )))
                     .insert(Sensor);
             });

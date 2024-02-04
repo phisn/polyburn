@@ -3,11 +3,28 @@ use bevy::{
     render::{mesh::Indices, render_resource::PrimitiveTopology},
     sprite::MaterialMesh2dBundle,
 };
-use bevy_rapier2d::prelude::*;
-use i_triangle::triangulation::triangulate;
-use rust_game_plugin::ShapeVertex;
+use rust_game_plugin::{MapTemplate, ShapeVertex};
 
-pub struct PolygonShape {
+pub fn startup(
+    mut commands: Commands,
+    map: ResMut<MapTemplate>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    for shape in map.shapes.iter() {
+        let shape = PolygonShape {
+            vertices: shape.vertices().clone(),
+        };
+
+        commands.spawn(MaterialMesh2dBundle {
+            mesh: meshes.add(shape.into()).into(),
+            material: materials.add(ColorMaterial::from(Color::WHITE)),
+            ..default()
+        });
+    }
+}
+
+struct PolygonShape {
     pub vertices: Vec<ShapeVertex>,
 }
 

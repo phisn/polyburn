@@ -1,14 +1,7 @@
-use bevy::{ecs::schedule::SystemConfigs, prelude::*, sprite::MaterialMesh2dBundle};
-use bevy_rapier2d::prelude::*;
+use bevy::prelude::*;
+
 use bevy_svg::prelude::*;
-use rust_game_plugin::{
-    constants::ENTITY_ROCKET_ENTRY,
-    ecs::{
-        level::{Level, LevelCapturedEvent},
-        rocket::Rocket,
-    },
-    MapTemplate,
-};
+use rust_game_plugin::{constants::ENTITY_ROCKET_ENTRY, ecs::rocket::Rocket};
 
 use super::SVG_SCALE_FACTOR;
 
@@ -17,7 +10,7 @@ pub fn startup(
     mut rocket_query: Query<(Entity, &Rocket)>,
     asset_server: Res<AssetServer>,
 ) {
-    let (rocket_entity, rocket) = rocket_query.single_mut();
+    let (rocket_entity, _rocket) = rocket_query.single_mut();
     let rocket_svg: Handle<Svg> = asset_server.load("rocket.svg");
 
     commands.entity(rocket_entity).with_children(|parent| {

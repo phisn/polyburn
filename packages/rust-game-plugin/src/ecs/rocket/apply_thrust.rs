@@ -11,7 +11,7 @@ pub fn apply_thrust(
     game_config: Res<GameConfig>,
     rapier_context: Res<RapierContext>,
 ) {
-    let (entity, mut rocket_transform, mut rocket_impulse) = rocket_query.single_mut();
+    let (entity, rocket_transform, mut rocket_impulse) = rocket_query.single_mut();
 
     if input.thrust {
         let mut force = Vec2::new(0.0, game_config.thrust_value);

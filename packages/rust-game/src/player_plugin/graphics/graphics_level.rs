@@ -1,13 +1,7 @@
-use bevy::{ecs::schedule::SystemConfigs, prelude::*, sprite::MaterialMesh2dBundle};
-use bevy_rapier2d::prelude::*;
+use bevy::prelude::*;
+
 use bevy_svg::prelude::*;
-use rust_game_plugin::{
-    constants::ENTITY_ROCKET_ENTRY,
-    ecs::{
-        level::{Level, LevelCapturedEvent},
-        rocket::Rocket,
-    },
-};
+use rust_game_plugin::ecs::level::{Level, LevelCapturedEvent};
 
 use super::SVG_SCALE_FACTOR;
 

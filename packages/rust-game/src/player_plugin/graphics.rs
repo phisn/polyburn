@@ -1,14 +1,4 @@
-use bevy::{ecs::schedule::SystemConfigs, prelude::*, sprite::MaterialMesh2dBundle};
-use bevy_rapier2d::prelude::*;
-use bevy_svg::prelude::*;
-use rust_game_plugin::{
-    constants::ENTITY_ROCKET_ENTRY,
-    ecs::{
-        level::{Level, LevelCapturedEvent},
-        rocket::Rocket,
-    },
-    MapTemplate,
-};
+use bevy::{ecs::schedule::SystemConfigs, prelude::*};
 
 mod graphics_level;
 mod graphics_rocket;

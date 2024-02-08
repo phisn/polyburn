@@ -1,6 +1,7 @@
 use bevy::math::{Rect, Vec2};
 use rust_proto::LevelModel;
 
+#[derive(Clone)]
 pub struct LevelTemplate {
     pub position: Vec2,
     pub rotation: f32,

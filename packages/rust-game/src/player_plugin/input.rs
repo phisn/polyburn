@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{ecs::schedule::SystemConfigs, prelude::*};
 use rust_game_plugin::FrameInput;
 
 mod input_state;
@@ -7,7 +7,11 @@ mod input_tracker;
 pub use input_state::*;
 pub use input_tracker::*;
 
-pub fn input_generator(
+pub fn fixed_update() -> SystemConfigs {
+    (input_generator).chain().into_configs()
+}
+
+fn input_generator(
     mut state: Local<InputState>,
     mut event_writer: EventWriter<FrameInput>,
     mut input_tracker: ResMut<InputTracker>,

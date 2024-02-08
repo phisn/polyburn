@@ -1,11 +1,16 @@
 use bevy::{
+    ecs::schedule::SystemConfigs,
     prelude::*,
     render::{mesh::Indices, render_resource::PrimitiveTopology},
     sprite::MaterialMesh2dBundle,
 };
 use rust_game_plugin::{MapTemplate, ShapeVertex};
 
-pub fn startup(
+pub fn startup() -> SystemConfigs {
+    (insert_initial_shape_mesh).chain().into_configs()
+}
+
+fn insert_initial_shape_mesh(
     mut commands: Commands,
     map: ResMut<MapTemplate>,
     mut meshes: ResMut<Assets<Mesh>>,

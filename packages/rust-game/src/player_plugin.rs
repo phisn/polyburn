@@ -1,12 +1,15 @@
-use bevy::prelude::*;
+use bevy::{app::SubApp, prelude::*};
 use bevy_svg::SvgPlugin;
-use rust_game_plugin::GamePluginSet;
+use rust_game_plugin::{GamePluginSet, MapTemplate};
 
 mod camera;
 mod graphics;
 mod input;
+mod particle;
 
 pub use input::*;
+
+use self::particle::{init_particle_app, ParticleSubApp};
 
 #[derive(Default)]
 pub struct PlayerPlugin;
@@ -17,19 +20,21 @@ impl Plugin for PlayerPlugin {
             .add_plugins(SvgPlugin)
             .add_systems(
                 FixedUpdate,
-                (input::input_generator).chain().in_set(GamePluginSet),
+                (input::fixed_update()).chain().in_set(GamePluginSet),
             )
             .add_systems(
                 PostUpdate,
-                (camera::camera_movement, graphics::to_update())
+                (camera::update(), graphics::update())
                     .chain()
                     .in_set(GamePluginSet),
             )
             .add_systems(
                 PostStartup,
-                (graphics::to_startup(), camera::startup)
+                (graphics::startup(), camera::startup())
                     .chain()
                     .after(GamePluginSet),
             );
+
+        init_particle_app(app);
     }
 }

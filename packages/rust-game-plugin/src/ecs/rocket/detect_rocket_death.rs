@@ -16,7 +16,7 @@ pub fn detect_rocket_death(
         velocity.linvel = Vec2::ZERO;
         velocity.angvel = 0.0;
 
-        transform.translation = rocket.spawn_point.extend(0.0);
+        transform.translation = rocket.spawn_point;
         transform.rotation = Quat::from_rotation_z(0.0);
 
         rocket.reset_rotation(&transform, input.rotation);

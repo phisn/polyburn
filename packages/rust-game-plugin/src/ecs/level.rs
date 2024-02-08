@@ -3,8 +3,13 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{constants::*, LevelTemplate, MapTemplate};
 
-mod handle_level_capture;
-mod progress_level_capture;
+mod collider_capture_detector;
+mod level_progress_capture;
+mod level_toggle_capture;
+
+pub use collider_capture_detector::CaptureState;
+pub use collider_capture_detector::LevelCaptureStateEvent;
+pub use level_progress_capture::LevelCapturedEvent;
 
 #[derive(Component)]
 pub struct Level {
@@ -13,7 +18,7 @@ pub struct Level {
 }
 
 #[derive(Component)]
-pub struct LevelInCapture {
+pub struct LevelCaptureProgress {
     pub progress: i32,
 }
 
@@ -22,11 +27,6 @@ pub struct LevelCaptured;
 
 #[derive(Component)]
 pub struct CaptureCollider;
-
-#[derive(Event)]
-pub struct LevelCapturedEvent {
-    pub level: Entity,
-}
 
 #[derive(Bundle)]
 pub struct LevelBundle {
@@ -50,10 +50,37 @@ impl LevelBundle {
     }
 }
 
+#[derive(Bundle)]
+pub struct CaptureColliderBundle {
+    capture_collider: CaptureCollider,
+    collider: Collider,
+    transform: TransformBundle,
+    sensor: Sensor,
+}
+
+impl CaptureColliderBundle {
+    pub fn new(level: &LevelTemplate) -> Self {
+        CaptureColliderBundle {
+            capture_collider: CaptureCollider,
+            collider: Collider::cuboid(
+                level.capture_area_left + level.capture_area_right,
+                LEVEL_CAPTURE_HEIGHT,
+            ),
+            transform: TransformBundle::from(Transform::from_translation(Vec3::new(
+                0.0,
+                LEVEL_CAPTURE_HEIGHT - ENTITY_LEVEL_ENTRY.height,
+                0.0,
+            ))),
+            sensor: Sensor,
+        }
+    }
+}
+
 pub fn systems() -> SystemConfigs {
     (
-        progress_level_capture::progress_level_capture,
-        handle_level_capture::handle_level_capture(),
+        level_progress_capture::level_progress_capture,
+        collider_capture_detector::collider_capture_detector(),
+        level_toggle_capture::level_toggle_capture,
     )
         .chain()
         .into_configs()
@@ -64,16 +91,7 @@ pub fn startup(mut commands: Commands, map: Res<MapTemplate>) {
         commands
             .spawn(LevelBundle::new(level))
             .with_children(|parent| {
-                parent
-                    .spawn(CaptureCollider)
-                    .insert(Collider::cuboid(
-                        level.capture_area_left + level.capture_area_right,
-                        LEVEL_CAPTURE_HEIGHT,
-                    ))
-                    .insert(TransformBundle::from(Transform::from_translation(
-                        Vec3::new(0.0, LEVEL_CAPTURE_HEIGHT - ENTITY_LEVEL_ENTRY.height, 0.0),
-                    )))
-                    .insert(Sensor);
+                parent.spawn(CaptureColliderBundle::new(level));
             });
     }
 }

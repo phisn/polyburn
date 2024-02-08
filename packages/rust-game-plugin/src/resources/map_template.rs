@@ -11,7 +11,7 @@ pub use level_template::*;
 pub use rocket_template::*;
 pub use shape_template::*;
 
-#[derive(Resource)]
+#[derive(Resource, Clone)]
 pub struct MapTemplate {
     pub shapes: Vec<shape_template::ShapeTemplate>,
     pub rocket: RocketTemplate,

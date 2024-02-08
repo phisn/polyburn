@@ -2,7 +2,7 @@ use bevy::{ecs::schedule::SystemConfigs, prelude::*};
 use bevy_rapier2d::prelude::*;
 use rapier2d::math::Point;
 
-use crate::MapTemplate;
+use crate::{constants::ROCKET_Z_POSITION, MapTemplate};
 
 mod apply_rotation;
 mod apply_thrust;
@@ -12,7 +12,7 @@ mod update_rocket_spawn;
 
 #[derive(Component, Default)]
 pub struct Rocket {
-    pub spawn_point: Vec2,
+    pub spawn_point: Vec3,
     pub input_offset: f32,
 }
 
@@ -37,13 +37,15 @@ pub struct RocketBundle {
 
 impl RocketBundle {
     pub fn new(position: Point<f32>) -> Self {
+        let initial_position = Vec3::new(position.x, position.y, ROCKET_Z_POSITION);
+
         RocketBundle {
             rocket: Rocket {
-                spawn_point: Vec2::new(position.x, position.y),
+                spawn_point: initial_position,
                 input_offset: 0.0,
             },
 
-            transform: TransformBundle::from(Transform::from_xyz(position.x, position.y, 0.0)),
+            transform: TransformBundle::from(Transform::from_translation(initial_position)),
             velocity: Velocity::default(),
 
             rigid_body: RigidBody::Dynamic,

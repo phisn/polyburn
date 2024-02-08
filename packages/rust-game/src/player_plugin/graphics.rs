@@ -6,15 +6,15 @@ mod graphics_shape;
 
 const SVG_SCALE_FACTOR: f32 = 0.15 / 25.0;
 
-pub fn to_update() -> SystemConfigs {
-    (graphics_level::update).chain().into_configs()
+pub fn update() -> SystemConfigs {
+    (graphics_level::update()).chain().into_configs()
 }
 
-pub fn to_startup() -> SystemConfigs {
+pub fn startup() -> SystemConfigs {
     (
-        graphics_rocket::startup,
-        graphics_shape::startup,
-        graphics_level::startup,
+        graphics_rocket::startup(),
+        graphics_shape::startup(),
+        graphics_level::startup(),
     )
         .chain()
         .into_configs()

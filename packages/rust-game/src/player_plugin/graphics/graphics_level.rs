@@ -1,40 +1,51 @@
-use bevy::prelude::*;
+use bevy::{ecs::schedule::SystemConfigs, prelude::*};
 
 use bevy_svg::prelude::*;
-use rust_game_plugin::ecs::level::{Level, LevelCapturedEvent};
+use rust_game_plugin::ecs::level::{
+    CaptureState, Level, LevelCaptureStateEvent, LevelCapturedEvent,
+};
 
 use super::SVG_SCALE_FACTOR;
 
-pub fn update(
+pub fn update() -> SystemConfigs {
+    (level_flag_tracker).chain().into_configs()
+}
+
+pub fn startup() -> SystemConfigs {
+    (insert_initial_flag).chain().into_configs()
+}
+
+fn level_flag_tracker(
     mut commands: Commands,
-    mut level_captured: EventReader<LevelCapturedEvent>,
     asset_server: Res<AssetServer>,
-    level_query: Query<&Children, With<Level>>,
-    level_child_query: Query<Entity, With<Handle<Svg>>>,
+    mut level_capture_state_reader: EventReader<LevelCaptureStateEvent>,
+    level_children_query: Query<&Children, ()>,
+    flag_child_query: Query<Entity, With<Handle<Svg>>>,
 ) {
-    for entity in level_captured
-        .read()
-        .map(|event| level_query.get(event.level).unwrap())
-        .map(|children| {
-            children
-                .iter()
-                .find(|child| level_child_query.contains(**child))
-                .unwrap()
-        })
-    {
-        println!("Level captured! 21222");
+    for level_capture_state in level_capture_state_reader.read() {
+        let level_children = level_children_query
+            .get(level_capture_state.level)
+            .expect("Level children not found!");
 
-        let level_green: Handle<Svg> = asset_server.load("flag-green.svg");
+        let flag_child = level_children
+            .iter()
+            .find(|child| flag_child_query.contains(**child))
+            .expect("Flag child not found!");
 
-        commands.entity(*entity).insert(Svg2dBundle {
-            svg: level_green.clone(),
+        let flag_asset = match level_capture_state.state {
+            CaptureState::Started => asset_server.load("flag-green.svg"),
+            CaptureState::Stopped => asset_server.load("flag-red.svg"),
+        };
+
+        commands.entity(*flag_child).insert(Svg2dBundle {
+            svg: flag_asset,
             transform: Transform::from_scale(Vec3::splat(SVG_SCALE_FACTOR)),
             ..Default::default()
         });
     }
 }
 
-pub fn startup(
+fn insert_initial_flag(
     mut commands: Commands,
     level_query: Query<Entity, With<Level>>,
     asset_server: Res<AssetServer>,

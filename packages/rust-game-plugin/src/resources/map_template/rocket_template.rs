@@ -1,6 +1,7 @@
 use rapier2d::prelude::*;
 use rust_proto::RocketModel;
 
+#[derive(Clone)]
 pub struct RocketTemplate {
     pub position: Point<f32>,
     pub rotation: f32,

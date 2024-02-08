@@ -8,7 +8,7 @@ pub mod constants;
 pub mod ecs;
 mod resources;
 
-use ecs::level::LevelCapturedEvent;
+use ecs::level::{LevelCaptureStateEvent, LevelCapturedEvent};
 pub use resources::*;
 
 pub struct GamePlugin {
@@ -43,6 +43,7 @@ impl Plugin for GamePlugin {
 
         app.add_event::<FrameInput>()
             .add_event::<LevelCapturedEvent>()
+            .add_event::<LevelCaptureStateEvent>()
             .init_resource::<GameConfig>()
             .add_plugins(
                 RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0)

@@ -1,11 +1,15 @@
-use bevy::prelude::*;
+use bevy::{ecs::schedule::SystemConfigs, prelude::*};
 
 use bevy_svg::prelude::*;
 use rust_game_plugin::{constants::ENTITY_ROCKET_ENTRY, ecs::rocket::Rocket};
 
 use super::SVG_SCALE_FACTOR;
 
-pub fn startup(
+pub fn startup() -> SystemConfigs {
+    (insert_initial_rocket).chain().into_configs()
+}
+
+fn insert_initial_rocket(
     mut commands: Commands,
     mut rocket_query: Query<(Entity, &Rocket)>,
     asset_server: Res<AssetServer>,

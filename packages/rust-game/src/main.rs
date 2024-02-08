@@ -22,12 +22,6 @@ fn input_catpure_system(
     }
 }
 
-#[derive(Component, Debug)]
-struct TestA {}
-
-#[derive(Component, Debug)]
-struct TestB {}
-
 pub fn main() {
     let mut app = App::new();
 
@@ -35,15 +29,6 @@ pub fn main() {
     let map_template = MapTemplate::new(map, "Normal");
 
     let mut world = World::default();
-
-    world.spawn(TestA {}).with_children(|parent| {
-        parent.spawn(TestB {});
-    });
-
-    println!(
-        "Exists: {:?}",
-        world.query::<(&TestA, &TestB)>().iter(&world).any(|_| true)
-    );
 
     app.add_plugins(DefaultPlugins)
         .add_plugins(RapierDebugRenderPlugin::default());

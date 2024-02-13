@@ -56,7 +56,7 @@ export const newThrustParticleFactory = (rocket: RocketEntity) => (): ParticleCo
 
     const spawnVelocity = {
         x: velocity * Math.sin(rocketRotation + randomAngle),
-        y: velocity * Math.cos(rocketRotation + randomAngle) * -1,
+        y: velocity * Math.cos(rocketRotation + randomAngle),
     }
 
     return {

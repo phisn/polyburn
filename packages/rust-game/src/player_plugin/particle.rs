@@ -1,32 +1,36 @@
-use bevy::{
-    app::{AppLabel, SubApp},
-    ecs::schedule::SystemConfigs,
-    prelude::*,
-    sprite::MaterialMesh2dBundle,
-};
+use bevy::{app::AppLabel, ecs::schedule::SystemConfigs, prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_xpbd_2d::{prelude::*, PhysicsSchedule, PhysicsStepSet};
 use rapier2d::parry::bounding_volume::BoundingVolume;
-use rust_game_plugin::MapTemplate;
+
+use self::gradient::Gradient;
+
+mod gradient;
+mod particle_spawner;
+mod thrust;
 
 #[derive(Event)]
 pub struct ParticleSpawnEvent {
     pub position: Vec2,
     pub velocity: Vec2,
     pub size: f32,
-    pub color: Color,
+    pub gradient: &'static Gradient,
     pub lifetime: f32,
 }
 
 #[derive(Component)]
 pub struct Particle {
-    pub lifetime: i128,
+    pub lifetime: i64,
+    pub age: i64,
+    pub gradient: &'static Gradient,
 }
 
 #[derive(AppLabel, Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ParticleSubApp;
 
 pub fn update() -> SystemConfigs {
-    (particle_spawner, particle_lifetime).chain().into_configs()
+    (particle_spawner, particle_lifetime, thrust::update())
+        .chain()
+        .into_configs()
 }
 
 fn particle_spawner(
@@ -38,7 +42,9 @@ fn particle_spawner(
     for event in particle_reader.read() {
         commands.spawn((
             Particle {
-                lifetime: event.lifetime as i128,
+                lifetime: event.lifetime as i64,
+                age: 0,
+                gradient: event.gradient,
             },
             RigidBody::Dynamic,
             Collider::cuboid(event.size, event.size),
@@ -59,12 +65,18 @@ fn particle_spawner(
 fn particle_lifetime(
     mut commands: Commands,
     time: Res<Time>,
-    mut query: Query<(Entity, &mut Particle)>,
+    mut query: Query<(Entity, &mut Particle, &mut Handle<ColorMaterial>)>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    for (entity, mut particle) in query.iter_mut() {
-        particle.lifetime -= time.delta().as_millis() as i128;
+    for (entity, mut particle, material) in query.iter_mut() {
+        if let Some(material) = materials.get_mut(material.id()) {
+            let age_ratio = particle.age as f32 / particle.lifetime as f32;
+            material.color = particle.gradient.pick_color(age_ratio);
+        }
 
-        if particle.lifetime <= 0i128 {
+        particle.age += time.delta().as_millis() as i64;
+
+        if particle.age >= particle.lifetime {
             commands.entity(entity).despawn();
         }
     }

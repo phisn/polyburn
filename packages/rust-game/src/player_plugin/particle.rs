@@ -33,23 +33,33 @@ pub fn update() -> SystemConfigs {
         .into_configs()
 }
 
+#[derive(Default)]
+struct Counter {
+    count: i32,
+}
+
 fn particle_spawner(
+    mut state: Local<Counter>,
     mut commands: Commands,
     mut particle_reader: EventReader<ParticleSpawnEvent>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     for event in particle_reader.read() {
+        state.count += 1;
+        println!("Particle count: {}", state.count);
+
         commands.spawn((
             Particle {
                 lifetime: event.lifetime as i64,
                 age: 0,
                 gradient: event.gradient,
             },
-            RigidBody::Dynamic,
-            Collider::cuboid(event.size, event.size),
+            RigidBody::Kinematic,
+            //            Collider::ball(event.size),
             LockedAxes::ROTATION_LOCKED,
             LinearVelocity(event.velocity),
+            GravityScale(0.0),
             MaterialMesh2dBundle {
                 transform: Transform::from_translation(event.position.extend(-1.0)),
                 mesh: meshes
@@ -92,24 +102,5 @@ impl Plugin for BruteForceBroadPhasePlugin {
         let physics_schedule = app
             .get_schedule_mut(PhysicsSchedule)
             .expect("add PhysicsSchedule first");
-
-        // Add the broad phase system into the broad phase set
-        physics_schedule.add_systems(collect_collision_pairs.in_set(PhysicsStepSet::BroadPhase));
-    }
-}
-
-fn collect_collision_pairs(
-    bodies: Query<(Entity, &ColliderAabb, &RigidBody), Without<Particle>>,
-    mut broad_collision_pairs: ResMut<BroadCollisionPairs>,
-) {
-    // Clear old collision pairs
-    broad_collision_pairs.0.clear();
-
-    // Loop through all entity combinations and collect pairs of bodies with intersecting AABBs
-    for [(ent_a, aabb_a, rb_a), (ent_b, aabb_b, rb_b)] in bodies.iter_combinations() {
-        // At least one of the bodies is dynamic and their AABBs intersect
-        if (rb_a.is_dynamic() || rb_b.is_dynamic()) && aabb_a.0.intersects(&aabb_b.0) {
-            broad_collision_pairs.0.push((ent_a, ent_b));
-        }
     }
 }

@@ -32,7 +32,7 @@ fn spawn_camera(mut commands: Commands, map: ResMut<MapTemplate>) {
             projection: OrthographicProjection {
                 far: 1000.,
                 near: -1000.,
-                scale: 0.070,
+                scale: 0.040,
                 ..Default::default()
             },
             transform: Transform::from_xyz(map.rocket.position.x, map.rocket.position.y, 1.0),

@@ -55,6 +55,8 @@ impl Plugin for GamePlugin {
             )
             .add_systems(Startup, ecs::startup().in_set(GamePluginSet))
             .add_systems(self.runner_schedule, core_runner.in_set(GamePluginSet));
+
+        app.world.init_resource::<FrameInput>();
     }
 }
 

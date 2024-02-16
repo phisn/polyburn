@@ -3,16 +3,18 @@ use bevy_xpbd_2d::prelude::*;
 use rand::prelude::*;
 use std::ops::Range;
 
-use super::{gradient::Gradient, ParticleSpawnEvent};
+use super::gradient::Gradient;
 
+#[derive(Clone)]
 pub struct ParticleTemplate {
     pub velocity: Range<f32>,
     pub size: Range<f32>,
     pub angle: Range<f32>,
     pub lifetime: Range<f32>,
-    pub gradient: &'static Gradient,
+    pub gradient: Gradient,
 }
 
+/*
 pub fn spawn_particle(
     amount: i32,
     source_position: Vec2,
@@ -57,3 +59,4 @@ fn sample_range(range: &Range<f32>) -> f32 {
         rand::thread_rng().gen_range(range.start..range.end)
     }
 }
+ */

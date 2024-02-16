@@ -1,6 +1,7 @@
 use bevy::{ecs::schedule::SystemConfigs, prelude::*};
+use bevy_rapier2d::dynamics::Velocity;
 use rand::{distributions::uniform::SampleRange, prelude::*};
-use rust_game_plugin::{ecs::rocket::Rocket, FrameInput};
+use rust_game_plugin::{constants::ENTITY_ROCKET_ENTRY, ecs::rocket::Rocket, FrameInput};
 use std::{f32::consts, ops::Range};
 
 use super::{
@@ -13,8 +14,7 @@ pub fn update() -> SystemConfigs {
     (spawn_thrust_particles).chain().into_configs()
 }
 
-const TEMPLATE: ParticleTemplate = ParticleTemplate {
-    amount: 3,
+pub const TEMPLATE: ParticleTemplate = ParticleTemplate {
     velocity: 15.0..15.0,
     size: 0.3..0.7,
     angle: (-consts::PI / 16.0)..consts::PI / 16.0,
@@ -43,15 +43,44 @@ const TEMPLATE: ParticleTemplate = ParticleTemplate {
     ]),
 };
 
+#[derive(Default)]
+struct State {
+    pub timer: f32,
+}
+
 fn spawn_thrust_particles(
-    mut input_reader: EventReader<FrameInput>,
+    mut state: Local<State>,
+    time: Res<Time>,
+    input: Res<FrameInput>,
     mut writer: EventWriter<ParticleSpawnEvent>,
-    rocket_query: Query<&Transform, With<Rocket>>,
+    rocket_query: Query<(&Transform, &Velocity), With<Rocket>>,
 ) {
-    for input in input_reader.read() {
-        if input.thrust {
-            let particles = spawn_particle(rocket_query.single(), &TEMPLATE);
+    const FREQUENCY: f32 = 1.0 / (60.0 * 3.0);
+
+    if input.thrust {
+        state.timer += time.delta_seconds();
+
+        if state.timer >= FREQUENCY {
+            let amount = (state.timer / FREQUENCY) as i32;
+
+            let (transform, velocity) = rocket_query.single();
+
+            let position = transform.translation
+                + transform.rotation * Vec3::new(0.0, -0.2 * ENTITY_ROCKET_ENTRY.height, 0.0);
+            let position = position.truncate();
+
+            let particles = spawn_particle(
+                amount,
+                position,
+                transform.rotation.z,
+                velocity.linvel,
+                &TEMPLATE,
+            );
             writer.send_batch(particles);
+
+            state.timer -= FREQUENCY * amount as f32;
         }
+    } else {
+        state.timer = 0.0;
     }
 }

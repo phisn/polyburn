@@ -20,6 +20,7 @@ i_overlay = "0.13.0"
 i_shape = "0.9.0"
 i_triangle = "0.11.0"
 js-sys = "0.3.66"
+parry2d = "0.13.6"
 prost = "0.12.3"
 rand = "0.8.5"
 rapier2d = { version = "0.17.2", features = ["enhanced-determinism", "wasm-bindgen"] }

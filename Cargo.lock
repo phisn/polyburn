@@ -3098,9 +3098,9 @@ dependencies = [
 
 [[package]]
 name = "parry2d"
-version = "0.13.5"
+version = "0.13.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "104ae65232e20477a98f9f1e75ca9850eae24a2ea846a2b1a0af03ad752136ce"
+checksum = "94683d8d7e785fe84b02d0a0dbe0fcf359c031c338dd6d144de958573c570c25"
 dependencies = [
  "approx",
  "arrayvec",
@@ -3109,7 +3109,7 @@ dependencies = [
  "either",
  "indexmap 1.9.3",
  "nalgebra",
- "num-derive 0.3.3",
+ "num-derive 0.4.2",
  "num-traits",
  "rayon",
  "rustc-hash",
@@ -3569,6 +3569,7 @@ dependencies = [
  "i_shape",
  "i_triangle",
  "js-sys",
+ "parry2d",
  "prost",
  "rand",
  "rapier2d",

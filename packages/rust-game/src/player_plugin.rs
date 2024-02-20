@@ -25,10 +25,10 @@ impl Plugin for PlayerPlugin {
         app.init_resource::<input::InputTracker>()
             .add_plugins(SvgPlugin)
             .add_plugins(
-                PhysicsPlugins::new(FixedUpdate)
+                PhysicsPlugins::new(Update)
                     .build()
                     .disable::<BroadPhasePlugin>()
-                    .add(particle::BruteForceBroadPhasePlugin),
+                    .add(super::particle_plugin::custom_broad_phase::CustomBroadPhasePlugin),
             )
             .insert_resource(Time::new_with(Physics::fixed_hz(120.0)))
             .add_systems(

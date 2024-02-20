@@ -55,7 +55,7 @@ fn spawn_thrust_particles(
     mut writer: EventWriter<ParticleSpawnEvent>,
     rocket_query: Query<(&Transform, &Velocity), With<Rocket>>,
 ) {
-    const FREQUENCY: f32 = 1.0 / (60.0 * 3.0);
+    const FREQUENCY: f32 = 1.0 / (60.0 * 30.0);
 
     if input.thrust {
         state.timer += time.delta_seconds();

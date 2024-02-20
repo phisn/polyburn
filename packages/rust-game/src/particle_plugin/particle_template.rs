@@ -5,7 +5,7 @@ use std::ops::Range;
 
 use super::gradient::Gradient;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct ParticleTemplate {
     pub velocity: Range<f32>,
     pub size: Range<f32>,

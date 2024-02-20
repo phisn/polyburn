@@ -20,5 +20,9 @@
         "editor.formatOnSave": true,
         "editor.formatOnSaveMode": "file"
     },
-    "rust-analyzer.linkedProjects": ["./packages/rust-game/Cargo.toml"]
+    "rust-analyzer.linkedProjects": [
+        "./packages/rust-game/Cargo.toml",
+        "./packages/rust-game/Cargo.toml",
+        "./packages/rust-game/Cargo.toml"
+    ]
 }

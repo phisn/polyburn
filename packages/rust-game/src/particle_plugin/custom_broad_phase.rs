@@ -3,7 +3,7 @@
 //!
 //! See [`BroadPhasePlugin`].
 
-use std::collections::{HashMap, LinkedList};
+use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy_xpbd_2d::{math::Vector, prelude::*, PhysicsSchedule, PhysicsStepSet};
@@ -145,9 +145,9 @@ fn update_aabb_intervals(
     )>,
     mut interval_maps: ResMut<AabbIntervalMaps>,
 ) {
-    for (layer, mut intervals) in interval_maps.intervals {
+    for intervals in interval_maps.intervals.values_mut() {
         intervals.retain_mut(|interval| {
-            if let Ok((new_aabb, new_layers, position, rotation)) = aabbs.get(interval.entity) {
+            if let Ok((new_aabb, _, position, rotation)) = aabbs.get(interval.entity) {
                 interval.aabb = *new_aabb;
                 interval.is_inactive = !position.is_changed() && !rotation.is_changed();
 
@@ -194,7 +194,7 @@ fn add_new_aabb_intervals(
         )
     });
 
-    for (layer, mut layer_intervals) in aabbs {
+    for (layer, layer_intervals) in aabbs {
         match intervals.intervals.get_mut(&collision_layers_to_u64(layer)) {
             Some(intervals) => {
                 intervals.push(layer_intervals);
@@ -215,13 +215,18 @@ fn collect_collision_pairs(
 ) {
     broad_collision_pairs.0.clear();
 
-    for (layer, intervals) in interval_maps.intervals.iter_mut() {
+    for (layers, intervals) in interval_maps.intervals.iter_mut() {
         insertion_sort(intervals, |a, b| a.aabb.mins.x < b.aabb.mins.x);
-        sweep_and_prune_self(intervals, &mut broad_collision_pairs.0);
+
+        let layers_instance = collision_layers_from_u64(*layers);
+
+        if layers_instance.interacts_with(layers_instance) {
+            sweep_and_prune_self(intervals, &mut broad_collision_pairs.0);
+        }
     }
 
-    for (i, (layer_0, intervals_0)) in interval_maps.intervals.iter_mut().enumerate() {
-        for (layer_1, intervals_1) in interval_maps.intervals.iter_mut().skip(i + 1) {
+    for (i, (layer_0, intervals_0)) in interval_maps.intervals.iter().enumerate() {
+        for (layer_1, intervals_1) in interval_maps.intervals.iter().skip(i + 1) {
             let layer_0_instance = collision_layers_from_u64(*layer_0);
             let layer_1_instance = collision_layers_from_u64(*layer_1);
 
@@ -233,13 +238,13 @@ fn collect_collision_pairs(
 }
 
 fn sweep_and_prune_others(
-    mut intervals_0: &mut Vec<AabbInterval>,
-    mut intervals_1: &mut Vec<AabbInterval>,
+    intervals_0: &Vec<AabbInterval>,
+    intervals_1: &Vec<AabbInterval>,
     broad_collision_pairs: &mut Vec<(Entity, Entity)>,
 ) {
     let mut iter_1 = 0;
 
-    for interval_0 in intervals_0.iter_mut() {
+    for interval_0 in intervals_0.iter() {
         for interval_1 in intervals_1.iter().skip(iter_1) {
             if interval_1.aabb.mins.x > interval_0.aabb.maxs.x {
                 break;
@@ -262,7 +267,7 @@ fn sweep_and_prune_others(
 }
 
 fn sweep_and_prune_self(
-    mut intervals: &mut Vec<AabbInterval>,
+    intervals: &Vec<AabbInterval>,
     broad_collision_pairs: &mut Vec<(Entity, Entity)>,
 ) {
     // Clear broad phase collisions from previous iteration.

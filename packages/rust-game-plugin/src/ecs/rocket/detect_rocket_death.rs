@@ -24,7 +24,7 @@ pub fn detect_rocket_death(
 }
 
 fn is_rocket_dead(
-    rapier_context: Res<'_, RapierContext>,
+    rapier_context: Res<RapierContext>,
     rocket_entity: Entity,
     rocket_vector: Vec3,
 ) -> bool {

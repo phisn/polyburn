@@ -1,4 +1,10 @@
-use bevy::{app::AppLabel, ecs::schedule::SystemConfigs, prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::{
+    app::AppLabel,
+    ecs::schedule::SystemConfigs,
+    prelude::*,
+    render::RenderSet,
+    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
+};
 use bevy_xpbd_2d::{prelude::*, PhysicsSchedule, PhysicsStepSet};
 use rapier2d::parry::bounding_volume::BoundingVolume;
 
@@ -38,13 +44,28 @@ struct Counter {
     count: i32,
 }
 
+struct ParticleSpawnerState {
+    pub material: Handle<ColorMaterial>,
+    pub mesh: Mesh2dHandle,
+}
+
 fn particle_spawner(
+    mut test_state: Local<Option<ParticleSpawnerState>>,
     mut state: Local<Counter>,
     mut commands: Commands,
     mut particle_reader: EventReader<ParticleSpawnEvent>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    if test_state.is_none() {
+        *test_state = Some(ParticleSpawnerState {
+            material: materials.add(ColorMaterial::from(Color::LIME_GREEN)),
+            mesh: meshes
+                .add(shape::Quad::new(Vec2::new(0.5, 0.5)).into())
+                .into(),
+        });
+    }
+
     for event in particle_reader.read() {
         state.count += 1;
         println!("Particle count: {}", state.count);
@@ -56,18 +77,17 @@ fn particle_spawner(
                 gradient: event.gradient,
             },
             RigidBody::Kinematic,
-            //            Collider::ball(event.size),
+            Collider::ball(event.size),
             LockedAxes::ROTATION_LOCKED,
             LinearVelocity(event.velocity),
             GravityScale(0.0),
             MaterialMesh2dBundle {
                 transform: Transform::from_translation(event.position.extend(-1.0)),
-                mesh: meshes
-                    .add(shape::Quad::new(Vec2::new(event.size, event.size)).into())
-                    .into(),
-                material: materials.add(ColorMaterial::from(Color::LIME_GREEN)),
+                mesh: test_state.as_ref().unwrap().mesh.clone(),
+                material: test_state.as_ref().unwrap().material.clone(),
                 ..Default::default()
             },
+            CollisionLayers::none(),
         ));
     }
 }
@@ -84,7 +104,7 @@ fn particle_lifetime(
             material.color = particle.gradient.pick_color(age_ratio);
         }
 
-        particle.age += time.delta().as_millis() as i64;
+        particle.age += 0 * time.delta().as_millis() as i64;
 
         if particle.age >= particle.lifetime {
             commands.entity(entity).despawn();

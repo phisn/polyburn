@@ -5,6 +5,17 @@ pub struct Gradient {
     entries: Vec<GradientEntry>,
 }
 
+impl Default for Gradient {
+    fn default() -> Self {
+        Self {
+            entries: vec![GradientEntry {
+                time: 0.0,
+                color: Color::WHITE,
+            }],
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 pub struct GradientEntry {
     pub time: f32,

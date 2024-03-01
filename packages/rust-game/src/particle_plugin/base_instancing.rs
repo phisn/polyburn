@@ -4,6 +4,7 @@ use bevy::{
         query::QueryItem,
         system::{lifetimeless::*, SystemParamItem},
     },
+    pbr::MeshUniform,
     prelude::*,
     render::{
         batching::NoAutomaticBatching,
@@ -21,7 +22,7 @@ use bevy::{
     },
     sprite::{
         MaterialMesh2dBundle, Mesh2d, Mesh2dHandle, Mesh2dPipeline, Mesh2dPipelineKey,
-        RenderMesh2dInstances, SetMesh2dBindGroup, SetMesh2dViewBindGroup,
+        Mesh2dUniform, RenderMesh2dInstances, SetMesh2dBindGroup, SetMesh2dViewBindGroup,
     },
     utils::FloatOrd,
 };
@@ -43,7 +44,7 @@ pub struct InstancingPlugin;
 impl Plugin for InstancingPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(ExtractComponentPlugin::<InstancingHost>::default());
-        app.add_systems(Last, prepare_buffer);
+        app.add_systems(PostUpdate, prepare_buffer);
 
         app.sub_app_mut(RenderApp)
             .add_render_command::<Transparent2d, DrawCustom>()
@@ -51,8 +52,8 @@ impl Plugin for InstancingPlugin {
             .add_systems(
                 Render,
                 (
-                    queue_custom.in_set(RenderSet::QueueMeshes),
-                    prepare_instance_buffers.in_set(RenderSet::PrepareResources),
+                    queue_custom.in_set(RenderSet::Queue),
+                    prepare_instance_buffers.in_set(RenderSet::Prepare),
                 ),
             );
     }
@@ -222,6 +223,11 @@ impl SpecializedMeshPipeline for CustomPipeline {
                     offset: VertexFormat::Float32x4.size(),
                     shader_location: 4,
                 },
+                VertexAttribute {
+                    format: VertexFormat::Uint32,
+                    offset: VertexFormat::Float32x4.size() * 2,
+                    shader_location: 5,
+                },
             ],
         });
         descriptor.fragment.as_mut().unwrap().shader = self.shader.clone();
@@ -254,6 +260,7 @@ impl<P: PhaseItem> RenderCommand<P> for DrawMeshInstanced {
         let Some(mesh_instance) = render_mesh_instances.get(&item.entity()) else {
             return RenderCommandResult::Failure;
         };
+
         let gpu_mesh = match meshes.into_inner().get(mesh_instance.mesh_asset_id) {
             Some(gpu_mesh) => gpu_mesh,
             None => return RenderCommandResult::Failure,

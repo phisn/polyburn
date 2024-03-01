@@ -16,9 +16,9 @@ use parry2d::math::Isometry;
 /// Currently, the broad phase uses the [sweep and prune](https://en.wikipedia.org/wiki/Sweep_and_prune) algorithm.
 ///
 /// The broad phase systems run in [`PhysicsStepSet::BroadPhase`].
-pub struct CustomBroadPhasePlugin;
+pub struct BroadPhasePlugin;
 
-impl Plugin for CustomBroadPhasePlugin {
+impl Plugin for BroadPhasePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AabbIntervalMaps>();
 

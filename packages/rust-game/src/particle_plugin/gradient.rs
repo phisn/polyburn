@@ -44,7 +44,11 @@ impl Gradient {
                 let left = self.entries[i].color;
                 let right = self.entries[i + 1].color;
 
-                return left + (right + left * -1.0) * ratio;
+                let mut result = left + (right + left * -1.0) * ratio;
+
+                result.set_a(0.8);
+
+                return result;
             }
         }
 

@@ -81,13 +81,13 @@ fn particle_spawner(
             LockedAxes::ROTATION_LOCKED,
             LinearVelocity(event.velocity),
             GravityScale(0.0),
+            CollisionLayers::none(),
             MaterialMesh2dBundle {
                 transform: Transform::from_translation(event.position.extend(-1.0)),
                 mesh: test_state.as_ref().unwrap().mesh.clone(),
                 material: test_state.as_ref().unwrap().material.clone(),
                 ..Default::default()
             },
-            CollisionLayers::none(),
         ));
     }
 }

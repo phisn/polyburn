@@ -37,8 +37,7 @@ pub fn main() {
             ..default()
         }),
         ..default()
-    }))
-    .add_plugins(RapierDebugRenderPlugin::default());
+    })); // .add_plugins(RapierDebugRenderPlugin::default());
 
     app.insert_resource(map_template)
         .add_plugins(GamePlugin::default())

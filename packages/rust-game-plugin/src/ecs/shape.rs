@@ -20,7 +20,7 @@ impl ShapeBundle {
         ShapeBundle {
             shape: Shape,
             rigid_body: RigidBody::Fixed,
-            collider: template.create_collider(),
+            collider: template.create_rapier_collider(),
             transform: TransformBundle::IDENTITY,
         }
     }

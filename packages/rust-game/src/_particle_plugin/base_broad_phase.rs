@@ -235,6 +235,12 @@ fn collect_collision_pairs(
             }
         }
     }
+
+    for (n, interval) in &interval_maps.intervals {
+        print!("({:016x}, {})", n, interval.len());
+    }
+
+    println!();
 }
 
 fn sweep_and_prune_others(
@@ -242,16 +248,13 @@ fn sweep_and_prune_others(
     intervals_1: &Vec<AabbInterval>,
     broad_collision_pairs: &mut Vec<(Entity, Entity)>,
 ) {
-    let mut iter_1 = 0;
-
     for interval_0 in intervals_0.iter() {
-        for interval_1 in intervals_1.iter().skip(iter_1) {
+        for interval_1 in intervals_1.iter() {
             if interval_1.aabb.mins.x > interval_0.aabb.maxs.x {
                 break;
             }
 
             if interval_1.aabb.maxs.x < interval_0.aabb.mins.x {
-                iter_1 += 1;
                 continue;
             }
 

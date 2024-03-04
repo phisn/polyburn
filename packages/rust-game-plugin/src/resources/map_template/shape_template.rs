@@ -1,5 +1,4 @@
 use bevy::math::Vec2;
-use bevy_rapier2d::geometry::Collider;
 use i_float::fix_float::{FixConvert, FixMath};
 use i_float::fix_vec::FixVec;
 use i_overlay::bool::fill_rule::FillRule;
@@ -86,9 +85,8 @@ impl ShapeTemplate {
         &self.vertices
     }
 
-    pub fn create_collider(&self) -> Collider {
-        let colliders: Vec<SharedShape> = self
-            .parts
+    pub fn parry_shapes(&self) -> Vec<SharedShape> {
+        self.parts
             .iter()
             .map(|part| {
                 part.iter()
@@ -99,13 +97,16 @@ impl ShapeTemplate {
                 SharedShape::convex_polyline(part)
                     .expect("Failed to create collider in shape from part")
             })
-            .collect();
+            .collect()
+    }
 
-        let shapes: Vec<(Vec2, f32, Collider)> = colliders
+    pub fn create_rapier_collider(&self) -> bevy_rapier2d::geometry::Collider {
+        let shapes: Vec<(Vec2, f32, bevy_rapier2d::geometry::Collider)> = self
+            .parry_shapes()
             .iter()
             .map(|collider| (Vec2::ZERO, 0.0, collider.clone().into()))
             .collect();
 
-        Collider::compound(shapes)
+        bevy_rapier2d::geometry::Collider::compound(shapes)
     }
 }

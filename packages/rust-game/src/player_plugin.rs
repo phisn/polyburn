@@ -6,8 +6,9 @@ use bevy::render::view::NoFrustumCulling;
 use bevy::sprite::Mesh2dHandle;
 use bevy::{app::SubApp, prelude::*};
 use bevy_svg::SvgPlugin;
+use bevy_xpbd_2d::components::{Collider, RigidBody};
 use bevy_xpbd_2d::plugins::setup::Physics;
-use bevy_xpbd_2d::plugins::{BroadPhasePlugin, PhysicsPlugins};
+use bevy_xpbd_2d::plugins::{BroadPhasePlugin, PhysicsDebugPlugin, PhysicsPlugins};
 use rand::prelude::*;
 use rust_game_plugin::constants::ENTITY_ROCKET_ENTRY;
 use rust_game_plugin::GamePluginSchedule;
@@ -20,11 +21,7 @@ mod particle;
 
 pub use input::*;
 
-use crate::particle_plugin::{
-    self, Gradient, GradientEntry, ParticleSystem, ParticleSystemBundle, ParticleTemplate,
-};
-
-use self::particle::{ParticleSpawnEvent, ParticleSubApp};
+use self::particle::ParticleSpawnEvent;
 
 #[derive(Default)]
 pub struct PlayerPlugin;
@@ -33,14 +30,8 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<input::InputTracker>()
             .add_plugins(SvgPlugin)
-            .add_plugins(
-                PhysicsPlugins::new(GamePluginSchedule)
-                    .build()
-                    .disable::<BroadPhasePlugin>()
-                    .add(super::particle_plugin::base_broad_phase::BroadPhasePlugin),
-            )
-            .add_plugins(particle_plugin::ParticlePlugin)
-            .insert_resource(Time::new_with(Physics::fixed_hz(60.0)))
+            .add_plugins(PhysicsPlugins::new(PostUpdate))
+            .add_plugins(PhysicsDebugPlugin::new(PostUpdate))
             .add_systems(
                 FixedUpdate,
                 (input::fixed_update()).chain().in_set(GamePluginSet),
@@ -56,7 +47,7 @@ impl Plugin for PlayerPlugin {
                 (
                     graphics::startup(),
                     camera::startup(),
-                    rocket_particle_setup,
+                    // rocket_particle_setup,
                 )
                     .chain()
                     .after(GamePluginSet),
@@ -68,10 +59,12 @@ impl Plugin for PlayerPlugin {
     }
 }
 
+/*
 fn rocket_particle_setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     rocket_query: Query<Entity, With<Rocket>>,
+    map_template: Res<MapTemplate>,
 ) {
     let mesh = Mesh::from(shape::Quad::new(Vec2::splat(1.0)));
     let mesh_handle = meshes.add(mesh);
@@ -80,11 +73,11 @@ fn rocket_particle_setup(
         .spawn(ParticleSystemBundle {
             particle_system: ParticleSystem {
                 spawn_every_duration: Duration::from_secs_f32(1.0 / 60.0 / 3.0),
-                location: particle_plugin::ParticleSpawnLocation::Entity(
+                location: _particle_plugin::ParticleSpawnLocation::Entity(
                     rocket_query.single(),
                     Vec3::new(0.0, -ENTITY_ROCKET_ENTRY.height * 0.2, 0.0),
                 ),
-                amount: particle_plugin::ParticleAmount::Finite(0),
+                amount: _particle_plugin::ParticleAmount::Finite(0),
                 template: thrust_particle_template(),
             },
             mesh: Mesh2dHandle(mesh_handle.clone()),
@@ -92,6 +85,26 @@ fn rocket_particle_setup(
             ..Default::default()
         })
         .insert(RocketParticleSystem);
+
+    for shape in &map_template.shapes {
+        let colliders: Vec<(Vec2, f32, bevy_xpbd_2d::components::Collider)> = shape
+            .parry_shapes()
+            .iter()
+            .map(|collider| (Vec2::ZERO, 0.0, collider.clone().into()))
+            .collect();
+
+        for collider in colliders {
+            commands.spawn((
+                TransformBundle::from_transform(Transform::from_translation(Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                })),
+                RigidBody::Static,
+                Collider::from(collider.2),
+            ));
+        }
+    }
 }
 
 fn thrust_particle_template() -> ParticleTemplate {
@@ -124,3 +137,4 @@ fn thrust_particle_template() -> ParticleTemplate {
         ]),
     }
 }
+*/

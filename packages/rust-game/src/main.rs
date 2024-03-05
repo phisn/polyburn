@@ -1,5 +1,5 @@
 use base64::*;
-use bevy::{prelude::*, window::PresentMode};
+use bevy::{input::keyboard::Key, prelude::*, window::PresentMode};
 use bevy_rapier2d::prelude::*;
 
 use bevy_xpbd_2d::plugins::setup::Physics;
@@ -12,10 +12,10 @@ mod player_plugin;
 
 fn input_catpure_system(
     input_tracker: Res<InputTracker>,
-    keyboard: Res<Input<KeyCode>>,
+    keyboard: Res<ButtonInput<KeyCode>>,
     rocket_query: Query<(&Rocket, &Transform)>,
 ) {
-    if keyboard.just_pressed(KeyCode::L) && keyboard.pressed(KeyCode::ControlLeft) {
+    if keyboard.just_pressed(KeyCode::KeyL) && keyboard.pressed(KeyCode::ControlLeft) {
         println!(
             "Inputs({:?}), \n\n\n\n\n\n\n\n\n\n\n\n State({:?})",
             base64::engine::general_purpose::STANDARD

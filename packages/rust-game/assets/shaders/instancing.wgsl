@@ -14,14 +14,22 @@ struct VertexOutput {
     @location(0) color: vec4<f32>,
 };
 
+const identity_matrix: mat4x4<f32> = mat4x4<f32>(
+    vec4<f32>(1.0, 0.0, 0.0, 0.0),
+    vec4<f32>(0.0, 1.0, 0.0, 0.0),
+    vec4<f32>(0.0, 0.0, 1.0, 0.0),
+    vec4<f32>(0.0, 0.0, 0.0, 1.0)
+);
+
 @vertex
 fn vertex(vertex: Vertex) -> VertexOutput {
     let position = vertex.position * vertex.i_pos_scale.w + vertex.i_pos_scale.xyz;
     var out: VertexOutput;
     
-    var model = mesh_functions::get_model_matrix(0u);
     out.clip_position = mesh_functions::mesh2d_position_local_to_clip(
-        model,
+        // identity_matrix approach found here (https://github.com/jadedbay/bevy_procedural_grass/blob/c1269a964fd9ee31c2569a580535ee6b61cfcf03/src/assets/shaders/grass.wgsl)
+        // i do not understand why this works or why other soultions suggested in the bevy discord do not work.
+        identity_matrix,
         vec4<f32>(position, 1.0)
     );
     out.color = vertex.i_color;

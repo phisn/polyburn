@@ -105,18 +105,21 @@ fn queue_custom(
     mut views: Query<(&ExtractedView, &mut RenderPhase<Transparent2d>)>,
 ) {
     let draw_custom = transparent_2d_draw_functions.read().id::<DrawCustom>();
-
     let msaa_key = Mesh2dPipelineKey::from_msaa_samples(msaa.samples());
 
     for (view, mut transparent_phase) in &mut views {
         let view_key = msaa_key | Mesh2dPipelineKey::from_hdr(view.hdr);
         for entity in &material_meshes {
             let Some(mesh_instance) = render_mesh_instances.get(&entity) else {
+                error!("Mesh instance not found for entity {:?}", entity);
                 continue;
             };
+
             let Some(mesh) = meshes.get(mesh_instance.mesh_asset_id) else {
+                error!("Mesh not found for entity {:?}", entity);
                 continue;
             };
+
             let key =
                 view_key | Mesh2dPipelineKey::from_primitive_topology(mesh.primitive_topology);
 
@@ -126,7 +129,7 @@ fn queue_custom(
             let pipeline = match pipeline {
                 Ok(id) => id,
                 Err(err) => {
-                    error!("{}", err);
+                    error!("Failed to create pipeline: {:?}", err);
                     continue;
                 }
             };
@@ -246,24 +249,33 @@ pub struct DrawMeshInstanced;
 
 impl<P: PhaseItem> RenderCommand<P> for DrawMeshInstanced {
     type Param = (SRes<RenderAssets<Mesh>>, SRes<RenderMesh2dInstances>);
-    type ViewWorldQuery = ();
-    type ItemWorldQuery = Read<InstanceBuffer>;
+    type ViewQuery = ();
+    type ItemQuery = Read<InstanceBuffer>;
 
     #[inline]
     fn render<'w>(
         item: &P,
         _view: (),
-        instance_buffer: &'w InstanceBuffer,
+        instance_buffer: Option<&'w InstanceBuffer>,
         (meshes, render_mesh_instances): SystemParamItem<'w, '_, Self::Param>,
         pass: &mut TrackedRenderPass<'w>,
     ) -> RenderCommandResult {
         let Some(mesh_instance) = render_mesh_instances.get(&item.entity()) else {
+            error!("Mesh instance not found for entity {:?}", item.entity());
             return RenderCommandResult::Failure;
         };
 
         let gpu_mesh = match meshes.into_inner().get(mesh_instance.mesh_asset_id) {
             Some(gpu_mesh) => gpu_mesh,
-            None => return RenderCommandResult::Failure,
+            None => {
+                error!("Mesh not found for entity {:?}", item.entity());
+                return RenderCommandResult::Failure;
+            }
+        };
+
+        let Some(instance_buffer) = instance_buffer else {
+            error!("Instance buffer not found for entity {:?}", item.entity());
+            return RenderCommandResult::Failure;
         };
 
         pass.set_vertex_buffer(0, gpu_mesh.vertex_buffer.slice(..));

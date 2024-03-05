@@ -12,7 +12,7 @@ pub fn detect_rocket_death(
 ) {
     let (rocket_entity, mut rocket, mut transform, mut velocity) = rocket_query.single_mut();
 
-    if is_rocket_dead(rapier_context, rocket_entity, transform.up()) {
+    if is_rocket_dead(rapier_context, rocket_entity, *transform.up()) {
         velocity.linvel = Vec2::ZERO;
         velocity.angvel = 0.0;
 
@@ -29,7 +29,7 @@ fn is_rocket_dead(
     rocket_vector: Vec3,
 ) -> bool {
     for contact in rapier_context
-        .contacts_with(rocket_entity)
+        .contact_pairs_with(rocket_entity)
         .filter(|contact| contact.has_any_active_contacts())
     {
         if contact.raw.total_impulse_magnitude() > ROCKET_MAX_IMPULSE_MAGNITUDE {

@@ -7,9 +7,9 @@ use parry2d::{
     shape::SharedShape,
 };
 
-#[derive(Resource, Default)]
+#[derive(Debug, Resource, Default)]
 pub struct Environment {
-    pub tree: Node,
+    tree: Node,
 }
 
 impl Environment {

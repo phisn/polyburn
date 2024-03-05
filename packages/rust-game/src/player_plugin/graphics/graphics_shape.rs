@@ -1,7 +1,7 @@
 use bevy::{
     ecs::schedule::SystemConfigs,
     prelude::*,
-    render::{mesh::Indices, render_resource::PrimitiveTopology},
+    render::{mesh::Indices, render_asset::RenderAssetUsages, render_resource::PrimitiveTopology},
     sprite::MaterialMesh2dBundle,
 };
 use rust_game_plugin::{MapTemplate, ShapeVertex};
@@ -22,7 +22,7 @@ fn insert_initial_shape_mesh(
         };
 
         commands.spawn(MaterialMesh2dBundle {
-            mesh: meshes.add(shape.into()).into(),
+            mesh: meshes.add(shape).into(),
             material: materials.add(ColorMaterial::from(Color::WHITE)),
             ..default()
         });
@@ -67,9 +67,9 @@ impl From<PolygonShape> for Mesh {
             })
             .collect();
 
-        Mesh::new(PrimitiveTopology::TriangleList)
+        Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::all())
             .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, positions)
             .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
-            .with_indices(Some(Indices::U32(indices)))
+            .with_inserted_indices(Indices::U32(indices))
     }
 }

@@ -1,4 +1,8 @@
-use bevy::{ecs::schedule::SystemConfigs, prelude::*};
+use bevy::{
+    ecs::schedule::SystemConfigs,
+    input::keyboard::{Key, KeyboardInput},
+    prelude::*,
+};
 use rust_game_plugin::FrameInput;
 
 mod input_state;
@@ -6,6 +10,8 @@ mod input_tracker;
 
 pub use input_state::*;
 pub use input_tracker::*;
+
+use crate::particle_plugin::{ParticleSpawnEvent, ParticleSpawnType};
 
 pub fn fixed_update() -> SystemConfigs {
     (input_generator).chain().into_configs()
@@ -19,17 +25,17 @@ fn input_generator(
     mut event_writer: EventWriter<FrameInput>,
     mut input_tracker: ResMut<InputTracker>,
     time: Res<Time>,
-    keyboard: Res<Input<KeyCode>>,
+    keyboard: Res<ButtonInput<KeyCode>>,
     mut rocket_particle_system_query: Query<Entity, With<RocketParticleSystem>>,
-    //    mut particle_spawn_writer: EventWriter<ParticleSpawnEvent>,
+    mut particle_spawn_writer: EventWriter<ParticleSpawnEvent>,
 ) {
     match *state {
         InputState::Keyboard { mut rotation } => {
-            if keyboard.pressed(KeyCode::Left) {
+            if keyboard.pressed(KeyCode::ArrowLeft) {
                 rotation += 1.0 * time.delta_seconds();
             }
 
-            if keyboard.pressed(KeyCode::Right) {
+            if keyboard.pressed(KeyCode::ArrowRight) {
                 rotation -= 1.0 * time.delta_seconds();
             }
 
@@ -37,12 +43,11 @@ fn input_generator(
 
             let input = FrameInput {
                 rotation,
-                thrust: keyboard.pressed(KeyCode::Up),
+                thrust: keyboard.pressed(KeyCode::ArrowUp),
             };
 
             let rocket_particle_system = rocket_particle_system_query.single();
 
-            /*
             if input.thrust {
                 particle_spawn_writer.send(ParticleSpawnEvent {
                     system_entity: rocket_particle_system,
@@ -54,7 +59,6 @@ fn input_generator(
                     spawn_type: ParticleSpawnType::Stop,
                 });
             }
-            */
 
             event_writer.send(input);
             input_tracker.push(input);

@@ -186,7 +186,8 @@ pub fn particle_system_spawner(
                         Particle {
                             vx: velocity.x,
                             vy: velocity.y,
-                            mass: 1.0,
+                            friction: 0.8,
+                            restitution: 0.1,
                             shape: SharedShape::ball(size),
                             gradient: particle_system.template.gradient.clone(),
                             age: Duration::ZERO,

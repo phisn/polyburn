@@ -13,8 +13,8 @@ pub use level_progress_capture::LevelCapturedEvent;
 
 #[derive(Component)]
 pub struct Level {
-    camera: Rect,
-    hideFlag: bool,
+    pub camera: Rect,
+    pub hideFlag: bool,
 }
 
 #[derive(Component)]

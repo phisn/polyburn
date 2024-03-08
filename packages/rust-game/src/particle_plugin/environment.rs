@@ -52,23 +52,23 @@ impl Environment {
             }
             Node::Node(split, min, max, mid) => match split.split_type {
                 SplitType::Horizontal => {
-                    if aabb.mins.y < split.min {
-                        self.query_recursive(min, aabb, result);
+                    if aabb.maxs.y > split.min {
+                        self.query_recursive(max, aabb, result);
                     }
 
-                    if aabb.maxs.y > split.max {
-                        self.query_recursive(max, aabb, result);
+                    if aabb.mins.y < split.max {
+                        self.query_recursive(min, aabb, result);
                     }
 
                     self.query_recursive(mid, aabb, result);
                 }
                 SplitType::Vertical => {
-                    if aabb.mins.x < split.min {
-                        self.query_recursive(min, aabb, result);
+                    if aabb.maxs.x > split.min {
+                        self.query_recursive(max, aabb, result);
                     }
 
-                    if aabb.maxs.x > split.max {
-                        self.query_recursive(max, aabb, result);
+                    if aabb.mins.x < split.max {
+                        self.query_recursive(min, aabb, result);
                     }
 
                     self.query_recursive(mid, aabb, result);
@@ -145,8 +145,6 @@ impl Environment {
                 continue;
             }
 
-            min = min.min(*shape_min);
-            max = max.max(*shape_max);
             mid_shapes.push(shape.clone());
         }
 
@@ -220,6 +218,7 @@ mod tests {
 
     fn create_shape(x: f32, y: f32, w: f32, h: f32) -> (SharedShape, Isometry2<f32>) {
         let shape = SharedShape::cuboid(w / 2.0, h / 2.0);
+
         let iso = Isometry2::new([x, y].into(), 0.0);
         (shape, iso)
     }

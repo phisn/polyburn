@@ -19,8 +19,8 @@ impl LevelTemplate {
             rotation: level.rotation,
 
             camera: Rect {
-                min: Vec2::new(level.camera_top_left_x, level.camera_top_left_y),
-                max: Vec2::new(level.camera_bottom_right_x, level.camera_bottom_right_y),
+                min: Vec2::new(level.camera_top_left_x, level.camera_bottom_right_y),
+                max: Vec2::new(level.camera_bottom_right_x, level.camera_top_left_y),
             },
 
             capture_area_left: level.capture_area_left,

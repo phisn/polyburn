@@ -25,6 +25,7 @@ use crate::particle_plugin::{
     self, Environment, Gradient, GradientEntry, ParticlePlugin, ParticleSystem,
     ParticleSystemBundle, ParticleTemplate,
 };
+use crate::player_plugin::camera::CameraConfig;
 
 #[derive(Default)]
 pub struct PlayerPlugin;
@@ -56,7 +57,9 @@ impl Plugin for PlayerPlugin {
             )
             .insert_resource(DeterministicRenderingConfig {
                 stable_sort_z_fighting: true,
-            });
+            })
+            .init_resource::<CameraConfig>()
+            .insert_resource(ClearColor(Color::rgb(0.9, 0.3, 0.6)));
 
         use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
         app.add_plugins(FrameTimeDiagnosticsPlugin::default());
@@ -69,7 +72,7 @@ fn rocket_particle_setup(
     rocket_query: Query<Entity, With<Rocket>>,
     map_template: Res<MapTemplate>,
 ) {
-    let mesh = Mesh::from(shape::Quad::new(Vec2::splat(1.0)));
+    let mesh = Mesh::from(Circle::new(0.8));
     let mesh_handle = meshes.add(mesh);
 
     commands
@@ -96,7 +99,9 @@ fn rocket_particle_setup(
         .map(|collider| (collider, Isometry2::<f32>::identity()))
         .collect();
 
-    commands.insert_resource(Environment::build(colliders));
+    let env = Environment::build(colliders);
+
+    commands.insert_resource(env);
 }
 
 fn thrust_particle_template() -> ParticleTemplate {

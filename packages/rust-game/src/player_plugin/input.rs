@@ -26,7 +26,7 @@ fn input_generator(
     mut input_tracker: ResMut<InputTracker>,
     time: Res<Time>,
     keyboard: Res<ButtonInput<KeyCode>>,
-    mut rocket_particle_system_query: Query<Entity, With<RocketParticleSystem>>,
+    rocket_particle_system_query: Query<Entity, With<RocketParticleSystem>>,
     mut particle_spawn_writer: EventWriter<ParticleSpawnEvent>,
 ) {
     match *state {

@@ -7,8 +7,8 @@ use bevy_rapier2d::dynamics::Velocity;
 use parry2d::shape::SharedShape;
 use rand::prelude::*;
 use rust_game_plugin::GamePluginSchedule;
-use std::ops::Range;
 use std::time::Duration;
+use std::{ops::Range, sync::Arc};
 
 mod gradient;
 mod particle_template;
@@ -87,7 +87,6 @@ impl Default for ParticleSystemBundle {
 }
 
 pub fn particle_system_event_receiver(
-    mut commands: Commands,
     mut events: EventReader<ParticleSpawnEvent>,
     mut particle_systems: Query<&mut ParticleSystem>,
 ) {
@@ -131,9 +130,6 @@ pub fn particle_system_spawner(
                 as u32;
 
             state.time_since_last_spawn -= particle_system.spawn_every_duration * count;
-
-            let single_factor = particle_system.spawn_every_duration.as_secs_f32()
-                / state.time_since_last_spawn.as_secs_f32();
 
             if let ParticleAmount::Finite(max_amount) = particle_system.amount {
                 if count > max_amount as u32 {

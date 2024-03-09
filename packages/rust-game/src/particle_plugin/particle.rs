@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
 use bevy::prelude::*;
 use parry2d::{
@@ -26,7 +26,7 @@ pub struct Particle {
     pub friction: f32,
     pub restitution: f32,
 
-    pub gradient: Gradient,
+    pub gradient: Arc<Gradient>,
     pub age: Duration,
     pub lifetime: Duration,
 }
@@ -67,7 +67,7 @@ pub fn simulation_step(
                         particle.shape.as_ref(),
                         &Isometry2::identity(),
                         possible_contact.as_ref(),
-                        0.01,
+                        0.0,
                     );
 
                     if let Ok(Some(contact)) = contact {

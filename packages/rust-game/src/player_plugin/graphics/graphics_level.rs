@@ -32,16 +32,12 @@ fn level_flag_tracker(
             .find(|child| flag_child_query.contains(**child))
             .expect("Flag child not found!");
 
-        let flag_asset = match level_capture_state.state {
+        let flag_asset: Handle<Svg> = match level_capture_state.state {
             CaptureState::Started => asset_server.load("flag-green.svg"),
             CaptureState::Stopped => asset_server.load("flag-red.svg"),
         };
 
-        commands.entity(*flag_child).insert(Svg2dBundle {
-            svg: flag_asset,
-            transform: Transform::from_scale(Vec3::splat(SVG_SCALE_FACTOR)),
-            ..Default::default()
-        });
+        commands.entity(*flag_child).insert(flag_asset);
     }
 }
 

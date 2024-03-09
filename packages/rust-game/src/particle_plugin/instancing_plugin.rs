@@ -64,22 +64,24 @@ impl Plugin for InstancingPlugin {
 }
 
 fn prepare_buffer(
-    mut instanced_materials: Query<(&mut InstancingHost, &Children)>,
+    mut instanced_materials: Query<(&mut InstancingHost, Option<&Children>)>,
     instanced_material_children: Query<(&InstancingChild, &Transform)>,
 ) {
     for (mut instanced_material, children) in &mut instanced_materials {
-        let children = children
-            .iter()
-            .map(|entity| instanced_material_children.get(*entity).unwrap());
-
         instanced_material.buffer.clear();
 
-        for (child, child_transform) in children {
-            instanced_material.buffer.push(InstanceData {
-                position: child_transform.translation,
-                scale: child.scale,
-                color: child.color,
-            });
+        if let Some(children) = children {
+            let children = children
+                .iter()
+                .map(|entity| instanced_material_children.get(*entity).unwrap());
+
+            for (child, child_transform) in children {
+                instanced_material.buffer.push(InstanceData {
+                    position: child_transform.translation,
+                    scale: child.scale,
+                    color: child.color,
+                });
+            }
         }
     }
 }

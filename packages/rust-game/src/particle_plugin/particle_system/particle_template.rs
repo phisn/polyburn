@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_xpbd_2d::prelude::*;
 use rand::prelude::*;
-use std::ops::Range;
+use std::{ops::Range, sync::Arc};
 
 use super::gradient::Gradient;
 
@@ -11,7 +11,7 @@ pub struct ParticleTemplate {
     pub size: Range<f32>,
     pub angle: Range<f32>,
     pub lifetime: Range<f32>,
-    pub gradient: Gradient,
+    pub gradient: Arc<Gradient>,
 }
 
 /*

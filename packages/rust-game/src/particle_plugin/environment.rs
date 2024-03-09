@@ -30,14 +30,14 @@ impl Environment {
         Environment { tree }
     }
 
-    pub fn query<'a>(&'a self, aabb: Aabb) -> Vec<&'a parry2d::shape::SharedShape> {
+    pub fn query(&self, aabb: Aabb) -> Vec<&parry2d::shape::SharedShape> {
         let mut result = vec![];
         self.query_recursive(&self.tree, aabb, &mut result);
         result
     }
 
     fn query_recursive<'a>(
-        &'a self,
+        &self,
         node: &'a Node,
         aabb: Aabb,
         result: &mut Vec<&'a parry2d::shape::SharedShape>,

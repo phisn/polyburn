@@ -1,6 +1,8 @@
 use std::f32::consts::{self, PI};
+use std::sync::Arc;
 use std::time::Duration;
 
+use bevy::asset::LoadedFolder;
 use bevy::render::deterministic::DeterministicRenderingConfig;
 use bevy::render::view::NoFrustumCulling;
 use bevy::sprite::Mesh2dHandle;
@@ -26,6 +28,7 @@ use crate::particle_plugin::{
     ParticleSystemBundle, ParticleTemplate,
 };
 use crate::player_plugin::camera::CameraConfig;
+use crate::player_plugin::graphics::GameAssets;
 
 #[derive(Default)]
 pub struct PlayerPlugin;
@@ -47,11 +50,7 @@ impl Plugin for PlayerPlugin {
             )
             .add_systems(
                 PostStartup,
-                (
-                    graphics::startup(),
-                    camera::startup(),
-                    rocket_particle_setup,
-                )
+                (graphics::startup(), camera::startup())
                     .chain()
                     .after(GamePluginSet),
             )
@@ -59,78 +58,9 @@ impl Plugin for PlayerPlugin {
                 stable_sort_z_fighting: true,
             })
             .init_resource::<CameraConfig>()
-            .insert_resource(ClearColor(Color::rgb(0.9, 0.3, 0.6)));
+            .init_resource::<GameAssets>();
 
         use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
         app.add_plugins(FrameTimeDiagnosticsPlugin::default());
-    }
-}
-
-fn rocket_particle_setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    rocket_query: Query<Entity, With<Rocket>>,
-    map_template: Res<MapTemplate>,
-) {
-    let mesh = Mesh::from(Circle::new(0.8));
-    let mesh_handle = meshes.add(mesh);
-
-    commands
-        .spawn(ParticleSystemBundle {
-            particle_system: ParticleSystem {
-                spawn_every_duration: Duration::from_secs_f32(1.0 / 60.0 / 3.0),
-                location: particle_plugin::ParticleSpawnLocation::Entity(
-                    rocket_query.single(),
-                    Vec3::new(0.0, -ENTITY_ROCKET_ENTRY.height * 0.2, 0.0),
-                ),
-                amount: particle_plugin::ParticleAmount::Finite(0),
-                template: thrust_particle_template(),
-            },
-            mesh: Mesh2dHandle(mesh_handle.clone()),
-            spatial_bundle: SpatialBundle::from_transform(Transform::from_xyz(0.0, 0.0, 0.0)),
-            ..Default::default()
-        })
-        .insert(RocketParticleSystem);
-
-    let colliders: Vec<_> = map_template
-        .shapes
-        .iter()
-        .flat_map(|shape| shape.parry_shapes())
-        .map(|collider| (collider, Isometry2::<f32>::identity()))
-        .collect();
-
-    let env = Environment::build(colliders);
-
-    commands.insert_resource(env);
-}
-
-fn thrust_particle_template() -> ParticleTemplate {
-    ParticleTemplate {
-        velocity: 15.0..15.0,
-        size: 0.3..0.7,
-        angle: (-consts::PI / 16.0)..(consts::PI / 16.0),
-        lifetime: 0.360..0.630,
-        gradient: Gradient::new(vec![
-            GradientEntry {
-                time: 0.0,
-                color: Color::rgb(1.0, 0.726, 0.0),
-            },
-            GradientEntry {
-                time: 0.2,
-                color: Color::rgb(1.0, 0.618, 0.318),
-            },
-            GradientEntry {
-                time: 0.4,
-                color: Color::rgb(1.0, 0.0, 0.0),
-            },
-            GradientEntry {
-                time: 0.65,
-                color: Color::rgb(0.65, 0.65, 0.65),
-            },
-            GradientEntry {
-                time: 1.0,
-                color: Color::rgb(0.311, 0.311, 0.311),
-            },
-        ]),
     }
 }

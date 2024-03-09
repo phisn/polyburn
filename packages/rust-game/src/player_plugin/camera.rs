@@ -149,20 +149,6 @@ fn update_camera_size(
     camera: &mut CustomCamera,
     camera_projection: &mut OrthographicProjection,
 ) {
-    /*
-    let constraint_comparison = (
-        camera.size.x.total_cmp(&camera.level_constraint_size.x),
-        camera.size.y.total_cmp(&camera.level_constraint_size.y),
-    );
-    */
-
-    /*match constraint_comparison {
-        (Ordering::Less, Ordering::Less) => camera.size,
-        (Ordering::Less, _) => Vec2::new(camera.size.x, camera.level_constraint_size.y),
-        (_, Ordering::Less) => Vec2::new(camera.level_constraint_size.x, camera.size.y),
-        (_, _) => camera.level_constraint_size,
-    }; */
-
     camera.size_after_constraint = camera.size.min(camera.level_constraint_size);
 
     let view_port_size = Vec2::new(
@@ -174,23 +160,6 @@ fn update_camera_size(
         view_port_size.x / view_port_size.max_element(),
         view_port_size.y / view_port_size.max_element(),
     );
-
-    /*{
-        let factor_x = camera.size.x / camera.level_constraint_size.x;
-        let factor_y = camera.size.y / camera.level_constraint_size.y;
-
-        if factor_x > factor_y {
-            Vec2::new(
-                camera.level_constraint_size.x * factor_y / camera.size.x,
-                1.0,
-            )
-        } else {
-            Vec2::new(
-                1.0,
-                camera.level_constraint_size.y * factor_x / camera.size.y,
-            )
-        }
-    }; */
 
     camera_projection.scaling_mode = ScalingMode::Fixed {
         width: camera.size_after_constraint.x,
@@ -211,8 +180,8 @@ fn update_camera_size(
         depth: 0.0..1.0,
     };
 
-    match &mut camera.animation {
-        Some(animation) => {
+    match camera.animation {
+        Some(ref mut animation) => {
             animation.source_viewport = native_camera.viewport.clone().unwrap_or(viewport.clone());
             animation.target_viewport = viewport;
         }
@@ -257,8 +226,8 @@ fn update_camera_transform(
             15.0,
         );
 
-    match &mut camera.animation {
-        Some(animation) => {
+    match camera.animation {
+        Some(ref mut animation) => {
             animation.target_translation = camera_translation.truncate();
         }
         None => {

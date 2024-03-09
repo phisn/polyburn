@@ -2,8 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use bevy::prelude::*;
 use parry2d::{
-    bounding_volume::BoundingVolume,
-    na::{ComplexField, Isometry2},
+    na::{Isometry2},
     shape::SharedShape,
 };
 

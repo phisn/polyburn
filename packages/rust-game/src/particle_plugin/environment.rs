@@ -1,10 +1,9 @@
 use core::fmt;
 
-use bevy::{ecs::system::Resource, prelude::default};
+use bevy::ecs::system::Resource;
 use parry2d::{
     bounding_volume::{Aabb, BoundingVolume},
     na::Isometry2,
-    shape::SharedShape,
 };
 
 #[derive(Debug, Resource, Default)]
@@ -212,7 +211,7 @@ struct SplitResult {
 
 #[cfg(test)]
 mod tests {
-    use parry2d::na::Isometry2;
+    use parry2d::{na::Isometry2, shape::SharedShape};
 
     use super::*;
 

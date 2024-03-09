@@ -1,6 +1,5 @@
 use bevy::{
     ecs::schedule::SystemConfigs,
-    input::keyboard::{Key, KeyboardInput},
     prelude::*,
 };
 use rust_game_plugin::FrameInput;

@@ -2,7 +2,7 @@ use bevy::{ecs::schedule::SystemConfigs, prelude::*};
 
 use bevy_svg::prelude::*;
 use rust_game_plugin::ecs::level::{
-    CaptureState, Level, LevelCaptureStateEvent, LevelCapturedEvent,
+    CaptureState, Level, LevelCaptureStateEvent,
 };
 
 use super::SVG_SCALE_FACTOR;

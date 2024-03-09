@@ -1,13 +1,10 @@
 use bevy::{
     core_pipeline::core_2d::Transparent2d,
     ecs::{
-        query::QueryItem,
         system::{lifetimeless::*, SystemParamItem},
     },
-    pbr::MeshUniform,
     prelude::*,
     render::{
-        batching::NoAutomaticBatching,
         extract_component::{ExtractComponent, ExtractComponentPlugin},
         mesh::{GpuBufferInfo, MeshVertexBufferLayout},
         render_asset::RenderAssets,
@@ -17,12 +14,11 @@ use bevy::{
         },
         render_resource::*,
         renderer::RenderDevice,
-        view::{ExtractedView, NoFrustumCulling},
+        view::{ExtractedView},
         Render, RenderApp, RenderSet,
     },
     sprite::{
-        MaterialMesh2dBundle, Mesh2d, Mesh2dHandle, Mesh2dPipeline, Mesh2dPipelineKey,
-        Mesh2dUniform, RenderMesh2dInstances, SetMesh2dBindGroup, SetMesh2dViewBindGroup,
+        Mesh2dPipeline, Mesh2dPipelineKey, RenderMesh2dInstances, SetMesh2dBindGroup, SetMesh2dViewBindGroup,
     },
     utils::FloatOrd,
 };

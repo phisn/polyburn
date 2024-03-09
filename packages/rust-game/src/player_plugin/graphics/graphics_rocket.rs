@@ -3,12 +3,12 @@ use std::{f32::consts, sync::Arc, time::Duration};
 use bevy::{ecs::schedule::SystemConfigs, prelude::*, sprite::Mesh2dHandle};
 
 use bevy_svg::prelude::*;
-use parry2d::na::Isometry2;
+
 use rust_game_plugin::{constants::ENTITY_ROCKET_ENTRY, ecs::rocket::Rocket, MapTemplate};
 
 use crate::{
     particle_plugin::{
-        self, Environment, Gradient, GradientEntry, ParticleSystem, ParticleSystemBundle,
+        self, Gradient, GradientEntry, ParticleSystem, ParticleSystemBundle,
         ParticleTemplate,
     },
     player_plugin::RocketParticleSystem,
@@ -51,7 +51,7 @@ fn rocket_particle_setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     rocket_query: Query<Entity, With<Rocket>>,
-    map_template: Res<MapTemplate>,
+    _map_template: Res<MapTemplate>,
 ) {
     let mesh = Mesh::from(Circle::new(0.8));
     let mesh_handle = meshes.add(mesh);

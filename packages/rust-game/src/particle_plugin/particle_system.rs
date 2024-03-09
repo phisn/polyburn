@@ -6,9 +6,9 @@ use bevy::{
 use bevy_rapier2d::dynamics::Velocity;
 use parry2d::shape::SharedShape;
 use rand::prelude::*;
-use rust_game_plugin::GamePluginSchedule;
+
 use std::time::Duration;
-use std::{ops::Range, sync::Arc};
+use std::{ops::Range};
 
 mod gradient;
 mod particle_template;

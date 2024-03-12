@@ -1,21 +1,9 @@
-
-
-
-
-
 use bevy::render::deterministic::DeterministicRenderingConfig;
 
-
-use bevy::{prelude::*};
+use bevy::prelude::*;
 use bevy_svg::SvgPlugin;
 
-
-
-
-
-
-
-use rust_game_plugin::{GamePluginSet};
+use rust_game_plugin::GamePluginSet;
 
 mod camera;
 mod graphics;
@@ -23,9 +11,7 @@ mod input;
 
 pub use input::*;
 
-use crate::particle_plugin::{
-    ParticlePlugin,
-};
+use crate::particle_plugin::ParticlePlugin;
 use crate::player_plugin::camera::CameraConfig;
 use crate::player_plugin::graphics::GameAssets;
 

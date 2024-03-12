@@ -23,6 +23,8 @@
     "rust-analyzer.linkedProjects": [
         "./packages/rust-game/Cargo.toml",
         "./packages/rust-game/Cargo.toml",
-        "./packages/rust-game/Cargo.toml"
-    ]
+        "./packages/rust-game/Cargo.toml",
+        "./packages/rust-game-rl/Cargo.toml"
+    ],
+    "rust-analyzer.showUnlinkedFileNotification": false
 }

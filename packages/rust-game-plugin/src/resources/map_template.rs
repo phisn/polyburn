@@ -1,5 +1,5 @@
 use base64::*;
-use bevy::ecs::system::Resource;
+use bevy::{ecs::system::Resource, math::Vec2};
 use prost::Message;
 use rust_proto::WorldModel;
 
@@ -16,6 +16,8 @@ pub struct MapTemplate {
     pub shapes: Vec<shape_template::ShapeTemplate>,
     pub rocket: RocketTemplate,
     pub levels: Vec<LevelTemplate>,
+
+    pub initial_level_index: usize,
 }
 
 impl MapTemplate {
@@ -55,10 +57,30 @@ impl MapTemplate {
             .map(LevelTemplate::new)
             .collect::<Vec<_>>();
 
+        let rocket_position: Vec2 = rocket.position.into();
+
+        let Some((initial_level_index, _)) =
+            levels
+                .iter()
+                .enumerate()
+                .reduce(|(min_index, min), (level_index, level)| {
+                    if level.position.distance(rocket_position)
+                        < min.position.distance(rocket_position)
+                    {
+                        (level_index, level)
+                    } else {
+                        (min_index, min)
+                    }
+                })
+        else {
+            panic!("No levels found");
+        };
+
         Self {
             shapes,
             rocket,
             levels,
+            initial_level_index,
         }
     }
 }

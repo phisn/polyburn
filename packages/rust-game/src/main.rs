@@ -1,7 +1,5 @@
 use base64::*;
-use bevy::{prelude::*, window::PresentMode};
-
-
+use bevy::{app::ScheduleRunnerPlugin, prelude::*, window::PresentMode};
 
 use player_plugin::InputTracker;
 use rust_game_plugin::{ecs::rocket::Rocket, GamePlugin, MapTemplate};
@@ -37,7 +35,7 @@ pub fn main() {
             ..default()
         }),
         ..default()
-    })); // .add_plugins(RapierDebugRenderPlugin::default());
+    }));
 
     app.insert_resource(map_template)
         .add_plugins(GamePlugin::default())

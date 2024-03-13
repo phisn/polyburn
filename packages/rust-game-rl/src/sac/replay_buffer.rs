@@ -2,13 +2,13 @@ use burn::tensor::{backend::Backend, Data, Shape, Tensor};
 use rand::{seq::SliceRandom, Rng};
 
 #[derive(Clone)]
-pub struct Experience<B: Backend> {
-    observation: Vec<B::FloatElem>,
-    action: Vec<B::FloatElem>,
-    next_observation: Vec<B::FloatElem>,
+pub struct Experience {
+    pub observation: Vec<f32>,
+    pub action: Vec<f32>,
+    pub next_observation: Vec<f32>,
 
-    reward: B::FloatElem,
-    done: B::FloatElem,
+    pub reward: f32,
+    pub done: f32,
 }
 
 pub struct ExperienceBatch<B: Backend> {
@@ -21,11 +21,13 @@ pub struct ExperienceBatch<B: Backend> {
 }
 
 pub struct ReplayBuffer<B: Backend> {
-    buffer: Vec<Experience<B>>,
+    buffer: Vec<Experience>,
 
     capacity: usize,
     ptr: usize,
     size: usize,
+
+    _backend: std::marker::PhantomData<B>,
 }
 
 impl<B: Backend> ReplayBuffer<B> {
@@ -35,10 +37,11 @@ impl<B: Backend> ReplayBuffer<B> {
             capacity,
             ptr: 0,
             size: 0,
+            _backend: std::marker::PhantomData,
         }
     }
 
-    pub fn store(&mut self, experience: Experience<B>) {
+    pub fn store(&mut self, experience: Experience) {
         if self.size < self.capacity {
             self.buffer.push(experience);
             self.size += 1;
@@ -56,16 +59,19 @@ impl<B: Backend> ReplayBuffer<B> {
             .map(|_| rng.gen_range(0..self.size))
             .collect();
 
-        let sample_tensor_1d = |f: fn(&Experience<B>) -> B::FloatElem| {
+        let sample_tensor_1d = |f: fn(&Experience) -> f32| {
             let elements = indices
                 .iter()
                 .map(|&i| f(&self.buffer[i]))
-                .collect::<Vec<B::FloatElem>>();
+                .collect::<Vec<_>>();
 
-            Tensor::<B, 1>::from_data(Data::new(elements, [batch_size].into()), device)
+            Tensor::<B, 1>::from_data(
+                Data::new(elements, [batch_size].into()).convert::<B::FloatElem>(),
+                device,
+            )
         };
 
-        let sample_tensor_2d = |f: fn(&Experience<B>) -> &Vec<B::FloatElem>| {
+        let sample_tensor_2d = |f: fn(&Experience) -> &Vec<f32>| {
             let mut elements = Vec::with_capacity(batch_size * self.buffer[0].observation.len());
 
             for &i in &indices {
@@ -78,7 +84,8 @@ impl<B: Backend> ReplayBuffer<B> {
                 Data::new(
                     elements,
                     [batch_size, self.buffer[0].observation.len()].into(),
-                ),
+                )
+                .convert::<B::FloatElem>(),
                 device,
             )
         };

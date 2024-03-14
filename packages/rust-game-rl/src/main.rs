@@ -1,6 +1,6 @@
-mod environment;
-mod sac;
+mod example;
+mod reinforce;
 
 fn main() {
-    sac::test();
+    example::train_flappy_bird()
 }

@@ -1,15 +1,7 @@
 use burn::tensor::{backend::Backend, Data, Shape, Tensor};
 use rand::{seq::SliceRandom, Rng};
 
-#[derive(Clone)]
-pub struct Experience {
-    pub observation: Vec<f32>,
-    pub action: Vec<f32>,
-    pub next_observation: Vec<f32>,
-
-    pub reward: f32,
-    pub done: f32,
-}
+use crate::abstraction::Experience;
 
 pub struct ExperienceBatch<B: Backend> {
     pub observation: Tensor<B, 2>,

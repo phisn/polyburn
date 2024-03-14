@@ -16,13 +16,12 @@ use burn::{
 use rand::rngs::ThreadRng;
 
 use crate::{
-    environment::Environment,
-    sac::actor_critic::{ActorCritic, ActorCriticConfig},
+    abstraction::{Environment, Experience}, sac::actor_critic::{ActorCritic, ActorCriticConfig}
 };
 
 use super::{
     actor_critic::{ActionValueFunction, Actor},
-    replay_buffer::{Experience, ReplayBuffer},
+    replay_buffer::{ReplayBuffer},
     SacConfig,
 };
 

@@ -20,7 +20,7 @@ use crate::sac::actor_critic::{ActorCritic, ActorCriticConfig};
 use self::{
     actor_critic::{ActionValueFunction, Actor},
     algorithm::SacAlgorithm,
-    replay_buffer::{Experience, ReplayBuffer},
+    replay_buffer::{ReplayBuffer},
 };
 
 mod actor_critic;

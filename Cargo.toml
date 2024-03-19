@@ -1,2 +1,6 @@
 [workspace]
+resolver = "2"
 members = ["packages/rust-game", "packages/rust-game-plugin", "packages/rust-proto"]
+
+[profile.dev.package."*"]
+opt-level = 3

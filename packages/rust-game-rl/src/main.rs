@@ -2,5 +2,5 @@ mod example;
 mod reinforce;
 
 fn main() {
-    example::train_flappy_bird()
+    example::play_flappy_bird()
 }

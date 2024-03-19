@@ -6,6 +6,7 @@ mod particle;
 mod particle_system;
 
 pub use environment::Environment;
+pub use instancing_plugin::InstancingHost;
 pub use particle_system::*;
 
 pub struct ParticlePlugin;

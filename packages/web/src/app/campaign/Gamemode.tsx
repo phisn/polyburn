@@ -38,7 +38,7 @@ export function Gamemode(props: { gamemode: GamemodeView }) {
                     <div className="join bg-base-300 relative z-10 flex h-16 rounded-2xl border border-zinc-600">
                         <button
                             className="join-item hover:bg-base-100 w-full rounded-[0.9rem] px-6 text-left outline-none transition active:bg-slate-600"
-                            onClick={() => selectGameHandler(props.gamemode)}
+                            onClick={() => selectGameHandler(props.gamemode.name)}
                         >
                             {props.gamemode.name}
                         </button>
@@ -55,7 +55,7 @@ export function Gamemode(props: { gamemode: GamemodeView }) {
                 {props.gamemode.replayStats && (
                     <ReplayStatsDisplay
                         stats={props.gamemode.replayStats}
-                        onSelected={() => selectReplayHandler(props.gamemode, userId)}
+                        onSelected={() => selectReplayHandler(props.gamemode.name, userId)}
                     />
                 )}
             </div>
@@ -121,8 +121,8 @@ function LeaderboardList(props: { gamemode: GamemodeView }) {
                     rank={i + 1}
                     time={secondsToMMSS(row.ticks * 16.66667)}
                     name={nameFromString(row.userId)}
-                    onCompete={() => selectGameHandler(props.gamemode, row.userId)}
-                    onReplay={() => selectReplayHandler(props.gamemode, row.userId)}
+                    onCompete={() => selectGameHandler(props.gamemode.name, row.userId)}
+                    onReplay={() => selectReplayHandler(props.gamemode.name, row.userId)}
                 />
             ))}
             {replays.length === 0 && (

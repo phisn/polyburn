@@ -1,0 +1,110 @@
+.spinner {
+    width: 100px; /* Adjust based on your needs */
+    height: 100px; /* Adjust based on your needs */
+    position: relative;
+    overflow: hidden;
+}
+
+.cube-animation-phase-1 {
+    animation: growToLeft 1s forwards;
+}
+
+.cube-animation-phase-2 {
+    animation: shrinkToLeft 1s forwards;
+}
+
+.cube-animation-phase-3 {
+    animation: growToRight 1s forwards;
+}
+
+.cube-animation-phase-4 {
+    animation: shrinkToRight 1s forwards;
+}
+
+@keyframes growToLeft {
+    from {
+        width: 0;
+        left: 0;
+    }
+    to {
+        width: 100%;
+        left: 0;
+    }
+}
+
+@keyframes shrinkToLeft {
+    from {
+        width: 100%;
+        left: 0;
+    }
+    to {
+        width: 0;
+        left: 100%;
+    }
+}
+
+@keyframes growToRight {
+    from {
+        width: 0;
+        left: 100%;
+    }
+    to {
+        width: 100%;
+        left: 0;
+    }
+}
+
+@keyframes shrinkToRight {
+    from {
+        width: 100%;
+        left: 0;
+    }
+    to {
+        width: 0;
+        left: 0;
+    }
+}
+
+@keyframes growToTop {
+    from {
+        height: 0;
+        top: 0;
+    }
+    to {
+        height: 100%;
+        top: 0;
+    }
+}
+
+@keyframes shrinkToTop {
+    from {
+        height: 100%;
+        top: 0;
+    }
+    to {
+        height: 0;
+        top: 100%;
+    }
+}
+
+@keyframes growToBottom {
+    from {
+        height: 0;
+        top: 100%;
+    }
+    to {
+        height: 100%;
+        top: 0;
+    }
+}
+
+@keyframes shrinkToBottom {
+    from {
+        height: 100%;
+        top: 0;
+    }
+    to {
+        height: 0;
+        top: 0;
+    }
+}

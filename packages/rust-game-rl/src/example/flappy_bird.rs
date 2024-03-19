@@ -186,7 +186,10 @@ fn update_control(world: &mut World) {
         let config = world.resource::<FlappyBirdConfig>();
 
         let action = match control.as_mut() {
-            Control::Player => {
+            Control {
+                agent: None,
+                trainer,
+            } => {
                 let input = world.resource::<Input<KeyCode>>();
 
                 if input.pressed(KeyCode::Space) {
@@ -195,7 +198,10 @@ fn update_control(world: &mut World) {
                     config.gravity
                 }
             }
-            Control::Agent(agent, _) => {
+            Control {
+                agent: Some(agent),
+                trainer,
+            } => {
                 let action = agent.act(&vec![0.0, 0.0, 0.0, 0.0]);
                 let action = action[0];
 

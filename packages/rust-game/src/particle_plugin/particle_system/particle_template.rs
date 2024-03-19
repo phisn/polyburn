@@ -1,6 +1,3 @@
-
-
-
 use std::{ops::Range, sync::Arc};
 
 use super::gradient::Gradient;

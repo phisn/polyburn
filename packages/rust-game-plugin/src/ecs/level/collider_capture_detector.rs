@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use super::*;
-use crate::{ecs::rocket::Rocket};
+use crate::ecs::rocket::Rocket;
 
 pub enum CaptureState {
     Stopped,

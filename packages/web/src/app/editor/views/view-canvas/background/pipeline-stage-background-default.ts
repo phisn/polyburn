@@ -27,7 +27,7 @@ export const pipelineStageBackgroundDefault: PipelineStage = (event, { store, st
     }
 
     if (event.rightButtonClicked) {
-        store.openContextMenu(event.position, BackgroundContextMenu)
+        store.openContextMenu(event.position, BackgroundContextMenu())
     }
 
     if (

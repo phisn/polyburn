@@ -2,7 +2,10 @@ use bevy::{ecs::schedule::SystemConfigs, prelude::*};
 use bevy_rapier2d::prelude::*;
 use rapier2d::math::Point;
 
-use crate::{constants::ROCKET_Z_POSITION, MapTemplate};
+use crate::{
+    constants::{ENTITY_ROCKET_ENTRY, ROCKET_Z_POSITION},
+    MapTemplate,
+};
 
 mod apply_rotation;
 mod apply_thrust;
@@ -36,8 +39,12 @@ pub struct RocketBundle {
 }
 
 impl RocketBundle {
-    pub fn new(position: Point<f32>) -> Self {
+    pub fn new(position: Point<f32>, rotation: f32) -> Self {
         let initial_position = Vec3::new(position.x, position.y, ROCKET_Z_POSITION);
+        let rotation = Quat::from_euler(EulerRot::XYZ, 0.0, 0.0, rotation);
+
+        let inverse = rotation.mul_vec3(Vec3::new(0.0, -0.5, 0.0));
+        let initial_position = initial_position + inverse * ENTITY_ROCKET_ENTRY.height;
 
         RocketBundle {
             rocket: Rocket {
@@ -69,7 +76,7 @@ pub fn systems() -> SystemConfigs {
 
 pub fn startup(mut commands: Commands, map: Res<MapTemplate>) {
     commands
-        .spawn(RocketBundle::new(map.rocket.position))
+        .spawn(RocketBundle::new(map.rocket.position, map.rocket.rotation))
         .insert(ActiveEvents::COLLISION_EVENTS)
         .insert(ColliderMassProperties::Mass(20.0))
         .insert(Damping {

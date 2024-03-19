@@ -32,7 +32,7 @@ impl Default for CameraConfig {
 
 #[derive(Component, Default)]
 struct CustomCamera {
-    animation: Option<CustomCameraAnimation>,
+    animation: CameraAnimation,
 
     level_constraint_size: Vec2,
     level_constraint_translation: Vec2,
@@ -44,7 +44,23 @@ struct CustomCamera {
 }
 
 #[derive(Default)]
-struct CustomCameraAnimation {
+struct StartAnimation {
+    progress: f32,
+
+    start_scale: f32,
+    target_scale: f32,
+}
+
+#[derive(Default)]
+enum CameraAnimation {
+    #[default]
+    None,
+    Start(StartAnimation),
+    Transition(CameraTransitionAnimation),
+}
+
+#[derive(Default)]
+struct CameraTransitionAnimation {
     target_viewport: Viewport,
     source_viewport: Viewport,
 
@@ -62,18 +78,26 @@ pub fn startup() -> SystemConfigs {
     (spawn_camera, view::startup()).chain().into_configs()
 }
 
+#[derive(Component, Default)]
+struct CameraStartAnimation {
+    pub progress: f32,
+}
+
+const CAMERA_SCALE_MIN: f32 = 0.00001;
+const CAMERA_SCALE_MAX: f32 = 1.0;
+
 fn spawn_camera(mut commands: Commands) {
     commands.spawn((
         Camera2dBundle {
             projection: OrthographicProjection {
                 far: 1000.,
                 near: -1000.,
-                scale: 1.0,
-                ..Default::default()
+                scale: CAMERA_SCALE_MIN,
+                ..default()
             },
             camera: Camera {
                 clear_color: ClearColorConfig::Custom(Color::rgb(0.0, 0.0, 0.0)),
-                ..Default::default()
+                ..default()
             },
             ..default()
         },

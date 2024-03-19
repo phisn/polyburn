@@ -44,6 +44,7 @@ module.exports = {
                 },
             },
         ],
+        logs: false,
     },
     variants: {
         extend: {

@@ -1,10 +1,7 @@
 use std::{sync::Arc, time::Duration};
 
 use bevy::prelude::*;
-use parry2d::{
-    na::{Isometry2},
-    shape::SharedShape,
-};
+use parry2d::{na::Isometry2, shape::SharedShape};
 
 use super::{environment, instancing_plugin, particle_system::Gradient};
 

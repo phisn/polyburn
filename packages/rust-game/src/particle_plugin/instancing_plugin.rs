@@ -1,8 +1,6 @@
 use bevy::{
     core_pipeline::core_2d::Transparent2d,
-    ecs::{
-        system::{lifetimeless::*, SystemParamItem},
-    },
+    ecs::system::{lifetimeless::*, SystemParamItem},
     prelude::*,
     render::{
         extract_component::{ExtractComponent, ExtractComponentPlugin},
@@ -14,11 +12,12 @@ use bevy::{
         },
         render_resource::*,
         renderer::RenderDevice,
-        view::{ExtractedView},
+        view::ExtractedView,
         Render, RenderApp, RenderSet,
     },
     sprite::{
-        Mesh2dPipeline, Mesh2dPipelineKey, RenderMesh2dInstances, SetMesh2dBindGroup, SetMesh2dViewBindGroup,
+        Mesh2dPipeline, Mesh2dPipelineKey, RenderMesh2dInstances, SetMesh2dBindGroup,
+        SetMesh2dViewBindGroup,
     },
     utils::FloatOrd,
 };
@@ -224,13 +223,9 @@ impl SpecializedMeshPipeline for CustomPipeline {
                     offset: VertexFormat::Float32x4.size(),
                     shader_location: 4,
                 },
-                VertexAttribute {
-                    format: VertexFormat::Uint32,
-                    offset: VertexFormat::Float32x4.size() * 2,
-                    shader_location: 5,
-                },
             ],
         });
+
         descriptor.fragment.as_mut().unwrap().shader = self.shader.clone();
         Ok(descriptor)
     }

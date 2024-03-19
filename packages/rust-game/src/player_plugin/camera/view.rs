@@ -12,7 +12,9 @@ use rust_game_plugin::{
     MapTemplate,
 };
 
-use super::{CameraConfig, CustomCamera, CustomCameraAnimation};
+use crate::player_plugin::camera::{CameraTransitionAnimation, CAMERA_SCALE_MAX, CAMERA_SCALE_MIN};
+
+use super::{CameraAnimation, CameraConfig, CameraStartAnimation, CustomCamera, StartAnimation};
 
 pub fn update() -> SystemConfigs {
     (
@@ -20,6 +22,7 @@ pub fn update() -> SystemConfigs {
         track_rocket,
         track_window_size,
         animate,
+        // progress_start_animation,
     )
         .chain()
 }
@@ -30,64 +33,187 @@ pub fn startup() -> SystemConfigs {
 
 fn animate(
     camera_config: Res<CameraConfig>,
-    mut camera_query: Query<(&mut Transform, &mut CustomCamera, &mut Camera), Without<Rocket>>,
+    mut camera_query: Query<
+        (
+            &mut Transform,
+            &mut CustomCamera,
+            &mut Camera,
+            &mut OrthographicProjection,
+        ),
+        Without<Rocket>,
+    >,
     time: Res<Time>,
 ) {
-    fn ease_out_quint(x: f32) -> f32 {
+    fn ease_out_fast(x: f32) -> f32 {
         1.0 - (1.0 - x).powi(5)
     }
 
+    fn ease_out_slow(x: f32) -> f32 {
+        1.0 - (1.0 - x).powi(3)
+    }
+
     fn lerp_uvec2_with_ease(a: UVec2, b: UVec2, t: f32) -> UVec2 {
-        let t = ease_out_quint(t);
+        let t = ease_out_fast(t);
         UVec2::new(
             (a.x as f32 + (b.x as f32 - a.x as f32) * t).round() as u32,
             (a.y as f32 + (b.y as f32 - a.y as f32) * t).round() as u32,
         )
     }
 
-    let (mut camera_transform, mut camera, mut native_camera) = camera_query.single_mut();
+    let (mut camera_transform, mut camera, mut native_camera, mut projection) =
+        camera_query.single_mut();
 
-    if let Some(camera_animation) = &mut camera.animation {
-        let source_translation = camera_animation.source_translation;
-        let target_translation = camera_animation.target_translation;
+    match camera.animation {
+        CameraAnimation::Transition(ref mut camera_animation) => {
+            let source_translation = camera_animation.source_translation;
+            let target_translation = camera_animation.target_translation;
 
-        camera_animation.progress += time.delta_seconds() * camera_config.animation_speed;
-        camera_animation.progress = camera_animation.progress.min(1.0);
+            camera_animation.progress += time.delta_seconds() * camera_config.animation_speed;
+            camera_animation.progress = camera_animation.progress.min(1.0);
 
-        camera_transform.translation = source_translation
-            .lerp(
-                target_translation,
-                ease_out_quint(camera_animation.progress),
-            )
-            .extend(15.0);
+            let camera_animation_progress_bounded = camera_animation.progress.max(0.0);
 
-        let source_viewport = &camera_animation.source_viewport;
-        let target_viewport = &camera_animation.target_viewport;
+            camera_transform.translation = source_translation
+                .lerp(
+                    target_translation,
+                    ease_out_fast(camera_animation_progress_bounded),
+                )
+                .extend(15.0);
 
-        native_camera.viewport = Some(Viewport {
-            physical_size: lerp_uvec2_with_ease(
-                source_viewport.physical_size,
-                target_viewport.physical_size,
-                camera_animation.progress,
-            ),
-            physical_position: lerp_uvec2_with_ease(
-                source_viewport.physical_position,
-                target_viewport.physical_position,
-                camera_animation.progress,
-            ),
-            depth: 0.0..1.0,
-        });
+            let source_viewport = &camera_animation.source_viewport;
+            let target_viewport = &camera_animation.target_viewport;
 
-        if camera_animation.progress >= 1.0 {
-            camera.animation = None;
+            native_camera.viewport = Some(Viewport {
+                physical_size: lerp_uvec2_with_ease(
+                    source_viewport.physical_size,
+                    target_viewport.physical_size,
+                    camera_animation_progress_bounded,
+                ),
+                physical_position: lerp_uvec2_with_ease(
+                    source_viewport.physical_position,
+                    target_viewport.physical_position,
+                    camera_animation_progress_bounded,
+                ),
+                depth: 0.0..1.0,
+            });
+
+            if camera_animation_progress_bounded >= 1.0 {
+                camera.animation = CameraAnimation::None;
+            }
         }
+        CameraAnimation::Start(ref mut camera_animation) => {
+            camera_animation.progress += time.delta_seconds() * camera_config.animation_speed;
+            camera_animation.progress = camera_animation.progress.min(1.0);
+
+            let camera_animation_progress_bounded = camera_animation.progress.max(0.0);
+
+            projection.scale = f32::lerp(
+                camera_animation.start_scale,
+                camera_animation.target_scale,
+                ease_out_slow(camera_animation_progress_bounded),
+            );
+
+            if camera_animation_progress_bounded >= 1.0 {
+                camera.animation = CameraAnimation::None;
+            }
+        }
+        _ => {}
+    }
+}
+
+fn progress_start_animation(
+    mut commands: Commands,
+    mut camer_config: ResMut<CameraConfig>,
+    mut query_camera: Query<
+        (
+            Entity,
+            &mut Camera,
+            &mut CustomCamera,
+            &mut Transform,
+            &mut OrthographicProjection,
+            &mut CameraStartAnimation,
+        ),
+        Without<Rocket>,
+    >,
+    query_rocket: Query<&Transform, With<Rocket>>,
+    time: Res<Time>,
+) {
+    let Ok((
+        camera_entity,
+        mut camera,
+        mut custom_camera,
+        mut transform,
+        mut projection,
+        mut start_animation,
+    )) = query_camera.get_single_mut()
+    else {
+        return;
+    };
+
+    fn curve(x: f32) -> f32 {
+        /*
+                const n1 = 7.5625;
+        const d1 = 2.75;
+
+        if (x < 1 / d1) {
+            return n1 * x * x;
+        } else if (x < 2 / d1) {
+            return n1 * (x -= 1.5 / d1) * x + 0.75;
+        } else if (x < 2.5 / d1) {
+            return n1 * (x -= 2.25 / d1) * x + 0.9375;
+        } else {
+            return n1 * (x -= 2.625 / d1) * x + 0.984375;
+        }
+                        */
+
+        x * x * x
+    }
+
+    const CAMERA_ZOOM_SPEED: f32 = 10.0;
+
+    let scale_min_transformed = CAMERA_ZOOM_SPEED.powf(CAMERA_SCALE_MIN);
+    let scale_max_transformed = CAMERA_ZOOM_SPEED.powf(CAMERA_SCALE_MAX);
+
+    fn lerp_uvec2_with_ease(a: UVec2, b: UVec2, t: f32) -> UVec2 {
+        let t = curve(t);
+        UVec2::new(
+            (a.x as f32 + (b.x as f32 - a.x as f32) * t).round() as u32,
+            (a.y as f32 + (b.y as f32 - a.y as f32) * t).round() as u32,
+        )
+    }
+
+    start_animation.progress += time.delta_seconds() * 1.4;
+    start_animation.progress = start_animation.progress.min(1.0);
+
+    let target_scale_transformed = scale_min_transformed
+        + (scale_max_transformed - scale_min_transformed)
+            * curve(start_animation.progress.max(0.0));
+
+    camer_config.zoom = target_scale_transformed.log(CAMERA_ZOOM_SPEED);
+    custom_camera.size = custom_camera.physical_size * camer_config.zoom;
+
+    let rocket_transform = query_rocket.single();
+
+    update_camera_size(&mut camera, &mut custom_camera, &mut projection);
+    update_camera_transform(
+        &mut custom_camera,
+        &mut transform,
+        rocket_transform.translation.truncate(),
+    );
+
+    println!("zoom: {}", camer_config.zoom);
+
+    if start_animation.progress >= 1.0 {
+        commands
+            .entity(camera_entity)
+            .remove::<CameraStartAnimation>();
     }
 }
 
 fn track_window_size(
     mut window_resized_events: EventReader<WindowResized>,
     camer_config: Res<CameraConfig>,
-    mut camera_query: Query<
+    mut query_camera: Query<
         (
             &mut Camera,
             &mut CustomCamera,
@@ -96,17 +222,18 @@ fn track_window_size(
         ),
         Without<Rocket>,
     >,
-    rocket_query: Query<&Transform, With<Rocket>>,
+    query_rocket: Query<&Transform, With<Rocket>>,
 ) {
     let Some(resize_event) = window_resized_events.read().last() else {
         return;
     };
 
+    let (mut native_camera, mut camera, mut transform, mut projection) = query_camera.single_mut();
+
     let physical_camera_size = Vec2::new(resize_event.width, resize_event.height);
     let camera_size = physical_camera_size * camer_config.zoom;
 
-    let (mut native_camera, mut camera, mut transform, mut projection) = camera_query.single_mut();
-    let rocket_transform = rocket_query.single();
+    let rocket_transform = query_rocket.single();
 
     camera.physical_size = physical_camera_size;
     camera.size = camera_size;
@@ -145,7 +272,7 @@ fn track_level_capture(
     let (mut native_camera, mut camera, mut transform, mut projection) = camera_query.single_mut();
     let rocket_transform = rocket_query.single();
 
-    camera.animation = Some(CustomCameraAnimation {
+    camera.animation = CameraAnimation::Transition(CameraTransitionAnimation {
         source_translation: transform.translation.truncate(),
         ..default()
     });
@@ -166,7 +293,7 @@ fn track_rocket(
     mut camera_query: Query<(&mut Transform, &mut CustomCamera, &mut Camera), Without<Rocket>>,
 ) {
     let rocket_transform = rocket_query.single();
-    let (mut camera_transform, mut camera, mut native_camera) = camera_query.single_mut();
+    let (mut camera_transform, mut camera, native_camera) = camera_query.single_mut();
 
     update_camera_transform(
         &mut camera,
@@ -202,6 +329,13 @@ fn prepare_inital_view(
 
     update_camera_size(&mut native_camera, &mut custom_camera, &mut projection);
     update_camera_transform(&mut custom_camera, &mut transform, rocket_position);
+
+    custom_camera.animation = CameraAnimation::Start(StartAnimation {
+        progress: -0.2,
+
+        start_scale: CAMERA_SCALE_MIN,
+        target_scale: CAMERA_SCALE_MAX,
+    });
 }
 
 fn update_camera_size(
@@ -241,11 +375,11 @@ fn update_camera_size(
     };
 
     match camera.animation {
-        Some(ref mut animation) => {
+        CameraAnimation::Transition(ref mut animation) => {
             animation.source_viewport = native_camera.viewport.clone().unwrap_or(viewport.clone());
             animation.target_viewport = viewport;
         }
-        None => {
+        _ => {
             native_camera.viewport = Some(viewport);
         }
     }
@@ -287,10 +421,10 @@ fn update_camera_transform(
         );
 
     match camera.animation {
-        Some(ref mut animation) => {
+        CameraAnimation::Transition(ref mut animation) => {
             animation.target_translation = camera_translation.truncate();
         }
-        None => {
+        _ => {
             camera_transform.translation = camera_translation;
         }
     }

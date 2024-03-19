@@ -1,7 +1,4 @@
-use bevy::{
-    app::PluginsState, ecs::schedule::ScheduleLabel, prelude::*,
-    tasks::tick_global_task_pools_on_main_thread, utils::intern::Interned,
-};
+use bevy::{app::PluginsState, ecs::schedule::ScheduleLabel, prelude::*, utils::intern::Interned};
 use bevy_rapier2d::prelude::*;
 
 pub mod constants;
@@ -93,18 +90,6 @@ pub fn validate(map_template: MapTemplate, inputs: &Vec<FrameInput>) {
 
     app.add_plugins(MinimalPlugins);
 
-    app.set_runner(move |mut app: App| {
-        while app.plugins_state() == PluginsState::Adding {
-            #[cfg(not(target_arch = "wasm32"))]
-            tick_global_task_pools_on_main_thread();
-        }
-
-        app.finish();
-        app.cleanup();
-
-        app.update();
-    });
-
     app.insert_resource(map_template)
         .add_plugins(GamePlugin::default().in_schedule(Update));
 
@@ -115,12 +100,10 @@ pub fn validate(map_template: MapTemplate, inputs: &Vec<FrameInput>) {
             }
         });
 
-    while app.plugins_state() == PluginsState::Adding {
-        #[cfg(not(target_arch = "wasm32"))]
-        tick_global_task_pools_on_main_thread();
-    }
+    while app.plugins_state() == PluginsState::Adding {}
 
     app.finish();
     app.cleanup();
+
     app.update();
 }

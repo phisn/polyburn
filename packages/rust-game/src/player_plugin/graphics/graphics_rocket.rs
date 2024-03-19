@@ -1,6 +1,8 @@
 use std::{f32::consts, sync::Arc, time::Duration};
 
-use bevy::{ecs::schedule::SystemConfigs, prelude::*, sprite::Mesh2dHandle};
+use bevy::{
+    ecs::schedule::SystemConfigs, prelude::*, render::view::NoFrustumCulling, sprite::Mesh2dHandle,
+};
 
 use bevy_svg::prelude::*;
 
@@ -8,7 +10,7 @@ use rust_game_plugin::{constants::ENTITY_ROCKET_ENTRY, ecs::rocket::Rocket, MapT
 
 use crate::{
     particle_plugin::{
-        self, Gradient, GradientEntry, ParticleSystem, ParticleSystemBundle,
+        self, Gradient, GradientEntry, InstancingHost, ParticleSystem, ParticleSystemBundle,
         ParticleTemplate,
     },
     player_plugin::RocketParticleSystem,
@@ -69,9 +71,9 @@ fn rocket_particle_setup(
             },
             mesh: Mesh2dHandle(mesh_handle.clone()),
             spatial_bundle: SpatialBundle::from_transform(Transform::from_xyz(0.0, 0.0, 0.0)),
-            ..Default::default()
+            instancing_host: InstancingHost::default(),
         })
-        .insert(RocketParticleSystem);
+        .insert((RocketParticleSystem, NoFrustumCulling));
 }
 
 fn thrust_particle_template() -> ParticleTemplate {

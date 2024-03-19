@@ -1,4 +1,11 @@
-use bevy::{asset::LoadedFolder, ecs::schedule::SystemConfigs, prelude::*};
+use std::sync::Arc;
+
+use bevy::{
+    asset::{LoadedFolder, StrongHandle},
+    ecs::schedule::SystemConfigs,
+    prelude::*,
+};
+use bevy_svg::prelude::Svg;
 use parry2d::na::Isometry2;
 use rust_game_plugin::MapTemplate;
 
@@ -11,7 +18,11 @@ mod graphics_shape;
 const SVG_SCALE_FACTOR: f32 = 0.15 / 25.0;
 
 #[derive(Resource, Default)]
-pub struct GameAssets(Option<Handle<LoadedFolder>>);
+pub struct GameAssets {
+    pub rocket: Handle<Svg>,
+    pub flag_green: Handle<Svg>,
+    pub flag_red: Handle<Svg>,
+}
 
 pub fn update() -> SystemConfigs {
     (graphics_level::update(), particle_environment_setup)
@@ -31,8 +42,9 @@ pub fn startup() -> SystemConfigs {
 }
 
 fn game_assets_setup(asset_server: Res<AssetServer>, mut game_assets: ResMut<GameAssets>) {
-    let folder = asset_server.load_folder("./");
-    game_assets.0 = Some(folder);
+    game_assets.flag_green = asset_server.load("flag-green.svg");
+    game_assets.flag_red = asset_server.load("flag-red.svg");
+    game_assets.rocket = asset_server.load("rocket.svg");
 }
 
 fn particle_environment_setup(mut commands: Commands, map_template: Res<MapTemplate>) {

@@ -6,6 +6,7 @@ use bevy_svg::SvgPlugin;
 use rust_game_plugin::GamePluginSet;
 
 mod camera;
+mod device_info;
 mod graphics;
 mod input;
 
@@ -13,6 +14,7 @@ pub use input::*;
 
 use crate::particle_plugin::ParticlePlugin;
 use crate::player_plugin::camera::CameraConfig;
+use crate::player_plugin::device_info::DeviceInfo;
 use crate::player_plugin::graphics::GameAssets;
 
 #[derive(Default)]
@@ -43,7 +45,10 @@ impl Plugin for PlayerPlugin {
                 stable_sort_z_fighting: true,
             })
             .init_resource::<CameraConfig>()
-            .init_resource::<GameAssets>();
+            .init_resource::<GameAssets>()
+            .init_resource::<DeviceInfo>();
+
+        error!("User agent: ");
 
         use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
         app.add_plugins(FrameTimeDiagnosticsPlugin::default());

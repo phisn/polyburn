@@ -1,7 +1,6 @@
 {
     "private": true,
     "scripts": {
-        "preinstall": "wasm-pack build --release packages/rust-game",
         "postinstall": "yarn workspace server postinstall",
         "build": "turbo run build --no-daemon",
         "dev": "concurrently -k \"yarn dev:web\" \"yarn dev:rust\"",

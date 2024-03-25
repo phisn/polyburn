@@ -37,11 +37,13 @@ export function Campaign() {
                 setIsStartLoading(true)
             }, 200)
 
+            /*
             setTimeout(() => {
                 setIsStartLoading(false)
                 selectHandler(undefined)
                 selectWorld(undefined)
-            }, 5000)
+            }, 1000)
+            */
         }
     }, [worldSelected, handler, selectHandler, selectWorld])
 

@@ -51,7 +51,7 @@ export default function LoadingIndicator(props: { loading: boolean; onAnimationE
         setTimeout(() => {
             onInterval()
             interval = setInterval(onInterval, 750)
-        }, 150)
+        }, 0)
 
         return () => clearInterval(interval)
     }, [])

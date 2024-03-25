@@ -1,3 +1,5 @@
+pub mod sac;
+
 #[derive(Clone)]
 pub struct Experience {
     pub observation: Vec<f32>,
@@ -18,3 +20,5 @@ pub trait Agent: Send + Sync {
 pub trait AgentTrainer: Send + Sync {
     fn observe(&mut self, experience: Experience);
 }
+
+pub trait AgentWithTrainer: Agent + AgentTrainer {}

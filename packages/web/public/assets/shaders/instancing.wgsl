@@ -12,7 +12,7 @@ struct Vertex {
 struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
     @location(0) color: vec4<f32>,
-
+}
 
 const identity_matrix: mat4x4<f32> = mat4x4<f32>(
     vec4<f32>(1.0, 0.0, 0.0, 0.0),

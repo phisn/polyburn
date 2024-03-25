@@ -2,10 +2,9 @@ use std::f32::consts::LOG2_E;
 
 use bevy::core_pipeline::core_2d::graph::input;
 use burn::{
-    backend::{wgpu::AutoGraphicsApi, Autodiff, Wgpu},
     config::Config,
     module::{AutodiffModule, Module},
-    nn::{Linear, LinearConfig, ReLU},
+    nn::{loss, Linear, LinearConfig, ReLU},
     optim::{AdamConfig, GradientsParams, Optimizer},
     tensor::{
         activation::{softplus, tanh},
@@ -15,30 +14,25 @@ use burn::{
 };
 use rand::rngs::ThreadRng;
 
-use crate::{
-    abstraction::{Environment, Experience}, sac::actor_critic::{ActorCritic, ActorCriticConfig}
-};
+use crate::reinforce::{Agent, AgentTrainer, AgentWithTrainer};
 
 use super::{
-    actor_critic::{ActionValueFunction, Actor},
-    replay_buffer::{ReplayBuffer},
+    actor_critic::{ActionValueFunction, Actor, ActorCritic, ActorCriticConfig},
+    replay_buffer::{ExperienceBatch, ReplayBuffer},
     SacConfig,
 };
 
 impl SacConfig {
     pub fn init<B: AutodiffBackend>(
         self,
-        device: &B::Device,
-        env: &dyn Environment,
+        device: B::Device,
     ) -> SacAlgorithm<B, impl Optimizer<ActionValueFunction<B>, B>, impl Optimizer<Actor<B>, B>>
     {
-        let observation_dim = env.observation_dim();
-        let action_dim = env.action_dim();
+        let actor_critic_config =
+            ActorCriticConfig::new(self.observation_dim, self.action_dim, 1.0, 512);
 
-        let actor_critic_config = ActorCriticConfig::new(observation_dim, action_dim, 1.0, 512);
-
-        let actor_critic = actor_critic_config.init::<B>(device);
-        let actor_critic_target = actor_critic_config.init::<B>(device).no_grad();
+        let actor_critic = actor_critic_config.init::<B>(&device);
+        let actor_critic_target = actor_critic_config.init::<B>(&device).no_grad();
 
         let pi_optimizer = self.adam_config.init();
         let q_optimizer = self.adam_config.init();
@@ -46,9 +40,8 @@ impl SacConfig {
         let replay_buffer: ReplayBuffer<B> = ReplayBuffer::new(self.replay_size);
 
         SacAlgorithm {
+            device: device.clone(),
             config: self,
-            observation_dim,
-            action_dim,
             actor_critic,
             actor_critic_target,
             replay_buffer,
@@ -66,10 +59,8 @@ where
     OptPi: Optimizer<ActionValueFunction<B>, B>,
     OptQ: Optimizer<Actor<B>, B>,
 {
+    device: B::Device,
     config: SacConfig,
-
-    observation_dim: usize,
-    action_dim: usize,
 
     actor_critic: ActorCritic<B>,
     actor_critic_target: ActorCritic<B>,
@@ -90,62 +81,111 @@ where
     OptPi: Optimizer<ActionValueFunction<B>, B>,
     OptQ: Optimizer<Actor<B>, B>,
 {
-    pub fn train(&mut self, device: &B::Device, env: &dyn Environment) {
-        for _ in 0..(self.config.steps_per_epoch * self.config.epochs) {
-            //            self.step(device, env,);
-        }
+    fn update(&mut self, batch: &ExperienceBatch<B>) {
+        let loss_q = self.compute_loss_q(batch);
+        panic!("Loss Q: {:?}", loss_q);
     }
 
-    fn step(&mut self, device: &B::Device, env: &dyn Environment) {
-        let (observation, _) = env.observe();
-        let observation_tensor = Tensor::from_floats(observation.as_slice(), device);
+    fn compute_loss_q(&self, batch: &ExperienceBatch<B>) -> Tensor<B, 1> {
+        let backup = self.backup(batch);
 
-        let action_tensor = self.sample_action(observation_tensor, device);
-        let action = action_tensor.into_data().convert().value;
+        let q1 = self
+            .actor_critic
+            .critic1
+            .forward(batch.observation.clone(), batch.action.clone());
+        let q2 = self
+            .actor_critic
+            .critic2
+            .forward(batch.observation.clone(), batch.action.clone());
 
-        let reward = env.step(&action);
-        let (next_observation, done) = env.observe();
+        let loss_q1 = q1.sub(backup.clone()).powf_scalar(2.0).mean();
+        let loss_q2 = q2.sub(backup).powf_scalar(2.0).mean();
 
-        let experience = Experience {
-            observation,
-            action,
-            reward,
-            next_observation,
-            done: done as i32 as f32,
+        loss_q1 + loss_q2
+    }
+
+    fn backup(&self, batch: &ExperienceBatch<B>) -> Tensor<B, 1> {
+        let (a2, Some(logp_a2)) =
+            self.actor_critic
+                .actor
+                .forward(batch.next_observation.clone(), false, true)
+        else {
+            panic!("logp_a2 is None")
         };
 
-        self.replay_buffer.store(experience);
+        let q1_pi_targ = self
+            .actor_critic_target
+            .critic1
+            .forward(batch.next_observation.clone(), a2.clone());
+        let q2_pi_targ = self
+            .actor_critic_target
+            .critic2
+            .forward(batch.next_observation.clone(), a2.clone());
 
-        self.t += 1;
-        self.episode_length += 1;
-        self.episode_reward += reward;
+        let q_pi_targ = Tensor::stack(vec![q1_pi_targ, q2_pi_targ], 1).min_dim(1);
 
-        if done || self.episode_length > self.config.max_ep_len {
-            self.episode_length = 0;
-            self.episode_reward = 0.0;
+        let backup_f1 = batch.done.clone().mul_scalar(-1.0).add_scalar(1.0);
+        let backup_f2 = q_pi_targ.sub(logp_a2.mul_scalar(self.config.alpha));
 
-            env.reset();
-        }
-
-        if self.t >= self.config.update_after && self.t % self.config.update_every == 0 {
-            for _ in 0..self.config.update_every {}
-        }
+        batch.reward.clone() - backup_f1.mul(backup_f2).mul_scalar(self.config.gamma)
     }
+}
 
-    fn sample_action(
-        &mut self,
-        observation_tensor: Tensor<B, 1>,
-        device: &B::Device,
-    ) -> Tensor<B, 1> {
-        let action = if self.t > self.config.start_steps {
+impl<B: AutodiffBackend, OptPi, OptQ> Agent for SacAlgorithm<B, OptPi, OptQ>
+where
+    OptPi: Optimizer<ActionValueFunction<B>, B>,
+    OptQ: Optimizer<Actor<B>, B>,
+{
+    fn act(&self, observation: &Vec<f32>) -> Vec<f32> {
+        let observation_tensor = Tensor::from_floats(observation.as_slice(), &self.device);
+
+        let action_tensor = if self.t > self.config.start_steps {
             self.actor_critic.act(observation_tensor, true)
         } else {
             Tensor::random(
-                [self.action_dim],
+                [self.config.action_dim],
                 burn::tensor::Distribution::Uniform(-1.0, 1.0),
-                device,
+                &self.device,
             )
         };
-        action
+
+        action_tensor.into_data().convert().value
     }
+}
+
+impl<B: AutodiffBackend, OptPi, OptQ> AgentTrainer for SacAlgorithm<B, OptPi, OptQ>
+where
+    OptPi: Optimizer<ActionValueFunction<B>, B>,
+    OptQ: Optimizer<Actor<B>, B>,
+{
+    fn observe(&mut self, experience: crate::reinforce::Experience) {
+        self.t += 1;
+        self.episode_length += 1;
+        self.episode_reward += experience.reward;
+
+        if experience.done > 0.0 || self.episode_length > self.config.max_ep_len {
+            self.episode_length = 0;
+            self.episode_reward = 0.0;
+        }
+
+        self.replay_buffer.store(experience);
+
+        if self.t >= self.config.update_after && self.t % self.config.update_every == 0 {
+            for _ in 0..self.config.update_every {
+                self.update(
+                    &self
+                        .replay_buffer
+                        .sample_batch(self.config.batch_size, &self.device),
+                );
+            }
+        }
+    }
+}
+
+
+impl<B: AutodiffBackend, OptPi, OptQ> AgentWithTrainer for SacAlgorithm<B, OptPi, OptQ>
+where
+    OptPi: Optimizer<ActionValueFunction<B>, B>,
+    OptQ: Optimizer<Actor<B>, B>,
+{
 }

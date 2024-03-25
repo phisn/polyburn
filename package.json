@@ -2,7 +2,7 @@
     "private": true,
     "scripts": {
         "postinstall": "yarn workspace server postinstall",
-        "build": "turbo run build --no-daemon",
+        "build": "wasm-pack build --release packages/rust-game && turbo run build --no-daemon",
         "dev": "concurrently -k \"yarn dev:web\" \"yarn dev:rust\"",
         "dev:web": "turbo run dev --no-daemon --output-logs errors-only",
         "dev:rust": "cargo watch -C packages/rust-game -i \"pkg/*\" -s \"wasm-pack -q build --debug\"",

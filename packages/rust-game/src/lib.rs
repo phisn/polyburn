@@ -1,6 +1,6 @@
 use base64::*;
 use bevy::{
-    app::ScheduleRunnerPlugin,
+    app::{AppExit, ScheduleRunnerPlugin},
     asset::AssetMetaCheck,
     prelude::*,
     window::{PresentMode, WindowMode},
@@ -37,7 +37,18 @@ pub fn run_game() {
         .add_plugins(fps_plugin::FpsPlugin::default())
         .add_systems(Startup, fit_canvas_to_parent);
 
+    error!("Starting game");
+
     app.run();
+
+    error!("Game finished");
+}
+
+fn exit_system(time: Res<Time>, mut exit_writer: EventWriter<AppExit>) {
+    if time.elapsed_seconds() > 5.0 {
+        println!("Exiting game");
+        exit_writer.send(AppExit);
+    }
 }
 
 use wasm_bindgen::JsCast;

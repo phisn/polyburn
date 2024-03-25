@@ -2,7 +2,6 @@ use std::f32::consts::LOG2_E;
 
 use bevy::core_pipeline::core_2d::graph::input;
 use burn::{
-    backend::{wgpu::AutoGraphicsApi, Autodiff, Wgpu},
     config::Config,
     module::{AutodiffModule, Module},
     nn::{Linear, LinearConfig, ReLU},
@@ -15,12 +14,10 @@ use burn::{
 };
 use rand::rngs::ThreadRng;
 
-use crate::sac::actor_critic::{ActorCritic, ActorCriticConfig};
-
 use self::{
     actor_critic::{ActionValueFunction, Actor},
     algorithm::SacAlgorithm,
-    replay_buffer::{ReplayBuffer},
+    replay_buffer::ReplayBuffer,
 };
 
 mod actor_critic;
@@ -33,6 +30,9 @@ mod replay_buffer;
 pub struct SacConfig {
     adam_config: AdamConfig,
     seed: Option<u64>,
+
+    action_dim: usize,
+    observation_dim: usize,
 
     #[config(default = 4000)]
     steps_per_epoch: usize,
@@ -50,7 +50,7 @@ pub struct SacConfig {
     alpha: f32,
     #[config(default = 100)]
     batch_size: usize,
-    #[config(default = 10000)]
+    #[config(default = 100)]
     start_steps: usize,
     #[config(default = 1000)]
     update_after: usize,
@@ -60,12 +60,3 @@ pub struct SacConfig {
     max_ep_len: usize,
 }
 
-pub fn test() {
-    type MyBackend = Wgpu<AutoGraphicsApi, f32, i32>;
-    type MyAutodiffBackend = Autodiff<MyBackend>;
-
-    let device = burn::backend::wgpu::WgpuDevice::default();
-    let config = SacConfig::new(AdamConfig::new());
-
-    // let sac = config.init::<MyAutodiffBackend>(&device, &());
-}

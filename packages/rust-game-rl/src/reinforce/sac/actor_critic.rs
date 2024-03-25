@@ -2,7 +2,7 @@ use std::f32::consts::LOG2_E;
 
 use bevy::core_pipeline::core_2d::graph::input;
 use burn::{
-    backend::{wgpu::AutoGraphicsApi, Autodiff, Wgpu},
+    backend::{Autodiff},
     config::Config,
     module::Module,
     nn::{Linear, LinearConfig, ReLU},
@@ -109,7 +109,7 @@ impl<B: Backend> Actor<B> {
         observation: Tensor<B, 2>,
         deterministic: bool,
         with_logprob: bool,
-    ) -> (Tensor<B, 2>, Option<Tensor<B, 2>>) {
+    ) -> (Tensor<B, 2>, Option<Tensor<B, 1>>) {
         let x = self.base.forward(observation);
         let mu = self.mu_layer.forward(x.clone());
         let log_std = self.log_std_layer.forward(x.clone());
@@ -131,11 +131,12 @@ impl<B: Backend> Actor<B> {
             */
 
             // logp_pi = pi_distribution.log_prob(pi_action).sum(axis=-1)
-            let logp_pi = pi_log_prob.sum_dim(1);
+            let logp_pi = pi_log_prob.sum_dim(1).squeeze::<1>(1);
 
             // logp_pi -= (2*(np.log(2) - pi_action - F.softplus(-2*pi_action))).sum(axis=1)
             let minus_term = pi_action.clone() - softplus(pi_action.clone().mul_scalar(-2.0), 1.0);
             let minus_term = minus_term.neg().add_scalar(LOG2_E).mul_scalar(2.0);
+            let minus_term = minus_term.sum_dim(1).squeeze::<1>(1);
 
             let logp_pi = logp_pi.sub(minus_term);
 

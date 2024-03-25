@@ -6,30 +6,16 @@ use bevy::{
 };
 
 use self::flappy_bird::*;
-use crate::reinforce::{Agent, AgentTrainer};
+use crate::reinforce::{sac, Agent, AgentTrainer, AgentWithTrainer};
 
 mod flappy_bird;
 
 #[derive(Resource)]
-pub struct Control {
-    agent: Option<Box<dyn Agent>>,
-    trainer: Option<Box<dyn AgentTrainer>>,
-}
-
-impl Control {
-    pub fn Player() -> Self {
-        Self {
-            agent: None,
-            trainer: None,
-        }
-    }
-
-    pub fn Agent(agent: Box<dyn Agent>) -> Self {
-        Self {
-            agent: Some(agent),
-            trainer: None,
-        }
-    }
+pub enum Control {
+    Player,
+    PlayerWithTrainer(Box<dyn AgentTrainer>),
+    Agent(Box<dyn Agent>),
+    AgentWithTrainer(Box<dyn AgentWithTrainer>),
 }
 
 struct DoNothingAgent;
@@ -40,9 +26,9 @@ impl Agent for DoNothingAgent {
     }
 }
 
-pub fn play_flappy_bird() {
+pub fn play_flappy_bird(control: Control) {
     App::new()
-        .insert_resource(Control::Player())
+        .insert_resource(control)
         .add_plugins(DefaultPlugins)
         .add_plugins(FlappyBirdPlugin::new(FlappyBirdConfig {
             with_graphics: true,
@@ -60,10 +46,10 @@ pub fn play_flappy_bird() {
         .run();
 }
 
-pub fn train_flappy_bird() {
+pub fn train_flappy_bird(control: Control) {
     let mut app = App::new();
 
-    app.insert_resource(Control::Agent(Box::new(DoNothingAgent)))
+    app.insert_resource(control)
         .add_plugins(MinimalPlugins)
         .add_plugins(FlappyBirdPlugin::new(FlappyBirdConfig {
             with_graphics: false,

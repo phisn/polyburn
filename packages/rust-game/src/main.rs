@@ -1,5 +1,6 @@
 use base64::*;
 use bevy::{
+    app::AppExit,
     prelude::*,
     window::{PresentMode, WindowTheme},
 };
@@ -46,7 +47,15 @@ pub fn main() {
         .add_plugins(player_plugin::PlayerPlugin::default())
         .add_plugins(fps_plugin::FpsPlugin::default());
 
-    app.add_systems(PostUpdate, input_catpure_system);
+    app.add_systems(PostUpdate, input_catpure_system)
+        .add_systems(Update, exit_system);
 
     app.run();
+}
+
+fn exit_system(time: Res<Time>, mut exit_writer: EventWriter<AppExit>) {
+    if time.elapsed_seconds() > 5.0 {
+        println!("Exiting game");
+        exit_writer.send(AppExit);
+    }
 }

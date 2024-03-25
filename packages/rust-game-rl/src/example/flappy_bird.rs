@@ -15,6 +15,8 @@ use bevy::{
 use bevy_rapier2d::prelude::*;
 use rand::{thread_rng, Rng};
 
+use crate::reinforce::{Agent, Experience};
+
 use super::Control;
 
 #[derive(Resource, Clone)]
@@ -55,6 +57,8 @@ impl Plugin for FlappyBirdPlugin {
             });
 
         app.insert_resource(self.config.clone())
+            .init_resource::<CurrentReward>()
+            .init_resource::<PreviousObservation>()
             .add_systems(Startup, game_startup)
             .add_systems(
                 Update,
@@ -178,18 +182,89 @@ fn game_startup(mut commands: Commands, config: Res<FlappyBirdConfig>) {
         ))),
         Velocity::zero(),
         LockedAxes::ROTATION_LOCKED_Z,
+        CollidingEntities::default(),
+        ActiveEvents::COLLISION_EVENTS
     ));
 }
 
+#[derive(Resource, Default)]
+struct PreviousObservation {
+    action_and_observation: Option<(Vec<f32>, Vec<f32>)>,
+}
+
+#[derive(Resource, Default)]
+struct CurrentReward {
+    reward: f32,
+    done: f32
+}
+
+fn observe_world(world: &mut World) -> Vec<f32> {
+    let player_position_y = world
+        .query::<(&Transform, &Player)>()
+        .single(world)
+        .0
+        .translation
+        .y;
+
+    let mut obstacle_observations = {
+        let mut obstacles = world
+            .query::<(&Transform, &Obstacle)>()
+            .iter(world)
+            .collect::<Vec<_>>();
+
+        obstacles.sort_by(|x, y| x.0.translation.x.total_cmp(&y.0.translation.x));
+
+        obstacles
+            .iter()
+            .take(2)
+            .map(|(transform, obstacle)| {
+                let obstacle_position_x = transform.translation.x;
+
+                let obstacle_bottom_height = obstacle.bottom_height;
+                let obstacle_top_height = obstacle.top_height;
+
+                vec![
+                    obstacle_position_x,
+                    (obstacle_bottom_height + obstacle_top_height) * 0.5,
+                    obstacle.space,
+                ]
+            })
+            .collect::<Vec<_>>()
+    };
+
+    for _ in 0..(2 - obstacle_observations.len()) {
+        obstacle_observations.push(vec![10000.0, 0.0, 0.0]);
+    }
+
+    let mut observations = vec![player_position_y];
+
+    observations.extend(obstacle_observations.iter().flatten());
+
+    observations
+}
+
 fn update_control(world: &mut World) {
+    let observation = observe_world(world);
+
     world.resource_scope(|world, mut control: Mut<Control>| {
         let config = world.resource::<FlappyBirdConfig>();
 
+        // get last action and observation
+        let experience = if let Some((last_action, last_observation)) = &world.resource::<PreviousObservation>().action_and_observation {   
+            Some(Experience {
+                observation: last_observation.clone(),
+                action: last_action.clone(),
+                next_observation: observation.clone(),
+                reward: world.resource::<CurrentReward>().reward,
+                done: world.resource::<CurrentReward>().done,
+            })
+        }
+        else {
+            None
+        };
+
         let action = match control.as_mut() {
-            Control {
-                agent: None,
-                trainer,
-            } => {
+            Control::Player | Control::PlayerWithTrainer(_) => {
                 let input = world.resource::<Input<KeyCode>>();
 
                 if input.pressed(KeyCode::Space) {
@@ -198,15 +273,39 @@ fn update_control(world: &mut World) {
                     config.gravity
                 }
             }
-            Control {
-                agent: Some(agent),
-                trainer,
-            } => {
-                let action = agent.act(&vec![0.0, 0.0, 0.0, 0.0]);
+            Control::PlayerWithTrainer(agent) => {
+                let input = world.resource::<Input<KeyCode>>();
+                
+                if let Some(experience) = experience {
+                    agent.observe(experience);
+                }
+
+                if input.pressed(KeyCode::Space) {
+                    config.player_strength
+                } else {
+                    config.gravity
+                }
+            }
+            Control::AgentWithTrainer(agent) => {
+                let action = agent.act(&observation);
                 let action = action[0];
+
+                if let Some(experience) = experience {
+                    agent.observe(experience);
+                }
 
                 if action > 0.0 {
                     action * config.player_strength
+                } else {
+                    config.gravity
+                }
+            }
+            Control::Agent(agent)=> {
+                let action = agent.act(&observation);
+                let action = action[0];
+
+                if action > 0.0 {
+                    config.player_strength
                 } else {
                     config.gravity
                 }
@@ -215,6 +314,8 @@ fn update_control(world: &mut World) {
 
         let (mut player_velocity, _) = world.query::<(&mut Velocity, &Player)>().single_mut(world);
         player_velocity.linvel.y = action;
+
+        world.insert_resource(PreviousObservation { action_and_observation: Some((vec![action], observation)) });
     });
 }
 
@@ -285,12 +386,32 @@ fn obstacle_update(
 }
 
 fn player_update(
+    mut commands: Commands,
     config: Res<FlappyBirdConfig>,
-    mut player_query: Query<&mut Transform, With<Player>>,
+    mut current_reward: ResMut<CurrentReward>,
+    mut player_query: Query<(&mut Transform, &CollidingEntities), With<Player>>,
+    obstacle_query: Query<Entity, With<Obstacle>>,
 ) {
-    let mut player_transform = player_query.single_mut();
+    let (mut player_transform, colliding_entities) = player_query.single_mut();
 
     if player_transform.translation.x < 0.0 {
         player_transform.translation.x = config.game_width / 4.0;
+
+        for obstacle_entity in obstacle_query.iter() {
+            commands.entity(obstacle_entity).despawn_recursive();
+        }
+
+        current_reward.reward = -100.0;
+        current_reward.done = 1.0;
+    }
+    else {
+        if colliding_entities.len() > 0 {
+            current_reward.reward = -1.0;
+        }
+        else {
+            current_reward.reward = 1.0;
+        }
+
+        current_reward.done = 0.0;
     }
 }

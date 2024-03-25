@@ -1,7 +1,7 @@
 use burn::tensor::{backend::Backend, Data, Shape, Tensor};
 use rand::{seq::SliceRandom, Rng};
 
-use crate::abstraction::Experience;
+use crate::reinforce::Experience;
 
 pub struct ExperienceBatch<B: Backend> {
     pub observation: Tensor<B, 2>,

@@ -2,17 +2,12 @@ use std::f32::consts::LOG2_E;
 
 use bevy::core_pipeline::core_2d::graph::input;
 use burn::{
-    backend::{wgpu::AutoGraphicsApi, Autodiff, Wgpu},
-    config::Config,
-    module::Module,
-    nn::{Linear, LinearConfig, ReLU},
-    tensor::{
+    config::Config, module::Module, nn::{Linear, LinearConfig, ReLU}, tensor::{
         activation::{softplus, tanh},
         backend::Backend,
         Distribution, DistributionSampler, DistributionSamplerKind, Tensor,
-    },
+    }
 };
-use rand::rngs::ThreadRng;
 
 #[derive(Module, Debug)]
 pub struct BaseNetwork<B: Backend> {

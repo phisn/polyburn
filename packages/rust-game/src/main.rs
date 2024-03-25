@@ -47,8 +47,7 @@ pub fn main() {
         .add_plugins(player_plugin::PlayerPlugin::default())
         .add_plugins(fps_plugin::FpsPlugin::default());
 
-    app.add_systems(PostUpdate, input_catpure_system)
-        .add_systems(Update, exit_system);
+    app.add_systems(PostUpdate, input_catpure_system);
 
     app.run();
 }

@@ -54,12 +54,12 @@ export function wgpu_render_pass_set_index_buffer(a: number, b: number, c: numbe
 export function __wbindgen_malloc(a: number, b: number): number;
 export function __wbindgen_realloc(a: number, b: number, c: number, d: number): number;
 export const __wbindgen_export_2: WebAssembly.Table;
-export function wasm_bindgen__convert__closures__invoke2_mut__ha21c45bd6564ba0d(a: number, b: number, c: number, d: number): void;
-export function wasm_bindgen__convert__closures__invoke1_mut__h1e3b6269cc53ec60(a: number, b: number, c: number): void;
-export function wasm_bindgen__convert__closures__invoke0_mut__haca33f720af281a0(a: number, b: number): void;
-export function wasm_bindgen__convert__closures__invoke1_mut__h2b0e3cb02b08038a(a: number, b: number, c: number): void;
-export function wasm_bindgen__convert__closures__invoke0_mut__h96f383b13b53395f(a: number, b: number): void;
-export function wasm_bindgen__convert__closures__invoke0_mut__h82c47d4ae4caad63(a: number, b: number): void;
+export function wasm_bindgen__convert__closures__invoke1_mut__h1a7f0affd6166340(a: number, b: number, c: number): void;
+export function wasm_bindgen__convert__closures__invoke0_mut__h4b83f81b31de4b09(a: number, b: number): void;
+export function wasm_bindgen__convert__closures__invoke2_mut__h171d7fb522e397e6(a: number, b: number, c: number, d: number): void;
+export function wasm_bindgen__convert__closures__invoke0_mut__h4965dd5ec452a737(a: number, b: number): void;
+export function wasm_bindgen__convert__closures__invoke1_mut__h6f6aada71531b208(a: number, b: number, c: number): void;
+export function wasm_bindgen__convert__closures__invoke0_mut__hd051c02be305827c(a: number, b: number): void;
 export function _dyn_core__ops__function__FnMut__A____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__hef91b7164d2378f1(a: number, b: number, c: number): void;
 export function __wbindgen_free(a: number, b: number, c: number): void;
 export function __wbindgen_exn_store(a: number): void;

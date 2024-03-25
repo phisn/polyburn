@@ -7,7 +7,19 @@ edition = "2021"
 
 [dependencies]
 base64 = "0.21.5"
-bevy = "0.13.1"
+bevy = { version = "0.13.1", default-features = false, features = [
+	"bevy_asset",
+	"bevy_audio",
+	"bevy_core_pipeline",
+	"bevy_debug_stepping",
+	"bevy_render",
+	"bevy_sprite",
+	"bevy_text",
+	"bevy_ui",
+	"bevy_winit",
+	"default_font",
+	"webgl2"
+] }
 bevy_rapier2d = { version = "0.25.0", features = ["wasm-bindgen", "enhanced-determinism"] }
 half = "2.3.1"
 i_float = "0.6.0"

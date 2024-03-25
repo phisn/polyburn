@@ -4,11 +4,13 @@
   "files": [
     "rust_game_bg.wasm",
     "rust_game.js",
+    "rust_game_bg.js",
     "rust_game.d.ts"
   ],
   "module": "rust_game.js",
   "types": "rust_game.d.ts",
   "sideEffects": [
+    "./rust_game.js",
     "./snippets/*"
   ]
 }

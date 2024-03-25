@@ -14,10 +14,14 @@ export default {
         }
 
         const headers = {
-            "Access-Control-Allow-Origin": `${env.CLIENT_URL}`,
+            "Access-Control-Allow-Origin": "",
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type",
             "Access-Control-Allow-Credentials": "true",
+        }
+
+        if (env.CLIENT_URL.split(",").includes(request.headers.get("Origin") || "")) {
+            headers["Access-Control-Allow-Origin"] = request.headers.get("Origin") || ""
         }
 
         if (request.method === "OPTIONS") {

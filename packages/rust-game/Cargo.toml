@@ -1,0 +1,54 @@
+[package]
+name = "rust-game"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+base64 = "0.21.5"
+bevy = { version = "0.13.1", default-features = false, features = [
+	"bevy_asset",
+	"bevy_audio",
+	"bevy_core_pipeline",
+	"bevy_debug_stepping",
+	"bevy_render",
+	"bevy_sprite",
+	"bevy_text",
+	"bevy_ui",
+	"bevy_winit",
+	"default_font",
+	"webgl2"
+] }
+bevy_prototype_lyon = "0.11.0"
+bevy_rapier2d = { version = "0.25.0", features = ["wasm-bindgen", "enhanced-determinism", "serde-serialize"] }
+bevy_svg = { git = "https://github.com/arnfaldur/bevy_svg.git", default-features = false, features = ["2d"] }
+bincode = "1.3.3"
+bytemuck = "1.14.3"
+earcutr = "0.4.3"
+half = "2.3.1"
+i_float = "0.6.0"
+i_overlay = "0.13.0"
+i_shape = "0.9.0"
+i_triangle = "0.11.0"
+js-sys = "0.3.66"
+parry2d = "0.13.6"
+prost = "0.12.3"
+rand = "0.8.5"
+rapier2d = { version = "0.18.0", features = ["enhanced-determinism", "wasm-bindgen"] }
+rust-game-plugin = { version = "0.1.0", path = "../rust-game-plugin" }
+rust-proto = { version = "0.1.0", path = "../rust-proto" }
+serde = { version = "1.0.196", features = ["derive"] }
+wasm-bindgen = "0.2.92"
+
+web-sys = { version = "0.3", features = [
+	"CssStyleDeclaration",
+	"Document",
+	"HtmlCanvasElement",
+	"Window",
+	"Navigator"
+] }
+
+[lints.rust]
+unused = "allow"

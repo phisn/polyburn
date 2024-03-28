@@ -1,6 +1,6 @@
 import { Suspense } from "react"
-import { WorldView } from "shared/src/views/WorldView"
-import { useAppStore } from "../../common/storage/AppStore"
+import { WorldView } from "shared/src/views/world-view"
+import { useAppStore } from "../../common/storage/app-store"
 import { trpc } from "../../common/trpc/trpc"
 import { World } from "./World"
 

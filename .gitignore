@@ -33,3 +33,6 @@ yarn-error.log*
 
 # webstorms
 .idea
+
+# Added by cargo
+/target

@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server"
 import { asc, eq, inArray } from "drizzle-orm"
-import { WorldView } from "shared/src/views/WorldView"
+import { WorldView } from "shared/src/views/world-view"
 import { z } from "zod"
 import { leaderboard } from "../db-schema"
 import { worlds } from "../domain/worlds"

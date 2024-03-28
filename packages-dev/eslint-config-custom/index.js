@@ -8,9 +8,9 @@ module.exports = {
     extends: [
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
+        "plugin:filenames-simple/recommended-react",
         "plugin:react/jsx-runtime",
         "plugin:react-hooks/recommended",
-        "plugin:unicorn/recommended",
         "prettier",
         "turbo",
     ],
@@ -24,6 +24,7 @@ module.exports = {
         "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/unbound-method": "off",
+        "filenames-simple/named-export": "off",
 
         eqeqeq: "error",
         "no-var": "error",

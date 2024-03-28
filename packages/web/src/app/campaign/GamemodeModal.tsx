@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
-import { WorldView } from "shared/src/views/WorldView"
+import { WorldView } from "shared/src/views/world-view"
 import { Modal, ModalPanel } from "../../common/components/Modal"
 import { useCampaignStore } from "./CampaignStore"
 import { Gamemode } from "./Gamemode"
 
 export function GamemodeModal() {
     const worldSelected = useCampaignStore(state => state.worldSelected)
+    const handlerSelected = useCampaignStore(state => state.handlerSelected)
+
     const cancelGamemodeSelection = useCampaignStore(state => state.cancelGamemodeSelection)
 
     const [world, setWorld] = useState<WorldView | undefined>(worldSelected)
@@ -18,7 +20,7 @@ export function GamemodeModal() {
 
     return (
         <Modal
-            open={worldSelected !== undefined}
+            open={worldSelected !== undefined && handlerSelected === undefined}
             closeDialog={() => cancelGamemodeSelection()}
             className="flex items-center justify-center rounded-2xl p-6"
         >

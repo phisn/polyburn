@@ -1,4 +1,4 @@
-import { ReplayStats } from "runtime/src/model/replay/ReplayStats"
+import { ReplayStats } from "runtime/src/model/replay/replay-stats"
 
 export interface Replay {
     world: string

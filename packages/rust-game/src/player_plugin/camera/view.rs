@@ -12,7 +12,7 @@ use rust_game_plugin::{
     MapTemplate,
 };
 
-use crate::player_plugin::camera::{CameraTransitionAnimation, CAMERA_SCALE_MAX, CAMERA_SCALE_MIN};
+use crate::player_plugin::camera::{TransitionAnimation, CAMERA_SCALE_MAX, CAMERA_SCALE_MIN};
 
 use super::{CameraAnimation, CameraConfig, CameraStartAnimation, CustomCamera, StartAnimation};
 
@@ -32,7 +32,7 @@ pub fn startup() -> SystemConfigs {
 }
 
 fn animate(
-    camera_config: Res<CameraConfig>,
+    mut camera_config: ResMut<CameraConfig>,
     mut camera_query: Query<
         (
             &mut Transform,
@@ -42,6 +42,7 @@ fn animate(
         ),
         Without<Rocket>,
     >,
+    query_rocket: Query<&Transform, With<Rocket>>,
     time: Res<Time>,
 ) {
     fn ease_out_fast(x: f32) -> f32 {
@@ -117,13 +118,37 @@ fn animate(
                 custom_camera.animation = CameraAnimation::None;
             }
         }
+        CameraAnimation::Zoom(ref mut zoom_animation) => {
+            zoom_animation.progress += time.delta_seconds() * camera_config.animation_speed;
+            zoom_animation.progress = zoom_animation.progress.min(1.0);
+
+            camera_config.zoom = f32::lerp(
+                zoom_animation.source_zoom,
+                zoom_animation.target_zoom,
+                ease_out_slow(zoom_animation.progress),
+            );
+
+            if zoom_animation.progress >= 1.0 {
+                custom_camera.animation = CameraAnimation::None;
+            }
+
+            custom_camera.size = custom_camera.physical_size * camera_config.zoom;
+            let rocket_transform = query_rocket.single();
+
+            update_camera_size(&mut camera, &mut custom_camera, &mut projection);
+            update_camera_transform(
+                &mut custom_camera,
+                &mut camera_transform,
+                rocket_transform.translation.truncate(),
+            );
+        }
         _ => {}
     }
 }
 
 fn track_window_size(
     mut window_resized_events: EventReader<WindowResized>,
-    camer_config: Res<CameraConfig>,
+    camera_config: Res<CameraConfig>,
     window_query: Query<&Window>,
     mut query_camera: Query<
         (
@@ -149,12 +174,12 @@ fn track_window_size(
         window.resolution.physical_height() as f32,
     );
 
-    let camera_size = physical_camera_size * camer_config.zoom;
+    custom_camera.physical_size = physical_camera_size;
+
+    let camera_size = physical_camera_size * camera_config.zoom;
+    custom_camera.size = camera_size;
 
     let rocket_transform = query_rocket.single();
-
-    custom_camera.physical_size = physical_camera_size;
-    custom_camera.size = camera_size;
 
     update_camera_size(&mut camera, &mut custom_camera, &mut projection);
     update_camera_transform(
@@ -190,7 +215,7 @@ fn track_level_capture(
     let (mut native_camera, mut camera, mut transform, mut projection) = camera_query.single_mut();
     let rocket_transform = rocket_query.single();
 
-    camera.animation = CameraAnimation::Transition(CameraTransitionAnimation {
+    camera.animation = CameraAnimation::Transition(TransitionAnimation {
         source_translation: transform.translation.truncate(),
         ..default()
     });
@@ -261,15 +286,16 @@ fn prepare_inital_view(
 }
 
 fn update_camera_size(
-    native_camera: &mut Camera,
-    camera: &mut CustomCamera,
+    camera: &mut Camera,
+    custom_camera: &mut CustomCamera,
     camera_projection: &mut OrthographicProjection,
 ) {
-    camera.size_after_constraint = camera.size.min(camera.level_constraint_size);
+    custom_camera.size_after_constraint =
+        custom_camera.size.min(custom_camera.level_constraint_size);
 
     let view_port_size = Vec2::new(
-        camera.size_after_constraint.x / camera.size.x,
-        camera.size_after_constraint.y / camera.size.y,
+        custom_camera.size_after_constraint.x / custom_camera.size.x,
+        custom_camera.size_after_constraint.y / custom_camera.size.y,
     );
 
     let view_port_size = Vec2::new(
@@ -278,37 +304,37 @@ fn update_camera_size(
     );
 
     camera_projection.scaling_mode = ScalingMode::Fixed {
-        width: camera.size_after_constraint.x,
-        height: camera.size_after_constraint.y,
+        width: custom_camera.size_after_constraint.x,
+        height: custom_camera.size_after_constraint.y,
     };
 
     let viewport = Viewport {
         physical_size: Vec2::new(
-            (camera.physical_size.x * view_port_size.x).round(),
-            (camera.physical_size.y * view_port_size.y).round(),
+            (custom_camera.physical_size.x * view_port_size.x).round(),
+            (custom_camera.physical_size.y * view_port_size.y).round(),
         )
         .as_uvec2(),
         physical_position: Vec2::new(
-            (0.5 * camera.physical_size.x * (1.0 - view_port_size.x)).round(),
-            (0.5 * camera.physical_size.y * (1.0 - view_port_size.y)).round(),
+            (0.5 * custom_camera.physical_size.x * (1.0 - view_port_size.x)).round(),
+            (0.5 * custom_camera.physical_size.y * (1.0 - view_port_size.y)).round(),
         )
         .as_uvec2(),
         depth: 0.0..1.0,
     };
 
-    match camera.animation {
+    match custom_camera.animation {
         CameraAnimation::Transition(ref mut animation) => {
-            animation.source_viewport = native_camera.viewport.clone().unwrap_or(viewport.clone());
+            animation.source_viewport = camera.viewport.clone().unwrap_or(viewport.clone());
             animation.target_viewport = viewport;
         }
         _ => {
-            native_camera.viewport = Some(viewport);
+            camera.viewport = Some(viewport);
         }
     }
 }
 
 fn update_camera_transform(
-    camera: &mut CustomCamera,
+    custom_camera: &mut CustomCamera,
     camera_transform: &mut Transform,
     rocket_translation: Vec2,
 ) {
@@ -325,24 +351,25 @@ fn update_camera_transform(
         }
     }
 
-    let rocket_translation_in_view = rocket_translation - camera.level_constraint_translation;
+    let rocket_translation_in_view =
+        rocket_translation - custom_camera.level_constraint_translation;
 
-    let camera_translation = camera.level_constraint_translation.extend(0.0)
+    let camera_translation = custom_camera.level_constraint_translation.extend(0.0)
         + Vec3::new(
             constrain_translation_axis(
-                camera.size_after_constraint.x,
-                camera.level_constraint_size.x,
+                custom_camera.size_after_constraint.x,
+                custom_camera.level_constraint_size.x,
                 rocket_translation_in_view.x,
             ),
             constrain_translation_axis(
-                camera.size_after_constraint.y,
-                camera.level_constraint_size.y,
+                custom_camera.size_after_constraint.y,
+                custom_camera.level_constraint_size.y,
                 rocket_translation_in_view.y,
             ),
             15.0,
         );
 
-    match camera.animation {
+    match custom_camera.animation {
         CameraAnimation::Transition(ref mut animation) => {
             animation.target_translation = camera_translation.truncate();
         }

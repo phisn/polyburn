@@ -19,13 +19,47 @@ mod zoom;
 pub struct CameraConfig {
     pub zoom: f32,
     pub animation_speed: f32,
+
+    zoom_index: usize,
+}
+
+impl CameraConfig {
+    fn target_zoom(&self) -> f32 {
+        match self.zoom_index {
+            0 => 0.02,
+            1 => 0.015,
+            2 => 0.01,
+            3 => 0.0075,
+            4 => 0.005,
+            _ => 0.003,
+        }
+    }
+
+    fn zoom_in(&mut self) -> bool {
+        if self.zoom_index < 4 {
+            self.zoom_index += 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn zoom_out(&mut self) -> bool {
+        if self.zoom_index > 0 {
+            self.zoom_index -= 1;
+            true
+        } else {
+            false
+        }
+    }
 }
 
 impl Default for CameraConfig {
     fn default() -> Self {
         Self {
-            zoom: 0.05,
+            zoom: 0.02,
             animation_speed: 1.0,
+            zoom_index: 0,
         }
     }
 }
@@ -56,11 +90,12 @@ enum CameraAnimation {
     #[default]
     None,
     Start(StartAnimation),
-    Transition(CameraTransitionAnimation),
+    Transition(TransitionAnimation),
+    Zoom(ZoomAnimation),
 }
 
 #[derive(Default)]
-struct CameraTransitionAnimation {
+struct TransitionAnimation {
     target_viewport: Viewport,
     source_viewport: Viewport,
 
@@ -70,12 +105,22 @@ struct CameraTransitionAnimation {
     progress: f32,
 }
 
+#[derive(Default)]
+struct ZoomAnimation {
+    source_zoom: f32,
+    target_zoom: f32,
+
+    progress: f32,
+}
+
 pub fn update() -> SystemConfigs {
-    (view::update()).chain().into_configs()
+    (view::update(), zoom::update()).chain().into_configs()
 }
 
 pub fn startup() -> SystemConfigs {
-    (spawn_camera, view::startup()).chain().into_configs()
+    (spawn_camera, view::startup(), zoom::startup())
+        .chain()
+        .into_configs()
 }
 
 #[derive(Component, Default)]

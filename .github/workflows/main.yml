@@ -33,11 +33,7 @@ jobs:
       - name: Deploy
         uses: cloudflare/pages-action@v1.5.0
         with:
-          # Cloudflare API Token
           apiToken: ${{ CLOUDFLARE_API_TOKEN }}
-          # Cloudflare Account ID
           accountId: ${{ CLOUDFLARE_ACCOUNT_ID }}
-          # The name of the Pages project to upload to
-          projectName: rocket-game
-          # The directory of static assets to upload
+          projectName: polyburn
           directory: /packages/web/dist

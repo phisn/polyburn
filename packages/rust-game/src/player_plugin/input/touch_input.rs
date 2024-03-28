@@ -78,6 +78,6 @@ pub fn touch_input(
         }
     }
 
-    frame_input.thrust = state.thrust_index.is_some();
+    frame_input.thrust = frame_input.thrust || state.thrust_index.is_some();
     frame_input.rotation += state.total_rotation;
 }

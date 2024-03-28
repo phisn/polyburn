@@ -3,7 +3,7 @@
     "scripts": {
         "postinstall": "yarn workspace server postinstall",
         "build": "turbo run build --no-daemon",
-        "build:rust": "wasm-pack build packages/rust-game --release",
+        "build:rust": "wasm-pack build --release packages/rust-game",
         "dev": "concurrently -k \"yarn dev:web\" \"yarn dev:rust\"",
         "dev:web": "turbo run dev --no-daemon --output-logs errors-only",
         "dev:rust": "cargo watch -C packages/rust-game -i \"pkg/*\" -s \"wasm-pack -q build --debug\"",

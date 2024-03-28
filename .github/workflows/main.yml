@@ -1,0 +1,43 @@
+name: CI/CD
+on: [push]
+
+jobs:
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Instal Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
+      - name: Install Yarn
+        run: npm install -g yarn
+
+      - name: Install rust & cargo
+        run: rustup update stable && rustup default stable
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Install dependencies
+        run: yarn
+        
+      - name: Build rust-game
+        run: yarn build:rust-game
+
+      - name: Build frontend
+        run: yarn build
+
+      - name: Deploy
+        uses: cloudflare/pages-action@v1.5.0
+        with:
+          # Cloudflare API Token
+          apiToken: ${{ CLOUDFLARE_API_TOKEN }}
+          # Cloudflare Account ID
+          accountId: ${{ CLOUDFLARE_ACCOUNT_ID }}
+          # The name of the Pages project to upload to
+          projectName: rocket-game
+          # The directory of static assets to upload
+          directory: /packages/web/dist

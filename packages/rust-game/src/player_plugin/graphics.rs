@@ -25,14 +25,13 @@ pub struct GameAssets {
 }
 
 pub fn update() -> SystemConfigs {
-    (graphics_level::update(), particle_environment_setup)
-        .chain()
-        .into_configs()
+    (graphics_level::update()).chain().into_configs()
 }
 
 pub fn startup() -> SystemConfigs {
     (
         game_assets_setup,
+        particle_environment_setup,
         graphics_rocket::startup(),
         graphics_shape::startup(),
         graphics_level::startup(),

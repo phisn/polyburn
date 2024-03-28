@@ -11,3 +11,12 @@ prost = "0.12.3"
 
 [build-dependencies]
 prost-build = "0.12.3"
+
+
+[profile.release]
+debug = true
+
+[package.metadata.wasm-pack.profile.release]
+# previously had just ['-O4']
+wasm-opt = ['-O4', '-g']
+

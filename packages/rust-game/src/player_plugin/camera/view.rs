@@ -60,10 +60,10 @@ fn animate(
         )
     }
 
-    let (mut camera_transform, mut camera, mut native_camera, mut projection) =
+    let (mut camera_transform, mut custom_camera, mut camera, mut projection) =
         camera_query.single_mut();
 
-    match camera.animation {
+    match custom_camera.animation {
         CameraAnimation::Transition(ref mut camera_animation) => {
             let source_translation = camera_animation.source_translation;
             let target_translation = camera_animation.target_translation;
@@ -83,7 +83,7 @@ fn animate(
             let source_viewport = &camera_animation.source_viewport;
             let target_viewport = &camera_animation.target_viewport;
 
-            native_camera.viewport = Some(Viewport {
+            camera.viewport = Some(Viewport {
                 physical_size: lerp_uvec2_with_ease(
                     source_viewport.physical_size,
                     target_viewport.physical_size,
@@ -98,7 +98,7 @@ fn animate(
             });
 
             if camera_animation_progress_bounded >= 1.0 {
-                camera.animation = CameraAnimation::None;
+                custom_camera.animation = CameraAnimation::None;
             }
         }
         CameraAnimation::Start(ref mut camera_animation) => {
@@ -114,105 +114,17 @@ fn animate(
             );
 
             if camera_animation_progress_bounded >= 1.0 {
-                camera.animation = CameraAnimation::None;
+                custom_camera.animation = CameraAnimation::None;
             }
         }
         _ => {}
     }
 }
 
-fn progress_start_animation(
-    mut commands: Commands,
-    mut camer_config: ResMut<CameraConfig>,
-    mut query_camera: Query<
-        (
-            Entity,
-            &mut Camera,
-            &mut CustomCamera,
-            &mut Transform,
-            &mut OrthographicProjection,
-            &mut CameraStartAnimation,
-        ),
-        Without<Rocket>,
-    >,
-    query_rocket: Query<&Transform, With<Rocket>>,
-    time: Res<Time>,
-) {
-    let Ok((
-        camera_entity,
-        mut camera,
-        mut custom_camera,
-        mut transform,
-        mut projection,
-        mut start_animation,
-    )) = query_camera.get_single_mut()
-    else {
-        return;
-    };
-
-    fn curve(x: f32) -> f32 {
-        /*
-                const n1 = 7.5625;
-        const d1 = 2.75;
-
-        if (x < 1 / d1) {
-            return n1 * x * x;
-        } else if (x < 2 / d1) {
-            return n1 * (x -= 1.5 / d1) * x + 0.75;
-        } else if (x < 2.5 / d1) {
-            return n1 * (x -= 2.25 / d1) * x + 0.9375;
-        } else {
-            return n1 * (x -= 2.625 / d1) * x + 0.984375;
-        }
-                        */
-
-        x * x * x
-    }
-
-    const CAMERA_ZOOM_SPEED: f32 = 10.0;
-
-    let scale_min_transformed = CAMERA_ZOOM_SPEED.powf(CAMERA_SCALE_MIN);
-    let scale_max_transformed = CAMERA_ZOOM_SPEED.powf(CAMERA_SCALE_MAX);
-
-    fn lerp_uvec2_with_ease(a: UVec2, b: UVec2, t: f32) -> UVec2 {
-        let t = curve(t);
-        UVec2::new(
-            (a.x as f32 + (b.x as f32 - a.x as f32) * t).round() as u32,
-            (a.y as f32 + (b.y as f32 - a.y as f32) * t).round() as u32,
-        )
-    }
-
-    start_animation.progress += time.delta_seconds() * 1.4;
-    start_animation.progress = start_animation.progress.min(1.0);
-
-    let target_scale_transformed = scale_min_transformed
-        + (scale_max_transformed - scale_min_transformed)
-            * curve(start_animation.progress.max(0.0));
-
-    camer_config.zoom = target_scale_transformed.log(CAMERA_ZOOM_SPEED);
-    custom_camera.size = custom_camera.physical_size * camer_config.zoom;
-
-    let rocket_transform = query_rocket.single();
-
-    update_camera_size(&mut camera, &mut custom_camera, &mut projection);
-    update_camera_transform(
-        &mut custom_camera,
-        &mut transform,
-        rocket_transform.translation.truncate(),
-    );
-
-    println!("zoom: {}", camer_config.zoom);
-
-    if start_animation.progress >= 1.0 {
-        commands
-            .entity(camera_entity)
-            .remove::<CameraStartAnimation>();
-    }
-}
-
 fn track_window_size(
     mut window_resized_events: EventReader<WindowResized>,
     camer_config: Res<CameraConfig>,
+    window_query: Query<&Window>,
     mut query_camera: Query<
         (
             &mut Camera,
@@ -224,23 +136,29 @@ fn track_window_size(
     >,
     query_rocket: Query<&Transform, With<Rocket>>,
 ) {
-    let Some(resize_event) = window_resized_events.read().last() else {
+    let Some(_) = window_resized_events.read().last() else {
         return;
     };
 
-    let (mut native_camera, mut camera, mut transform, mut projection) = query_camera.single_mut();
+    let (mut camera, mut custom_camera, mut transform, mut projection) = query_camera.single_mut();
 
-    let physical_camera_size = Vec2::new(resize_event.width, resize_event.height);
+    let window = window_query.single();
+
+    let physical_camera_size = Vec2::new(
+        window.resolution.physical_width() as f32,
+        window.resolution.physical_height() as f32,
+    );
+
     let camera_size = physical_camera_size * camer_config.zoom;
 
     let rocket_transform = query_rocket.single();
 
-    camera.physical_size = physical_camera_size;
-    camera.size = camera_size;
+    custom_camera.physical_size = physical_camera_size;
+    custom_camera.size = camera_size;
 
-    update_camera_size(&mut native_camera, &mut camera, &mut projection);
+    update_camera_size(&mut camera, &mut custom_camera, &mut projection);
     update_camera_transform(
-        &mut camera,
+        &mut custom_camera,
         &mut transform,
         rocket_transform.translation.truncate(),
     );
@@ -320,7 +238,11 @@ fn prepare_inital_view(
         camera_query.single_mut();
 
     let window = window_query.single();
-    let window_size = Vec2::new(window.width(), window.height());
+
+    let window_size = Vec2::new(
+        window.resolution.physical_width() as f32,
+        window.resolution.physical_height() as f32,
+    );
 
     custom_camera.level_constraint_size = inital_level.camera.size();
     custom_camera.level_constraint_translation = inital_level.camera.min;
@@ -362,13 +284,13 @@ fn update_camera_size(
 
     let viewport = Viewport {
         physical_size: Vec2::new(
-            (2.0 * camera.physical_size.x * view_port_size.x).round(),
-            (2.0 * camera.physical_size.y * view_port_size.y).round(),
+            (camera.physical_size.x * view_port_size.x).round(),
+            (camera.physical_size.y * view_port_size.y).round(),
         )
         .as_uvec2(),
         physical_position: Vec2::new(
-            (camera.physical_size.x * (1.0 - view_port_size.x)).round(),
-            (camera.physical_size.y * (1.0 - view_port_size.y)).round(),
+            (0.5 * camera.physical_size.x * (1.0 - view_port_size.x)).round(),
+            (0.5 * camera.physical_size.y * (1.0 - view_port_size.y)).round(),
         )
         .as_uvec2(),
         depth: 0.0..1.0,

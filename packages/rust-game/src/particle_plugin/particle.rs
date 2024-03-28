@@ -46,7 +46,8 @@ pub fn simulation_step(
             let tx: f32 = particle_transform.translation.x + dx;
             let ty = particle_transform.translation.y + dy;
 
-            if collidable.is_some() || true {
+            #[cfg(not(feature = "debug"))]
+            if collidable.is_some() {
                 let aabb = particle.shape.compute_aabb(&Isometry2::translation(tx, ty));
 
                 let mut acc_normal = Vec2::ZERO;

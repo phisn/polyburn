@@ -159,7 +159,7 @@ pub fn particle_system_spawner(
                     velocity_without_source.y * (i as f32) * 0.02,
                 );
 
-                let velocity = velocity_without_source + source_velocity;
+                let velocity = velocity_without_source + source_velocity * 0.5;
 
                 commands.entity(entity).with_children(|parent| {
                     parent.spawn((

@@ -4,6 +4,7 @@ use bevy::{
     ecs::schedule::SystemConfigs, prelude::*, render::view::NoFrustumCulling, sprite::Mesh2dHandle,
 };
 
+use bevy_rapier2d::dynamics::Velocity;
 use bevy_svg::prelude::*;
 
 use rust_game_plugin::{constants::ENTITY_ROCKET_ENTRY, ecs::rocket::Rocket, MapTemplate};
@@ -36,7 +37,7 @@ fn insert_initial_rocket(
     let rocket_svg: Handle<Svg> = asset_server.load("rocket.svg");
 
     let image_id = commands
-        .spawn((SpatialBundle::default()))
+        .spawn((SpatialBundle::default(), Velocity::default()))
         .with_children(|parent| {
             parent.spawn(Svg2dBundle {
                 svg: rocket_svg.clone(),

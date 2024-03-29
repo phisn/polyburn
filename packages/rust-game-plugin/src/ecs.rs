@@ -6,7 +6,9 @@ pub mod rocket;
 pub mod shape;
 
 pub fn systems() -> SystemConfigs {
-    (rocket::systems(), level::systems()).chain().into_configs()
+    (common::systems(), level::systems(), rocket::systems())
+        .chain()
+        .into_configs()
 }
 
 pub fn startup() -> SystemConfigs {

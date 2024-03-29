@@ -2,41 +2,44 @@ name: CI/CD
 on: [push]
 
 jobs:
-  build:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Instal Node.js 18.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.x
+    build:
+        name: Test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Instal Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
 
-      - name: Install Yarn
-        run: npm install -g yarn
+            - name: Install Yarn
+              run: npm install -g yarn
 
-      - name: Install rust & cargo
-        run: rustup update stable && rustup default stable
+            - name: Install rust & cargo
+              run: rustup update stable && rustup default stable
 
-      - name: Install wasm-pack
-        uses: jetli/wasm-pack-action@v0.4.0
+            - name: Setup cargo Cache
+              uses: Swatinem/rust-cache@v2.7.3
 
-      - name: Install protoc
-        uses: arduino/setup-protoc@v3.0.0          
+            - name: Install wasm-pack
+              uses: jetli/wasm-pack-action@v0.4.0
 
-      - name: Build rust-game
-        run: yarn build:rust
+            - name: Install protoc
+              uses: arduino/setup-protoc@v3.0.0
 
-      - name: Install dependencies
-        run: yarn
+            - name: Build rust-game
+              run: yarn build:rust
 
-      - name: Build frontend
-        run: yarn build
+            - name: Install dependencies
+              run: yarn
 
-      - name: Deploy
-        uses: cloudflare/pages-action@v1.5.0
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: polyburn
-          directory: ./packages/web/dist
+            - name: Build frontend
+              run: yarn build
+
+            - name: Deploy
+              uses: cloudflare/pages-action@v1.5.0
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  projectName: polyburn
+                  directory: ./packages/web/dist

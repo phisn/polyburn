@@ -22,10 +22,15 @@ fn update_interpolation_copy(
 
     for (mut interpolation_copy, tracking) in interpolated.iter_mut() {
         if let Ok(mut transform) = transforms.get_mut(interpolation_copy.copy) {
-            let lerped = tracking.previous.lerp_slerp(&tracking.current, alpha);
+            transform.translation = tracking
+                .previous_transform
+                .translation
+                .lerp(tracking.transform.translation, alpha);
 
-            transform.translation = Vec3::new(lerped.translation.x, lerped.translation.y, 0.0);
-            transform.rotation = Quat::from_rotation_z(lerped.rotation.angle());
+            transform.rotation = tracking
+                .previous_transform
+                .rotation
+                .lerp(tracking.transform.rotation, alpha);
         }
     }
 }

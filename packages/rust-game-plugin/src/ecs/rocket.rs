@@ -50,13 +50,19 @@ impl RocketBundle {
         let inverse = rotation.mul_vec3(Vec3::new(0.0, -0.5, 0.0));
         let initial_position = initial_position + inverse * ENTITY_ROCKET_ENTRY.height;
 
+        let transform = Transform {
+            translation: initial_position,
+            rotation,
+            ..Default::default()
+        };
+
         RocketBundle {
             rocket: Rocket {
                 spawn_point: initial_position,
                 input_offset: 0.0,
             },
 
-            transform: TransformBundle::from(Transform::from_translation(initial_position)),
+            transform: TransformBundle::from_transform(transform),
             velocity: Velocity::default(),
 
             rigid_body: RigidBody::Dynamic,
@@ -65,8 +71,8 @@ impl RocketBundle {
             external_impulse: ExternalImpulse::default(),
 
             interpolated: TrackingForInterpolation {
-                current: initial_position.truncate().into(),
-                previous: initial_position.truncate().into(),
+                transform,
+                previous_transform: transform,
             },
         }
     }

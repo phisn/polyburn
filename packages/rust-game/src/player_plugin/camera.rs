@@ -15,51 +15,26 @@ use rust_game_plugin::{
 mod view;
 mod zoom;
 
+fn camera_size_from_zoom(zoom: f32, physical_size: Vec2) -> Vec2 {
+    let max = physical_size.x.max(physical_size.y);
+
+    Vec2 {
+        x: zoom * physical_size.x / max,
+        y: zoom * physical_size.y / max,
+    }
+}
+
 #[derive(Resource)]
 pub struct CameraConfig {
     pub zoom: f32,
     pub animation_speed: f32,
-
-    zoom_index: usize,
-}
-
-impl CameraConfig {
-    fn target_zoom(&self) -> f32 {
-        match self.zoom_index {
-            0 => 0.02,
-            1 => 0.015,
-            2 => 0.01,
-            3 => 0.0075,
-            4 => 0.005,
-            _ => 0.003,
-        }
-    }
-
-    fn zoom_in(&mut self) -> bool {
-        if self.zoom_index < 4 {
-            self.zoom_index += 1;
-            true
-        } else {
-            false
-        }
-    }
-
-    fn zoom_out(&mut self) -> bool {
-        if self.zoom_index > 0 {
-            self.zoom_index -= 1;
-            true
-        } else {
-            false
-        }
-    }
 }
 
 impl Default for CameraConfig {
     fn default() -> Self {
         Self {
-            zoom: 0.02,
+            zoom: 1920.0 * 0.02,
             animation_speed: 1.0,
-            zoom_index: 0,
         }
     }
 }

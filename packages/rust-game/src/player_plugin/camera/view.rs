@@ -17,7 +17,10 @@ use crate::player_plugin::{
     interpolation::RocketInterpolated,
 };
 
-use super::{CameraAnimation, CameraConfig, CameraStartAnimation, CustomCamera, StartAnimation};
+use super::{
+    camera_size_from_zoom, CameraAnimation, CameraConfig, CameraStartAnimation, CustomCamera,
+    StartAnimation,
+};
 
 pub fn update() -> SystemConfigs {
     (
@@ -128,14 +131,16 @@ fn animate(
             camera_config.zoom = f32::lerp(
                 zoom_animation.source_zoom,
                 zoom_animation.target_zoom,
-                ease_out_slow(zoom_animation.progress),
+                ease_out_fast(zoom_animation.progress),
             );
 
             if zoom_animation.progress >= 1.0 {
                 custom_camera.animation = CameraAnimation::None;
             }
 
-            custom_camera.size = custom_camera.physical_size * camera_config.zoom;
+            custom_camera.size =
+                camera_size_from_zoom(camera_config.zoom, custom_camera.physical_size);
+
             let rocket_transform = query_rocket.single();
 
             update_camera_size(&mut camera, &mut custom_camera, &mut projection);
@@ -178,9 +183,7 @@ fn track_window_size(
     );
 
     custom_camera.physical_size = physical_camera_size;
-
-    let camera_size = physical_camera_size * camera_config.zoom;
-    custom_camera.size = camera_size;
+    custom_camera.size = camera_size_from_zoom(camera_config.zoom, custom_camera.physical_size);
 
     let rocket_transform = query_rocket.single();
 
@@ -278,7 +281,7 @@ fn prepare_inital_view(
     custom_camera.level_constraint_size = inital_level.camera.size();
     custom_camera.level_constraint_translation = inital_level.camera.min;
     custom_camera.physical_size = window_size;
-    custom_camera.size = window_size * camera_config.zoom;
+    custom_camera.size = camera_size_from_zoom(camera_config.zoom, custom_camera.physical_size);
 
     update_camera_size(&mut native_camera, &mut custom_camera, &mut projection);
     update_camera_transform(&mut custom_camera, &mut transform, rocket_position);

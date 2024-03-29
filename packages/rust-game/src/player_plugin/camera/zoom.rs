@@ -1,6 +1,8 @@
 use bevy::{ecs::schedule::SystemConfigs, prelude::*};
 use bevy_rapier2d::prelude::*;
 
+use crate::player_plugin::camera::camera_size_from_zoom;
+
 use super::{CameraAnimation, CameraConfig, CustomCamera, ZoomAnimation};
 
 pub fn startup() -> SystemConfigs {
@@ -121,15 +123,57 @@ fn handle_zoom_buttons(
 
         match *interaction {
             Interaction::Pressed => {
-                error!("zoom: {:?}", camera_config.zoom_index);
+                let camera = camera_query.single_mut();
 
-                if match *zoom_type {
-                    ZoomButton::ZoomIn => camera_config.zoom_in(),
-                    ZoomButton::ZoomOut => camera_config.zoom_out(),
+                let current_zoom = match &camera.animation {
+                    CameraAnimation::Zoom(animation) => animation.target_zoom,
+                    _ => camera_config.zoom,
+                };
+
+                if let Some(target) = match *zoom_type {
+                    ZoomButton::ZoomIn => {
+                        if current_zoom > 20.0 {
+                            let mut total_zoom = current_zoom;
+
+                            let target_size =
+                                camera_size_from_zoom(total_zoom, camera.physical_size);
+
+                            if target_size.x < camera.level_constraint_size.x
+                                || target_size.y < camera.level_constraint_size.y
+                            {
+                                Some(current_zoom / 1.5)
+                            } else {
+                                let factor_x =
+                                    camera.physical_size.x / camera.physical_size.max_element();
+                                let factor_y =
+                                    camera.physical_size.y / camera.physical_size.max_element();
+
+                                Some(
+                                    f32::max(
+                                        camera.level_constraint_size.x / factor_x,
+                                        camera.level_constraint_size.y / factor_y,
+                                    ) / 1.5,
+                                )
+                            }
+                        } else {
+                            None
+                        }
+                    }
+                    ZoomButton::ZoomOut => {
+                        let target_size = camera_size_from_zoom(current_zoom, camera.physical_size);
+
+                        if target_size.x < camera.level_constraint_size.x
+                            || target_size.y < camera.level_constraint_size.y
+                        {
+                            Some(current_zoom * 1.5)
+                        } else {
+                            None
+                        }
+                    }
                 } {
                     camera_query.single_mut().animation = CameraAnimation::Zoom(ZoomAnimation {
                         source_zoom: camera_config.zoom,
-                        target_zoom: camera_config.target_zoom(),
+                        target_zoom: target,
                         progress: 0.0,
                     });
 

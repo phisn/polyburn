@@ -35,7 +35,7 @@ pub fn main() {
 
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
-            present_mode: PresentMode::Immediate,
+            present_mode: PresentMode::Fifo,
             window_theme: Some(WindowTheme::Dark),
             ..default()
         }),

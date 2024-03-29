@@ -1,5 +1,6 @@
 use bevy::{ecs::schedule::SystemConfigs, prelude::*};
 
+pub mod common;
 pub mod level;
 pub mod rocket;
 pub mod shape;

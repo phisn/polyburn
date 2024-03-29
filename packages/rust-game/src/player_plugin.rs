@@ -9,6 +9,7 @@ mod camera;
 mod device_info;
 mod graphics;
 mod input;
+mod interpolation;
 
 pub use input::*;
 
@@ -31,7 +32,11 @@ impl Plugin for PlayerPlugin {
             )
             .add_systems(
                 PostUpdate,
-                (camera::update(), graphics::update())
+                (
+                    interpolation::update(),
+                    graphics::update(),
+                    camera::update(),
+                )
                     .chain()
                     .after(GamePluginSet),
             )

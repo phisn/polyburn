@@ -50,6 +50,10 @@ impl Plugin for GamePlugin {
                 GamePluginSchedule,
                 ecs::systems().before(PhysicsSet::SyncBackend),
             )
+            .add_systems(
+                GamePluginSchedule,
+                ecs::common::after_write_back().after(PhysicsSet::Writeback),
+            )
             .add_systems(Startup, ecs::startup().in_set(GamePluginSet))
             .add_systems(self.runner_schedule, core_runner.in_set(GamePluginSet));
 

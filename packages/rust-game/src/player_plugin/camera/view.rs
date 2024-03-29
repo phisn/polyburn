@@ -12,7 +12,10 @@ use rust_game_plugin::{
     MapTemplate,
 };
 
-use crate::player_plugin::camera::{TransitionAnimation, CAMERA_SCALE_MAX, CAMERA_SCALE_MIN};
+use crate::player_plugin::{
+    camera::{TransitionAnimation, CAMERA_SCALE_MAX, CAMERA_SCALE_MIN},
+    interpolation::RocketInterpolated,
+};
 
 use super::{CameraAnimation, CameraConfig, CameraStartAnimation, CustomCamera, StartAnimation};
 
@@ -40,9 +43,9 @@ fn animate(
             &mut Camera,
             &mut OrthographicProjection,
         ),
-        Without<Rocket>,
+        Without<RocketInterpolated>,
     >,
-    query_rocket: Query<&Transform, With<Rocket>>,
+    query_rocket: Query<&Transform, With<RocketInterpolated>>,
     time: Res<Time>,
 ) {
     fn ease_out_fast(x: f32) -> f32 {
@@ -157,9 +160,9 @@ fn track_window_size(
             &mut Transform,
             &mut OrthographicProjection,
         ),
-        Without<Rocket>,
+        Without<RocketInterpolated>,
     >,
-    query_rocket: Query<&Transform, With<Rocket>>,
+    query_rocket: Query<&Transform, With<RocketInterpolated>>,
 ) {
     let Some(_) = window_resized_events.read().last() else {
         return;
@@ -199,9 +202,9 @@ fn track_level_capture(
             &mut Transform,
             &mut OrthographicProjection,
         ),
-        Without<Rocket>,
+        Without<RocketInterpolated>,
     >,
-    rocket_query: Query<&Transform, With<Rocket>>,
+    rocket_query: Query<&Transform, With<RocketInterpolated>>,
 ) {
     let Some(level_captured_event) = level_captured_events.read().last() else {
         return;
@@ -232,8 +235,11 @@ fn track_level_capture(
 }
 
 fn track_rocket(
-    rocket_query: Query<&Transform, With<Rocket>>,
-    mut camera_query: Query<(&mut Transform, &mut CustomCamera, &mut Camera), Without<Rocket>>,
+    rocket_query: Query<&Transform, With<RocketInterpolated>>,
+    mut camera_query: Query<
+        (&mut Transform, &mut CustomCamera, &mut Camera),
+        Without<RocketInterpolated>,
+    >,
 ) {
     let rocket_transform = rocket_query.single();
     let (mut camera_transform, mut camera, native_camera) = camera_query.single_mut();

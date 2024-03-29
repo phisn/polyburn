@@ -13,7 +13,10 @@ use crate::{
         self, Gradient, GradientEntry, InstancingHost, ParticleSystem, ParticleSystemBundle,
         ParticleTemplate,
     },
-    player_plugin::RocketParticleSystem,
+    player_plugin::{
+        interpolation::{InterpolationCopy, RocketInterpolated},
+        RocketParticleSystem,
+    },
 };
 
 use super::SVG_SCALE_FACTOR;
@@ -32,27 +35,36 @@ fn insert_initial_rocket(
     let (rocket_entity, _rocket) = rocket_query.single_mut();
     let rocket_svg: Handle<Svg> = asset_server.load("rocket.svg");
 
-    commands.entity(rocket_entity).with_children(|parent| {
-        parent.spawn(Svg2dBundle {
-            svg: rocket_svg.clone(),
-            transform: Transform {
-                translation: Vec3::new(
-                    -ENTITY_ROCKET_ENTRY.width / 2.0,
-                    ENTITY_ROCKET_ENTRY.height / 2.0,
-                    0.0,
-                ),
-                scale: Vec3::splat(SVG_SCALE_FACTOR),
+    let image_id = commands
+        .spawn((SpatialBundle::default()))
+        .with_children(|parent| {
+            parent.spawn(Svg2dBundle {
+                svg: rocket_svg.clone(),
+                transform: Transform {
+                    translation: Vec3::new(
+                        -ENTITY_ROCKET_ENTRY.width / 2.0,
+                        ENTITY_ROCKET_ENTRY.height / 2.0,
+                        0.0,
+                    ),
+                    scale: Vec3::splat(SVG_SCALE_FACTOR),
+                    ..Default::default()
+                },
+                origin: Origin::Center,
                 ..Default::default()
-            },
-            ..Default::default()
-        });
-    });
+            });
+        })
+        .insert(RocketInterpolated)
+        .id();
+
+    commands
+        .entity(rocket_entity)
+        .insert(InterpolationCopy { copy: image_id });
 }
 
 fn rocket_particle_setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    rocket_query: Query<Entity, With<Rocket>>,
+    rocket_interpolated_query: Query<Entity, With<RocketInterpolated>>,
     _map_template: Res<MapTemplate>,
 ) {
     let mesh = Mesh::from(Circle::new(0.8));
@@ -63,7 +75,7 @@ fn rocket_particle_setup(
             particle_system: ParticleSystem {
                 spawn_every_duration: Duration::from_secs_f32(1.0 / 60.0 / 3.0),
                 location: particle_plugin::ParticleSpawnLocation::Entity(
-                    rocket_query.single(),
+                    rocket_interpolated_query.single(),
                     Vec3::new(0.0, -ENTITY_ROCKET_ENTRY.height * 0.2, 0.0),
                 ),
                 amount: particle_plugin::ParticleAmount::Finite(0),

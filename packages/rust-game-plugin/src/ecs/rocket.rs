@@ -7,6 +7,8 @@ use crate::{
     MapTemplate,
 };
 
+use super::common::TrackingForInterpolation;
+
 mod apply_rotation;
 mod apply_thrust;
 mod create_rocket_collider;
@@ -25,7 +27,7 @@ impl Rocket {
     }
 }
 
-#[derive(Bundle, Default)]
+#[derive(Bundle)]
 pub struct RocketBundle {
     rocket: Rocket,
 
@@ -36,6 +38,8 @@ pub struct RocketBundle {
     collider: Collider,
     colliding_entities: CollidingEntities,
     external_impulse: ExternalImpulse,
+
+    interpolated: TrackingForInterpolation,
 }
 
 impl RocketBundle {
@@ -59,6 +63,11 @@ impl RocketBundle {
             collider: create_rocket_collider::rocket_collider().unwrap(),
             colliding_entities: CollidingEntities::default(),
             external_impulse: ExternalImpulse::default(),
+
+            interpolated: TrackingForInterpolation {
+                current: initial_position.truncate().into(),
+                previous: initial_position.truncate().into(),
+            },
         }
     }
 }

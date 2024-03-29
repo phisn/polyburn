@@ -23,8 +23,8 @@ pub fn mouse_input(
 ) {
     let mut window = query_window.single_mut();
 
-    if mouse.just_pressed(MouseButton::Left) {
-        if !device_info.is_safari {
+    if !device_info.is_safari {
+        if mouse.just_pressed(MouseButton::Left) {
             window.cursor.grab_mode = CursorGrabMode::Locked;
             window.cursor.visible = false;
         }
@@ -34,12 +34,12 @@ pub fn mouse_input(
         for motion in reader_mousemotion.read() {
             state.total_rotation -= (motion.delta.x / 4.0) * time.delta_seconds();
         }
-
-        frame_input.rotation += state.total_rotation;
     } else {
         if !device_info.is_safari {
             window.cursor.grab_mode = CursorGrabMode::None;
             window.cursor.visible = true;
         }
     }
+
+    frame_input.rotation += state.total_rotation;
 }

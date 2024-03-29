@@ -55,7 +55,7 @@ pub fn touch_input(
                     if control.index == touch.id {
                         error!("Touch moved");
                         let delta = control.start_position - touch.position.x;
-                        state.total_rotation = control.start_total_rotation + delta / 100.0;
+                        state.total_rotation = control.start_total_rotation + delta / 150.0;
                     }
                 }
             }

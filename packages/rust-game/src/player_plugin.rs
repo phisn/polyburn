@@ -3,7 +3,7 @@ use bevy::render::deterministic::DeterministicRenderingConfig;
 use bevy::prelude::*;
 use bevy_svg::SvgPlugin;
 
-use rust_game_plugin::GamePluginSet;
+use rust_game_plugin::{GamePluginSchedule, GamePluginSet};
 
 mod camera;
 mod device_info;
@@ -33,7 +33,7 @@ impl Plugin for PlayerPlugin {
                 PostUpdate,
                 (camera::update(), graphics::update())
                     .chain()
-                    .in_set(GamePluginSet),
+                    .after(GamePluginSet),
             )
             .add_systems(
                 PostStartup,

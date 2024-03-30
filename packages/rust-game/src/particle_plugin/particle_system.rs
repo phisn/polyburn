@@ -18,7 +18,7 @@ pub use particle_template::*;
 
 use super::{
     instancing_plugin::{InstancingChild, InstancingHost},
-    particle::Particle,
+    particle::{Particle, ParticleCollidable},
 };
 
 #[derive(Event, Debug)]
@@ -186,6 +186,7 @@ pub fn particle_system_spawner(
                             source_position.y + offset.y,
                             0.5,
                         ))),
+                        ParticleCollidable,
                     ));
                 });
             }

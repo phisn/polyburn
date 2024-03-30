@@ -1,7 +1,10 @@
 use std::{f32::consts, sync::Arc, time::Duration};
 
 use bevy::{
-    ecs::schedule::SystemConfigs, prelude::*, render::view::NoFrustumCulling, sprite::Mesh2dHandle,
+    ecs::schedule::SystemConfigs,
+    prelude::*,
+    render::{batching::NoAutomaticBatching, view::NoFrustumCulling},
+    sprite::Mesh2dHandle,
 };
 
 use bevy_rapier2d::dynamics::Velocity;
@@ -86,7 +89,7 @@ fn rocket_particle_setup(
             spatial_bundle: SpatialBundle::from_transform(Transform::from_xyz(0.0, 0.0, 0.0)),
             instancing_host: InstancingHost::default(),
         })
-        .insert((RocketParticleSystem, NoFrustumCulling));
+        .insert((RocketParticleSystem, NoFrustumCulling, NoAutomaticBatching));
 }
 
 fn thrust_particle_template() -> ParticleTemplate {

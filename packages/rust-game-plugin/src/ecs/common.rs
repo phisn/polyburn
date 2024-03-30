@@ -4,10 +4,10 @@ pub fn systems() -> SystemConfigs {
     (update_interpolation).into_configs()
 }
 
-fn update_interpolation(mut tracking: Query<(&GlobalTransform, &mut TrackingForInterpolation)>) {
+fn update_interpolation(mut tracking: Query<(&Transform, &mut TrackingForInterpolation)>) {
     for (transform, mut tracking) in tracking.iter_mut() {
         tracking.previous_transform = tracking.transform;
-        tracking.transform = transform.compute_transform();
+        tracking.transform = transform.clone();
     }
 }
 

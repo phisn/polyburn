@@ -8,7 +8,6 @@ import { ArrowClockwise } from "../../common/components/inline-svg/ArrowClockwis
 import { LockedSvg } from "../../common/components/inline-svg/Locked"
 import { PlayFilled } from "../../common/components/inline-svg/PlayFilled"
 import { TrophySvg } from "../../common/components/inline-svg/Trophy"
-import { useAppStore } from "../../common/storage/app-store"
 import { trpc } from "../../common/trpc/trpc"
 import { useCampaignStore } from "./CampaignStore"
 
@@ -20,7 +19,7 @@ export function Gamemode(props: { gamemode: GamemodeView }) {
     const selectGameHandler = useCampaignStore(state => state.selectGameHandler)
     const selectReplayHandler = useCampaignStore(state => state.selectReplayHandler)
 
-    const userId = useAppStore(store => store.userId())
+    const userId = ""
 
     return (
         <>

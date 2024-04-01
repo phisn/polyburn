@@ -24,3 +24,15 @@ export const leaderboard = sqliteTable(
 
 export type Leaderboard = typeof leaderboard.$inferSelect
 export type InsertLeaderboard = typeof leaderboard.$inferInsert
+
+export const users = sqliteTable("users", {
+    id: integer("id").primaryKey({
+        autoIncrement: true,
+    }),
+
+    email: text("email").notNull(),
+    username: text("username").notNull(),
+})
+
+export type Users = typeof users.$inferSelect
+export type InsertUsers = typeof users.$inferInsert

@@ -1,11 +1,7 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
+import { Env } from "./env"
 import { createContext } from "./trpc"
 import { appRouter } from "./trpc-router"
-
-interface Env {
-    CLIENT_URL: string
-    DB: D1Database
-}
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
@@ -34,7 +30,7 @@ export default {
             endpoint: "/trpc",
             req: request,
             router: appRouter,
-            createContext: createContext(env.DB),
+            createContext: createContext(env),
         })
 
         Object.entries(headers).forEach(([key, value]) => {

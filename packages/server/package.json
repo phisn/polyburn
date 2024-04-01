@@ -6,7 +6,7 @@
     "scripts": {
         "postinstall": "wrangler d1 migrations apply rocket-game-d1 --local && node ./tools/postprocess-rapier2d.mjs",
         "generate": "drizzle-kit generate:sqlite",
-        "dev": "wrangler dev src/index.ts --live-reload --log-level warn",
+        "dev": "wrangler dev src/index.ts --live-reload",
         "lint": "eslint \"src/**/*.{tsx,ts}\""
     },
     "keywords": [],
@@ -25,12 +25,16 @@
         "@dimforge/rapier2d": "^0.11.2",
         "@prisma/client": "5.2.0",
         "@trpc/server": "^10.38.1",
+        "@tsndr/cloudflare-worker-jwt": "^2.5.3",
+        "cloudflare-worker-jwt": "^21.37.0",
         "drizzle-orm": "^0.28.6",
         "morgan": "^1.10.0",
+        "oslo": "^1.2.0",
         "runtime": "*",
         "shared": "*",
         "superjson": "^1.13.1",
         "tsconfig": "*",
+        "worker-auth-providers": "^0.0.13-beta.4",
         "zod": "^3.22.2"
     },
     "eslintConfig": {

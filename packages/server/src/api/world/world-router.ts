@@ -2,9 +2,9 @@ import { TRPCError } from "@trpc/server"
 import { asc, eq, inArray } from "drizzle-orm"
 import { WorldView } from "shared/src/views/world-view"
 import { z } from "zod"
-import { leaderboard } from "../db-schema"
-import { worlds } from "../domain/worlds"
-import { publicProcedure, router } from "../trpc"
+import { worlds } from "../../domain/worlds"
+import { leaderboard } from "../../framework/db-schema"
+import { publicProcedure, router } from "../../framework/trpc"
 
 export const worldRouter = router({
     get: publicProcedure

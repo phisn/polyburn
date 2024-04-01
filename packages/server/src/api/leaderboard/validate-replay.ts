@@ -5,9 +5,9 @@ import { ReplayModel } from "runtime/proto/replay"
 import { WorldModel } from "runtime/proto/world"
 import { validateReplay } from "runtime/src/model/replay/validate-replay"
 import { z } from "zod"
-import { leaderboard } from "../db-schema"
-import { worlds } from "../domain/worlds"
-import { publicProcedure } from "../trpc"
+import { worlds } from "../../domain/worlds"
+import { leaderboard } from "../../framework/db-schema"
+import { publicProcedure } from "../../framework/trpc"
 
 export const validateReplayProcedure = publicProcedure
     .input(

@@ -30,8 +30,8 @@ export const users = sqliteTable("users", {
         autoIncrement: true,
     }),
 
-    email: text("email").notNull(),
-    username: text("username").notNull(),
+    email: text("email").notNull().unique(),
+    username: text("username").notNull().unique(),
 })
 
 export type Users = typeof users.$inferSelect

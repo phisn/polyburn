@@ -1,6 +1,7 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client"
 import superjson from "superjson"
-import { AppRouter } from "../../../../server/src/trpc-router"
+import { AppRouter } from "../../../../server/src/framework/trpc-router"
+import { useAppStore } from "../storage/app-store"
 
 export const options = {
     links: [
@@ -12,6 +13,17 @@ export const options = {
                     ...options,
                     credentials: "include",
                 })
+            },
+            headers() {
+                const jwt = useAppStore.getState().jwt
+
+                if (jwt) {
+                    return {
+                        authorization: jwt,
+                    }
+                }
+
+                return {}
             },
         }),
     ],

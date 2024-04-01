@@ -2,7 +2,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 import { Outlet } from "react-router-dom"
 import { useAppStore } from "../../common/storage/app-store"
 import { Alert } from "./Alert"
-import { AuthButton } from "./AuthButton"
+import { AuthButton } from "./auth-button/AuthButton"
 
 export function Layout() {
     const existsModal = useAppStore(state => state.modalCount > 0)

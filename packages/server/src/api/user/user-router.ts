@@ -3,10 +3,60 @@ import jwt from "@tsndr/cloudflare-worker-jwt"
 import { eq } from "drizzle-orm"
 import { OAuth2RequestError } from "oslo/oauth2"
 import { z } from "zod"
-import { users } from "../db-schema"
-import { publicProcedure, router } from "../trpc"
+import { JwtCreationToken } from "../../domain/auth/jwt-creation-token"
+import { JwtToken } from "../../domain/auth/jwt-token"
+import { users } from "../../framework/db-schema"
+import { publicProcedure, router } from "../../framework/trpc"
 
-export const googleAuthRouter = router({
+export const userRouter = router({
+    me: publicProcedure.query(async ({ ctx: { db, user } }) => {
+        if (!user) {
+            throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "Not logged in",
+            })
+        }
+
+        const [dbUser] = await db.select().from(users).where(eq(users.id, user.id))
+
+        if (!dbUser) {
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "User not found",
+            })
+        }
+
+        return { username: dbUser.username }
+    }),
+    rename: publicProcedure
+        .input(
+            z
+                .object({
+                    username: z.string(),
+                })
+                .required(),
+        )
+        .mutation(async ({ input: { username }, ctx: { db, user } }) => {
+            if (!user) {
+                throw new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "Not logged in",
+                })
+            }
+
+            const duplicate = await db.select().from(users).where(eq(users.username, username))
+
+            if (duplicate.length > 0) {
+                return {
+                    message: "username-taken" as const,
+                }
+            }
+
+            await db.update(users).set({ username }).where(eq(users.id, user.id))
+            console.log("renamed user", user.id, "to", username)
+
+            return { message: "success" as const }
+        }),
     getToken: publicProcedure
         .input(
             z
@@ -59,17 +109,18 @@ export const googleAuthRouter = router({
                         env.JWT_SECRET,
                     )
 
-                    return { tokenForCreation, type: "prompt-create" }
+                    return { tokenForCreation, type: "prompt-create" as const }
                 }
 
-                const token = await jwt.sign(
+                const token = await jwt.sign<JwtToken>(
                     {
-                        username: user.username,
+                        id: user.id,
+                        iat: Date.now(),
                     },
                     env.JWT_SECRET,
                 )
 
-                return { token, username: user.username, type: "logged-in" }
+                return { token, type: "logged-in" as const }
             } catch (e) {
                 if (e instanceof OAuth2RequestError) {
                     console.error(e)
@@ -91,7 +142,7 @@ export const googleAuthRouter = router({
                 })
                 .required(),
         )
-        .query(async ({ input: { tokenForCreation, username }, ctx: { env, db } }) => {
+        .mutation(async ({ input: { tokenForCreation, username }, ctx: { env, db } }) => {
             const verification = await jwt.verify(tokenForCreation, env.JWT_SECRET)
 
             if (verification === false) {
@@ -101,7 +152,7 @@ export const googleAuthRouter = router({
                 })
             }
 
-            const payload = jwt.decode<{ email: string }>(tokenForCreation).payload
+            const payload = jwt.decode<JwtCreationToken>(tokenForCreation).payload
 
             if (!payload) {
                 throw new TRPCError({
@@ -110,20 +161,39 @@ export const googleAuthRouter = router({
                 })
             }
 
+            const duplicate = await db.select().from(users).where(eq(users.username, username))
+
+            if (duplicate.length > 0) {
+                return {
+                    message: "username-taken" as const,
+                }
+            }
+
             const { email } = payload
 
-            const token = await jwt.sign(
+            const [user] = await db
+                .insert(users)
+                .values({
+                    username: username,
+                    email: email,
+                })
+                .returning({ id: users.id })
+
+            if (!user) {
+                throw new TRPCError({
+                    code: "BAD_REQUEST",
+                    message: "Failed to create user",
+                })
+            }
+
+            const token = await jwt.sign<JwtToken>(
                 {
-                    username,
+                    id: user.id,
+                    iat: Date.now(),
                 },
                 env.JWT_SECRET,
             )
 
-            await db.insert(users).values({
-                username: username,
-                email: email,
-            })
-
-            return { token }
+            return { message: "success" as const, jwt: token }
         }),
 })

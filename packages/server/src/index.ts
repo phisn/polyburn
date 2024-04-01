@@ -1,7 +1,7 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
 import { Env } from "./env"
-import { createContext } from "./trpc"
-import { appRouter } from "./trpc-router"
+import { createContext } from "./framework/trpc"
+import { appRouter } from "./framework/trpc-router"
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
@@ -12,7 +12,7 @@ export default {
         const headers = {
             "Access-Control-Allow-Origin": "",
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
             "Access-Control-Allow-Credentials": "true",
         }
 

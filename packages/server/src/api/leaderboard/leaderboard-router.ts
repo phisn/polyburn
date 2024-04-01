@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm"
 import { Buffer } from "node:buffer"
 import { z } from "zod"
-import { leaderboard } from "../db-schema"
-import { publicProcedure, router } from "../trpc"
+import { leaderboard } from "../../framework/db-schema"
+import { publicProcedure, router } from "../../framework/trpc"
 
 export const leaderboardRouter = router({
     get: publicProcedure

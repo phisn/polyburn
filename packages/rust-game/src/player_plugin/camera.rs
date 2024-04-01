@@ -33,7 +33,7 @@ pub struct CameraConfig {
 impl Default for CameraConfig {
     fn default() -> Self {
         Self {
-            zoom: 1920.0 * 0.02,
+            zoom: 1920.0 * 0.05,
             animation_speed: 1.0,
         }
     }

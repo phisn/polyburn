@@ -62,9 +62,11 @@ export const useAppStore = create<AppStore>()(
             storage: createJSONStorage(() => storage),
 
             partialize: state => ({
-                jwt: state.jwt ?? undefined,
+                jwt: state.jwt,
             }),
-            onRehydrateStorage: () => () => {},
+            onRehydrateStorage: () => state => {
+                console.log("rehydrated", state)
+            },
         },
     ),
 )

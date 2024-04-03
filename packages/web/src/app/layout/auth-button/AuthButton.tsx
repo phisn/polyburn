@@ -1,5 +1,5 @@
 import { useGoogleLogin } from "@react-oauth/google"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useAppStore } from "../../../common/storage/app-store"
 import { trpcNative } from "../../../common/trpc/trpc-native"
 import { CreateAccount } from "./CreateAccount"
@@ -13,6 +13,23 @@ export function AuthButton() {
 
     const updateJwt = useAppStore(x => x.updateJwt)
     const updateUser = useAppStore(x => x.updateUser)
+
+    useEffect(() => {
+        setTimeout(() => {
+            const jwt = useAppStore.getState().jwt
+
+            if (jwt) {
+                console.log("jwt", jwt)
+                setLoading(true)
+                trpcNative.user.me.query().then(user => {
+                    updateUser(user)
+                    setLoading(false)
+                })
+            } else {
+                console.log("no jwt")
+            }
+        }, 100)
+    }, [updateUser])
 
     const login = useGoogleLogin({
         onSuccess: async ({ code }) => {

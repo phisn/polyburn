@@ -68,7 +68,7 @@ export function RenameAccount(props: { open: boolean; onFinished: () => void }) 
                         </label>
                         {loading === false && (
                             <div className="btn w-44" onClick={onRename}>
-                                Create Account
+                                Rename
                             </div>
                         )}
                         {loading && (

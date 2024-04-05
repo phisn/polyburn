@@ -29,7 +29,7 @@ export const useCampaignStore = create<CampaignStore>(set => ({
                 type: "game",
                 worldSelected: state.worldSelected!,
                 gamemodeSelected: gamemode,
-                userId,
+                username: userId,
             },
         })),
     selectReplayHandler: (gamemode, userId) =>

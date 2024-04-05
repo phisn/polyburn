@@ -13,6 +13,7 @@
         "@dimforge/rapier2d": "^0.11.2",
         "@headlessui/react": "^1.7.17",
         "@petamoriken/float16": "^3.8.3",
+        "@react-oauth/google": "^0.12.1",
         "@react-three/drei": "^9.80.9",
         "@react-three/fiber": "^8.13.7",
         "@stdlib/math": "^0.0.11",

@@ -1,14 +1,12 @@
 import { Suspense, useState } from "react"
 import { BrowserView, isMobile } from "react-device-detect"
 import { ReplayStats } from "runtime/src/model/replay/replay-stats"
-import { nameFromString } from "shared/src/names"
 import { GamemodeView } from "shared/src/views/gamemode-view"
 import { Modal, ModalPanel } from "../../common/components/Modal"
 import { ArrowClockwise } from "../../common/components/inline-svg/ArrowClockwise"
 import { LockedSvg } from "../../common/components/inline-svg/Locked"
 import { PlayFilled } from "../../common/components/inline-svg/PlayFilled"
 import { TrophySvg } from "../../common/components/inline-svg/Trophy"
-import { useAppStore } from "../../common/storage/app-store"
 import { trpc } from "../../common/trpc/trpc"
 import { useCampaignStore } from "./CampaignStore"
 
@@ -19,8 +17,6 @@ export function Gamemode(props: { gamemode: GamemodeView }) {
 
     const selectGameHandler = useCampaignStore(state => state.selectGameHandler)
     const selectReplayHandler = useCampaignStore(state => state.selectReplayHandler)
-
-    const userId = useAppStore(store => store.userId())
 
     return (
         <>
@@ -120,9 +116,9 @@ function LeaderboardList(props: { gamemode: GamemodeView }) {
                     key={i}
                     rank={i + 1}
                     time={secondsToMMSS(row.ticks * 16.66667)}
-                    name={nameFromString(row.userId)}
-                    onCompete={() => selectGameHandler(props.gamemode, row.userId)}
-                    onReplay={() => selectReplayHandler(props.gamemode, row.userId)}
+                    name={row.username}
+                    onCompete={() => selectGameHandler(props.gamemode, row.leaderboardId)}
+                    onReplay={() => selectReplayHandler(props.gamemode, row.leaderboardId)}
                 />
             ))}
             {replays.length === 0 && (

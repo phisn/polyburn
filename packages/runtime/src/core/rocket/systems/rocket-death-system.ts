@@ -86,8 +86,6 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({
 
         const speedSquare = velx * velx + vely * vely
 
-        console.log(`speedSquare: ${speedSquare}`)
-
         const distance = sqrt(dx * dx + dy * dy)
 
         if (

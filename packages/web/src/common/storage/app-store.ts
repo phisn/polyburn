@@ -1,15 +1,14 @@
-import { nanoid } from "nanoid"
-import { nameFromString } from "shared/src/names"
 import { create } from "zustand"
 import { StateStorage, createJSONStorage, persist } from "zustand/middleware"
 import { AlertProps } from "../../app/layout/Alert"
 import { db } from "./db"
 
 export interface AppStore {
-    token: string
+    jwt: string | undefined
+    user: { username: string } | undefined
 
-    userId(): string
-    userName(): string
+    updateJwt: (jwt: string) => void
+    updateUser: (user: { username: string }) => void
 
     alerts: AlertProps[]
     modalCount: number
@@ -29,14 +28,19 @@ const storage: StateStorage = {
     },
 }
 
-import jsSHA from "jssha"
-
 export const useAppStore = create<AppStore>()(
     persist(
-        (set, get) => ({
-            token: nanoid(),
-            userId: () => new jsSHA("SHA-512", "TEXT").update(get().token ?? "").getHash("B64"),
-            userName: () => nameFromString(get().userId()),
+        set => ({
+            jwt: undefined,
+            user: undefined,
+
+            updateJwt: jwt => {
+                set({ jwt })
+            },
+
+            updateUser: user => {
+                set({ user })
+            },
 
             alerts: [],
             modalCount: 0,
@@ -58,13 +62,10 @@ export const useAppStore = create<AppStore>()(
             storage: createJSONStorage(() => storage),
 
             partialize: state => ({
-                token: state.token,
+                jwt: state.jwt,
             }),
             onRehydrateStorage: () => state => {
-                console.log(
-                    "User Id: " + state?.userId(),
-                    ", User Name: " + nameFromString(state?.userId() ?? ""),
-                )
+                console.log("rehydrated", state)
             },
         },
     ),

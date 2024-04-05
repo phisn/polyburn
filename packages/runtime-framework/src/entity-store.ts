@@ -425,6 +425,13 @@ export const createEntityStore = <Components extends object>(): EntityStoreState
             extend() {
                 return true
             },
+            with<K extends Partial<NarrowProperties<Components, L>>>(components: K) {
+                for (const key of Object.keys(components)) {
+                    entityComponents[key as L] = components[key as L] as any
+                }
+
+                return entity as Entity<NarrowProperties<Components, L> & K>
+            },
 
             toString() {
                 return Object.keys(entityComponents).length > 0

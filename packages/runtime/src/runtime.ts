@@ -60,3 +60,5 @@ export const newRuntime = (world: WorldModel, gamemodeName: string) => {
         context as any as RuntimeFactoryContext<RuntimeComponents>,
     ).add(...runtimeSystemFactories)
 }
+
+export type Runtime = ReturnType<typeof newRuntime>

@@ -3,6 +3,8 @@ import { Point } from "../../model/point"
 import { RuntimeComponents } from "../runtime-components"
 
 export interface RocketComponent {
+    thrusting: boolean
+
     collisionCount: number
     rotationWithoutInput: number
 

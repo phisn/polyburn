@@ -3,6 +3,7 @@ import * as SAT from "sat"
 import * as THREE from "three"
 
 import { makeCCW, quickDecomp } from "poly-decomp-es"
+import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 import { Environment, aabbFromCircle, newEnvironment } from "./particle-environment"
 import {
     ParticleGradient,
@@ -40,14 +41,14 @@ export class ParticleSimulation {
     private instanceMatrix = new THREE.Matrix4()
     private maxInstances = 2048
 
-    constructor(scene: THREE.Scene, shapes: Point[][]) {
+    constructor(runtime: ExtendedRuntime, shapes: Point[][]) {
         const geometry = new THREE.CircleGeometry(1, 32)
         const material = new THREE.MeshBasicMaterial({ color: 0xffffff })
 
         this.particleMesh = new THREE.InstancedMesh(geometry, material, this.maxInstances)
         this.particleMesh.frustumCulled = false
 
-        scene.add(this.particleMesh)
+        runtime.factoryContext.scene.add(this.particleMesh)
 
         for (const shape of shapes) {
             const polygon = shape.map(p => [p.x, p.y] as [number, number])

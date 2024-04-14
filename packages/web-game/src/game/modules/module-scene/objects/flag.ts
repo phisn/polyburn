@@ -1,6 +1,6 @@
 import { EntityWith } from "runtime-framework"
 import * as THREE from "three"
-import { ExtendedComponents } from "../../runtime-extension/components"
+import { ExtendedComponents } from "../../../runtime-extension/extended-components"
 import { Svg } from "../svg"
 
 const prototypeRed = new Svg(

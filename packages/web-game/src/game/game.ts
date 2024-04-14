@@ -1,63 +1,47 @@
 import { WorldModel } from "runtime/proto/world"
-import * as THREE from "three"
-import { WebGLRenderer } from "three"
-import { Camera } from "./camera"
-import { Input } from "./input/input"
-import { Particles } from "./particles/particles"
+import { Color, Scene, WebGLRenderer } from "three"
+import { ModuleCamera } from "./modules/module-camera"
+import { ModuleInput } from "./modules/module-input/module-input"
+import { ModuleParticles } from "./modules/module-particles/module-particles"
+import { ModuleScene } from "./modules/module-scene/module-scene"
 import { ExtendedRuntime, newExtendedRuntime } from "./runtime-extension/new-extended-runtime"
-import { GameScene } from "./scene/scene"
-
-export interface GameHooks {
-    onFinished(
-}
-
-class Renderer extends WebGLRenderer {
-    constructor() {
-        const canvas = document.querySelector(`canvas#scene`) as HTMLCanvasElement
-        super({ canvas, antialias: true, alpha: true })
-
-        this.setClearColor(THREE.Color.NAMES["black"], 1)
-    }
-
-    onCanvasResize(width: number, height: number) {
-        this.setSize(width, height, false)
-    }
-}
 
 export class Game {
-    private input: Input
-
-    private renderer: Renderer
-    private camera: Camera
-    private scene: GameScene
     private runtime: ExtendedRuntime
-    private particles: Particles
+
+    private camera: ModuleCamera
+    private input: ModuleInput
+    private particles: ModuleParticles
+    private scene: ModuleScene
 
     constructor(world: WorldModel, gamemode: string) {
-        this.runtime = newExtendedRuntime(world, gamemode)
-        this.scene = new GameScene(this.runtime)
+        const scene = new Scene()
 
-        this.renderer = new Renderer()
-        this.camera = new Camera(this.runtime, this.renderer)
-        this.input = new Input()
+        const canvas = document.querySelector(`canvas#scene`) as HTMLCanvasElement
+        const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true })
+        renderer.setClearColor(Color.NAMES["black"], 1)
 
-        this.particles = new Particles(this.runtime, this.scene, this.input)
+        this.runtime = newExtendedRuntime(scene, renderer, world, gamemode)
+
+        this.scene = new ModuleScene(this.runtime)
+        this.camera = new ModuleCamera(this.runtime)
+        this.input = new ModuleInput(this.runtime)
+        this.particles = new ModuleParticles(this.runtime)
 
         this.onCanvasResize = this.onCanvasResize.bind(this)
         const observer = new ResizeObserver(this.onCanvasResize)
-        observer.observe(this.renderer.domElement)
+        observer.observe(renderer.domElement)
     }
 
     dispose() {
         this.input.dispose()
-        this.renderer.dispose()
+        this.runtime.factoryContext.renderer.dispose()
     }
 
     private onCanvasResize() {
-        const width = this.renderer.domElement.clientWidth
-        const height = this.renderer.domElement.clientHeight
+        const width = this.runtime.factoryContext.renderer.domElement.clientWidth
+        const height = this.runtime.factoryContext.renderer.domElement.clientHeight
 
-        this.renderer.onCanvasResize(width, height)
         this.camera.onCanvasResize(width, height)
     }
 
@@ -81,8 +65,8 @@ export class Game {
     onUpdate(delta: number, overstep: number) {
         this.particles.update(delta)
         this.scene.onUpdate(delta, overstep)
-        this.camera.onUpdate(delta, overstep)
+        this.camera.onUpdate(delta)
 
-        this.renderer.render(this.scene, this.camera)
+        this.runtime.factoryContext.renderer.render(this.runtime.factoryContext.scene, this.camera)
     }
 }

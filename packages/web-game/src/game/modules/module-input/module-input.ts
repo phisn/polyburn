@@ -1,18 +1,20 @@
-const CHARCODE_ONE = "1".charCodeAt(0)
-const CHARCODE_FIVE = "5".charCodeAt(0)
+import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 
-export class Input {
+const CHARCODE_ONE = "1".charCodeAt(0)
+const CHARCODE_NINE = "9".charCodeAt(0)
+
+export class ModuleInput {
     private keyboardLeft = false
     private keyboardRight = false
     private keyboardUp = false
 
-    private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5]
+    private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
     private rotationSpeedIndex = 2
 
     private _rotation = 0
     private _thrust = false
 
-    constructor() {
+    constructor(private runtime: ExtendedRuntime) {
         this.onKeyDown = this.onKeyDown.bind(this)
         this.onKeyUp = this.onKeyUp.bind(this)
 
@@ -58,7 +60,7 @@ export class Input {
                 break
         }
 
-        if (event.key.charCodeAt(0) >= CHARCODE_ONE && event.key.charCodeAt(0) <= CHARCODE_FIVE) {
+        if (event.key.charCodeAt(0) >= CHARCODE_ONE && event.key.charCodeAt(0) <= CHARCODE_NINE) {
             this.rotationSpeedIndex = event.key.charCodeAt(0) - CHARCODE_ONE
         }
     }

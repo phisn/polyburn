@@ -2,8 +2,8 @@ import { EntityWith, MessageCollector } from "runtime-framework"
 import { LevelCapturedMessage } from "runtime/src/core/level-capture/level-captured-message"
 import { RuntimeComponents } from "runtime/src/core/runtime-components"
 import * as THREE from "three"
-import { ExtendedComponents } from "./runtime-extension/components"
-import { ExtendedRuntime } from "./runtime-extension/new-extended-runtime"
+import { ExtendedComponents } from "../runtime-extension/extended-components"
+import { ExtendedRuntime } from "../runtime-extension/new-extended-runtime"
 
 type TransitionAnimation =
     | undefined
@@ -27,7 +27,7 @@ type StartAnimation =
           targetScale: number
       }
 
-export class Camera extends THREE.OrthographicCamera {
+export class ModuleCamera extends THREE.OrthographicCamera {
     private configAnimationSpeed: number
     private configZoom: number
 
@@ -43,10 +43,7 @@ export class Camera extends THREE.OrthographicCamera {
 
     private levelCapturedCollector: MessageCollector<LevelCapturedMessage>
 
-    constructor(
-        private runtime: ExtendedRuntime,
-        private renderer: THREE.WebGLRenderer,
-    ) {
+    constructor(private runtime: ExtendedRuntime) {
         super()
 
         this.position.z = 5
@@ -78,6 +75,8 @@ export class Camera extends THREE.OrthographicCamera {
     }
 
     onCanvasResize(width: number, height: number) {
+        this.runtime.factoryContext.renderer.setSize(width, height, false)
+
         const max = Math.max(width, height)
 
         this.cameraTargetSize.x = (this.configZoom * width) / max
@@ -105,7 +104,7 @@ export class Camera extends THREE.OrthographicCamera {
         }
     }
 
-    onUpdate(delta: number, overstep: number) {
+    onUpdate(delta: number) {
         this.updateCameraPosition()
 
         if (this.transitionAnimation) {
@@ -191,8 +190,8 @@ export class Camera extends THREE.OrthographicCamera {
     }
 
     private updateViewport() {
-        const rendererWidth = this.renderer.domElement.clientWidth
-        const rendererHeight = this.renderer.domElement.clientHeight
+        const rendererWidth = this.runtime.factoryContext.renderer.domElement.clientWidth
+        const rendererHeight = this.runtime.factoryContext.renderer.domElement.clientHeight
 
         let viewportSizeX = this.size.x / this.cameraTargetSize.x
         let viewportSizeY = this.size.y / this.cameraTargetSize.y
@@ -205,7 +204,7 @@ export class Camera extends THREE.OrthographicCamera {
         const viewportX = 0.5 * rendererWidth * (1 - viewportSizeX)
         const viewportY = 0.5 * rendererHeight * (1 - viewportSizeY)
 
-        this.renderer.setViewport(
+        this.runtime.factoryContext.renderer.setViewport(
             viewportX,
             viewportY,
             viewportSizeX * rendererWidth,

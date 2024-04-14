@@ -3,19 +3,17 @@ import { RocketEntityComponents } from "runtime/src/core/rocket/rocket-entity"
 import { RuntimeFactoryContext } from "runtime/src/core/runtime-factory-context"
 import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
 import * as THREE from "three"
-import { ExtendedComponents } from "../runtime-extension/components"
-import { ExtendedRuntime } from "../runtime-extension/new-extended-runtime"
+import { ExtendedComponents } from "../../runtime-extension/extended-components"
+import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 import { MutatableShapeGeometry } from "./mutatable-shape-geometry"
 import { Flag } from "./objects/flag"
 import { Rocket } from "./objects/rocket"
 
-export class GameScene extends THREE.Scene {
+export class ModuleScene {
     private entitiesInterpolated: EntityInterpolation[] = []
     private flags: Flag[] = []
 
     constructor(private runtime: ExtendedRuntime) {
-        super()
-
         this.initRocket(runtime)
         this.initShapes(runtime)
 
@@ -25,7 +23,7 @@ export class GameScene extends THREE.Scene {
             }
 
             const flag = new Flag(levelEntity)
-            this.add(flag)
+            this.runtime.factoryContext.scene.add(flag)
             this.flags.push(flag)
         }
     }
@@ -45,7 +43,7 @@ export class GameScene extends THREE.Scene {
             const shapeMaterial = new THREE.MeshBasicMaterial({ vertexColors: true })
             const shapeMesh = new THREE.Mesh(shapeGeometry, shapeMaterial)
 
-            this.add(shapeMesh)
+            this.runtime.factoryContext.scene.add(shapeMesh)
         }
     }
 
@@ -67,7 +65,7 @@ export class GameScene extends THREE.Scene {
             ),
         )
 
-        this.add(rocket)
+        this.runtime.factoryContext.scene.add(rocket)
     }
 
     onUpdate(delta: number, overstep: number) {

@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js"
+import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader"
 
 export class Svg extends THREE.Group {
     constructor(svgText: string) {

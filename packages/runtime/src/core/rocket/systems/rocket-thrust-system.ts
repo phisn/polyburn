@@ -9,16 +9,18 @@ export const newRocketThrustSystem: RuntimeSystemFactory = ({ config, store, phy
     const rockets = store.newSet(...RocketEntityComponents)
 
     return context => {
-        if (!context.thrust) {
-            return
-        }
-
-        const force = {
-            x: 0,
-            y: config.thrustValue,
-        }
-
         for (const rocket of rockets) {
+            rocket.components.rocket.thrusting = context.thrust
+
+            if (!context.thrust) {
+                continue
+            }
+
+            const force = {
+                x: 0,
+                y: config.thrustValue,
+            }
+
             if (rocketGroundRay(physics, rocket.components.rigidBody, config.thrustDistance)) {
                 force.x *= config.thrustGroundMultiplier
                 force.y *= config.thrustGroundMultiplier

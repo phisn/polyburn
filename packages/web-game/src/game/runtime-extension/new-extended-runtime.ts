@@ -1,15 +1,21 @@
 import { SystemStack } from "runtime-framework"
 import { WorldModel } from "runtime/proto/world"
-import { RuntimeFactoryContext } from "runtime/src/core/runtime-factory-context"
 import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
 import { newRuntime } from "runtime/src/runtime"
-import { ExtendedComponents } from "./components"
+import { Scene, WebGLRenderer } from "three"
+import { ExtendedFactoryContext } from "./extended-factory-context"
 
 export function newExtendedRuntime(
+    scene: Scene,
+    renderer: WebGLRenderer,
     world: WorldModel,
     gamemodeName: string,
-): SystemStack<RuntimeFactoryContext<ExtendedComponents>, RuntimeSystemContext> {
-    const runtime = newRuntime(world, gamemodeName)
+): SystemStack<ExtendedFactoryContext, RuntimeSystemContext> {
+    const runtime = newRuntime(world, gamemodeName).extend({
+        scene,
+        renderer,
+    })
+
     return runtime
 }
 

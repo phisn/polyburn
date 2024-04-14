@@ -1,4 +1,3 @@
-/*
 import { WorldModel } from "runtime/proto/world"
 import { Game } from "./game/game"
 import { GameLoop } from "./game/game-loop"
@@ -13,4 +12,3 @@ const worldModel = WorldModel.decode(base64ToBytes(world))
 
 const loop = new GameLoop(new Game(worldModel, "Normal"))
 loop.start()
-*/

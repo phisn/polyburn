@@ -2,8 +2,8 @@ import { EntityWith, MessageCollector } from "runtime-framework"
 import { LevelCapturedMessage } from "runtime/src/core/level-capture/level-captured-message"
 import { RuntimeComponents } from "runtime/src/core/runtime-components"
 import * as THREE from "three"
-import { ExtendedComponents } from "../runtime-extension/components"
-import { ExtendedRuntime } from "../runtime-extension/new-extended-runtime"
+import { ExtendedComponents } from "./runtime-extension/components"
+import { ExtendedRuntime } from "./runtime-extension/new-extended-runtime"
 
 type TransitionAnimation =
     | undefined

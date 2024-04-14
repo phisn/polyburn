@@ -46,6 +46,7 @@
         "three": "^0.155.0",
         "three-stdlib": "^2.25.0",
         "tunnel-rat": "^0.1.2",
+        "web-game": "*",
         "zustand": "^4.4.1"
     },
     "devDependencies": {

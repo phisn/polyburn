@@ -1,7 +1,13 @@
+const CHARCODE_ONE = "1".charCodeAt(0)
+const CHARCODE_FIVE = "5".charCodeAt(0)
+
 export class Input {
     private keyboardLeft = false
     private keyboardRight = false
     private keyboardUp = false
+
+    private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5]
+    private rotationSpeedIndex = 2
 
     private _rotation = 0
     private _thrust = false
@@ -29,11 +35,11 @@ export class Input {
 
     onPreFixedUpdate(delta: number) {
         if (this.keyboardLeft) {
-            this._rotation += delta * 0.001
+            this._rotation += delta * 0.001 * this.rotationSpeed[this.rotationSpeedIndex]
         }
 
         if (this.keyboardRight) {
-            this._rotation -= delta * 0.001
+            this._rotation -= delta * 0.001 * this.rotationSpeed[this.rotationSpeedIndex]
         }
 
         this._thrust = this.keyboardUp
@@ -50,6 +56,10 @@ export class Input {
             case "ArrowUp":
                 this.keyboardUp = true
                 break
+        }
+
+        if (event.key.charCodeAt(0) >= CHARCODE_ONE && event.key.charCodeAt(0) <= CHARCODE_FIVE) {
+            this.rotationSpeedIndex = event.key.charCodeAt(0) - CHARCODE_ONE
         }
     }
 

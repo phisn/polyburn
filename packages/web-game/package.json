@@ -20,7 +20,7 @@
         "vite": "^5.1.6"
     },
     "dependencies": {
-        "detect-collisions": "^9.5.3",
+        "@types/sat": "^0.0.35",
         "eslint-config-custom": "*",
         "lil-gui": "^0.19.2",
         "poly-decomp-es": "^0.4.2",

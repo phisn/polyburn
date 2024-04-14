@@ -3635,11 +3635,6 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.12.tgz#12bb1e2be27293c1406acb6af1c3f3a1481d98c6"
   integrity sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==
 
-"@types/rbush@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@types/rbush/-/rbush-3.0.3.tgz#f7ba6bc940e0913678f5df119e7a7803f1842ece"
-  integrity sha512-lX55lR0iYCgapxD3IrgujpQA1zDxwZI5qMRelKvmKAsSMplFVr7wmMpG7/6+Op2tjrgEex8o3vjg8CRDrRNYxg==
-
 "@types/react-dom@^18.2.7":
   version "18.2.23"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.2.23.tgz#112338760f622a16d64271b408355f2f27f6302c"
@@ -5017,17 +5012,6 @@ depd@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/depd/-/depd-2.0.0.tgz#b696163cc757560d09cf22cc8fad1571b79e76df"
   integrity sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==
-
-detect-collisions@^9.5.3:
-  version "9.5.3"
-  resolved "https://registry.yarnpkg.com/detect-collisions/-/detect-collisions-9.5.3.tgz#a4e3e2b6b5e1f9fbb4e2f6b9a27f0310640b687b"
-  integrity sha512-C/EYORZrTPjzZ9ZUMEOZ965ZEUM1sKnS2tr8ZkQlGLMQ/53uyyIgBFDP6pE1hZuzHGocvLbnrIgV6R10BvIRqw==
-  dependencies:
-    "@types/rbush" "^3.0.3"
-    "@types/sat" "^0.0.35"
-    poly-decomp-es "^0.4.2"
-    rbush "^3.0.1"
-    sat "^0.9.0"
 
 detect-gpu@^5.0.28:
   version "5.0.38"
@@ -7949,13 +7933,6 @@ randombytes@^2.1.0:
   integrity sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==
   dependencies:
     safe-buffer "^5.1.0"
-
-rbush@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/rbush/-/rbush-3.0.1.tgz#5fafa8a79b3b9afdfe5008403a720cc1de882ecf"
-  integrity sha512-XRaVO0YecOpEuIvbhbpTrZgoiI6xBlz6hnlr6EHhd+0x9ase6EmeN+hdwwUaJvLcsFFQ8iWVF1GAK1yB0BWi0w==
-  dependencies:
-    quickselect "^2.0.0"
 
 react-colorful@^5.6.1:
   version "5.6.1"

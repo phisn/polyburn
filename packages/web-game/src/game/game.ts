@@ -1,32 +1,35 @@
-import { WorldModel } from "runtime/proto/world"
 import { Color, Scene, WebGLRenderer } from "three"
+import { GameSettings } from "./game-settings"
 import { ModuleCamera } from "./modules/module-camera"
+import { ModuleHookHandler } from "./modules/module-hook-handler"
 import { ModuleInput } from "./modules/module-input/module-input"
 import { ModuleParticles } from "./modules/module-particles/module-particles"
 import { ModuleScene } from "./modules/module-scene/module-scene"
 import { ExtendedRuntime, newExtendedRuntime } from "./runtime-extension/new-extended-runtime"
 
 export class Game {
-    private runtime: ExtendedRuntime
+    runtime: ExtendedRuntime
 
-    private camera: ModuleCamera
-    private input: ModuleInput
-    private particles: ModuleParticles
-    private scene: ModuleScene
+    camera: ModuleCamera
+    hooks: ModuleHookHandler
+    input: ModuleInput
+    particles: ModuleParticles
+    scene: ModuleScene
 
-    constructor(world: WorldModel, gamemode: string) {
+    constructor(settings: GameSettings) {
         const scene = new Scene()
 
         const canvas = document.querySelector(`canvas#scene`) as HTMLCanvasElement
         const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true })
         renderer.setClearColor(Color.NAMES["black"], 1)
 
-        this.runtime = newExtendedRuntime(scene, renderer, world, gamemode)
+        this.runtime = newExtendedRuntime(settings, scene, renderer)
 
-        this.scene = new ModuleScene(this.runtime)
         this.camera = new ModuleCamera(this.runtime)
+        this.hooks = new ModuleHookHandler(this.runtime)
         this.input = new ModuleInput(this.runtime)
         this.particles = new ModuleParticles(this.runtime)
+        this.scene = new ModuleScene(this.runtime)
 
         this.onCanvasResize = this.onCanvasResize.bind(this)
         const observer = new ResizeObserver(this.onCanvasResize)

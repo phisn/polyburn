@@ -1,20 +1,26 @@
 import { SystemStack } from "runtime-framework"
-import { WorldModel } from "runtime/proto/world"
 import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
 import { newRuntime } from "runtime/src/runtime"
 import { Scene, WebGLRenderer } from "three"
+import { GameSettings } from "../game-settings"
 import { ExtendedFactoryContext } from "./extended-factory-context"
 
-export function newExtendedRuntime(
-    scene: Scene,
-    renderer: WebGLRenderer,
-    world: WorldModel,
-    gamemodeName: string,
-): SystemStack<ExtendedFactoryContext, RuntimeSystemContext> {
-    const runtime = newRuntime(world, gamemodeName).extend({
+export function newExtendedRuntime(settings: GameSettings, scene: Scene, renderer: WebGLRenderer) {
+    const runtime: SystemStack<ExtendedFactoryContext, RuntimeSystemContext> = newRuntime(
+        settings.world,
+        settings.gamemode,
+    ).extend({
+        hooks: settings.hooks,
         scene,
         renderer,
     })
+
+    for (const rocket of runtime.factoryContext.store.find("rocket", "rigidBody")) {
+        rocket.components.interpolation = {
+            position: rocket.components.rigidBody.translation(),
+            rotation: rocket.components.rigidBody.rotation(),
+        }
+    }
 
     return runtime
 }

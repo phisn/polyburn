@@ -50,21 +50,14 @@ export class ModuleScene {
     private initRocket(
         runtime: SystemStack<RuntimeFactoryContext<ExtendedComponents>, RuntimeSystemContext>,
     ) {
-        const [rocketEntity] = runtime.factoryContext.store.newSet(...RocketEntityComponents)
-        const rocket = new Rocket()
-
-        this.entitiesInterpolated.push(
-            new EntityInterpolation(
-                rocketEntity.with({
-                    interpolation: {
-                        position: { x: 0, y: 0 },
-                        rotation: 0,
-                    },
-                }),
-                rocket,
-            ),
+        const [rocketEntity] = runtime.factoryContext.store.newSet(
+            ...RocketEntityComponents,
+            "interpolation",
         )
 
+        const rocket = new Rocket()
+
+        this.entitiesInterpolated.push(new EntityInterpolation(rocketEntity, rocket))
         this.runtime.factoryContext.scene.add(rocket)
     }
 

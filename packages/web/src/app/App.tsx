@@ -4,6 +4,7 @@ import { NotFound } from "./NotFound"
 import { Campaign } from "./campaign/Campaign"
 import { Editor } from "./editor/Editor"
 import { Layout } from "./layout/Layout"
+import { Play } from "./play/Play"
 
 export function App() {
     return (
@@ -13,6 +14,7 @@ export function App() {
                     <Route path="/" element={<Navigate to="/campaign" replace />} />
                     <Route path="/campaign" element={<Campaign />} />
                     <Route path="/editor" element={<Editor />} />
+                    <Route path="/play/:world/:gamemode" element={<Play />} />
                     <Route path="*" element={<NotFound />} />
                 </Route>
             </Routes>

@@ -19,8 +19,12 @@ export class Game {
     constructor(settings: GameSettings) {
         const scene = new Scene()
 
-        const canvas = document.querySelector(`canvas#scene`) as HTMLCanvasElement
-        const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true })
+        const renderer = new WebGLRenderer({
+            canvas: settings.canvas,
+            antialias: true,
+            alpha: true,
+        })
+
         renderer.setClearColor(Color.NAMES["black"], 1)
 
         this.runtime = newExtendedRuntime(settings, scene, renderer)

@@ -1,3 +1,4 @@
+/*
 import { WorldModel } from "runtime/proto/world"
 import { Game } from "./game/game"
 import { GameLoop } from "./game/game-loop"
@@ -23,3 +24,4 @@ try {
 } catch (e) {
     console.error(e)
 }
+*/

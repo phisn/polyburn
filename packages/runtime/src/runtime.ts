@@ -50,7 +50,7 @@ export const newRuntime = (world: WorldModel, gamemodeName: string) => {
     rocket.components.rocket.currentLevel.components.level.captured = true
     rocket.components.rocket.currentLevel.components.level.hideFlag = true
 
-    context.store.world.components.world = {
+    context.store.world.components.stats = {
         ticks: 0,
         deaths: 0,
         finished: false,

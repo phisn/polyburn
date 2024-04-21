@@ -1,5 +1,6 @@
 import { SystemStack } from "runtime-framework"
 import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
+import { ReplayCaptureService } from "runtime/src/model/replay/replay-capture-service"
 import { newRuntime } from "runtime/src/runtime"
 import { Scene, WebGLRenderer } from "three"
 import { GameSettings } from "../game-settings"
@@ -10,6 +11,10 @@ export function newExtendedRuntime(settings: GameSettings, scene: Scene, rendere
         settings.world,
         settings.gamemode,
     ).extend({
+        worldname: settings.worldname,
+        gamemode: settings.gamemode,
+
+        replayCapture: new ReplayCaptureService(),
         hooks: settings.hooks,
         scene,
         renderer,

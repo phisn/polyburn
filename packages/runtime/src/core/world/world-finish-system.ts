@@ -6,11 +6,11 @@ export const newWorldFinishSystem: RuntimeSystemFactory = ({ store, messageStore
 
     return () => {
         if (
-            store.world.has("world") &&
+            store.world.has("stats") &&
             [...captures].length > 0 &&
             [...levels].every(level => level.components.level.captured)
         ) {
-            store.world.components.world.finished = true
+            store.world.components.stats.finished = true
             messageStore.publish("finished", {})
         }
     }

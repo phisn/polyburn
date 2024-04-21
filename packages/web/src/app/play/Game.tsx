@@ -4,10 +4,13 @@ import { Game as NativeGame } from "web-game/src/game/game"
 import { GameLoop } from "web-game/src/game/game-loop"
 import { GameHooks, GameInstanceType, GameSettings } from "web-game/src/game/game-settings"
 
-export function Game(props: { model: WorldModel; hooks: GameHooks }) {
+export function Game(props: {
+    worldname: string
+    gamemode: string
+    model: WorldModel
+    hooks: GameHooks
+}) {
     const [gameLoop, setGameLoop] = useState<GameLoop | null>(null)
-
-    console.log("World2")
 
     const canvasRef = useCallback(
         (canvas: HTMLCanvasElement | null) => {
@@ -18,8 +21,10 @@ export function Game(props: { model: WorldModel; hooks: GameHooks }) {
             const settings: GameSettings = {
                 instanceType: GameInstanceType.Play,
                 canvas,
+
+                worldname: props.worldname,
                 world: props.model,
-                gamemode: "Normal",
+                gamemode: props.gamemode,
                 hooks: props.hooks,
             }
 
@@ -35,5 +40,5 @@ export function Game(props: { model: WorldModel; hooks: GameHooks }) {
         }
     }, [gameLoop])
 
-    return <canvas className="absolute inset-0 h-full w-full" ref={canvasRef} />
+    return <canvas className="absolute inset-0 z-0 h-full w-full" ref={canvasRef} />
 }

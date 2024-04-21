@@ -1,25 +1,39 @@
+import { TRPCError } from "@trpc/server"
 import { and, eq } from "drizzle-orm"
 import { Buffer } from "node:buffer"
 import { z } from "zod"
-import { leaderboard } from "../db-schema"
-import { publicProcedure, router } from "../trpc"
+import { leaderboard, users } from "../../framework/db-schema"
+import { publicProcedure, router } from "../../framework/trpc"
 
 export const leaderboardRouter = router({
     get: publicProcedure
         .input(
             z.object({
-                userId: z.string(),
+                username: z.string(),
                 world: z.string(),
                 gamemode: z.string(),
             }),
         )
         .query(async ({ input, ctx: { db } }) => {
+            const [user] = await db
+                .select({ id: users.id })
+                .from(users)
+                .where(eq(users.username, input.username))
+                .limit(1)
+
+            if (!user) {
+                throw new TRPCError({
+                    message: "User not found",
+                    code: "BAD_REQUEST",
+                })
+            }
+
             const [replay] = await db
                 .select()
                 .from(leaderboard)
                 .where(
                     and(
-                        eq(leaderboard.userId, input.userId),
+                        eq(leaderboard.userId, user.id),
                         eq(leaderboard.world, input.world),
                         eq(leaderboard.gamemode, input.gamemode),
                     ),
@@ -49,6 +63,7 @@ export const leaderboardRouter = router({
             const replays = await db
                 .select()
                 .from(leaderboard)
+                .innerJoin(users, eq(leaderboard.userId, users.id))
                 .where(
                     and(
                         eq(leaderboard.world, input.world),
@@ -60,11 +75,11 @@ export const leaderboardRouter = router({
                 .execute()
 
             return replays.map(replay => ({
-                leaderboardId: replay.id,
-                userId: replay.userId,
-                deaths: replay.deaths,
-                ticks: replay.ticks,
-                model: Buffer.from(replay.model).toString("base64"),
+                leaderboardId: replay.leaderboard.id,
+                username: replay.users.username,
+                deaths: replay.leaderboard.deaths,
+                ticks: replay.leaderboard.ticks,
+                model: Buffer.from(replay.leaderboard.model).toString("base64"),
             }))
         }),
 })

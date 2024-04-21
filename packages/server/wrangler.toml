@@ -1,7 +1,7 @@
-name = "rocket-game-worker"
+name = "polyburn-worker"
 main = "src/index.ts"
-compatibility_date = "2023-09-08"
 
+compatibility_date = "2024-03-04"
 compatibility_flags = [ "nodejs_compat" ]
 
 usage_model = "unbound"
@@ -10,10 +10,10 @@ usage_model = "unbound"
 port = 3002
 
 [vars]
-CLIENT_URL = "https://new.rocketgame.app"
+CLIENT_URL = "https://new.rocketgame.app,https://rust-game.rocket-game.pages.dev,https://polyburn.com"
 
 [[d1_databases]]
 migrations_dir = "drizzle"
-binding = "DB" # i.e. available in your Worker on env.DB
-database_name = "rocket-game-d1"
-database_id = "0057ecf2-ede7-4876-ba0d-4542a665d209"
+binding = "DB"
+database_name = "polyburn"
+database_id = "432d6db4-6e41-4a3f-98bc-9d98bd3f115d"

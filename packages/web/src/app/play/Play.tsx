@@ -15,9 +15,11 @@ export function Play() {
         return undefined
     }
 
-    console.log("Play", params)
-
     const worldQuery = trpc.world.get.useQuery({ names: [params.world] })
+
+    if (worldQuery.isLoading) {
+        return <div>Loading...</div>
+    }
 
     if (worldQuery.data === undefined) {
         if (worldQuery.isError) {
@@ -37,7 +39,11 @@ export function Play() {
         return null
     }
 
-    console.log("World", world)
-
-    return <GameWithCanvasHooked model={WorldModel.decode(base64ToBytes(world.model))} />
+    return (
+        <GameWithCanvasHooked
+            worldname={params.world}
+            gamemode={params.gamemode}
+            model={WorldModel.decode(base64ToBytes(world.model))}
+        />
+    )
 }

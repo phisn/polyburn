@@ -58,6 +58,8 @@ export const newRocket = (
 
     return context.store.create({
         rocket: {
+            thrusting: false,
+
             collisionCount: 0,
             rotationWithoutInput: rocket.rotation,
             spawnPosition: positionAtCenter,

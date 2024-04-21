@@ -59,10 +59,15 @@ export class Game {
     onFixedUpdate(last: boolean) {
         this.scene.onFixedUpdate(last)
 
-        this.runtime.step({
+        const context = {
             thrust: this.input.thrust(),
             rotation: this.input.rotation(),
-        })
+        }
+
+        const rotationWithError = this.runtime.factoryContext.replayCapture.captureFrame(context)
+        context.rotation = rotationWithError
+
+        this.runtime.step(context)
 
         if (last) {
             this.camera.onFixedUpdate()

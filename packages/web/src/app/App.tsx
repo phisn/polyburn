@@ -1,3 +1,4 @@
+import { GoogleOAuthProvider } from "@react-oauth/google"
 import { Navigate, Route, Routes } from "react-router-dom"
 import { TrpcProvider } from "../common/trpc/TrpcProvider"
 import { NotFound } from "./NotFound"
@@ -9,15 +10,17 @@ import { Play } from "./play/Play"
 export function App() {
     return (
         <TrpcProvider>
-            <Routes>
-                <Route path="/" element={<Layout />}>
-                    <Route path="/" element={<Navigate to="/campaign" replace />} />
-                    <Route path="/campaign" element={<Campaign />} />
-                    <Route path="/editor" element={<Editor />} />
-                    <Route path="/play/:world/:gamemode" element={<Play />} />
-                    <Route path="*" element={<NotFound />} />
-                </Route>
-            </Routes>
+            <GoogleOAuthProvider clientId={import.meta.env.VITE_AUTH_GOOGLE_CLIENT_ID}>
+                <Routes>
+                    <Route path="/" element={<Layout />}>
+                        <Route path="/" element={<Navigate to="/campaign" replace />} />
+                        <Route path="/campaign" element={<Campaign />} />
+                        <Route path="/editor" element={<Editor />} />
+                        <Route path="/play/:world/:gamemode" element={<Play />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Route>
+                </Routes>
+            </GoogleOAuthProvider>
         </TrpcProvider>
     )
 }

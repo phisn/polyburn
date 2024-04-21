@@ -9,7 +9,7 @@ export function validateReplay(
     gamemode: string,
 ): ReplayStats | false {
     const runtime = runtimeFromReplay(replay, world, gamemode)
-    const worldComponent = runtime.factoryContext.store.world.components.world
+    const worldComponent = runtime.factoryContext.store.world.components.stats
 
     if (worldComponent?.finished) {
         return {

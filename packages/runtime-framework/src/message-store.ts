@@ -55,6 +55,8 @@ export const createMessageStore = <
             messageName: T,
             message: WithoutTarget<Messages, Components>[T],
         ) {
+            console.log("publish", messageName, message)
+
             for (const callback of listenerMap.get(messageName.toString()) ?? []) {
                 callback(message)
             }

@@ -1,11 +1,7 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
-import { createContext } from "./trpc"
-import { appRouter } from "./trpc-router"
-
-interface Env {
-    CLIENT_URL: string
-    DB: D1Database
-}
+import { Env } from "./env"
+import { createContext } from "./framework/trpc"
+import { appRouter } from "./framework/trpc-router"
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
@@ -14,10 +10,14 @@ export default {
         }
 
         const headers = {
-            "Access-Control-Allow-Origin": `${env.CLIENT_URL}`,
+            "Access-Control-Allow-Origin": "",
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
             "Access-Control-Allow-Credentials": "true",
+        }
+
+        if (env.CLIENT_URL.split(",").includes(request.headers.get("Origin") || "")) {
+            headers["Access-Control-Allow-Origin"] = request.headers.get("Origin") || ""
         }
 
         if (request.method === "OPTIONS") {
@@ -30,7 +30,7 @@ export default {
             endpoint: "/trpc",
             req: request,
             router: appRouter,
-            createContext: createContext(env.DB),
+            createContext: createContext(env),
         })
 
         Object.entries(headers).forEach(([key, value]) => {

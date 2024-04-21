@@ -4,9 +4,9 @@ export const newWorldTrackerSystem: RuntimeSystemFactory = ({ store, messageStor
     const deathMessages = messageStore.collect("rocketDeath")
 
     return () => {
-        if (store.world.has("world") && store.world.components.world.finished === false) {
-            store.world.components.world.ticks++
-            store.world.components.world.deaths += [...deathMessages].length
+        if (store.world.has("stats") && store.world.components.stats.finished === false) {
+            store.world.components.stats.ticks++
+            store.world.components.stats.deaths += [...deathMessages].length
         }
     }
 }

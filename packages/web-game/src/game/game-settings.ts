@@ -1,9 +1,9 @@
 import { WorldModel } from "runtime/proto/world"
-import { Runtime } from "runtime/src/runtime"
 import { ReplayModel } from "../replay/replay-model"
+import { ExtendedRuntime } from "./runtime-extension/new-extended-runtime"
 
 export interface GameHooks {
-    onFinished: undefined | ((runtime: Runtime) => void)
+    onFinished: undefined | ((runtime: ExtendedRuntime) => void)
 }
 
 export enum GameInstanceType {
@@ -15,6 +15,7 @@ export interface GameSettings {
     instanceType: GameInstanceType
     canvas: HTMLCanvasElement
 
+    worldname: string
     world: WorldModel
     gamemode: string
 

@@ -6,7 +6,7 @@ import { CreateAccount } from "./CreateAccount"
 import { LoginBadge } from "./LoginBadge"
 import { RenameAccount } from "./RenameAccount"
 
-export function AuthButton() {
+export function AuthButton(props: { children: React.ReactNode; className?: string }) {
     const [creationJwt, setCreationJwt] = useState<string | undefined>(undefined)
     const [loading, setLoading] = useState(false)
     const [renaming, setRenaming] = useState(false)
@@ -21,10 +21,16 @@ export function AuthButton() {
             if (jwt) {
                 console.log("jwt", jwt)
                 setLoading(true)
-                trpcNative.user.me.query().then(user => {
-                    updateUser(user)
-                    setLoading(false)
-                })
+                trpcNative.user.me
+                    .query()
+                    .then(user => {
+                        updateUser(user)
+                        setLoading(false)
+                    })
+                    .catch(error => {
+                        console.error(error)
+                        setLoading(false)
+                    })
             } else {
                 console.log("no jwt")
             }
@@ -81,12 +87,21 @@ export function AuthButton() {
 
     return (
         <>
-            <LoginBadge loading={loading} onClickLogin={onLogin} onClickUser={onRename} />
+            <LoginBadge
+                loading={loading}
+                onClickLogin={onLogin}
+                onClickUser={onRename}
+                className={props.className}
+            >
+                {props.children}
+            </LoginBadge>
+
             <CreateAccount
                 creationJwt={creationJwt}
                 onCancel={onCreateFinished}
                 onCreated={onCreateFinished}
             />
+
             <RenameAccount open={renaming} onFinished={onRenameFinished} />
         </>
     )

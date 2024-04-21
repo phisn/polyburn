@@ -1,20 +1,19 @@
 import { TRPCError } from "@trpc/server"
-import { asc, eq, inArray } from "drizzle-orm"
+import { and, asc, eq, inArray } from "drizzle-orm"
 import { WorldView } from "shared/src/views/world-view"
 import { z } from "zod"
-import { leaderboard } from "../db-schema"
-import { worlds } from "../domain/worlds"
-import { publicProcedure, router } from "../trpc"
+import { worlds } from "../../domain/worlds"
+import { leaderboard } from "../../framework/db-schema"
+import { publicProcedure, router } from "../../framework/trpc"
 
 export const worldRouter = router({
     get: publicProcedure
         .input(
             z.object({
                 names: z.array(z.string()),
-                userId: z.string(),
             }),
         )
-        .query(async ({ input, ctx: { db } }) => {
+        .query(async ({ input, ctx: { db, user } }) => {
             const requested = worlds.filter(world => input.names.includes(world.id.name))
 
             if (requested.length !== input.names.length) {
@@ -28,20 +27,28 @@ export const worldRouter = router({
                 })
             }
 
-            const replaysFound = await db
-                .select()
-                .from(leaderboard)
-                .where(inArray(leaderboard.world, input.names))
-                .where(eq(leaderboard.userId, input.userId))
-                .orderBy(asc(leaderboard.ticks))
-                .execute()
+            let replaysFound = undefined
+
+            if (user) {
+                replaysFound = await db
+                    .select()
+                    .from(leaderboard)
+                    .where(
+                        and(
+                            inArray(leaderboard.world, input.names),
+                            eq(leaderboard.userId, user.id),
+                        ),
+                    )
+                    .orderBy(asc(leaderboard.ticks))
+                    .execute()
+            }
 
             return requested.map(
                 (world): WorldView => ({
                     id: world.id,
                     model: world.model,
                     gamemodes: world.gamemodes.map(gamemode => {
-                        const replay = replaysFound.find(
+                        const replay = replaysFound?.find(
                             replay =>
                                 replay.world === world.id.name && replay.gamemode === gamemode,
                         )

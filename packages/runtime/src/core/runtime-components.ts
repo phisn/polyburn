@@ -5,10 +5,10 @@ import { LevelCapturingComponent } from "./level-capture/level-capturing-compone
 import { LevelComponent } from "./level/level-component"
 import { RocketComponent } from "./rocket/rocket-component"
 import { ShapeComponent } from "./shape/shape-component"
-import { WorldComponent } from "./world/world-component"
+import { StatsComponent } from "./world/stats-component"
 
 export interface RuntimeComponents {
-    world?: WorldComponent
+    stats?: StatsComponent
 
     level?: LevelComponent
     levelCapturing?: LevelCapturingComponent

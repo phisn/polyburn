@@ -1,5 +1,6 @@
 import { Transition } from "@headlessui/react"
 import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { ReplayModel } from "runtime/proto/replay"
 import { ExtendedRuntime } from "web-game/src/game/runtime-extension/new-extended-runtime"
 import { AuthButton } from "../../common/components/auth-button/AuthButton"
@@ -12,6 +13,7 @@ export function FinishedPopup(props: { runtime: ExtendedRuntime }) {
     const stats = props.runtime.factoryContext.store.world.components.stats!
     const user = useAppStore(x => x.user)
     const newAlert = useAppStore(x => x.newAlert)
+    const navigate = useNavigate()
 
     const validation = trpc.validateReplay.useMutation({
         onError: () => {
@@ -25,6 +27,10 @@ export function FinishedPopup(props: { runtime: ExtendedRuntime }) {
     const { mutate } = validation
 
     useEffect(() => {
+        if (!user) {
+            return
+        }
+
         setTimeout(
             () =>
                 mutate({
@@ -38,7 +44,11 @@ export function FinishedPopup(props: { runtime: ExtendedRuntime }) {
                 }),
             0,
         )
-    }, [mutate, props])
+    }, [mutate, props, user])
+
+    function onClickCompleted() {
+        navigate("/")
+    }
 
     return (
         <CenterOnScreen>
@@ -48,7 +58,7 @@ export function FinishedPopup(props: { runtime: ExtendedRuntime }) {
                 <div className="h-56 w-full">
                     <FinishedInfoContainer
                         loading={validation.isLoading}
-                        onClick={() => void 0}
+                        onClick={onClickCompleted}
                         ticks={stats.ticks}
                         deaths={stats.deaths}
                         rank={validation.data?.rank}
@@ -75,7 +85,10 @@ export function FinishedInfoContainer(props: {
     personalBestRank?: number
 }) {
     return (
-        <InfoContainer className="hover:bg-base-100 active:bg-base-200 relative flex items-center justify-center transition hover:cursor-pointer">
+        <InfoContainer
+            className="hover:bg-base-100 active:bg-base-200 relative flex items-center justify-center transition hover:cursor-pointer"
+            onClick={props.onClick}
+        >
             <Transition
                 show={!props.loading}
                 className="absolute"
@@ -130,13 +143,13 @@ function RunStats(props: {
                 <div>{formatTicks(props.ticks)}</div>
                 <div>{props.deaths}</div>
 
-                {props.rank && !props.personalBestRank && <div>{props.rank + 1}</div>}
-                {props.rank && props.personalBestRank && (
+                {undefined !== props.rank && !props.personalBestRank && <div>{props.rank + 1}</div>}
+                {undefined !== props.rank && !!props.personalBestRank && (
                     <div>
                         {props.rank + 1} (Best {props.personalBestRank + 1})
                     </div>
                 )}
-                {!props.rank && <div>No rank</div>}
+                {undefined === props.rank && <div>No rank</div>}
             </div>
         </div>
     )
@@ -150,13 +163,18 @@ function InfoContainerTitle(props: { children: React.ReactNode; className?: stri
     )
 }
 
-function InfoContainer(props: { children: React.ReactNode; className?: string }) {
+function InfoContainer(props: {
+    children: React.ReactNode
+    className?: string
+    onClick: () => void
+}) {
     return (
         <div
             className={
                 "bg-base-300 border-base-100 h-full w-full rounded-2xl border p-4 " +
                 props.className
             }
+            onClick={props.onClick}
         >
             {props.children}
         </div>

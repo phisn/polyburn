@@ -1,0 +1,90 @@
+export class Keyboard {
+    private keyboardLeft = false
+    private keyboardRight = false
+
+    private keyboardUpArrow = false
+    private keyboardUpW = false
+    private keyboardUpSpace = false
+
+    private rotationSpeed = 1.0
+
+    private _rotation = 0
+    private _thrust = false
+
+    constructor() {
+        this.onKeyDown = this.onKeyDown.bind(this)
+        this.onKeyUp = this.onKeyUp.bind(this)
+
+        window.addEventListener("keydown", this.onKeyDown)
+        window.addEventListener("keyup", this.onKeyUp)
+    }
+
+    dispose() {
+        window.removeEventListener("keydown", this.onKeyDown)
+        window.removeEventListener("keyup", this.onKeyUp)
+    }
+
+    rotation() {
+        return this._rotation
+    }
+
+    thrust() {
+        return this._thrust
+    }
+
+    setRotationSpeed(speed: number) {
+        this.rotationSpeed = speed
+    }
+
+    onPreFixedUpdate(delta: number) {
+        if (this.keyboardLeft) {
+            this._rotation += delta * 0.001 * this.rotationSpeed
+        }
+
+        if (this.keyboardRight) {
+            this._rotation -= delta * 0.001 * this.rotationSpeed
+        }
+
+        this._thrust = this.keyboardUpArrow || this.keyboardUpW || this.keyboardUpSpace
+    }
+
+    private onKeyDown(event: KeyboardEvent) {
+        switch (event.key) {
+            case "ArrowLeft":
+                this.keyboardLeft = true
+                break
+            case "ArrowRight":
+                this.keyboardRight = true
+                break
+            case "ArrowUp":
+                this.keyboardUpArrow = true
+                break
+            case "w":
+                this.keyboardUpW = true
+                break
+            case " ":
+                this.keyboardUpSpace = true
+                break
+        }
+    }
+
+    private onKeyUp(event: KeyboardEvent) {
+        switch (event.key) {
+            case "ArrowLeft":
+                this.keyboardLeft = false
+                break
+            case "ArrowRight":
+                this.keyboardRight = false
+                break
+            case "ArrowUp":
+                this.keyboardUpArrow = false
+                break
+            case "w":
+                this.keyboardUpW = false
+                break
+            case " ":
+                this.keyboardUpSpace = false
+                break
+        }
+    }
+}

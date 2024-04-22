@@ -30,7 +30,7 @@ export function Game(props: {
 
             setGameLoop(new GameLoop(new NativeGame(settings)))
         },
-        [props.model, props.hooks],
+        [props.model, props.hooks, props.gamemode, props.worldname],
     )
 
     useEffect(() => {

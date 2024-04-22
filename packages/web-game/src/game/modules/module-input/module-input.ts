@@ -1,81 +1,62 @@
 import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
+import { Keyboard } from "./keyboard"
+import { Mouse } from "./mouse"
 
 const CHARCODE_ONE = "1".charCodeAt(0)
 const CHARCODE_NINE = "9".charCodeAt(0)
 
 export class ModuleInput {
-    private keyboardLeft = false
-    private keyboardRight = false
-    private keyboardUp = false
+    private keyboard: Keyboard
+    private mouse: Mouse
 
     private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
     private rotationSpeedIndex = 2
 
-    private _rotation = 0
-    private _thrust = false
+    constructor(runtime: ExtendedRuntime) {
+        this.keyboard = new Keyboard()
+        this.mouse = new Mouse(runtime)
 
-    constructor(private runtime: ExtendedRuntime) {
-        this.onKeyDown = this.onKeyDown.bind(this)
-        this.onKeyUp = this.onKeyUp.bind(this)
+        this.onContextMenu = this.onContextMenu.bind(this)
+        document.addEventListener("contextmenu", this.onContextMenu)
 
-        window.addEventListener("keydown", this.onKeyDown)
-        window.addEventListener("keyup", this.onKeyUp)
+        this.onKeyboardDown = this.onKeyboardDown.bind(this)
+        window.addEventListener("keydown", this.onKeyboardDown)
     }
 
     dispose() {
-        window.removeEventListener("keydown", this.onKeyDown)
-        window.removeEventListener("keyup", this.onKeyUp)
+        this.keyboard.dispose()
+        this.mouse.dispose()
+
+        document.removeEventListener("contextmenu", this.onContextMenu)
+        window.removeEventListener("keydown", this.onKeyboardDown)
     }
 
     rotation() {
-        return this._rotation
+        return this.keyboard.rotation() + this.mouse.rotation()
     }
 
     thrust() {
-        return this._thrust
+        return this.keyboard.thrust() || this.mouse.thrust()
     }
 
     onPreFixedUpdate(delta: number) {
-        if (this.keyboardLeft) {
-            this._rotation += delta * 0.001 * this.rotationSpeed[this.rotationSpeedIndex]
-        }
-
-        if (this.keyboardRight) {
-            this._rotation -= delta * 0.001 * this.rotationSpeed[this.rotationSpeedIndex]
-        }
-
-        this._thrust = this.keyboardUp
+        this.keyboard.onPreFixedUpdate(delta)
     }
 
-    private onKeyDown(event: KeyboardEvent) {
-        switch (event.key) {
-            case "ArrowLeft":
-                this.keyboardLeft = true
-                break
-            case "ArrowRight":
-                this.keyboardRight = true
-                break
-            case "ArrowUp":
-                this.keyboardUp = true
-                break
+    onKeyboardDown(event: KeyboardEvent) {
+        if (event.repeat) {
+            return
         }
 
         if (event.key.charCodeAt(0) >= CHARCODE_ONE && event.key.charCodeAt(0) <= CHARCODE_NINE) {
             this.rotationSpeedIndex = event.key.charCodeAt(0) - CHARCODE_ONE
+
+            this.keyboard.setRotationSpeed(this.rotationSpeed[this.rotationSpeedIndex])
+            this.mouse.setRotationSpeed(this.rotationSpeed[this.rotationSpeedIndex])
         }
     }
 
-    private onKeyUp(event: KeyboardEvent) {
-        switch (event.key) {
-            case "ArrowLeft":
-                this.keyboardLeft = false
-                break
-            case "ArrowRight":
-                this.keyboardRight = false
-                break
-            case "ArrowUp":
-                this.keyboardUp = false
-                break
-        }
+    private onContextMenu(event: Event) {
+        event.preventDefault()
     }
 }

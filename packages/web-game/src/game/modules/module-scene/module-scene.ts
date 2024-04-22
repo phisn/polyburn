@@ -1,4 +1,5 @@
-import { EntityWith, SystemStack } from "runtime-framework"
+import { EntityWith, MessageCollector, SystemStack } from "runtime-framework"
+import { RocketDeathMessage } from "runtime/src/core/rocket/rocket-death-message"
 import { RocketEntityComponents } from "runtime/src/core/rocket/rocket-entity"
 import { RuntimeFactoryContext } from "runtime/src/core/runtime-factory-context"
 import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
@@ -13,6 +14,9 @@ export class ModuleScene {
     private entitiesInterpolated: EntityInterpolation[] = []
     private flags: Flag[] = []
 
+    private rocketInterplation!: EntityInterpolation
+    private rocketDeathCollector: MessageCollector<RocketDeathMessage>
+
     constructor(private runtime: ExtendedRuntime) {
         this.initRocket(runtime)
         this.initShapes(runtime)
@@ -26,6 +30,8 @@ export class ModuleScene {
             this.runtime.factoryContext.scene.add(flag)
             this.flags.push(flag)
         }
+
+        this.rocketDeathCollector = runtime.factoryContext.messageStore.collect("rocketDeath")
     }
 
     private initShapes(
@@ -56,9 +62,12 @@ export class ModuleScene {
         )
 
         const rocket = new Rocket()
+        const rocketInterpolation = new EntityInterpolation(rocketEntity, rocket)
 
-        this.entitiesInterpolated.push(new EntityInterpolation(rocketEntity, rocket))
+        this.entitiesInterpolated.push(rocketInterpolation)
         this.runtime.factoryContext.scene.add(rocket)
+
+        this.rocketInterplation = rocketInterpolation
     }
 
     onUpdate(delta: number, overstep: number) {
@@ -68,6 +77,11 @@ export class ModuleScene {
 
         for (const flag of this.flags) {
             flag.onUpdate()
+        }
+
+        if ([...this.rocketDeathCollector].length > 0) {
+            this.rocketInterplation.reset()
+            console.log("Rocket died ..")
         }
     }
 
@@ -119,6 +133,23 @@ class EntityInterpolation {
 
     position() {
         return this.object.position
+    }
+
+    reset() {
+        const translation = this.entity.components.rigidBody.translation()
+        const rotation = this.entity.components.rigidBody.rotation()
+
+        this.object.position.x = translation.x
+        this.object.position.y = translation.y
+        this.object.rotation.z = rotation
+
+        this.entity.components.interpolation.position.x = this.object.position.x
+        this.entity.components.interpolation.position.y = this.object.position.y
+        this.entity.components.interpolation.rotation = this.object.rotation.z
+
+        this.previousX = translation.x
+        this.previousY = translation.y
+        this.previousRotation = rotation
     }
 
     private lerp(previous: number, next: number, t: number) {

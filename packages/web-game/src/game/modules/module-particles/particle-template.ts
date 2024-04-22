@@ -1,14 +1,31 @@
 import { Color } from "three"
 
-export interface ParticleTemplate {
-    velocity: ParticleProperty
-    friction: ParticleProperty
-    restitution: ParticleProperty
+export type ParticleTemplate = () => ParticleTemplateInstance
 
-    lifetime: ParticleProperty
-    size: ParticleProperty
-    angle: ParticleProperty
+export interface ParticleTemplateInstance {
+    velocity: number
+    friction: number
+    restitution: number
+
+    lifetime: number
+    size: number
+    angle: number
     gradient: ParticleGradient
+
+    shrinkAfter: number
+    maxShrink: number
+}
+
+export function randomBetween(min: number, max: number): number {
+    return min + Math.random() * (max - min)
+}
+
+export function randomBetweenDownBiased(min: number, max: number, bias: number): number {
+    return min + downBias(Math.random(), bias) * (max - min)
+}
+
+export function downBias(value: number, bias: number): number {
+    return 1 - Math.pow(1 - value, bias)
 }
 
 export type ParticleGradient = ParticleGradientEntry[]
@@ -47,14 +64,4 @@ export function resolveGradientColor(value: ParticleGradient, t: number, color: 
             break
         }
     }
-}
-
-export type ParticleProperty = number | { min: number; max: number }
-
-export function resolveParticleProperty(value: ParticleProperty): number {
-    if (typeof value === "number") {
-        return value
-    }
-
-    return value.min + Math.random() * (value.max - value.min)
 }

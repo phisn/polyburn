@@ -6,10 +6,9 @@ import { makeCCW, quickDecomp } from "poly-decomp-es"
 import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 import { Environment, aabbFromCircle, newEnvironment } from "./particle-environment"
 import {
-    ParticleGradient,
     ParticleTemplate,
+    ParticleTemplateInstance,
     resolveGradientColor,
-    resolveParticleProperty,
 } from "./particle-template"
 
 export interface Particle {
@@ -18,13 +17,8 @@ export interface Particle {
     vx: number
     vy: number
 
-    friction: number
-    restitution: number
-
+    templateInstance: ParticleTemplateInstance
     age: number
-    lifetime: number
-
-    gradient: ParticleGradient
 }
 
 export class ParticleSimulation {
@@ -129,13 +123,13 @@ export class ParticleSimulation {
                     let dot = particle.vx * accNormalX + particle.vy * accNormalY
 
                     if (dot > 0) {
-                        dot *= 1 + particle.restitution
+                        dot *= 1 + particle.templateInstance.restitution
 
                         let accVelocityCandidateX = particle.vx - accNormalX * dot
                         let accVelocityCandidateY = particle.vy - accNormalY * dot
 
-                        accVelocityCandidateX *= particle.friction
-                        accVelocityCandidateY *= particle.friction
+                        accVelocityCandidateX *= particle.templateInstance.friction
+                        accVelocityCandidateY *= particle.templateInstance.friction
 
                         particle.vx = accVelocityCandidateX
                         particle.vy = accVelocityCandidateY
@@ -144,16 +138,31 @@ export class ParticleSimulation {
             }
 
             if (i < this.maxInstances) {
-                this.instanceMatrix.makeScale(particle.circle.r, particle.circle.r, 1)
+                const shrinkModifier = Math.min(
+                    1,
+                    1 -
+                        (particle.age / particle.templateInstance.lifetime -
+                            particle.templateInstance.shrinkAfter) /
+                            (1 - particle.templateInstance.shrinkAfter),
+                )
+
+                const minShrink = 1 - particle.templateInstance.maxShrink
+                const shrink = particle.templateInstance.maxShrink + minShrink * shrinkModifier
+
+                this.instanceMatrix.makeScale(
+                    shrink * particle.circle.r,
+                    shrink * particle.circle.r,
+                    1,
+                )
                 this.instanceMatrix.setPosition(
                     particle.circle.pos.x,
                     particle.circle.pos.y,
-                    -1 - (0.1 * particle.age) / particle.lifetime,
+                    -1 - (0.1 * particle.age) / particle.templateInstance.lifetime,
                 )
 
                 resolveGradientColor(
-                    particle.gradient,
-                    particle.age / particle.lifetime,
+                    particle.templateInstance.gradient,
+                    particle.age / particle.templateInstance.lifetime,
                     this.instanceColor,
                 )
 
@@ -173,16 +182,13 @@ export class ParticleSimulation {
         sourceVelocity: Point,
         offsetIndex: number = 0,
     ) {
-        const baseVelocity = resolveParticleProperty(template.velocity)
-        const friction = resolveParticleProperty(template.friction)
-        const restitution = resolveParticleProperty(template.restitution)
+        const instance = template()
 
-        const lifetime = resolveParticleProperty(template.lifetime)
-        const size = resolveParticleProperty(template.size)
-        const angle = resolveParticleProperty(template.angle)
+        console.log("lifetime", instance.lifetime)
 
-        const velocityWithoutSourceX = baseVelocity * Math.sin(angle + sourceRotation)
-        const velocityWithoutSourceY = baseVelocity * Math.cos(angle + sourceRotation) * -1
+        const velocityWithoutSourceX = instance.velocity * Math.sin(instance.angle + sourceRotation)
+        const velocityWithoutSourceY =
+            instance.velocity * Math.cos(instance.angle + sourceRotation) * -1
 
         const offsetX = velocityWithoutSourceX * offsetIndex * 0.02
         const offsetY = velocityWithoutSourceY * offsetIndex * 0.02
@@ -193,15 +199,12 @@ export class ParticleSimulation {
         const particle: Particle = {
             circle: new SAT.Circle(
                 new SAT.Vector(sourcePosition.x + offsetX, sourcePosition.y + offsetY),
-                size,
+                instance.size,
             ),
             vx: velocityX,
             vy: velocityY,
-            friction,
-            restitution,
+            templateInstance: instance,
             age: 0,
-            lifetime,
-            gradient: template.gradient,
         }
 
         this.particles.push(particle)
@@ -211,7 +214,7 @@ export class ParticleSimulation {
         let removed = 0
 
         for (let i = this.particles.length - 1; i >= 0; i--) {
-            if (this.particles[i].age > this.particles[i].lifetime) {
+            if (this.particles[i].age > this.particles[i].templateInstance.lifetime) {
                 const swapWith = this.particles.length - 1 - removed
 
                 if (i !== swapWith) {

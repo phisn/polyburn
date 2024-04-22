@@ -71,7 +71,7 @@ export const validateReplayProcedure = publicProcedure
             )
         }
 
-        if (personalBest === undefined || stats.ticks < personalBest.ticks) {
+        if (personalBest === undefined || stats.ticks <= personalBest.ticks) {
             const update = {
                 userId: user.id,
 

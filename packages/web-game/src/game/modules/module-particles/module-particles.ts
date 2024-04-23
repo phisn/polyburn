@@ -19,7 +19,7 @@ const PARTICLE_TEMPLATE_THRUST_GRADIENT = [
     { time: 0.2, color: new Color().setRGB(1.0, 0.618, 0.318, "srgb") },
     { time: 0.4, color: new Color().setRGB(1.0, 0.0, 0.0, "srgb") },
     { time: 0.65, color: new Color().setRGB(0.65, 0.65, 0.65, "srgb") },
-    { time: 1.0, color: new Color().setRGB(0.311, 0.311, 0.311, "srgb") },
+    { time: 1.0, color: new Color().setRGB(0.0, 0.0, 0.0, "srgb") },
 ]
 
 const PARTICLE_TEMPLATE_THRUST: ParticleTemplate = () => {
@@ -27,7 +27,7 @@ const PARTICLE_TEMPLATE_THRUST: ParticleTemplate = () => {
     const angle = randomBetween(-angleRange, angleRange)
 
     console.log("angle", 1 - Math.abs(angle / angleRange))
-    const lifetimeBoost = 400 * downBias(1 - Math.abs(angle / angleRange), 0.3)
+    const lifetimeBoost = 250 * downBias(1 - Math.abs(angle / angleRange), 0.3)
 
     return {
         velocity: 15,

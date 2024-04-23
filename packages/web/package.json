@@ -23,7 +23,7 @@
         "@trpc/server": "^10.38.1",
         "@vitejs/plugin-react": "^4.0.4",
         "clsx": "^2.0.0",
-        "daisyui": "^3.6.4",
+        "daisyui": "^4.10.2",
         "dexie": "^3.2.4",
         "dexie-react-hooks": "^1.1.6",
         "js-sdsl": "^4.4.2",

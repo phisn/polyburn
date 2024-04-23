@@ -7,7 +7,7 @@ import { AuthButton } from "../../common/components/auth-button/AuthButton"
 import { BackArrowSvg } from "../../common/components/inline-svg/BackArrow"
 import { useAppStore } from "../../common/storage/app-store"
 import { trpc } from "../../common/trpc/trpc"
-import { bytesToBase64 } from "../campaign/player-handlers/GameHandler"
+import { bytesToBase64 } from "../campaign_v1/player-handlers/GameHandler"
 
 export function FinishedPopup(props: { runtime: ExtendedRuntime }) {
     const stats = props.runtime.factoryContext.store.world.components.stats!

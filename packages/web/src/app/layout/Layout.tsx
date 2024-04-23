@@ -7,9 +7,7 @@ export function Layout() {
 
     return (
         <div
-            className={`bg-base-300 flex min-h-screen flex-col ${
-                existsModal && "h-screen overflow-hidden"
-            }`}
+            className={`bg-base-300 absolute inset-0 ${existsModal && "h-screen overflow-hidden"}`}
         >
             <Outlet />
             <LayoutAlerts />

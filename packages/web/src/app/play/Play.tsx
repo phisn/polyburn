@@ -18,7 +18,7 @@ export function Play() {
     const worldQuery = trpc.world.get.useQuery({ names: [params.world] })
 
     if (worldQuery.isLoading) {
-        return <div>Loading...</div>
+        return undefined
     }
 
     if (worldQuery.data === undefined) {

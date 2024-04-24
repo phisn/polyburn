@@ -4,9 +4,9 @@
     "version": "1.0.0",
     "type": "module",
     "scripts": {
-        "dev": "vite",
-        "build": "tsc && vite build",
-        "preview": "vite preview"
+        "web-game-dev": "vite",
+        "web-game-build": "tsc && vite build",
+        "web-game-preview": "vite preview"
     },
     "devDependencies": {
         "@types/three": "^0.162.0",

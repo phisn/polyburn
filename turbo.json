@@ -1,7 +1,13 @@
 {
     "$schema": "https://turbo.build/schema.json",
     "globalDependencies": ["**/.env.*local"],
-    "globalEnv": ["CLIENT_PORT", "CLIENT_URL", "SERVER_PORT", "VITE_SERVER_URL"],
+    "globalEnv": [
+        "CLIENT_PORT",
+        "CLIENT_URL",
+        "SERVER_PORT",
+        "VITE_AUTH_GOOGLE_CLIENT_ID",
+        "VITE_SERVER_URL"
+    ],
     "pipeline": {
         "proto": {
             "outputs": [".proto/**"]

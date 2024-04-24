@@ -4,8 +4,8 @@ import { WorldModel } from "runtime/proto/world"
 import { base64ToBytes } from "runtime/src/model/base64-to-bytes"
 import { GamemodeView } from "shared/src/views/gamemode-view"
 import { WorldView } from "shared/src/views/world-view"
-import { trpc } from "../../../common/trpc/trpc"
-import { ReplayPlayer } from "../../../game/player-replay/ReplayPlayer"
+import { trpc } from "../../src/common/trpc/trpc"
+import { ReplayPlayer } from "../../src/game/player-replay/ReplayPlayer"
 
 export interface ReplayHandlerProps {
     type: "replay"

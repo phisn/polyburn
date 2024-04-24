@@ -4,7 +4,7 @@ import { TrpcProvider } from "../common/trpc/TrpcProvider"
 import { NotFound } from "./NotFound"
 import { Campaign } from "./campaign/Campaign"
 import { Editor } from "./editor/Editor"
-import { Layout } from "./layout/Layout"
+import { Layout, LayoutWithMenu } from "./layout/Layout"
 import { Play } from "./play/Play"
 
 export function App() {
@@ -12,10 +12,13 @@ export function App() {
         <TrpcProvider>
             <GoogleOAuthProvider clientId={import.meta.env.VITE_AUTH_GOOGLE_CLIENT_ID}>
                 <Routes>
-                    <Route path="/" element={<Layout />}>
+                    <Route path="/" element={<LayoutWithMenu />}>
                         <Route path="/" element={<Navigate to="/campaign" replace />} />
                         <Route path="/campaign" element={<Campaign />} />
                         <Route path="/editor" element={<Editor />} />
+                    </Route>
+                    <Route path="/" element={<Layout />}>
+                        <Route path="/" element={<Navigate to="/campaign" replace />} />
                         <Route path="/play/:world/:gamemode" element={<Play />} />
                         <Route path="*" element={<NotFound />} />
                     </Route>

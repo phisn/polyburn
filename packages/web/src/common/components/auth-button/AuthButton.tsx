@@ -19,7 +19,6 @@ export function AuthButton(props: { children: React.ReactNode; className?: strin
             const jwt = useAppStore.getState().jwt
 
             if (jwt) {
-                console.log("jwt", jwt)
                 setLoading(true)
                 trpcNative.user.me
                     .query()

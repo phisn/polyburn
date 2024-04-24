@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { WorldView } from "shared/src/views/world-view"
-import { Modal, ModalPanel } from "../../common/components/Modal"
+import { Modal, ModalPanel } from "../src/common/components/Modal"
 import { useCampaignStore } from "./CampaignStore"
 import { Gamemode } from "./Gamemode"
 

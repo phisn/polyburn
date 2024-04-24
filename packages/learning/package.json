@@ -4,10 +4,10 @@
     "version": "1.0.0",
     "moduleResolution": "node",
     "scripts": {
-        "dev": "vite",
-        "local": "npx ts-node ./src/main.ts",
-        "build": "tsc && vite build",
-        "preview": "vite preview"
+        "rl-dev": "vite",
+        "rl-local": "npx ts-node ./src/main.ts",
+        "rl-build": "tsc && vite build",
+        "rl-preview": "vite preview"
     },
     "devDependencies": {
         "@types/node": "^20.12.7",

@@ -4,8 +4,8 @@ import { WorldModel } from "runtime/proto/world"
 import { base64ToBytes } from "runtime/src/model/base64-to-bytes"
 import { GamemodeView } from "shared/src/views/gamemode-view"
 import { WorldView } from "shared/src/views/world-view"
-import { trpc } from "../../../common/trpc/trpc"
-import { GamePlayer } from "../../../game/player-game/GamePlayer"
+import { trpc } from "../../src/common/trpc/trpc"
+import { GamePlayer } from "../../src/game/player-game/GamePlayer"
 
 export function bytesToBase64(bytes: Uint8Array) {
     const binString = Array.from(bytes, x => String.fromCodePoint(x)).join("")

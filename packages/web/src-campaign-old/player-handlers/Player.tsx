@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { Navbar } from "../../../common/components/Navbar"
-import { ArrowClockwise } from "../../../common/components/inline-svg/ArrowClockwise"
-import { StopSvg } from "../../../common/components/inline-svg/Stop"
+import { Navbar } from "../../src/common/components/Navbar"
+import { ArrowClockwise } from "../../src/common/components/inline-svg/ArrowClockwise"
+import { StopSvg } from "../../src/common/components/inline-svg/Stop"
 import { GameHandler, GameHandlerProps } from "./GameHandler"
 import { ReplayHandler, ReplayHandlerProps } from "./ReplayHandler"
 

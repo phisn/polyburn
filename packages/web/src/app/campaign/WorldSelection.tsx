@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { WorldView } from "shared/src/views/world-view"
+import { IndependentContainer } from "../../common/components/IndependentContainer"
 import { trpcNative } from "../../common/trpc/trpc-native"
 import { World } from "./World"
 
-export function WorldSelection(props: { onSelected: (world: WorldView) => void }) {
+export function WorldSelection() {
     const chapterBackgroundColors = [
         "bg-red-500", // Light Blue
         "bg-green-500", // Green
         "bg-yellow-500", // Yellow
-        "bg-orange-500", // Orange
         "bg-purple-500", // Purple
-        "bg-amber-500", // Bronze (using amber as an approximation)
         "bg-slate-500", // Silver (using slate as a closer match in Tailwind)
         "bg-blue-500", // Red
         "bg-yellow-600", // Gold (using a darker shade of yellow)
@@ -23,7 +23,7 @@ export function WorldSelection(props: { onSelected: (world: WorldView) => void }
         return (
             <div
                 className={
-                    "h-8 w-8 overflow-hidden rounded-lg duration-200 " +
+                    "h-6 w-6 select-none overflow-hidden rounded-lg duration-200 md:h-8 md:w-8 " +
                     (props.selected
                         ? " scale-[1.5] "
                         : " hover:scale-125 hover:cursor-pointer active:scale-110 ") +
@@ -35,60 +35,26 @@ export function WorldSelection(props: { onSelected: (world: WorldView) => void }
                         "flex h-full w-full items-center justify-center transition hover:bg-opacity-50 " +
                         (props.selected ? "" : "hover:bg-white")
                     }
-                >
-                    {props.selected && <div className="h-3 w-3 rounded bg-white bg-opacity-60" />}
-                </div>
+                ></div>
             </div>
         )
     }
 
     return (
-        <div className="flex h-full w-full flex-col justify-center p-8">
-            <div className="max-h-full w-full p-4">
-                <WorldSelectionList {...props} />
-            </div>
-            <div className="flex w-full justify-center space-x-8">
+        <div className="hxs:space-y-4 flex h-full max-h-[40rem] w-full flex-col space-y-0 px-1 py-2">
+            <IndependentContainer className="max-h-[32rem] grow">
+                <WorldSelectionList />
+            </IndependentContainer>
+            <div className="hxs:pb-6 flex w-full justify-center space-x-8 p-2 pb-3">
                 {chapterBackgroundColors.map((x, i) => (
                     <ChapterIndicator key={i} selected={i === selectedColor} colorClassNames={x} />
                 ))}
             </div>
         </div>
     )
-
-    /*
-     */
-
-    /*
-    return (
-        <div className="h-full">
-            <div
-                className={`flex h-full w-full flex-auto flex-col space-y-8 py-4 lg:justify-start`}
-            >
-                <div className="flex w-full justify-center space-x-8">
-                    {chapterBackgroundColors.map((x, i) => (
-                        <ChapterIndicator
-                            key={i}
-                            selected={i === selectedColor}
-                            colorClassNames={x}
-                        />
-                    ))}
-                </div>
-                <div className="xs:grid-cols-2 relative grid h-min flex-1 grid-cols-1 flex-wrap gap-4 p-1">
-                    <WorldSelectionList {...props} />
-                </div>
-                <div className="flex w-full justify-center">
-                    <button className="btn btn-lg btn-outline">
-                        <BackArrowSvg width="32" height="32" />
-                        Back to Main Menu
-                    </button>
-                </div>
-            </div>
-        </div>
-    )
-    */
 }
 
-export function WorldSelectionList(props: { onSelected: (world: WorldView) => void }) {
+export function WorldSelectionList() {
     const [worlds, setWorlds] = useState<(WorldView | undefined)[]>([
         undefined,
         undefined,
@@ -114,15 +80,29 @@ export function WorldSelectionList(props: { onSelected: (world: WorldView) => vo
         f()
     }, [])
 
+    const navigate = useNavigate()
+
+    function WorldWithNavigate(props: { world?: WorldView; locked?: boolean }) {
+        return (
+            <World
+                locked={props.locked}
+                world={props.world}
+                onSelected={() => {
+                    navigate(`/play/${props.world?.id.name}/Normal`)
+                }}
+            />
+        )
+    }
+
     return (
         <div className="flex max-h-full max-w-full space-x-2">
             <div className="flex max-h-full w-full flex-col items-end justify-center space-y-2">
-                <World world={worlds[0]} onSelected={() => {}} />
-                <World world={worlds[2]} onSelected={() => {}} />
+                <WorldWithNavigate world={worlds[0]} />
+                <WorldWithNavigate world={worlds[2]} locked={worlds[2] !== undefined} />
             </div>
             <div className="flex max-h-full w-full flex-col items-start justify-center space-y-2">
-                <World world={worlds[1]} onSelected={() => {}} />
-                <World world={worlds[3]} onSelected={() => {}} />
+                <WorldWithNavigate world={worlds[1]} />
+                <WorldWithNavigate world={worlds[3]} locked={worlds[3] !== undefined} />
             </div>
         </div>
     )

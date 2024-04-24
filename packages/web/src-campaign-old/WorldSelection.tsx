@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { WorldView } from "shared/src/views/world-view"
-import { useAppStore } from "../../common/storage/app-store"
-import { trpc } from "../../common/trpc/trpc"
+import { useAppStore } from "../src/common/storage/app-store"
+import { trpc } from "../src/common/trpc/trpc"
 import { World } from "./World"
 
 export function WorldSelection(props: { onSelected: (world: WorldView) => void }) {

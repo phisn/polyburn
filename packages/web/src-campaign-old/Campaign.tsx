@@ -1,5 +1,5 @@
 import { WorldView } from "shared/src/views/world-view"
-import { useModalView } from "../../common/storage/use-modal-view"
+import { useModalView } from "../src/common/storage/use-modal-view"
 import { useCampaignStore } from "./CampaignStore"
 import { GamemodeModal } from "./GamemodeModal"
 import { WorldSelection } from "./WorldSelection"

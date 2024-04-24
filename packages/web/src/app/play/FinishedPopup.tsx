@@ -3,11 +3,11 @@ import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { ReplayModel } from "runtime/proto/replay"
 import { ExtendedRuntime } from "web-game/src/game/runtime-extension/new-extended-runtime"
+import { bytesToBase64 } from "../../../src-campaign-old/player-handlers/GameHandler"
 import { AuthButton } from "../../common/components/auth-button/AuthButton"
 import { BackArrowSvg } from "../../common/components/inline-svg/BackArrow"
 import { useAppStore } from "../../common/storage/app-store"
 import { trpc } from "../../common/trpc/trpc"
-import { bytesToBase64 } from "../campaign_v1/player-handlers/GameHandler"
 
 export function FinishedPopup(props: { runtime: ExtendedRuntime }) {
     const stats = props.runtime.factoryContext.store.world.components.stats!

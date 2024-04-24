@@ -5,7 +5,7 @@ import { LockedSvg } from "../../common/components/inline-svg/Locked"
 
 const todoProgressFeature = true
 
-export function World(props: { world?: WorldView; onSelected: () => void }) {
+export function World(props: { world?: WorldView; locked?: boolean; onSelected: () => void }) {
     //    return <div className="m-2 h-[18rem] w-[28rem] bg-white"></div>
     function ButtonOverlay() {
         return (
@@ -14,6 +14,20 @@ export function World(props: { world?: WorldView; onSelected: () => void }) {
                 onClick={() => props.onSelected()}
             ></div>
         )
+    }
+
+    // TODO: remove and do actual serverside stored background
+    function bgPath() {
+        switch (props.world?.id.name) {
+            case "Red 1":
+                return "/static/bg-1.png"
+            case "Red 2":
+                return "/static/bg-2.png"
+            case "Red 4":
+                return "/static/bg-1.png"
+            default:
+                return "/static/background.png"
+        }
     }
 
     return (
@@ -28,9 +42,16 @@ export function World(props: { world?: WorldView; onSelected: () => void }) {
                     enterFrom="opacity-0"
                     enterTo="opacity-100"
                 >
-                    <img className="absolute bottom-0 z-0" src="/static/background.png" />
+                    <img
+                        className={
+                            "absolute bottom-0 z-0 " +
+                            (props.locked ? "transform-gpu blur-3xl" : "")
+                        }
+                        src={bgPath()}
+                    />
                 </Transition>
             </WorldContainerInner>
+            {props.locked && <LockedOverlay />}
         </WorldContainerOuter>
     )
 }
@@ -112,7 +133,7 @@ export function World(props: { world?: WorldView; onSelected: () => void }) {
 
 function LockedOverlay() {
     return (
-        <div className="group absolute inset-0 z-20 flex rounded-2xl text-zinc-300">
+        <div className="group absolute inset-0 z-50 flex rounded-2xl text-zinc-300">
             <BrowserView>
                 <div className="absolute inset-0 flex w-full items-center justify-center group-hover:hidden">
                     <div className="flex rounded p-4 drop-shadow">
@@ -144,7 +165,7 @@ export function Overlay(props: { world?: WorldView }) {
 
     function TitleInNormal() {
         return (
-            <div className="min-h-14 w-fit min-w-40 rounded-2xl bg-white p-3 px-8 text-xl text-black shadow">
+            <div className="min-h-14 w-fit min-w-40 rounded-2xl bg-white p-3 px-8 text-center text-xl text-black shadow">
                 {props.world?.id.name}
             </div>
         )

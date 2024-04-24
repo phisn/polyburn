@@ -1,7 +1,7 @@
 import { Point } from "runtime/src/model/point"
 import { changeAnchor } from "runtime/src/model/world/change-anchor"
-import { entityGraphicRegistry } from "../../../game/runtime-view/graphics-assets/entity-graphic-registry"
-import { EntityGraphicType } from "../../../game/runtime-view/graphics-assets/entity-graphic-type"
+import { entityGraphicRegistry } from "../../web/src/game/runtime-view/graphics-assets/entity-graphic-registry"
+import { EntityGraphicType } from "../../web/src/game/runtime-view/graphics-assets/entity-graphic-type"
 
 export function isPointInsideEntity(
     point: Point,

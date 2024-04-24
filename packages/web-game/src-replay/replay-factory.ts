@@ -1,6 +1,6 @@
 import { Vector3 } from "three"
 import { WebappFactoryContext } from "../webapp-factory-context"
-import { ReplayPrepared } from "./prepare/replay-repared"
+import { ReplayPrepared } from "./prepare/replay-reparexwd"
 import { ReplayComponent } from "./replay-component"
 
 export function newReplay(context: WebappFactoryContext, prepared: ReplayPrepared) {

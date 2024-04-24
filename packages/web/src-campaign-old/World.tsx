@@ -1,6 +1,6 @@
 import { BrowserView, isMobile } from "react-device-detect"
 import { WorldView } from "shared/src/views/world-view"
-import { LockedSvg } from "../../common/components/inline-svg/Locked"
+import { LockedSvg } from "../src/common/components/inline-svg/Locked"
 
 const todoProgressFeature = true
 

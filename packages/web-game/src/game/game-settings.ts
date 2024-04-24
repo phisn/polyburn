@@ -1,6 +1,7 @@
 import { WorldModel } from "runtime/proto/world"
-import { ReplayModel } from "../replay/replay-model"
 import { ExtendedRuntime } from "./runtime-extension/new-extended-runtime"
+
+export interface ReplayModel {}
 
 export interface GameHooks {
     onFinished: undefined | ((runtime: ExtendedRuntime) => void)

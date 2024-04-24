@@ -6,6 +6,7 @@ import { trpcNative } from "../../common/trpc/trpc-native"
 import { World } from "./World"
 
 export function WorldSelection() {
+    /*
     const chapterBackgroundColors = [
         "bg-red-500", // Light Blue
         "bg-green-500", // Green
@@ -39,24 +40,8 @@ export function WorldSelection() {
             </div>
         )
     }
+    */
 
-    return (
-        <div className="hxs:space-y-4 flex h-full max-h-[40rem] w-full flex-col space-y-0 px-1 py-2">
-            <IndependentContainer className="max-h-[32rem] grow">
-                <WorldSelectionList />
-            </IndependentContainer>
-            {/*
-            <div className="hxs:pb-6 flex w-full justify-center space-x-8 p-2 pb-3">
-                {chapterBackgroundColors.map((x, i) => (
-                    <ChapterIndicator key={i} selected={i === selectedColor} colorClassNames={x} />
-                ))}
-            </div>
-            */}
-        </div>
-    )
-}
-
-export function WorldSelectionList() {
     const [worlds, setWorlds] = useState<(WorldView | undefined)[]>([
         undefined,
         undefined,
@@ -82,6 +67,28 @@ export function WorldSelectionList() {
         f()
     }, [])
 
+    return (
+        <div className="hxs:space-y-4 flex h-full max-h-[40rem] w-full flex-col space-y-0 px-1 py-2">
+            <IndependentContainer className="max-h-[32rem] grow">
+                <WorldSquare tl={worlds[0]} tr={worlds[1]} bl={worlds[2]} br={worlds[3]} />
+            </IndependentContainer>
+            {/*
+            <div className="hxs:pb-6 flex w-full justify-center space-x-8 p-2 pb-3">
+                {chapterBackgroundColors.map((x, i) => (
+                    <ChapterIndicator key={i} selected={i === selectedColor} colorClassNames={x} />
+                ))}
+            </div>
+            */}
+        </div>
+    )
+}
+
+export function WorldSquare(props: {
+    tl?: WorldView
+    tr?: WorldView
+    bl?: WorldView
+    br?: WorldView
+}) {
     const navigate = useNavigate()
 
     function WorldWithNavigate(props: { world?: WorldView; locked?: boolean }) {
@@ -99,12 +106,12 @@ export function WorldSelectionList() {
     return (
         <div className="flex max-h-full max-w-full space-x-2">
             <div className="flex max-h-full w-full flex-col items-end justify-center space-y-2">
-                <WorldWithNavigate world={worlds[0]} />
-                <WorldWithNavigate world={worlds[2]} locked={worlds[2] !== undefined} />
+                <WorldWithNavigate world={props.tl} />
+                <WorldWithNavigate world={props.bl} locked={props.bl !== undefined} />
             </div>
             <div className="flex max-h-full w-full flex-col items-start justify-center space-y-2">
-                <WorldWithNavigate world={worlds[1]} />
-                <WorldWithNavigate world={worlds[3]} locked={worlds[3] !== undefined} />
+                <WorldWithNavigate world={props.tr} />
+                <WorldWithNavigate world={props.br} locked={props.br !== undefined} />
             </div>
         </div>
     )

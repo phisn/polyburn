@@ -45,11 +45,13 @@ export function WorldSelection() {
             <IndependentContainer className="max-h-[32rem] grow">
                 <WorldSelectionList />
             </IndependentContainer>
+            {/*
             <div className="hxs:pb-6 flex w-full justify-center space-x-8 p-2 pb-3">
                 {chapterBackgroundColors.map((x, i) => (
                     <ChapterIndicator key={i} selected={i === selectedColor} colorClassNames={x} />
                 ))}
             </div>
+            */}
         </div>
     )
 }

@@ -1,0 +1,33 @@
+name: CI/CD
+on: [push]
+
+jobs:
+    build:
+        name: Build and Deploy
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Instal Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+
+            - name: Install Yarn
+              run: npm install -g yarn
+
+            - name: Install protoc
+              uses: arduino/setup-protoc@v3.0.0
+
+            - name: Install dependencies
+              run: yarn
+
+            - name: Build frontend
+              run: yarn build
+
+            - name: Deploy
+              uses: cloudflare/pages-action@v1.5.0
+              with:
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  projectName: polyburn
+                  directory: ./packages/web/dist

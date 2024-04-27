@@ -1,26 +1,68 @@
-import * as tf from "@tensorflow/tfjs"
+// 1 -> 0
+// 0 -> -1
+// -1 -> 1
 
-// Define a model for linear regression.
-const model = tf.sequential()
-model.add(tf.layers.dense({ units: 1, inputShape: [1] }))
+import { SoftActorCritic } from "./soft-actor-critic/soft-actor-critic"
 
-// Prepare the model for training: Specify the loss and the optimizer.
-model.compile({ loss: "meanSquaredError", optimizer: "adam" })
+function getReward(got: number, expected: number) {
+    const gotRounded = Math.round(got)
 
-// Generate some synthetic data for training.
-const xs = tf.tensor2d([1, 2, 3, 4, 5, 6, 7], [7, 1])
-const ys = tf.tensor2d([2, 4, 6, 8, 10, 12, 14], [7, 1])
+    if (gotRounded === expected) {
+        return 0
+    }
 
-// Train the model using the data.
-model.fit(xs, ys, { epochs: 3000 * 7 }).then(() => {
-    ;(model.predict(tf.tensor2d([1, 2, 3, 4], [4, 1])) as tf.Tensor).print()
+    if (gotRounded === 0) {
+        return expected === -1 ? 1 : -1
+    }
+
+    if (gotRounded === 1) {
+        return expected === 0 ? 1 : -1
+    }
+
+    return expected === 1 ? 1 : -1
+}
+
+const observationSize = 8
+const actionSize = 1
+
+const observations = [
+    [[-1, -1, -1, -1, -1, -1, -1, -1], [-1]],
+    [[0, 0, 0, 0, 0, 0, 0, 0], [0]],
+    [[1, 1, 1, 1, 1, 1, 1, 1], [1]],
+    [[-1, 0, 1, 0, -1, 0, 1, 0], [-1]],
+    [[0, 1, 0, -1, 0, 1, 0, -1], [0]],
+    [[1, 0, -1, 0, 1, 0, -1, 0], [1]],
+    [[-1, 1, -1, 1, -1, 1, -1, 1], [-1]],
+    [[1, -1, 1, -1, 1, -1, 1, -1], [1]],
+]
+
+const sac = new SoftActorCritic({
+    mlpSpec: {
+        sizes: [64, 64],
+        activation: "relu",
+        outputActivation: "relu",
+    },
+    actionSize,
+    observationSize,
+    maxEpisodeLength: 1000,
+    bufferSize: 10000,
+    batchSize: 64,
+    updateAfter: 1000,
+    updateEvery: 50,
+    learningRate: 0.001,
+    alpha: 0.2,
+    gamma: 0.99,
 })
+
+const x = sac.act([0, 0, 0, 0, 0, 0, 0, 0])
+x.print()
 
 /*
 import { WorldModel } from "runtime/proto/world"
 import { Game } from "./game/game"
 import { GameLoop } from "./game/game-loop"
 import { GameInstanceType, GameSettings } from "./game/game-settings"
+import * as tf from '@tensorflow/tfjs';
 
 function base64ToBytes(base64: string) {
     return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
@@ -43,5 +85,3 @@ try {
     console.error(e)
 }
 */
-
-console.log("test")

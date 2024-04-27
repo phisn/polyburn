@@ -1,4 +1,4 @@
-import * as tf from "@tensorflow/tfjs"
+import * as tf from "@tensorflow/tfjs-node-gpu"
 import { MlpSpecification, mlp } from "./mlp"
 
 export class Critic extends tf.layers.Layer {
@@ -9,7 +9,7 @@ export class Critic extends tf.layers.Layer {
 
         this.q = mlp({
             ...mlpSpec,
-            sizes: [observationSize + actionSize, ...mlpSpec.sizes],
+            sizes: [observationSize + actionSize, ...mlpSpec.sizes, 1],
             outputActivation: undefined,
         })
     }

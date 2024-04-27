@@ -1,4 +1,4 @@
-import * as tf from "@tensorflow/tfjs"
+import * as tf from "@tensorflow/tfjs-node-gpu"
 import { GaussianLikelihood } from "./gaussian-likelihood"
 import { MlpSpecification, mlp } from "./mlp"
 
@@ -19,6 +19,8 @@ export class Actor extends tf.layers.Layer {
             ...mlpSpec,
             sizes: [observationSize, ...mlpSpec.sizes],
         })
+
+        this.net.predict
 
         this.meanLayer = tf.layers.dense({
             units: actionSize,

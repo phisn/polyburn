@@ -1,4 +1,4 @@
-import * as tf from "@tensorflow/tfjs"
+import * as tf from "@tensorflow/tfjs-node-gpu"
 
 export class GaussianLikelihood extends tf.layers.Layer {
     computeOutputShape(inputShape: tf.Shape[]): tf.Shape | tf.Shape[] {

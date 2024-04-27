@@ -1,4 +1,4 @@
-import * as tf from "@tensorflow/tfjs"
+import * as tf from "@tensorflow/tfjs-node-gpu"
 
 export interface Experience {
     observation: number[]
@@ -32,6 +32,10 @@ export class ReplayBuffer {
         private observationSize: number,
         private actionSize: number,
     ) {
+        if (batchSize > capacity) {
+            throw new Error("Batch size must be less than or equal to capacity")
+        }
+
         this.tensorObservation = tf.buffer([batchSize, observationSize], "float32")
         this.tensorAction = tf.buffer([batchSize, actionSize], "float32")
         this.tensorReward = tf.buffer([batchSize], "float32")
@@ -49,6 +53,10 @@ export class ReplayBuffer {
     }
 
     sample(): ExperienceTensor {
+        if (this.buffer.length < this.batchSize) {
+            throw new Error("Buffer does not have enough experiences")
+        }
+
         const indices = tf.util.createShuffledIndices(this.buffer.length)
 
         for (let i = 0; i < this.batchSize; i++) {

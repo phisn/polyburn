@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "postinstall": "wrangler d1 migrations apply polyburn --local && node ./tools/postprocess-rapier2d.mjs",
+        "_postinstall": "wrangler d1 migrations apply polyburn --local && node ./tools/postprocess-rapier2d.mjs",
         "generate": "drizzle-kit generate:sqlite",
         "dev": "wrangler dev src/index.ts --live-reload",
         "lint": "eslint \"src/**/*.{tsx,ts}\""

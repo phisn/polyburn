@@ -1,25 +1,23 @@
-// 1 -> 0
-// 0 -> -1
-// -1 -> 1
-
-import { SoftActorCritic } from "./soft-actor-critic/soft-actor-critic"
-
 function getReward(got: number, expected: number) {
-    const gotRounded = Math.round(got)
+    function f() {
+        const gotRounded = Math.round(got)
 
-    if (gotRounded === expected) {
-        return 0
+        if (gotRounded === expected) {
+            return 0
+        }
+
+        if (gotRounded === 0) {
+            return expected === -1 ? 1 : -1
+        }
+
+        if (gotRounded === 1) {
+            return expected === 0 ? 1 : -1
+        }
+
+        return expected === 1 ? 1 : -1
     }
 
-    if (gotRounded === 0) {
-        return expected === -1 ? 1 : -1
-    }
-
-    if (gotRounded === 1) {
-        return expected === 0 ? 1 : -1
-    }
-
-    return expected === 1 ? 1 : -1
+    return (f() + 1) / 2
 }
 
 const observationSize = 8
@@ -36,26 +34,168 @@ const observations = [
     [[1, -1, 1, -1, 1, -1, 1, -1], [1]],
 ]
 
-const sac = new SoftActorCritic({
-    mlpSpec: {
-        sizes: [64, 64],
-        activation: "relu",
-        outputActivation: "relu",
-    },
-    actionSize,
-    observationSize,
-    maxEpisodeLength: 1000,
-    bufferSize: 10000,
-    batchSize: 64,
-    updateAfter: 1000,
-    updateEvery: 50,
-    learningRate: 0.001,
-    alpha: 0.2,
-    gamma: 0.99,
+const PPO = require("ppo-tfjs")
+
+export class CartPole {
+    actionSpace = {
+        class: "Box",
+        shape: [1],
+        low: -1,
+        high: 1,
+    }
+
+    observationSpace = {
+        class: "Box",
+        shape: [4],
+        low: [-4.8, -Infinity, -0.418, -Infinity],
+        high: [4.8, Infinity, 0.418, Infinity],
+    }
+
+    private gravity: number
+    private massCart: number
+    private massPole: number
+    private totalMass: number
+    private cartWidth: number
+    private cartHeight: number
+    private length: number
+    private poleMoment: number
+    private forceMag: number
+    private tau: number
+
+    private xThreshold: number
+    private thetaThreshold: number
+
+    private x: number = 0
+    private xDot: number = 0
+    private theta: number = 0
+    private thetaDot: number = 0
+
+    /**
+     * Constructor of CartPole.
+     */
+    constructor() {
+        // Constants that characterize the system.
+        this.gravity = 9.8
+        this.massCart = 1.0
+        this.massPole = 0.1
+        this.totalMass = this.massCart + this.massPole
+        this.cartWidth = 0.2
+        this.cartHeight = 0.1
+        this.length = 0.5
+        this.poleMoment = this.massPole * this.length
+        this.forceMag = 10.0
+        this.tau = 0.02 // Seconds between state updates.
+
+        // Threshold values, beyond which a simulation will be marked as failed.
+        this.xThreshold = 2.4
+        this.thetaThreshold = (12 / 360) * 2 * Math.PI
+
+        this.reset()
+    }
+
+    /**
+     * Get current state as a tf.Tensor of shape [1, 4].
+     */
+    getStateTensor() {
+        return [this.x, this.xDot, this.theta, this.thetaDot]
+    }
+
+    /**
+     * Update the cart-pole system using an action.
+     * @param {number} action Only the sign of `action` matters.
+     *   A value > 0 leads to a rightward force of a fixed magnitude.
+     *   A value <= 0 leads to a leftward force of the same fixed magnitude.
+     */
+    step(action: number) {
+        const force = action > 0 ? this.forceMag : -this.forceMag
+
+        const cosTheta = Math.cos(this.theta)
+        const sinTheta = Math.sin(this.theta)
+
+        const temp =
+            (force + this.poleMoment * this.thetaDot * this.thetaDot * sinTheta) / this.totalMass
+        const thetaAcc =
+            (this.gravity * sinTheta - cosTheta * temp) /
+            (this.length * (4 / 3 - (this.massPole * cosTheta * cosTheta) / this.totalMass))
+        const xAcc = temp - (this.poleMoment * thetaAcc * cosTheta) / this.totalMass
+
+        // Update the four state variables, using Euler's method.
+        this.x += this.tau * this.xDot
+        this.xDot += this.tau * xAcc
+        this.theta += this.tau * this.thetaDot
+        this.thetaDot += this.tau * thetaAcc
+
+        const reward = this.isDone() ? -100 : 1
+        return [this.getStateTensor(), reward, this.isDone()]
+    }
+
+    /**
+     * Set the state of the cart-pole system randomly.
+     */
+    reset() {
+        // The control-theory state variables of the cart-pole system.
+        // Cart position, meters.
+        this.x = Math.random() - 0.5
+        // Cart velocity.
+        this.xDot = (Math.random() - 0.5) * 1
+        // Pole angle, radians.
+        this.theta = (Math.random() - 0.5) * 2 * ((6 / 360) * 2 * Math.PI)
+        // Pole angle velocity.
+        this.thetaDot = (Math.random() - 0.5) * 0.5
+
+        return this.getStateTensor()
+    }
+
+    /**
+     * Determine whether this simulation is done.
+     *
+     * A simulation is done when `x` (position of the cart) goes out of bound
+     * or when `theta` (angle of the pole) goes out of bound.
+     *
+     * @returns {bool} Whether the simulation is done.
+     */
+    isDone() {
+        return (
+            this.x < -this.xThreshold ||
+            this.x > this.xThreshold ||
+            this.theta < -this.thetaThreshold ||
+            this.theta > this.thetaThreshold
+        )
+    }
+}
+
+const tf = require("@tensorflow/tfjs-node")
+const env = new CartPole()
+
+const ppo = new PPO(env, {
+    nSteps: 1024,
+    nEpochs: 50,
+    verbose: 1,
+    netArch: [32],
 })
 
-const x = sac.act([0, 0, 0, 0, 0, 0, 0, 0])
-x.print()
+function possibleLifetime() {
+    env.reset()
+
+    let t = 0
+
+    while (!env.isDone() && t < 1000) {
+        const action = ppo.predict(tf.tensor([env.getStateTensor()]), true).arraySync()[0][0]
+        env.step(action)
+        t++
+    }
+
+    return t
+}
+
+console.log("Lifetime before training:", possibleLifetime())
+;(async () => {
+    await ppo.learn({
+        totalTimesteps: 20000,
+    })
+})().then(() => {
+    console.log("Lifetime after training:", possibleLifetime())
+})
 
 /*
 import { WorldModel } from "runtime/proto/world"

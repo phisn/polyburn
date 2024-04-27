@@ -1,5 +1,5 @@
-import * as tf from "@tensorflow/tfjs"
 import { ActivationIdentifier } from "@tensorflow/tfjs-layers/dist/keras_format/activation_config"
+import * as tf from "@tensorflow/tfjs-node-gpu"
 
 export interface MlpSpecification {
     sizes: number[]

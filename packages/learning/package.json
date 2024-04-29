@@ -25,6 +25,8 @@
         "vite": "^5.1.6"
     },
     "dependencies": {
+        "@tensorflow/tfjs-backend-webgl": "^4.18.0",
+        "@tensorflow/tfjs-backend-webgpu": "^4.18.0",
         "@tensorflow/tfjs-node": "^4.18.0",
         "@tensorflow/tfjs-node-gpu": "^4.18.0",
         "@types/prompts": "^2.4.9",

@@ -34,8 +34,6 @@ const observations = [
     [[1, -1, 1, -1, 1, -1, 1, -1], [1]],
 ]
 
-const PPO = require("ppo-tfjs")
-
 export class CartPole {
     actionSpace = {
         class: "Box",
@@ -165,39 +163,44 @@ export class CartPole {
 }
 
 const tf = require("@tensorflow/tfjs-node")
-const env = new CartPole()
+require("@tensorflow/tfjs-backend-webgpu")
 
-const ppo = new PPO(env, {
-    nSteps: 1024,
-    nEpochs: 50,
-    verbose: 1,
-    netArch: [32],
-})
+tf.setBackend("tensorflow").then(() => {
+    const env = new CartPole()
 
-function possibleLifetime() {
-    env.reset()
+    const PPO = require("./ppo/base-ppo.js")
 
-    let t = 0
+    const ppo = new PPO(env, {
+        nSteps: 1024,
+        nEpochs: 50,
+        verbose: 1,
+        netArch: [16],
+    })
 
-    while (!env.isDone() && t < 1000) {
-        const action = ppo.predict(tf.tensor([env.getStateTensor()]), true).arraySync()[0][0]
-        env.step(action)
-        t++
+    function possibleLifetime() {
+        env.reset()
+
+        let t = 0
+
+        while (!env.isDone() && t < 1000) {
+            const action = ppo.predict(tf.tensor([env.getStateTensor()]), true).arraySync()[0][0]
+            env.step(action)
+            t++
+        }
+
+        return t
     }
 
-    return t
-}
-
-console.log("Lifetime before training:", possibleLifetime())
-;(async () => {
-    await ppo.learn({
-        totalTimesteps: 20000,
+    console.log("Lifetime before training:", possibleLifetime())
+    ;(async () => {
+        await ppo.learn({
+            totalTimesteps: 5000,
+        })
+    })().then(() => {
+        console.log("Lifetime after training:", possibleLifetime())
     })
-})().then(() => {
-    console.log("Lifetime after training:", possibleLifetime())
-})
 
-/*
+    /*
 import { WorldModel } from "runtime/proto/world"
 import { Game } from "./game/game"
 import { GameLoop } from "./game/game-loop"
@@ -225,3 +228,4 @@ try {
     console.error(e)
 }
 */
+})

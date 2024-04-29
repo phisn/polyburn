@@ -94,53 +94,70 @@ class DictCallback extends BaseCallback {
 }
 
 class Buffer {
-    constructor(bufferConfig) {
-        const bufferConfigDefault = {
-            gamma: 0.99,
-            lam: 0.95,
-        }
-        this.bufferConfig = Object.assign({}, bufferConfigDefault, bufferConfig)
-        this.gamma = this.bufferConfig.gamma
-        this.lam = this.bufferConfig.lam
+    private gamma: number
+    private lam: number
+
+    private observationBuffer: number[][] = []
+    private actionBuffer: number[][] = []
+    private advantageBuffer: number[] = []
+    private rewardBuffer: number[] = []
+    private returnBuffer: number[] = []
+    private criticPredictionBuffer: number[] = []
+    private logProbabilityBuffer: number[] = []
+
+    private trajectoryStartIndex: number = 0
+    private ptr: number = 0
+
+    constructor(_: any, gamma?: number, lam?: number) {
+        this.gamma = gamma ?? 0.99
+        this.lam = lam ?? 0.95
+
         this.reset()
     }
 
-    add(observation, action, reward, value, logprobability) {
+    add(
+        observation: number[],
+        action: number[],
+        reward: number,
+        criticPrediction: number,
+        logProbability: number,
+    ) {
         this.observationBuffer.push(observation.slice(0))
         this.actionBuffer.push(action)
         this.rewardBuffer.push(reward)
-        this.valueBuffer.push(value)
-        this.logprobabilityBuffer.push(logprobability)
-        this.pointer += 1
+        this.criticPredictionBuffer.push(criticPrediction)
+        this.logProbabilityBuffer.push(logProbability)
+
+        this.ptr++
     }
 
-    discountedCumulativeSums(arr, coeff) {
-        let res = []
-        let s = 0
-        arr.reverse().forEach(v => {
-            s = v + s * coeff
-            res.push(s)
-        })
-        return res.reverse()
+    discountedCumulativeSums(values: number[], coefficient: number) {
+        const result = Array(values.length)
+        let sum = 0
+
+        for (let i = values.length - 1; i >= 0; i--) {
+            sum = values[i] + sum * coefficient
+            result[i] = sum
+        }
+
+        return result
     }
 
-    finishTrajectory(lastValue) {
-        const rewards = this.rewardBuffer
-            .slice(this.trajectoryStartIndex, this.pointer)
-            .concat(lastValue * this.gamma)
-        const values = this.valueBuffer
-            .slice(this.trajectoryStartIndex, this.pointer)
-            .concat(lastValue)
+    finishTrajectory(lastValue: number) {
+        const rewards = this.rewardBuffer.slice(this.trajectoryStartIndex, this.ptr)
+        rewards.push(lastValue * this.gamma)
+
+        const values = this.criticPredictionBuffer.slice(this.trajectoryStartIndex, this.ptr)
+        values.push(lastValue)
+
         const deltas = rewards
             .slice(0, -1)
             .map((reward, ri) => reward - (values[ri] - this.gamma * values[ri + 1]))
-        this.advantageBuffer = this.advantageBuffer.concat(
-            this.discountedCumulativeSums(deltas, this.gamma * this.lam),
-        )
-        this.returnBuffer = this.returnBuffer.concat(
-            this.discountedCumulativeSums(rewards, this.gamma).slice(0, -1),
-        )
-        this.trajectoryStartIndex = this.pointer
+
+        this.advantageBuffer.push(...this.discountedCumulativeSums(deltas, this.gamma * this.lam))
+        this.returnBuffer.push(...this.discountedCumulativeSums(rewards, this.gamma).slice(0, -1))
+
+        this.trajectoryStartIndex = this.ptr
     }
 
     get() {
@@ -158,20 +175,21 @@ class Buffer {
             this.actionBuffer,
             this.advantageBuffer,
             this.returnBuffer,
-            this.logprobabilityBuffer,
+            this.logProbabilityBuffer,
         ]
     }
 
     reset() {
-        this.observationBuffer = []
-        this.actionBuffer = []
-        this.advantageBuffer = []
-        this.rewardBuffer = []
-        this.returnBuffer = []
-        this.valueBuffer = []
-        this.logprobabilityBuffer = []
+        this.observationBuffer.length = 0
+        this.actionBuffer.length = 0
+        this.advantageBuffer.length = 0
+        this.rewardBuffer.length = 0
+        this.returnBuffer.length = 0
+        this.criticPredictionBuffer.length = 0
+        this.logProbabilityBuffer.length = 0
+
         this.trajectoryStartIndex = 0
-        this.pointer = 0
+        this.ptr = 0
     }
 }
 
@@ -222,7 +240,7 @@ class PPO {
         this.lastObservation = null
 
         // Initialize buffer
-        this.buffer = new Buffer(config)
+        this.buffer = new ReplayBuffer(config)
 
         // Initialize models for actor and critic
         this.actor = this.createActor()

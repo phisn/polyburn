@@ -19,6 +19,7 @@
     "name": "rocket-game",
     "workspaces": [
         "packages/*",
+        "packages/*/pkg",
         "packages-dev/*"
     ],
     "prettier": {

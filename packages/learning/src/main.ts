@@ -38,15 +38,15 @@ export class CartPole {
     actionSpace = {
         class: "Box",
         shape: [1],
-        low: -1,
-        high: 1,
+        dtype: "float32",
+        low: [-1],
+        high: [1],
     }
 
     observationSpace = {
         class: "Box",
         shape: [4],
-        low: [-4.8, -Infinity, -0.418, -Infinity],
-        high: [4.8, Infinity, 0.418, Infinity],
+        dtype: "float32",
     }
 
     private gravity: number
@@ -105,7 +105,7 @@ export class CartPole {
      *   A value <= 0 leads to a leftward force of the same fixed magnitude.
      */
     step(action: number) {
-        const force = action > 0 ? this.forceMag : -this.forceMag
+        let force = action * this.forceMag
 
         const cosTheta = Math.cos(this.theta)
         const sinTheta = Math.sin(this.theta)
@@ -162,42 +162,68 @@ export class CartPole {
     }
 }
 
-const tf = require("@tensorflow/tfjs-node")
-require("@tensorflow/tfjs-backend-webgpu")
+const tf = require("@tensorflow/tfjs-node-gpu")
 
-tf.setBackend("tensorflow").then(() => {
+tf.setBackend("cpu").then(() => {
     const env = new CartPole()
 
     const PPO = require("./ppo/base-ppo.js")
 
     const ppo = new PPO(env, {
-        nSteps: 1024,
-        nEpochs: 50,
+        nSteps: 2048,
+        nEpochs: 25,
+        policyLearningRate: 2e-3,
+        valueLearningRate: 2e-3,
+        clipRatio: 0.2,
+        targetKL: 0.01,
+        gamma: 0.99,
+        lam: 0.95,
+        netArch: {
+            pi: [32, 32],
+            vf: [32, 32],
+        },
+        activation: "relu",
         verbose: 1,
-        netArch: [16],
     })
 
     function possibleLifetime() {
-        env.reset()
+        let acc = []
 
-        let t = 0
+        for (let j = 0; j < 100; ++j) {
+            env.reset()
 
-        while (!env.isDone() && t < 1000) {
-            const action = ppo.predict(tf.tensor([env.getStateTensor()]), true).arraySync()[0][0]
-            env.step(action)
-            t++
+            let t = 0
+
+            while (!env.isDone() && t < 1000) {
+                const [, action] = ppo.sampleAction(tf.tensor([env.getStateTensor()]), true)
+                env.step(action.arraySync())
+                t++
+            }
+
+            acc.push(t)
         }
 
-        return t
+        // average of top 10% lifetimes
+        acc.sort((a, b) => b - a)
+
+        const best10avg = acc.slice(0, 10).reduce((a, b) => a + b, 0) / 10
+        const worst10avg = acc.slice(-10).reduce((a, b) => a + b, 0) / 10
+        const avg = acc.reduce((a, b) => a + b, 0) / acc.length
+
+        return `10%: ${best10avg}, 90%: ${worst10avg}, avg: ${avg}`
     }
 
-    console.log("Lifetime before training:", possibleLifetime())
+    console.log(possibleLifetime())
     ;(async () => {
-        await ppo.learn({
-            totalTimesteps: 5000,
-        })
+        for (let i = 0; i < 500; ++i) {
+            await ppo.learn({
+                totalTimesteps: 1000 * i,
+            })
+
+            console.log(possibleLifetime())
+        }
     })().then(() => {
-        console.log("Lifetime after training:", possibleLifetime())
+        console.log(possibleLifetime())
     })
 
     /*

@@ -240,7 +240,7 @@ class PPO {
         this.lastObservation = null
 
         // Initialize buffer
-        this.buffer = new ReplayBuffer(config)
+        this.buffer = new Buffer(config)
 
         // Initialize models for actor and critic
         this.actor = this.createActor()

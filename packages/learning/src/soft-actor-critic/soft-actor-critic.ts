@@ -1,4 +1,5 @@
 import * as tf from "@tensorflow/tfjs"
+import { Environment } from "../ppo/ppo"
 import { actor } from "./actor"
 import { critic } from "./critic"
 import { MlpSpecification } from "./mlp"
@@ -22,6 +23,72 @@ export interface Config {
     polyak: number
 }
 
+/*
+class ReplayBuffer:
+    """
+    A simple FIFO experience replay buffer for SAC agents.
+    """
+
+    def __init__(self, obs_dim, act_dim, size):
+        self.obs_buf = np.zeros(core.combined_shape(size, obs_dim), dtype=np.float32)
+        self.obs2_buf = np.zeros(core.combined_shape(size, obs_dim), dtype=np.float32)
+        self.act_buf = np.zeros(core.combined_shape(size, act_dim), dtype=np.float32)
+        self.rew_buf = np.zeros(size, dtype=np.float32)
+        self.done_buf = np.zeros(size, dtype=np.float32)
+        self.ptr, self.size, self.max_size = 0, 0, size
+
+    def store(self, obs, act, rew, next_obs, done):
+        self.obs_buf[self.ptr] = obs
+        self.obs2_buf[self.ptr] = next_obs
+        self.act_buf[self.ptr] = act
+        self.rew_buf[self.ptr] = rew
+        self.done_buf[self.ptr] = done
+        self.ptr = (self.ptr+1) % self.max_size
+        self.size = min(self.size+1, self.max_size)
+
+    def sample_batch(self, batch_size=32):
+        idxs = np.random.randint(0, self.size, size=batch_size)
+        batch = dict(obs=self.obs_buf[idxs],
+                     obs2=self.obs2_buf[idxs],
+                     act=self.act_buf[idxs],
+                     rew=self.rew_buf[idxs],
+                     done=self.done_buf[idxs])
+        
+        batches.append(
+            dict(
+                observation=self.obs_buf[idxs],
+                nextObservation=self.obs2_buf[idxs],
+                action=self.act_buf[idxs],
+                reward=self.rew_buf[idxs],
+                done=self.done_buf[idxs]
+            )
+        )
+
+        return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
+*/
+
+export interface LearningProgress {
+    episodeReturn: number
+    episodeLength: number
+
+    maxEpisodeReturn: number
+    maxEpisodeLength: number
+
+    lossQ: number
+    lossPolicy: number
+}
+
+export interface SacLearningConfig {
+    startAfter: number
+    renderEvery: number
+
+    onStart?: () => void
+    onStep?: () => void
+    onUpdate?: () => void
+    onEnd?: () => void
+    onEpisodeEnd?: () => void
+}
+
 export class SoftActorCritic {
     private replayBuffer: ReplayBuffer
 
@@ -40,12 +107,7 @@ export class SoftActorCritic {
     private t: number
 
     constructor(private config: Config) {
-        this.replayBuffer = new ReplayBuffer(
-            config.bufferSize,
-            config.batchSize,
-            config.observationSize,
-            config.actionSize,
-        )
+        this.replayBuffer = new ReplayBuffer(config.bufferSize, config.batchSize)
 
         this.policy = actor(config.observationSize, config.actionSize, config.mlpSpec)
         this.q1 = critic(config.observationSize, config.actionSize, config.mlpSpec)
@@ -58,23 +120,63 @@ export class SoftActorCritic {
         this.episodeLength = 0
         this.t = 0
 
-        this.observationBuffer = tf.buffer([1, config.observationSize], "float32")
-
         this.policyOptimizer = tf.train.adam(config.learningRate)
         this.qOptimizer = tf.train.adam(config.learningRate)
+    }
 
-        for (let i = 0; i < this.targetQ1.trainableWeights.length; i++) {
-            const targetWeight = this.targetQ1.trainableWeights[i]
-            const weight = this.q1.trainableWeights[i]
+    async learn(env: Environment, sacConfig: SacLearningConfig) {
+        const buffer = new ReplayBuffer(this.config.bufferSize, this.config.batchSize)
 
-            targetWeight.write(weight.read())
-        }
+        let observation = env.reset()
+        let episodeLength = 0
+        let episodeReturn = 0
 
-        for (let i = 0; i < this.targetQ2.trainableWeights.length; i++) {
-            const targetWeight = this.targetQ2.trainableWeights[i]
-            const weight = this.q2.trainableWeights[i]
+        let maxEpisodeReturn = 0
+        let maxEpisodeLength = 0
 
-            targetWeight.write(weight.read())
+        for (let t = 0; ; ++t) {
+            let action: number[]
+
+            if (t > startFrom) {
+                action = this.act(observation, false)
+            } else {
+                action = [Math.random() * 2 - 1]
+            }
+
+            const [nextObservation, reward, done] = env.step(action)
+            episodeLength += 1
+
+            buffer.store({
+                observation,
+                action,
+                reward,
+                nextObservation,
+                done: episodeLength === this.config.maxEpisodeLength ? false : done,
+            })
+
+            observation = nextObservation
+
+            if (done || episodeLength === this.config.maxEpisodeLength) {
+                observation = env.reset()
+                episodeLength = 0
+            }
+
+            if (t >= this.config.updateAfter && t % this.config.updateEvery === 0) {
+                for (let i = 0; i < this.config.updateEvery; i++) {
+                    const batch = buffer.sample()
+                    this.update(batch, false)
+
+                    tf.dispose(batch.observation)
+                    tf.dispose(batch.action)
+                    tf.dispose(batch.reward)
+                    tf.dispose(batch.nextObservation)
+                    tf.dispose(batch.done)
+                }
+            }
+
+            if (renderEvery > 0 && t % renderEvery === 0) {
+                await tf.nextFrame()
+            }
         }
     }
 
@@ -95,9 +197,8 @@ export class SoftActorCritic {
 
         const done = this.episodeLength < this.config.maxEpisodeLength && experience.done
 
-        this.replayBuffer.push({
+        this.replayBuffer.store({
             ...experience,
-            done,
         })
 
         if (done || this.episodeLength === this.config.maxEpisodeLength) {
@@ -106,13 +207,16 @@ export class SoftActorCritic {
         }
 
         if (this.t > this.config.updateAfter && this.t % this.config.updateEvery === 0) {
-            console.log("update")
             for (let i = 0; i < this.config.updateEvery; i++) {
                 tf.tidy(() => {
-                    this.update(this.replayBuffer.sample())
+                    this.update(this.replayBuffer.sample(), i === this.config.updateEvery - 1)
                 })
             }
+
+            return true
         }
+
+        return false
     }
 
     predictQ1(observation: tf.Tensor2D, action: tf.Tensor2D) {
@@ -129,189 +233,56 @@ export class SoftActorCritic {
         ) as tf.Tensor<tf.Rank.R1>
     }
 
-    test() {
-        this.deterministic = true
-
-        this.q1.weights.forEach(w => w.write(tf.ones(w.shape).mul(0.2)))
-        this.q2.weights.forEach(w => w.write(tf.ones(w.shape).mul(0.2)))
-        this.policy.weights.forEach(w => w.write(tf.ones(w.shape).mul(0.2)))
-        this.targetQ1.weights.forEach(w => w.write(tf.ones(w.shape).mul(0.2)))
-        this.targetQ2.weights.forEach(w => w.write(tf.ones(w.shape).mul(0.2)))
-
-        let seedi = 9
-
-        function randomNumber(seed: number, min: number, max: number) {
-            const a = 1103515245
-            const c = 721847
-
-            seed = (a * seed + c) % 2 ** 31
-            return min + (seed % (max - min))
-        }
-
-        /*
-        seedi = 9
-
-        for i in range(10):
-            seedi += 4
-            observation = torch.tensor([[
-                randomNumber(seedi, -10, 10), 
-                randomNumber(seedi + 1, -10, 10), 
-                randomNumber(seedi + 2, -10, 10), 
-                randomNumber(seedi + 3, -10, 10)]
-            ])
-
-            print("R", i, ": ", ac.pi(observation, True))
-        */
-
-        /*
-        seedi = 9
-
-        for (let i = 0; i < 10; i++) {
-            seedi += 4
-            const observation = tf.tensor2d([
-                [
-                    randomNumber(seedi, -10, 10),
-                    randomNumber(seedi + 1, -10, 10),
-                    randomNumber(seedi + 2, -10, 10),
-                    randomNumber(seedi + 3, -10, 10),
-                ],
-            ])
-
-            console.log(observation.dataSync())
-            const [a, b] = this.policy.apply(observation, {
-                deterministic: true,
-            })
-            console.log("R", i, ": ", a.dataSync(), b.dataSync())
-        }
-        */
-        function randomData() {
-            /*
-            def randomNumber(seed, min, max):
-                a = 1103515245
-                c = 721847
-
-                seed = (a * seed + c) % 2**31
-                return (float) (min + (seed % (max - min)))
-
-            seedi = 9
-
-            def randomData():
-                global seedi
-                
-                seedi += 5
-                data = {
-                    'obs': torch.tensor([[randomNumber(seedi, -10, 10), randomNumber(2, -10, 10), randomNumber(3, -10, 10), randomNumber(4, -10, 10)]]),
-                    'act': torch.tensor([[randomNumber(seedi + 1, -1, 1)]]),
-                    'rew': torch.tensor([[randomNumber(seedi + 2, -100, 100)]]),
-                    'obs2': torch.tensor([[randomNumber(seedi + 3, -10, 10), randomNumber(8, -10, 10), randomNumber(9, -10, 10), randomNumber(10, -10, 10)]]),
-                    'done': torch.tensor([[randomNumber(seedi + 4, 0, 1)]])
-                }
-
-                return data
-            */
-
-            seedi += 5
-
-            return {
-                observation: tf.tensor2d([
-                    [
-                        randomNumber(seedi, -10, 10),
-                        randomNumber(2, -10, 10),
-                        randomNumber(3, -10, 10),
-                        randomNumber(4, -10, 10),
-                    ],
-                ]),
-                action: tf.tensor2d([[randomNumber(seedi + 1, -1, 1)]]),
-                reward: tf.tensor1d([randomNumber(seedi + 2, -100, 100)]),
-                nextObservation: tf.tensor2d([
-                    [
-                        randomNumber(seedi + 3, -10, 10),
-                        randomNumber(8, -10, 10),
-                        randomNumber(9, -10, 10),
-                        randomNumber(10, -10, 10),
-                    ],
-                ]),
-                done: tf.tensor1d([randomNumber(seedi + 4, 0, 1)]),
-            }
-        }
-
-        let data = randomData()
-        for (let i = 0; i < 1000; i++) {
-            console.log("Action: ", this.act(data.observation.arraySync()[0], true)[0])
-            this.update(data)
-            data = randomData()
-        }
-
-        this.q1.trainableWeights.forEach(w => {
-            console.log(w.read().dataSync())
-        })
-
-        console.log("Verify: ", randomNumber(seedi, 0, 1000))
-    }
-
     private deterministic = false
 
-    private update(batch: ExperienceTensor) {
-        tf.tidy(() => {
-            const lossQ = () => {
-                const q1 = this.predictQ1(batch.observation, batch.action)
-                const q2 = this.predictQ2(batch.observation, batch.action)
+    update(batch: ExperienceTensor, last: boolean = false) {
+        const lossQ = () => {
+            const q1 = this.predictQ1(batch.observation, batch.action)
+            const q2 = this.predictQ2(batch.observation, batch.action)
 
-                const backup = tf.tensor1d(this.computeBackup(batch).arraySync())
+            const backup = tf.tensor1d(this.computeBackup(batch).arraySync())
 
-                const errorQ1 = tf.mean(tf.square(tf.sub(q1, backup))) as tf.Scalar
-                const errorQ2 = tf.mean(tf.square(tf.sub(q2, backup))) as tf.Scalar
+            const errorQ1 = tf.mean(tf.square(tf.sub(q1, backup))) as tf.Scalar
+            const errorQ2 = tf.mean(tf.square(tf.sub(q2, backup))) as tf.Scalar
 
-                return tf.add(errorQ1, errorQ2) as tf.Scalar
-            }
+            return tf.add(errorQ1, errorQ2) as tf.Scalar
+        }
 
-            console.log("lossQ: ", lossQ().arraySync())
+        const gradsQ = tf.variableGrads(lossQ, this.q1.getWeights().concat(this.q2.getWeights()))
+        this.qOptimizer.applyGradients(gradsQ.grads)
+        tf.dispose(gradsQ)
 
-            const gradsQ = tf.variableGrads(lossQ)
-            this.qOptimizer.applyGradients(gradsQ.grads)
+        const lossPolicy = () => {
+            const [pi, logpPi] = this.policy.apply(batch.observation, {
+                deterministic: this.deterministic,
+            }) as tf.Tensor<tf.Rank.R2>[]
 
-            const lossPolicy = () => {
-                const [pi, logpPi] = this.policy.apply(batch.observation, {
-                    deterministic: this.deterministic,
-                }) as tf.Tensor<tf.Rank.R2>[]
+            const piQ1 = this.predictQ1(batch.observation, pi)
+            const piQ2 = this.predictQ2(batch.observation, pi)
 
-                const piQ1 = this.predictQ1(batch.observation, pi)
-                const piQ2 = this.predictQ2(batch.observation, pi)
+            const minPiQ = tf.minimum(piQ1, piQ2)
 
-                const minPiQ = tf.minimum(piQ1, piQ2)
+            return tf.mean(logpPi.mul(this.config.alpha).sub(minPiQ)) as tf.Scalar
+        }
 
-                return tf.mean(logpPi.mul(this.config.alpha).sub(minPiQ)) as tf.Scalar
-            }
+        const gradsPolicy = tf.variableGrads(lossPolicy, this.policy.getWeights())
+        this.policyOptimizer.applyGradients(gradsPolicy.grads)
+        tf.dispose(gradsPolicy)
 
-            console.log("lossPolicy: ", lossPolicy().arraySync())
+        // do polyak averaging
+        const tau = tf.scalar(this.config.polyak)
+        const oneMinusTau = tf.scalar(1).sub(tau)
 
-            const gradsPolicy = tf.variableGrads(lossPolicy, this.policy.getWeights())
-            this.policyOptimizer.applyGradients(gradsPolicy.grads)
+        const updateTargetQ1 = this.targetQ1
+            .getWeights()
+            .map((w, i) => w.mul(tau).add(this.q1.getWeights()[i].mul(oneMinusTau)))
 
-            for (let i = 0; i < this.targetQ1.trainableWeights.length; i++) {
-                const targetWeight = this.targetQ1.trainableWeights[i]
-                const weight = this.q1.trainableWeights[i]
+        const updateTargetQ2 = this.targetQ2
+            .getWeights()
+            .map((w, i) => w.mul(tau).add(this.q2.getWeights()[i].mul(oneMinusTau)))
 
-                targetWeight.write(
-                    tf.add(
-                        tf.mul(this.config.polyak, targetWeight.read()),
-                        tf.mul(1 - this.config.polyak, weight.read()),
-                    ),
-                )
-            }
-
-            for (let i = 0; i < this.targetQ2.trainableWeights.length; i++) {
-                const targetWeight = this.targetQ2.trainableWeights[i]
-                const weight = this.q2.trainableWeights[i]
-
-                targetWeight.write(
-                    tf.add(
-                        tf.mul(this.config.polyak, targetWeight.read()),
-                        tf.mul(1 - this.config.polyak, weight.read()),
-                    ),
-                )
-            }
-        })
+        this.targetQ1.setWeights(updateTargetQ1)
+        this.targetQ2.setWeights(updateTargetQ2)
     }
 
     private computeBackup(batch: ExperienceTensor) {

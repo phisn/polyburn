@@ -241,7 +241,6 @@ export class CartPole implements Environment {
 
         const cosTheta = Math.cos(this.theta)
         const sinTheta = Math.sin(this.theta)
-        ++this.i
 
         const temp =
             (force + this.poleMoment * this.thetaDot * this.thetaDot * sinTheta) / this.totalMass
@@ -256,14 +255,7 @@ export class CartPole implements Environment {
         this.theta += this.tau * this.thetaDot
         this.thetaDot += this.tau * thetaAcc
 
-        let reward = 0
-
-        if (this.isDone()) {
-            reward = -100
-        } else {
-            reward = 1
-        }
-
+        const reward = this.isDone() ? -100 : 1
         return [this.getStateTensor(), reward, this.isDone()]
     }
 
@@ -309,8 +301,6 @@ import { SoftActorCritic } from "./soft-actor-critic/soft-actor-critic"
 
 if (false) {
     tf.setBackend("cpu").then(() => {
-        const env = new CartPole()
-
         const sac = new SoftActorCritic({
             mlpSpec: {
                 sizes: [32, 32],
@@ -333,72 +323,7 @@ if (false) {
             polyak: 0.995,
         })
 
-        sac.learn(new CartPole())
-
-        function iteration() {
-            requestAnimationFrame(iteration)
-        }
-
-        requestAnimationFrame(iteration)
-
-        return
-        fetch("http://localhost:5173/batches.json")
-            .then(r =>
-                r
-                    .json()
-                    .then(j => {
-                        const batches = JSON.parse(j)
-                        let i = 0
-
-                        function currentReward() {
-                            const acc = []
-
-                            for (let j = 0; j < 100; ++j) {
-                                env.reset()
-
-                                let x = 0
-
-                                while (!env.isDone() && x < 1000) {
-                                    env.step(sac.act(env.getStateTensor(), true))
-                                    x++
-                                }
-
-                                acc.push(x)
-                            }
-
-                            // average of top 10% lifetimes
-                            acc.sort((a, b) => b - a)
-
-                            const best10avg = acc.slice(0, 10).reduce((a, b) => a + b, 0) / 10
-                            const worst10avg = acc.slice(-10).reduce((a, b) => a + b, 0) / 10
-                            const avg = acc.reduce((a, b) => a + b, 0) / acc.length
-
-                            return { avg, best10avg, worst10avg }
-                        }
-
-                        for (const batch of batches) {
-                            sac.update({
-                                observation: tf.tensor2d(batch.observation),
-                                action: tf.tensor2d(batch.action),
-                                reward: tf.tensor1d(batch.reward),
-                                nextObservation: tf.tensor2d(batch.nextObservation),
-                                done: tf.tensor1d(batch.done),
-                            })
-
-                            console.log(`Batch ${i++} done`)
-                        }
-
-                        console.log("Reward: ", currentReward())
-
-                        console.log("Done")
-                    })
-                    .catch(e => {
-                        console.error(e)
-                    }),
-            )
-            .catch(e => {
-                console.error(e)
-            })
+        sac.test()
 
         /*
         const actor = new Actor(4, 2, {
@@ -456,14 +381,14 @@ if (true) {
             for (let j = 0; j < 10; ++j) {
                 env.reset()
 
-                let x = 0
+                let t = 0
 
-                while (!env.isDone() && x < 1000) {
-                    env.step(sac.act(env.getStateTensor(), false))
-                    x++
+                while (!env.isDone() && t < 1000) {
+                    env.step(sac.act(env.getStateTensor(), true))
+                    t++
                 }
 
-                acc.push(x)
+                acc.push(t)
             }
 
             // average of top 10% lifetimes
@@ -487,8 +412,8 @@ if (true) {
 
                 let action: number[]
 
-                if (t < 10_000) {
-                    action = [Math.random() * 2 - 1]
+                if (t < 1000) {
+                    action = [Math.random()]
                 } else {
                     action = sac.act(observation, false)
                 }

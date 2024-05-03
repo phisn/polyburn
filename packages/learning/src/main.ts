@@ -1,54 +1,179 @@
-function getReward(got: number, expected: number) {
-    function f() {
-        const gotRounded = Math.round(got)
+import * as tf from "@tensorflow/tfjs"
+import { Buffer } from "buffer"
+import { EntityWith, MessageCollector } from "runtime-framework"
+import { WorldModel } from "runtime/proto/world"
+import { LevelCapturedMessage } from "runtime/src/core/level-capture/level-captured-message"
+import { RocketDeathMessage } from "runtime/src/core/rocket/rocket-death-message"
+import { RuntimeComponents } from "runtime/src/core/runtime-components"
+import { Runtime, newRuntime } from "runtime/src/runtime"
+import { Environment, PPO } from "./ppo/ppo"
 
-        if (gotRounded === expected) {
-            return 0
-        }
+export class PolyburnEnvironment implements Environment {
+    private runtime: Runtime
+    private currentRotation: number
+    private nearestLevel: EntityWith<RuntimeComponents, "level">
 
-        if (gotRounded === 0) {
-            return expected === -1 ? 1 : -1
-        }
+    private captureMessages: MessageCollector<LevelCapturedMessage>
+    private deathMessages: MessageCollector<RocketDeathMessage>
 
-        if (gotRounded === 1) {
-            return expected === 0 ? 1 : -1
-        }
+    private bestDistance: number
+    private maxTime = 60 * 30
+    private remainingTime = 60 * 30
 
-        return expected === 1 ? 1 : -1
+    private worldModel: any
+
+    private touchedFlag = false
+
+    constructor() {
+        const worldStr =
+            "CqAJCgZOb3JtYWwSlQkKDw0fhZ3BFR+FB0Id2w/JQBItDR+FtsEVgZUDQh3bD8lAJQAAEMItpHBhQjWuR9lBPR+Fm0FFAAAAQE0AAABAEi0Nrkc/QRVt5wZCHdsPyUAlAAD4QC2kcBZCNezRjUI94KMwP0UAAABATQAAAEASLQ2k8B5CFX9qWEEd2w/JQCUAAP5BLaRwFkI17NG9Qj3gozA/RQAAAEBNAAAAQBItDeyRm0IVPzWGQR3bD8lAJQCAjUItSOHsQTX26AVDPYTr6cBFAAAAQE0AAABAEi0Nw0XwQhUcd4lAHTMeejwlAIDnQi2kcA5CNfboMkM9EK6nv0UAAABATQAAAEASLQ2PYhxDFT813EEd2w/JQCUAAM9CLaRwbEI1AMAmQz0fhbFBRQAAAEBNAAAAQBItDcM15UIVYxBJQh3bD8lAJQAAeUItUrijQjXs0fpCPZDCM0JFAAAAQE0AAABAEi0N9WiFQhXVeIhCHdsPyUAlw7WBQi3sUY9CNcO1kUI9AACBQkUAAABATQAAAEAaTgpMpHA9wXE9ukHAwP8AAEAAPYCA/wAAtIBDAAD/AIDFAEBAQP8AgMgAAICA/wBAxgC+oKD/AABGAMf///8AV0dxQry8+QBSQPHA////ABpOCkyuR3FBSOHKQf/++ABAxgAA//3wAAA/QMT/++AAQEoAQv/3wAAAPkBF/++AAADHAD//3gAAgMYAAP/vgAAAAIDD////AKxGCq////8AGpcCCpQC9qjBQpqZJEL///8AMNEAOv///wDqy9pH////AOzHNML///8AAMIAx////wAAQkDE////AABFAL3///8AAELAx////wCARgBF////AEBGgMb///8AwEYAv////wAgSQBF////AOBIgMP///8A4EjAR////wAARYDE////AAC+oMj///8AAD8AAP///wAAAODK////AGBJAEf///8AwMTASP///wAgSQAA////AEBEwMb///8AAEOAQ////wBASQC/////AAA+wEj///8AwEqAw////wAAvMBL////AODIAAD///8AQMoAQP///wAAPgBI////ACDIAAD///8AgMCARv///wCAyQAA////AEBFgMb///8AGqcCCqQCpHAZQqRwOcH///8AmFgAwP///wCAxwhU////AGDK4E3///8AwM1gyf///wAAv+DI////AKBLAMP///8AADpgyf///wCARgAA////AAA6YMv///8AQMgAAP///wAAvuDJ////AIBFYMj///8AQMyAwf///wAAtMDG////AGDLAL3///8AOMAMSP///wAkxgCu////AADC4Mj///8AAMNARv///wBgyQAA////AEDHgMP///8AwMeAQf///wAAAEBM////ACDJAAD///8AgMMAx////wAAyoBC////AAC9AMb///8AgMTARf///wCAwIDB////AABFAML///8AAMgANP///wBAxEBG////AADHAAD///8AAMFAyP///wBgyEDE////ABomCiSPQopCcT2DQv/AjQAAxAAA/+R0AAAAAMT/kwAAAEQAAP+bAAASEgoGTm9ybWFsEggKBk5vcm1hbA=="
+        this.worldModel = WorldModel.decode(Buffer.from(worldStr, "base64"))
+
+        this.runtime = newRuntime(this.worldModel, "Normal")
+
+        this.currentRotation = 0
+
+        const rocket = this.runtime.factoryContext.store.find("rocket", "rigidBody")[0]
+        const rocketPosition = rocket.components.rigidBody.translation()
+
+        this.captureMessages = this.runtime.factoryContext.messageStore.collect("levelCaptured")
+        this.deathMessages = this.runtime.factoryContext.messageStore.collect("rocketDeath")
+
+        this.nearestLevel = this.runtime.factoryContext.store
+            .find("level")
+            .filter(level => level.components.level.captured === false)
+            .sort(
+                (a, b) =>
+                    Math.abs(a.components.level.flag.x - rocketPosition.x) -
+                    Math.abs(b.components.level.flag.y - rocketPosition.x),
+            )[0]
+
+        const { distance } = this.state()
+        this.bestDistance = distance
     }
 
-    return (f() + 1) / 2
+    inputFromAction(action: number[]) {
+        const input = {
+            rotation: this.currentRotation + action[0],
+            thrust: action[1] > 0 ? true : false,
+        }
+
+        return input
+    }
+
+    step(action: number | number[]): [number[], number, boolean] {
+        if (typeof action === "number") {
+            throw new Error("Wrong action type")
+        }
+
+        this.remainingTime--
+
+        const input = this.inputFromAction(action)
+        this.currentRotation += action[0]
+
+        this.runtime.step(input)
+
+        const { distance, observation, velMag, angDiff } = this.state()
+
+        let newTouch = false
+
+        if (this.nearestLevel.components.level.inCapture) {
+            if (!this.touchedFlag) {
+                newTouch = true
+            }
+
+            this.touchedFlag = true
+        }
+
+        const captureMessage = [...this.captureMessages].at(-1)
+
+        if (captureMessage) {
+            const reward = 10000 + (this.maxTime - this.remainingTime) * 100
+            return [observation, reward, true]
+        }
+
+        const deathMessage = [...this.deathMessages].at(-1)
+
+        if (deathMessage) {
+            const reward = -(velMag + angDiff)
+            return [observation, reward, true]
+        }
+
+        const reward = Math.max(0, this.bestDistance - distance)
+        this.bestDistance = Math.min(this.bestDistance, distance)
+
+        const done = this.remainingTime <= 0
+
+        return [observation, reward * 10 + (newTouch ? 100 : 0), done]
+    }
+
+    state() {
+        const rocket = this.runtime.factoryContext.store.find("rocket", "rigidBody")[0]
+
+        const rocketPosition = rocket.components.rigidBody.translation()
+        const rocketRotation = rocket.components.rigidBody.rotation()
+        const rocketVelocity = rocket.components.rigidBody.linvel()
+
+        const dx = this.nearestLevel.components.level.flag.x - rocketPosition.x
+        const dy = this.nearestLevel.components.level.flag.y - rocketPosition.y
+
+        const distanceToLevel = Math.sqrt(dx * dx + dy * dy)
+
+        const angDiff =
+            (this.nearestLevel.components.level.flagRotation -
+                rocket.components.rigidBody.rotation()) %
+            (Math.PI * 2)
+
+        const velMag = Math.sqrt(
+            rocketVelocity.x * rocketVelocity.x + rocketVelocity.y * rocketVelocity.y,
+        )
+
+        return {
+            distance: distanceToLevel,
+            observation: [
+                this.nearestLevel.components.level.flag.x - rocketPosition.x,
+                this.nearestLevel.components.level.flag.y - rocketPosition.y,
+                rocketRotation,
+                rocketVelocity.x,
+                rocketVelocity.y,
+            ],
+            touched: this.touchedFlag,
+            angDiff,
+            velMag,
+        }
+    }
+
+    reset(): number[] {
+        this.runtime = newRuntime(this.worldModel, "Normal")
+
+        this.currentRotation = 0
+
+        const rocket = this.runtime.factoryContext.store.find("rocket", "rigidBody")[0]
+        const rocketPosition = rocket.components.rigidBody.translation()
+
+        this.captureMessages = this.runtime.factoryContext.messageStore.collect("levelCaptured")
+        this.deathMessages = this.runtime.factoryContext.messageStore.collect("rocketDeath")
+
+        this.nearestLevel = this.runtime.factoryContext.store
+            .find("level")
+            .filter(level => level.components.level.captured === false)
+            .sort(
+                (a, b) =>
+                    Math.abs(a.components.level.flag.x - rocketPosition.x) -
+                    Math.abs(b.components.level.flag.y - rocketPosition.x),
+            )[0]
+
+        const { distance, observation } = this.state()
+
+        this.bestDistance = distance
+        this.remainingTime = this.maxTime
+        this.touchedFlag = false
+
+        return observation
+    }
 }
 
-const observationSize = 8
-const actionSize = 1
-
-const observations = [
-    [[-1, -1, -1, -1, -1, -1, -1, -1], [-1]],
-    [[0, 0, 0, 0, 0, 0, 0, 0], [0]],
-    [[1, 1, 1, 1, 1, 1, 1, 1], [1]],
-    [[-1, 0, 1, 0, -1, 0, 1, 0], [-1]],
-    [[0, 1, 0, -1, 0, 1, 0, -1], [0]],
-    [[1, 0, -1, 0, 1, 0, -1, 0], [1]],
-    [[-1, 1, -1, 1, -1, 1, -1, 1], [-1]],
-    [[1, -1, 1, -1, 1, -1, 1, -1], [1]],
-]
-
-export class CartPole {
-    actionSpace = {
-        class: "Box",
-        shape: [1],
-        dtype: "float32",
-        low: [-1],
-        high: [1],
-    }
-
-    observationSpace = {
-        class: "Box",
-        shape: [4],
-        dtype: "float32",
-    }
-
+export class CartPole implements Environment {
     private gravity: number
     private massCart: number
     private massPole: number
@@ -98,14 +223,21 @@ export class CartPole {
         return [this.x, this.xDot, this.theta, this.thetaDot]
     }
 
+    private i = 0
+    private max = 0
+
     /**
      * Update the cart-pole system using an action.
      * @param {number} action Only the sign of `action` matters.
      *   A value > 0 leads to a rightward force of a fixed magnitude.
      *   A value <= 0 leads to a leftward force of the same fixed magnitude.
      */
-    step(action: number) {
-        let force = action * this.forceMag
+    step(action: number | number[]): [number[], number, boolean] {
+        if (Array.isArray(action)) {
+            action = action[0]
+        }
+
+        const force = action * this.forceMag
 
         const cosTheta = Math.cos(this.theta)
         const sinTheta = Math.sin(this.theta)
@@ -131,6 +263,7 @@ export class CartPole {
      * Set the state of the cart-pole system randomly.
      */
     reset() {
+        this.i = 0
         // The control-theory state variables of the cart-pole system.
         // Cart position, meters.
         this.x = Math.random() - 0.5
@@ -162,96 +295,399 @@ export class CartPole {
     }
 }
 
-const tf = require("@tensorflow/tfjs-node-gpu")
+import "@tensorflow/tfjs-backend-webgl"
+import "@tensorflow/tfjs-backend-webgpu"
+import { SoftActorCritic } from "./soft-actor-critic/soft-actor-critic"
 
-tf.setBackend("cpu").then(() => {
-    const env = new CartPole()
+if (true) {
+    tf.setBackend("cpu").then(() => {
+        const sac = new SoftActorCritic({
+            mlpSpec: {
+                sizes: [32, 32],
+                activation: "relu",
+                outputActivation: "relu",
+            },
 
-    const PPO = require("./ppo/base-ppo.js")
+            actionSize: 1,
+            observationSize: 4,
 
-    const ppo = new PPO(env, {
-        nSteps: 2048,
-        nEpochs: 25,
-        policyLearningRate: 2e-3,
-        valueLearningRate: 2e-3,
-        clipRatio: 0.2,
-        targetKL: 0.01,
-        gamma: 0.99,
-        lam: 0.95,
-        netArch: {
-            pi: [32, 32],
-            vf: [32, 32],
-        },
-        activation: "relu",
-        verbose: 1,
+            maxEpisodeLength: 1000,
+            bufferSize: 10000,
+            batchSize: 100,
+            updateAfter: 10000,
+            updateEvery: 50,
+
+            learningRate: 0.01,
+            alpha: 0.2,
+            gamma: 0.99,
+            polyak: 0.995,
+        })
+
+        sac.test()
+
+        /*
+        const actor = new Actor(4, 2, {
+            sizes: [32, 32],
+            activation: "relu",
+            outputActivation: "relu",
+        })
+
+        actor.trainableWeights.forEach(w => {
+            w.write(tf.zeros(w.shape, w.dtype))
+        })
+
+        /*
+        x = torch.tensor([[0.1, 0.2, 0.3, 0.4]], dtype=torch.float32)
+        x = actor(x, True)
+
+        const x = tf.tensor2d([[0.1, 0.2, 0.3, 0.4]])
+        const r = actor.apply(x, { deterministic: true }) as tf.Tensor<tf.Rank>[]
+
+        console.log(r[0].dataSync())
+        console.log(r[1].dataSync())
+        */
     })
+}
 
-    function possibleLifetime() {
-        let acc = []
+if (false) {
+    tf.setBackend("webgpu").then(() => {
+        const env = new CartPole()
 
-        for (let j = 0; j < 100; ++j) {
-            env.reset()
+        const sac = new SoftActorCritic({
+            mlpSpec: {
+                sizes: [32, 32],
+                activation: "relu",
+                outputActivation: "relu",
+            },
 
-            let t = 0
+            actionSize: 1,
+            observationSize: 4,
 
-            while (!env.isDone() && t < 1000) {
-                const [, action] = ppo.sampleAction(tf.tensor([env.getStateTensor()]), true)
-                env.step(action.arraySync())
-                t++
+            maxEpisodeLength: 1000,
+            bufferSize: 100000,
+            batchSize: 8096,
+            updateAfter: 8096,
+            updateEvery: 25,
+
+            learningRate: 1e-3,
+            alpha: 0.2,
+            gamma: 0.99,
+            polyak: 0.995,
+        })
+
+        function currentReward() {
+            const acc = []
+
+            for (let j = 0; j < 25; ++j) {
+                env.reset()
+
+                let t = 0
+
+                while (!env.isDone() && t < 1000) {
+                    env.step(sac.act(env.getStateTensor(), true))
+                    t++
+                }
+
+                acc.push(t)
             }
 
-            acc.push(t)
+            // average of top 10% lifetimes
+            acc.sort((a, b) => b - a)
+
+            const best10avg = acc.slice(0, 10).reduce((a, b) => a + b, 0) / 10
+            const worst10avg = acc.slice(-10).reduce((a, b) => a + b, 0) / 10
+            const avg = acc.reduce((a, b) => a + b, 0) / acc.length
+
+            return { avg, best10avg, worst10avg }
         }
 
-        // average of top 10% lifetimes
-        acc.sort((a, b) => b - a)
+        let t = 0
+        let k = 8
 
-        const best10avg = acc.slice(0, 10).reduce((a, b) => a + b, 0) / 10
-        const worst10avg = acc.slice(-10).reduce((a, b) => a + b, 0) / 10
-        const avg = acc.reduce((a, b) => a + b, 0) / acc.length
+        function iteration() {
+            for (let i = 0; i < 128; ++i) {
+                t++
 
-        return `10%: ${best10avg}, 90%: ${worst10avg}, avg: ${avg}`
-    }
+                const observation = env.getStateTensor()
 
-    console.log(possibleLifetime())
-    ;(async () => {
-        for (let i = 0; i < 500; ++i) {
-            await ppo.learn({
-                totalTimesteps: 1000 * i,
-            })
+                let action: number[]
 
-            console.log(possibleLifetime())
+                if (t < 300) {
+                    action = [Math.random()]
+                } else {
+                    action = sac.act(observation, false)
+                }
+
+                const [nextObservation, reward, done] = env.step(action)
+
+                sac.observe({
+                    observation,
+                    action,
+                    reward,
+                    nextObservation,
+                    done,
+                })
+
+                if (done) {
+                    env.reset()
+                }
+            }
+
+            --k
+            console.log(k)
+
+            if (k < 0) {
+                k = 10
+
+                const { avg, best10avg, worst10avg } = currentReward()
+
+                console.log(`Leaks: ${tf.memory().numTensors}`)
+                console.log(`10%: ${best10avg}, 90%: ${worst10avg}, avg: ${avg}`)
+            }
+
+            requestAnimationFrame(iteration)
         }
-    })().then(() => {
-        console.log(possibleLifetime())
+
+        console.log("Start")
+        requestAnimationFrame(iteration)
+
+        /*
+        const ppo = new PPO(
+            {
+                steps: 512,
+                epochs: 15,
+                policyLearningRate: 1e-3,
+                valueLearningRate: 1e-3,
+                clipRatio: 0.1,
+                targetKL: 0.01,
+                gamma: 0.99,
+                lambda: 0.95,
+                observationDimension: 4,
+                actionSpace: {
+                    class: "Discrete",
+                    len: 2,
+                },
+            },
+            env,
+            tf.sequential({
+                layers: [
+                    tf.layers.dense({
+                        inputDim: 4,
+                        units: 32,
+                        activation: "relu",
+                    }),
+                    tf.layers.dense({
+                        units: 32,
+                        activation: "relu",
+                    }),
+                ],
+            }),
+            tf.sequential({
+                layers: [
+                    tf.layers.dense({
+                        inputDim: 4,
+                        units: 32,
+                        activation: "relu",
+                    }),
+                    tf.layers.dense({
+                        units: 32,
+                        activation: "relu",
+                    }),
+                ],
+            }),
+        )
+
+        function possibleLifetime() {
+            const acc = []
+
+            for (let j = 0; j < 25; ++j) {
+                env.reset()
+
+                let t = 0
+
+                while (!env.isDone() && t < 1000) {
+                    env.step(ppo.act(env.getStateTensor()) as number[])
+                    t++
+                }
+
+                acc.push(t)
+            }
+
+            // average of top 10% lifetimes
+            acc.sort((a, b) => b - a)
+
+            const best10avg = acc.slice(0, 10).reduce((a, b) => a + b, 0) / 10
+            const worst10avg = acc.slice(-10).reduce((a, b) => a + b, 0) / 10
+            const avg = acc.reduce((a, b) => a + b, 0) / acc.length
+
+            return { avg, best10avg, worst10avg }
+        }
+
+        let currentAverage = 0
+        let i = 0
+
+        function iteration() {
+            ppo.learn(512 * i)
+
+            const { avg, best10avg, worst10avg } = possibleLifetime()
+
+            console.log(`Leaks: ${tf.memory().numTensors}`)
+            console.log(`10%: ${best10avg}, 90%: ${worst10avg}, avg: ${avg}`)
+
+            if (avg > currentAverage) {
+                // await ppo.save()
+                currentAverage = avg
+                console.log("Saved")
+            }
+
+            i++
+
+            requestAnimationFrame(iteration)
+        }
+
+        console.log("Initial: ", possibleLifetime())
+
+        console.log("Start")
+        requestAnimationFrame(iteration)
+
+    */
     })
-
-    /*
-import { WorldModel } from "runtime/proto/world"
-import { Game } from "./game/game"
-import { GameLoop } from "./game/game-loop"
-import { GameInstanceType, GameSettings } from "./game/game-settings"
-import * as tf from '@tensorflow/tfjs';
-
-function base64ToBytes(base64: string) {
-    return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
 }
 
-const world =
-    "CscCCgZOb3JtYWwSvAIKCg2F65XBFTXTGkISKA2kcLrBFZfjFkIlAAAAwi1SuIlCNa5H+UE9H4X/QUUAAABATQAAAEASKA1SuMFBFZmRGkIlhetRQS3NzFJCNSlcp0I9zcxEQUUAAABATQAAAEASKA0AgEVCFfIboEElAAAoQi0K189BNaRw4UI9rkdZwUUAAABATQAAAEASKA171MBCFcubHcElmpm5Qi0K189BNY/CI0M9rkdZwUUAAABATQAAAEASLQ1syOFCFToytkEdVGuzOiWamblCLSlcZUI1XI8jQz3NzIhBRQAAAEBNAAAAQBItDR/lAUMVk9VNQh2fUDa1JaRw9UItexRsQjWF60FDPQAAlEFFAAAAQE0AAABAEigNw1UzQxVpqkFCJdejJEMtBW94QjXXo0JDPQVvAEJFAAAAQE0AAABACu4KCg1Ob3JtYWwgU2hhcGVzEtwKGt8GCtwGP4UAws3MNEGgEEAAZjYAAP///wB1PAAU////AF5PABT///8AyUtPxP///wAzSg3L////AMBJAcj///8AE0Umzf///wCMVAo5////AJNRpDr///8AVE0WVP///wD0vlZLAAD/AEPI7Bn///8AhcPlOAAA/wAFQZrF////ADS9F8f///8AJMIuwf///wC5xvvF////AOrJ1rf///8Ac8ikQP///wBAxfRF////AGkxi0n///8Aj0LxQgAA/wB1xWY9////AJ/HZAlQUP4AzcUBvQAA/wDwQFzE////ADDGR73///8As8eZPoiI8QBxxWQ3rKz/AFw3LMQAAP8AwkNRtP///wC2RKO4////AEhBe8EAAP8AS0WPPP///wAdSaSx////AMw/Ucj///8A7MBNxv///wDmxnG9////AELCFLr///8Aw8UOof///wAKxCg4AAD/ALg8OMDZ2fsA4j9NwP///wCkxB+/AADwAHGwrr54ePgAVERcwv///wAPwXbA////APW0H0EAAPgASLtnv////wALM67DJSX/AFJApL////8AZj4uwP///wBcu+HATU3/AIU7+8H///8AXMK8Lf///wB7wjM/AAD4AHDCx8D///8AFEH7wP///wAAvnvE////AOTGChL///8A6bncRP///wCAQddAAAD4AB/AxLH///8AIL9RPQAA+ACZwqvG////AOLCLkQAAPgAIcTrwP///wDtwQPH////AOLJbqz///8ALsR6QwAA+AD+x8zA////APtF90kyMv8AH7mZQCcn/wCNxHo8tbX/AIDAiETKyv8AXEAgSgAA+AClyAqS////AH9EG0n///8AS0ypRP///wAxSIK7MDToANjBdUf///8A58yjxP///wCByD1EMDToAIzCYMv///8AnMq3MzA06AC+QenF////ANzGT0T///8AtMFSR////wBzRb85lpj/AFJALEQwNOgAqMIpPjA06AAgyiCF////AAPEE77///8AzT4FSnN1/wAzxWFCMDToAA23PcKXl/8AGcLmQDA06ADMPUnJu77/AFrGxsL///8A1TRGSjA06ACKwik8MDToAE3Apcn///8Ar8SawP///wBsygqP////ABHI8z0wNOgAAABTzv///wAa9wMK9APNzJNCj8JlQP///wBmtly8////ABa2jsg2Nv8AO0SENwAA+ACkvrtEvLz/AG0uOEX///8A4UaHPv///wA+QlXFAAD4AApB2L4AAPgAeDLVRP///wATSHHAAAD4ADhA3EP///8As0MKvAAA8ADOPxM4AAD4AEjBTUD///8Arj5TP3B0+ACyKw9DaGz4ALm6eDz///8AKT4MSP///wDhPy5CAAD/APS/XEL///8A+EV6PwAA/wAdsXtBp6f/AGzEpEEAAP8AisfEuf///wDXwVJI////AJpEaUf///8AhUfxQP///wB7RA3FAAD/ANdBTzUAAP8AC8C9Rv///wBGQoVE////APRMpDz///8A7kS3yAAA/wDLR9HB////AFLHNscAAP8AR0HNwf///wDsvtLGAAD/AABE5kD///8AD0JIRv///wD0RNJA////AEVFqcD///8A3ESpwwAA/wAuwgtJ////AARBqEj///8ALUdbSf///wA01Hks////AHjCAL3///8AF8s5x////wC4vlPP////AME1O8f///8AhsIAPgAA+ABcxZXC7e3/AIrEpUMAAPgAjcbDxcvL/wBdQFzF////AEjI+8EAAOAAQ0GZvf///wAGN77AFRX/APlFXDz///8AikEzwkhI+ADcQmoy////AArNAgoHUmV2ZXJzZRLBAgoPDRydLkMVk5lFQh2z7Zk2EigNpHC6wRWX4xZCJQAAAMItAABMQjUAAEDBPR+F/0FFAAAAQE0AAABAEigNUrjBQRWZkRpCJR+FAMItZuaJQjUAAPpBPQAAAEJFAAAAQE0AAABAEigNAIBFQhXyG6BBJQAAUEEthetRQjWkcKdCPVK4TkFFAAAAQE0AAABAEigNe9TAQhXLmx3BJTQzKEItCtfPQTUeBeJCPa5HWcFFAAAAQE0AAABAEi0NbMjhQhU6MrZBHVRrszolmpm5Qi1SuNRBNVyPI0M9ZmZawUUAAABATQAAAEASLQ0f5QFDFZPVTUIdn1A2tSWk8LlCLXsUZUI1hSskQz0AAIZBRQAAAEBNAAAAQBIoDcNVM0MVaapBQiUAgPVCLQAAbEI1AABCQz0AAJRBRQAAAEBNAAAAQBIhCgZOb3JtYWwSFwoNTm9ybWFsIFNoYXBlcwoGTm9ybWFsEiMKB1JldmVyc2USGAoNTm9ybWFsIFNoYXBlcwoHUmV2ZXJzZQ=="
-const worldModel = WorldModel.decode(base64ToBytes(world))
+if (false) {
+    tf.setBackend("cpu").then(() => {
+        const env = new PolyburnEnvironment()
 
-const settings: GameSettings = {
-    instanceType: GameInstanceType.Play,
-    world: worldModel,
-    gamemode: "Normal",
-}
+        const inputDim = 5
 
-try {
-    const loop = new GameLoop(new Game(settings))
-    loop.start()
-} catch (e) {
-    console.error(e)
+        const ppo = new PPO(
+            {
+                steps: 512,
+                epochs: 15,
+                policyLearningRate: 1e-3,
+                valueLearningRate: 1e-3,
+                clipRatio: 0.2,
+                targetKL: 0.01,
+                gamma: 0.99,
+                lambda: 0.95,
+                observationDimension: inputDim,
+                actionSpace: {
+                    class: "Box",
+                    len: 2,
+                    low: -1,
+                    high: 1,
+                },
+            },
+            env,
+            tf.sequential({
+                layers: [
+                    tf.layers.dense({
+                        inputDim: inputDim,
+                        units: 64,
+                        activation: "relu",
+                    }),
+                    tf.layers.dense({
+                        units: 64,
+                        activation: "relu",
+                    }),
+                ],
+            }),
+            tf.sequential({
+                layers: [
+                    tf.layers.dense({
+                        inputDim: inputDim,
+                        units: 64,
+                        activation: "relu",
+                    }),
+                    tf.layers.dense({
+                        units: 64,
+                        activation: "relu",
+                    }),
+                ],
+            }),
+        )
+
+        function possibleLifetime() {
+            let observation = env.reset()
+
+            let totalReward = 0
+            const inputs = []
+
+            while (true) {
+                const action = ppo.act(observation)
+                inputs.push(env.inputFromAction(action as number[]))
+
+                const [nextObservation, reward, done] = env.step(action)
+
+                totalReward += reward
+                observation = nextObservation
+
+                if (done) {
+                    break
+                }
+            }
+
+            return {
+                totalReward,
+                touched: env.state().touched,
+                distance: env.state().distance,
+                inputs,
+            }
+        }
+
+        let currentAverage = 0
+        let i = 0
+
+        const previousTwenty: number[] = []
+
+        function iteration() {
+            ppo.learn(512 * i)
+            const info = possibleLifetime()
+
+            console.log(
+                `Reward ${i}: reward(${info.totalReward}), distance(${info.distance}), touched(${info.touched})`,
+            )
+
+            if (info.totalReward > currentAverage && previousTwenty.length === 20) {
+                currentAverage = info.totalReward
+                console.log("Saved")
+                ppo.save()
+            }
+
+            if (previousTwenty.length === 20) {
+                previousTwenty.shift()
+            }
+
+            previousTwenty.push(info.totalReward)
+
+            const avgPreviousTwenty =
+                previousTwenty.reduce((a, b) => a + b, 0) / previousTwenty.length
+
+            ++i
+
+            if (
+                avgPreviousTwenty < 50 &&
+                avgPreviousTwenty < Math.max(currentAverage, 10) * 0.5 &&
+                previousTwenty.length === 20
+            ) {
+                console.log("Restoring")
+
+                ppo.restore().finally(() => {
+                    requestAnimationFrame(iteration)
+                })
+            } else {
+                requestAnimationFrame(iteration)
+            }
+        }
+
+        ppo.restore().finally(() => {
+            const { totalReward, inputs } = possibleLifetime()
+            currentAverage = totalReward
+
+            console.log(JSON.stringify(inputs))
+
+            console.log("Start with: ", currentAverage)
+            requestAnimationFrame(iteration)
+        })
+    })
 }
-*/
-})

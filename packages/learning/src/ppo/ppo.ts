@@ -5,7 +5,7 @@ class ReplayBuffer {
     private lambda: number
 
     private observationBuffer: number[][] = []
-    private actionBuffer: number[][] = []
+    private actionBuffer: (number | number[])[] = []
     private advantageBuffer: number[] = []
     private rewardBuffer: number[] = []
     private returnBuffer: number[] = []
@@ -24,7 +24,7 @@ class ReplayBuffer {
 
     add(
         observation: number[],
-        action: number[],
+        action: number | number[],
         reward: number,
         criticPrediction: number,
         logProbability: number,
@@ -83,13 +83,13 @@ class ReplayBuffer {
             advantage => (advantage - advantageMean) / advantageStd,
         )
 
-        return [
-            this.observationBuffer,
-            this.actionBuffer,
-            this.advantageBuffer,
-            this.returnBuffer,
-            this.logProbabilityBuffer,
-        ]
+        return {
+            observationBuffer: this.observationBuffer,
+            actionBuffer: this.actionBuffer,
+            advantageBuffer: this.advantageBuffer,
+            returnBuffer: this.returnBuffer,
+            logProbabilityBuffer: this.logProbabilityBuffer,
+        }
     }
 
     reset() {
@@ -108,14 +108,11 @@ class ReplayBuffer {
 
 interface DiscreteSpace {
     class: "Discrete"
-    dtype?: "int32"
-
     len: number
 }
 
 interface BoxSpace {
     class: "Box"
-    dtype?: "float32"
 
     low: number
     high: number
@@ -141,33 +138,12 @@ interface PPOConfig {
     actionSpace: Space
 }
 
-interface Environment {
+export interface Environment {
     reset(): number[]
     step(action: number | number[]): [number[], number, boolean]
 }
 
-const ppo = new PPO(
-    {} as PPOConfig,
-    {} as Space,
-    [
-        {
-            class: "Box",
-            len: 2,
-            low: [0, 0],
-            high: [1, 1],
-        },
-        {
-            class: "Discrete",
-            len: 2,
-        },
-    ],
-    {} as tf.LayersModel,
-    {} as tf.LayersModel,
-)
-
-ppo.act([1, 2, 3])
-
-class PPO {
+export class PPO {
     private numTimeSteps: number
     private lastObservation: number[]
 
@@ -186,39 +162,26 @@ class PPO {
 
         private env: Environment,
 
-        private actorModel: tf.LayersModel,
-        private criticModel: tf.LayersModel,
+        actorModel: tf.LayersModel,
+        criticModel: tf.LayersModel,
     ) {
         this.numTimeSteps = 0
         this.lastObservation = []
 
         this.buffer = new ReplayBuffer(config.gamma, config.lambda)
 
-        if (config.actionSpace.class === "Discrete") {
-            this.actor = tf.sequential({
-                layers: [
-                    actorModel,
-                    tf.layers.dense({
-                        units: config.actionSpace.len,
-                    }),
-                ],
-            })
-        } else if (config.actionSpace.class === "Box") {
-            this.actor = tf.sequential({
-                layers: [
-                    actorModel,
-                    tf.layers.dense({
-                        units: config.actionSpace.len,
-                    }),
-                ],
-            })
-        } else {
-            throw new Error("Unsupported action space")
-        }
+        this.actor = tf.sequential({
+            layers: [
+                actorModel,
+                tf.layers.dense({
+                    units: config.actionSpace.len,
+                }),
+            ],
+        })
 
         this.critic = tf.sequential({
             layers: [
-                actorModel,
+                criticModel,
                 tf.layers.dense({
                     units: 1,
                     activation: "linear",
@@ -234,29 +197,112 @@ class PPO {
         this.optimizerValue = tf.train.adam(config.valueLearningRate)
     }
 
-    act(observation: number[]): GetPPOSpaceType<ActionSpaces, "actionType"> {}
+    async save() {
+        await this.actor.save("localstorage://actor")
+        await this.critic.save("localstorage://critic")
+    }
+
+    async restore() {
+        this.actor = await tf.loadLayersModel("localstorage://actor")
+        this.critic = await tf.loadLayersModel("localstorage://critic")
+    }
+
+    act(observation: number[]): number | number[] {
+        return tf.tidy(() => {
+            const [, , actionSynced] = this.sampleAction(tf.tensor([observation]))
+            return actionSynced
+        })
+    }
+
+    learn(upToTimesteps: number) {
+        while (this.numTimeSteps < upToTimesteps) {
+            this.collectRollouts()
+            this.train()
+        }
+    }
+
+    private train() {
+        const batch = this.buffer.get()
+
+        tf.tidy(() => {
+            const observationBuffer = tf.tensor2d(batch.observationBuffer)
+
+            const actionBuffer = tf.tensor(
+                batch.actionBuffer,
+                undefined,
+                this.config.actionSpace.class === "Discrete" ? "int32" : "float32",
+            )
+
+            const advantageBuffer = tf.tensor1d(batch.advantageBuffer)
+            const returnBuffer = tf.tensor1d(batch.returnBuffer).reshape([-1, 1]) as tf.Tensor1D
+            const logProbabilityBuffer = tf.tensor1d(batch.logProbabilityBuffer)
+
+            for (let epoch = 0; epoch < this.config.epochs; ++epoch) {
+                const kl = this.trainPolicy(
+                    observationBuffer,
+                    actionBuffer,
+                    logProbabilityBuffer,
+                    advantageBuffer,
+                )
+
+                if (kl > 1.5 * this.config.targetKL) {
+                    break
+                }
+            }
+
+            for (let epoch = 0; epoch < this.config.epochs; ++epoch) {
+                this.trainValue(observationBuffer, returnBuffer)
+            }
+        })
+    }
 
     private collectRollouts() {
-        this.buffer.reset()
+        if (this.lastObservation.length === 0) {
+            this.lastObservation = this.env.reset()
+        }
 
-        let sumReturn = 0
-        let sumReward = 0
-        let numEpisodes = 0
+        this.buffer.reset()
 
         for (let step = 0; step < this.config.steps; ++step) {
             tf.tidy(() => {
-                const observation = tf.tensor2d(this.lastObservation)
+                const observation = tf.tensor([this.lastObservation]) as tf.Tensor2D
 
-                const [predictions, action, actionSynced] = this.sampleAction(observation)
-                const value = this.critic.predict(observation) as tf.Tensor1D
+                const [predictions, action, actionClipped] = this.sampleAction(observation)
+                const value = this.critic.predict(observation) as tf.Tensor2D
+                const valueSynced = value.arraySync()[0][0]
+                const actionSynced = action.arraySync()
 
                 // TODO verify types
-                const logProbability = this.logProb(predictions as any, action as any)
+                const logProbability = this.logProb(predictions, action)
+                const logProbabilitySynced = logProbability.arraySync()
 
-                const [nextObservation, reward, done] = this.env.step(actionSynced)
+                const [nextObservation, reward, done] = this.env.step(actionClipped)
+                this.numTimeSteps++
 
-                sumReturn += reward
-                sumReward += reward
+                this.buffer.add(
+                    this.lastObservation,
+                    actionSynced,
+                    reward,
+                    valueSynced,
+                    logProbabilitySynced,
+                )
+
+                this.lastObservation = nextObservation
+
+                if (done || step === this.config.steps - 1) {
+                    let lastValue = 0
+
+                    if (!done) {
+                        const lastValueTensor = this.critic.predict(
+                            tf.tensor([nextObservation]),
+                        ) as tf.Tensor2D
+
+                        lastValue = lastValueTensor.arraySync()[0][0]
+                    }
+
+                    this.buffer.finishTrajectory(lastValue)
+                    this.lastObservation = this.env.reset()
+                }
             })
         }
     }
@@ -275,7 +321,7 @@ class PPO {
 
     private trainPolicy(
         observationBuffer: tf.Tensor2D,
-        actionBuffer: tf.Tensor2D,
+        actionBuffer: tf.Tensor,
         logProbabilityBuffer: tf.Tensor1D,
         advantageBuffer: tf.Tensor1D,
     ) {
@@ -314,13 +360,13 @@ class PPO {
                         actionBuffer,
                     ),
                 ),
-            )
+            ) as tf.Scalar
 
             return kl.arraySync()
         })
     }
 
-    private logProb(predictions: tf.Tensor2D, actions: tf.Tensor2D) {
+    private logProb(predictions: tf.Tensor2D, actions: tf.Tensor) {
         if (this.config.actionSpace.class === "Discrete") {
             return this.logProbCategorical(predictions, actions)
         } else if (this.config.actionSpace.class === "Box") {
@@ -330,7 +376,7 @@ class PPO {
         }
     }
 
-    private logProbCategorical(predictions: tf.Tensor2D, actions: tf.Tensor2D) {
+    private logProbCategorical(predictions: tf.Tensor2D, actions: tf.Tensor) {
         return tf.tidy(() => {
             const numActions = predictions.shape[predictions.shape.length - 1]
             const logprobabilitiesAll = tf.logSoftmax(predictions)
@@ -338,11 +384,11 @@ class PPO {
             return tf.sum(
                 tf.mul(tf.oneHot(actions, numActions), logprobabilitiesAll),
                 logprobabilitiesAll.shape.length - 1,
-            )
+            ) as tf.Scalar
         })
     }
 
-    private logProbNormal(predictions: tf.Tensor2D, actions: tf.Tensor2D) {
+    private logProbNormal(predictions: tf.Tensor2D, actions: tf.Tensor) {
         return tf.tidy(() => {
             if (this.logStd === undefined) {
                 throw new Error("logStd is not initialized")
@@ -360,7 +406,7 @@ class PPO {
             return tf.sum(
                 tf.sub(logUnnormalized, logNormalization),
                 logUnnormalized.shape.length - 1,
-            )
+            ) as tf.Scalar
         })
     }
 
@@ -368,7 +414,7 @@ class PPO {
         return tf.tidy(() => {
             const predictions = tf.squeeze(
                 this.actor.predict(observation) as tf.Tensor2D,
-            ) as tf.Tensor1D
+            ) as tf.Tensor2D
 
             const actionSpace = this.config.actionSpace
 

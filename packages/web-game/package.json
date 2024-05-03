@@ -9,6 +9,7 @@
         "web-game-preview": "vite preview"
     },
     "devDependencies": {
+        "@types/sat": "^0.0.35",
         "@types/three": "^0.162.0",
         "autoprefixer": "^10.4.19",
         "postcss": "^8.4.38",
@@ -20,7 +21,6 @@
         "vite": "^5.1.6"
     },
     "dependencies": {
-        "@types/sat": "^0.0.35",
         "eslint-config-custom": "*",
         "lil-gui": "^0.19.2",
         "poly-decomp-es": "^0.4.2",

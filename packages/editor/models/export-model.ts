@@ -1,4 +1,4 @@
-import { EntityType, ShapeModel, WorldModel } from "runtime/proto/world"
+import { EntityType, ShapeModel } from "runtime/proto/world"
 import { verticesToBytes } from "runtime/src/model/world/shape-model"
 import { ShapeState } from "../entities/shape/shape-state"
 import { WorldState } from "./world-state"

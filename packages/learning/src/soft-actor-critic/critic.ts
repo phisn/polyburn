@@ -1,32 +1,59 @@
-import * as tf from "@tensorflow/tfjs-node-gpu"
+import * as tf from "@tensorflow/tfjs"
 import { MlpSpecification, mlp } from "./mlp"
 
-export class Critic extends tf.layers.Layer {
-    private q: tf.Sequential
+export function critic(observationSize: number, actionSize: number, mlpSpec: MlpSpecification) {
+    const q = mlp({
+        ...mlpSpec,
+        sizes: [observationSize + actionSize, ...mlpSpec.sizes, 1],
+        outputActivation: "linear",
+    })
 
-    constructor(observationSize: number, actionSize: number, mlpSpec: MlpSpecification) {
+    return q
+}
+
+class BeforeCriticLayer extends tf.layers.Layer {
+    constructor() {
         super()
+    }
 
-        this.q = mlp({
-            ...mlpSpec,
-            sizes: [observationSize + actionSize, ...mlpSpec.sizes, 1],
-            outputActivation: undefined,
-        })
+    computeOutputShape(inputShape: tf.Shape | tf.Shape[]): tf.Shape | tf.Shape[] {
+        console.log("inputShape: ", inputShape)
+        return [inputShape[0][0], inputShape[0][1] + inputShape[1][1]]
     }
 
     call([obs, act]: tf.Tensor<tf.Rank>[]): tf.Tensor<tf.Rank> {
-        let x = tf.concat([obs, act], 1)
-        x = this.q.apply(x) as tf.Tensor<tf.Rank>
-        return tf.squeeze(x, [1])
-    }
+        console.log("obs: ", obs.dataSync())
+        console.log("act: ", act.dataSync())
 
-    get trainableWeights(): tf.LayerVariable[] {
-        return this.q.trainableWeights
+        const x = tf.concat([obs, act], -1)
+
+        console.log("x: ", x.dataSync())
+
+        return x
     }
 
     static get className() {
-        return "Critic"
+        return "BeforeCriticLayer"
     }
 }
 
-tf.serialization.registerClass(Critic)
+class AfterCriticLayer extends tf.layers.Layer {
+    constructor() {
+        super()
+    }
+
+    computeOutputShape(inputShape: tf.Shape | tf.Shape[]): tf.Shape | tf.Shape[] {
+        console.log("inputShape: ", inputShape)
+        return [inputShape[0]]
+    }
+
+    call(x: tf.Tensor<tf.Rank>): tf.Tensor<tf.Rank> {
+        const y = tf.squeeze(x, [-1])
+
+        return y
+    }
+
+    static get className() {
+        return "AfterCriticLayer"
+    }
+}

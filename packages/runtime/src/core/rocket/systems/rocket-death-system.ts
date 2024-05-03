@@ -125,8 +125,6 @@ export const newRocketDeathSystem: RuntimeSystemFactory = ({
                 ? contact.solverContactPoint(0)
                 : contact.solverContactPoint(0)
 
-            console.log("rocket death", contactPoint)
-
             messageStore.publish("rocketDeath", {
                 position: rocket.components.rigidBody.translation(),
                 rotation: rocket.components.rigidBody.rotation(),

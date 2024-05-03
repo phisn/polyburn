@@ -1,4 +1,4 @@
-import * as tf from "@tensorflow/tfjs-node-gpu"
+import * as tf from "@tensorflow/tfjs"
 
 export interface Experience {
     observation: number[]
@@ -20,12 +20,6 @@ export class ReplayBuffer {
     private buffer: Experience[] = []
     private bufferIndex = 0
 
-    private tensorObservation: tf.TensorBuffer<tf.Rank.R2, "float32">
-    private tensorAction: tf.TensorBuffer<tf.Rank.R2, "float32">
-    private tensorReward: tf.TensorBuffer<tf.Rank.R1, "float32">
-    private tensorNextObservation: tf.TensorBuffer<tf.Rank.R2, "float32">
-    private tensorDone: tf.TensorBuffer<tf.Rank.R1, "bool">
-
     constructor(
         private capacity: number,
         private batchSize: number,
@@ -35,12 +29,6 @@ export class ReplayBuffer {
         if (batchSize > capacity) {
             throw new Error("Batch size must be less than or equal to capacity")
         }
-
-        this.tensorObservation = tf.buffer([batchSize, observationSize], "float32")
-        this.tensorAction = tf.buffer([batchSize, actionSize], "float32")
-        this.tensorReward = tf.buffer([batchSize], "float32")
-        this.tensorNextObservation = tf.buffer([batchSize, observationSize], "float32")
-        this.tensorDone = tf.buffer([batchSize], "bool")
     }
 
     push(experience: Experience) {
@@ -48,7 +36,7 @@ export class ReplayBuffer {
             this.buffer[this.bufferIndex] = experience
             this.bufferIndex = (this.bufferIndex + 1) % this.capacity
         } else {
-            this.buffer.push(experience)
+            this.buffer.push({ ...experience })
         }
     }
 
@@ -57,29 +45,16 @@ export class ReplayBuffer {
             throw new Error("Buffer does not have enough experiences")
         }
 
-        const indices = tf.util.createShuffledIndices(this.buffer.length)
+        const indices = [
+            ...tf.util.createShuffledIndices(Math.min(this.buffer.length, this.batchSize)),
+        ]
 
-        for (let i = 0; i < this.batchSize; i++) {
-            const experience = this.buffer[indices[i]]
+        const observation = tf.tensor2d(indices.map(x => this.buffer[x].observation))
+        const action = tf.tensor2d(indices.map(x => this.buffer[x].action))
+        const reward = tf.tensor1d(indices.map(x => this.buffer[x].reward))
+        const nextObservation = tf.tensor2d(indices.map(x => this.buffer[x].nextObservation))
+        const done = tf.tensor1d(indices.map(x => (this.buffer[x].done ? 1 : 0)))
 
-            for (let j = 0; j < this.observationSize; j++) {
-                this.tensorObservation.set(experience.observation[j], i, j)
-                this.tensorNextObservation.set(experience.nextObservation[j], i, j)
-            }
-
-            for (let j = 0; j < this.actionSize; j++) {
-                this.tensorAction.set(experience.action[j], i, j)
-            }
-
-            this.tensorReward.set(experience.reward, i)
-        }
-
-        return {
-            observation: this.tensorObservation.toTensor(),
-            action: this.tensorAction.toTensor(),
-            reward: this.tensorReward.toTensor(),
-            nextObservation: this.tensorNextObservation.toTensor(),
-            done: this.tensorDone.toTensor(),
-        }
+        return { observation, action, reward, nextObservation, done }
     }
 }

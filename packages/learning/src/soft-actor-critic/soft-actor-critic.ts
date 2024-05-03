@@ -23,70 +23,31 @@ export interface Config {
     polyak: number
 }
 
-/*
-class ReplayBuffer:
-    """
-    A simple FIFO experience replay buffer for SAC agents.
-    """
-
-    def __init__(self, obs_dim, act_dim, size):
-        self.obs_buf = np.zeros(core.combined_shape(size, obs_dim), dtype=np.float32)
-        self.obs2_buf = np.zeros(core.combined_shape(size, obs_dim), dtype=np.float32)
-        self.act_buf = np.zeros(core.combined_shape(size, act_dim), dtype=np.float32)
-        self.rew_buf = np.zeros(size, dtype=np.float32)
-        self.done_buf = np.zeros(size, dtype=np.float32)
-        self.ptr, self.size, self.max_size = 0, 0, size
-
-    def store(self, obs, act, rew, next_obs, done):
-        self.obs_buf[self.ptr] = obs
-        self.obs2_buf[self.ptr] = next_obs
-        self.act_buf[self.ptr] = act
-        self.rew_buf[self.ptr] = rew
-        self.done_buf[self.ptr] = done
-        self.ptr = (self.ptr+1) % self.max_size
-        self.size = min(self.size+1, self.max_size)
-
-    def sample_batch(self, batch_size=32):
-        idxs = np.random.randint(0, self.size, size=batch_size)
-        batch = dict(obs=self.obs_buf[idxs],
-                     obs2=self.obs2_buf[idxs],
-                     act=self.act_buf[idxs],
-                     rew=self.rew_buf[idxs],
-                     done=self.done_buf[idxs])
-        
-        batches.append(
-            dict(
-                observation=self.obs_buf[idxs],
-                nextObservation=self.obs2_buf[idxs],
-                action=self.act_buf[idxs],
-                reward=self.rew_buf[idxs],
-                done=self.done_buf[idxs]
-            )
-        )
-
-        return {k: torch.as_tensor(v, dtype=torch.float32) for k,v in batch.items()}
-*/
-
-export interface LearningProgress {
+export interface SacLearningInfo {
     episodeReturn: number
     episodeLength: number
 
-    maxEpisodeReturn: number
-    maxEpisodeLength: number
+    lastUpdateInfo: SacUpdateInfo
+}
 
+export interface SacUpdateInfo {
     lossQ: number
     lossPolicy: number
 }
 
 export interface SacLearningConfig {
+    epochs: number
+    stepsPerEpoch: number
+
     startAfter: number
     renderEvery: number
 
-    onStart?: () => void
-    onStep?: () => void
-    onUpdate?: () => void
-    onEnd?: () => void
-    onEpisodeEnd?: () => void
+    onEpochFinish?: (progress: SacLearningInfo) => void
+
+    // - guranteed to reset environment after call
+    // can be used if you want to evalue the model after each episode manually
+    // has the advantage of not breaking episodes in the middle
+    onFirstEpisodeInEpoch?: (progress: SacLearningInfo) => void
 }
 
 export class SoftActorCritic {
@@ -101,6 +62,7 @@ export class SoftActorCritic {
     private targetQ2: tf.LayersModel
     private qOptimizer: tf.Optimizer
 
+    private deterministic: boolean
     private episodeReturn: number
     private episodeLength: number
 
@@ -116,6 +78,7 @@ export class SoftActorCritic {
         this.targetQ1 = critic(config.observationSize, config.actionSize, config.mlpSpec)
         this.targetQ2 = critic(config.observationSize, config.actionSize, config.mlpSpec)
 
+        this.deterministic = false
         this.episodeReturn = 0
         this.episodeLength = 0
         this.t = 0
@@ -124,20 +87,23 @@ export class SoftActorCritic {
         this.qOptimizer = tf.train.adam(config.learningRate)
     }
 
-    async learn(env: Environment, sacConfig: SacLearningConfig) {
-        const buffer = new ReplayBuffer(this.config.bufferSize, this.config.batchSize)
-
+    async learn(env: Environment, learningConfig: SacLearningConfig) {
         let observation = env.reset()
         let episodeLength = 0
         let episodeReturn = 0
 
-        let maxEpisodeReturn = 0
-        let maxEpisodeLength = 0
+        let maxEpochEpisodeReturn = 0
+        let maxEpochEpisodeLength = 0
 
-        for (let t = 0; ; ++t) {
+        let hasEpisodeAlreadyEndedInEpoch = false
+        let lastUpdateInfoInEpoch = { lossQ: 0, lossPolicy: 0 }
+
+        const steps = learningConfig.epochs * learningConfig.stepsPerEpoch + this.t
+
+        while (this.t < steps) {
             let action: number[]
 
-            if (t > startFrom) {
+            if (this.t > learningConfig.startAfter) {
                 action = this.act(observation, false)
             } else {
                 action = [Math.random() * 2 - 1]
@@ -145,8 +111,12 @@ export class SoftActorCritic {
 
             const [nextObservation, reward, done] = env.step(action)
             episodeLength += 1
+            episodeReturn += reward
 
-            buffer.store({
+            maxEpochEpisodeLength = Math.max(maxEpochEpisodeLength, episodeLength)
+            maxEpochEpisodeReturn = Math.max(maxEpochEpisodeReturn, episodeReturn)
+
+            const updateInfo = this.observe({
                 observation,
                 action,
                 reward,
@@ -154,27 +124,42 @@ export class SoftActorCritic {
                 done: episodeLength === this.config.maxEpisodeLength ? false : done,
             })
 
+            lastUpdateInfoInEpoch = updateInfo ?? lastUpdateInfoInEpoch
             observation = nextObservation
 
             if (done || episodeLength === this.config.maxEpisodeLength) {
+                if (hasEpisodeAlreadyEndedInEpoch === false) {
+                    if (learningConfig.onFirstEpisodeInEpoch) {
+                        learningConfig.onFirstEpisodeInEpoch?.({
+                            episodeReturn,
+                            episodeLength,
+                            lastUpdateInfo: lastUpdateInfoInEpoch,
+                        })
+                    }
+
+                    hasEpisodeAlreadyEndedInEpoch = true
+                }
+
                 observation = env.reset()
                 episodeLength = 0
             }
 
-            if (t >= this.config.updateAfter && t % this.config.updateEvery === 0) {
-                for (let i = 0; i < this.config.updateEvery; i++) {
-                    const batch = buffer.sample()
-                    this.update(batch, false)
-
-                    tf.dispose(batch.observation)
-                    tf.dispose(batch.action)
-                    tf.dispose(batch.reward)
-                    tf.dispose(batch.nextObservation)
-                    tf.dispose(batch.done)
+            if (this.t % learningConfig.stepsPerEpoch === 0) {
+                if (learningConfig.onEpochFinish) {
+                    learningConfig.onEpochFinish({
+                        episodeReturn: maxEpochEpisodeReturn,
+                        episodeLength: maxEpochEpisodeLength,
+                        lastUpdateInfo: lastUpdateInfoInEpoch,
+                    })
                 }
+
+                maxEpochEpisodeReturn = 0
+                maxEpochEpisodeLength = 0
+
+                hasEpisodeAlreadyEndedInEpoch = true
             }
 
-            if (renderEvery > 0 && t % renderEvery === 0) {
+            if (learningConfig.renderEvery > 0 && this.t % learningConfig.renderEvery === 0) {
                 await tf.nextFrame()
             }
         }
@@ -190,33 +175,36 @@ export class SoftActorCritic {
         })
     }
 
-    observe(experience: Experience) {
-        this.episodeReturn += experience.reward
-        this.episodeLength += 1
+    observe(experience: Experience): SacUpdateInfo | undefined {
         this.t += 1
-
-        const done = this.episodeLength < this.config.maxEpisodeLength && experience.done
-
-        this.replayBuffer.store({
-            ...experience,
-        })
-
-        if (done || this.episodeLength === this.config.maxEpisodeLength) {
-            this.episodeReturn = 0
-            this.episodeLength = 0
-        }
+        this.replayBuffer.store(experience)
 
         if (this.t > this.config.updateAfter && this.t % this.config.updateEvery === 0) {
+            let averageLossQ = 0
+            let averageLossPolicy = 0
+
             for (let i = 0; i < this.config.updateEvery; i++) {
-                tf.tidy(() => {
-                    this.update(this.replayBuffer.sample(), i === this.config.updateEvery - 1)
-                })
+                const batch = this.replayBuffer.sample()
+                const updateInfo = this.update(batch)
+
+                tf.dispose(batch.observation)
+                tf.dispose(batch.action)
+                tf.dispose(batch.reward)
+                tf.dispose(batch.nextObservation)
+                tf.dispose(batch.done)
+
+                averageLossQ += updateInfo.lossQ
+                averageLossPolicy += updateInfo.lossPolicy
             }
 
-            return true
-        }
+            averageLossQ /= this.config.updateEvery
+            averageLossPolicy /= this.config.updateEvery
 
-        return false
+            return {
+                lossQ: averageLossQ,
+                lossPolicy: averageLossPolicy,
+            }
+        }
     }
 
     predictQ1(observation: tf.Tensor2D, action: tf.Tensor2D) {
@@ -233,9 +221,7 @@ export class SoftActorCritic {
         ) as tf.Tensor<tf.Rank.R1>
     }
 
-    private deterministic = false
-
-    update(batch: ExperienceTensor, last: boolean = false) {
+    update(batch: ExperienceTensor): SacUpdateInfo {
         const lossQ = () => {
             const q1 = this.predictQ1(batch.observation, batch.action)
             const q2 = this.predictQ2(batch.observation, batch.action)
@@ -248,9 +234,12 @@ export class SoftActorCritic {
             return tf.add(errorQ1, errorQ2) as tf.Scalar
         }
 
-        const gradsQ = tf.variableGrads(lossQ, this.q1.getWeights().concat(this.q2.getWeights()))
-        this.qOptimizer.applyGradients(gradsQ.grads)
-        tf.dispose(gradsQ)
+        const { value: lossValueQ, grads: gradsQ } = tf.variableGrads(
+            lossQ,
+            this.q1.getWeights().concat(this.q2.getWeights()) as tf.Variable[],
+        )
+
+        this.qOptimizer.applyGradients(gradsQ)
 
         const lossPolicy = () => {
             const [pi, logpPi] = this.policy.apply(batch.observation, {
@@ -265,9 +254,12 @@ export class SoftActorCritic {
             return tf.mean(logpPi.mul(this.config.alpha).sub(minPiQ)) as tf.Scalar
         }
 
-        const gradsPolicy = tf.variableGrads(lossPolicy, this.policy.getWeights())
-        this.policyOptimizer.applyGradients(gradsPolicy.grads)
-        tf.dispose(gradsPolicy)
+        const { value: lossValuePolicy, grads: gradsPolicy } = tf.variableGrads(
+            lossPolicy,
+            this.policy.getWeights() as tf.Variable[],
+        )
+
+        this.policyOptimizer.applyGradients(gradsPolicy)
 
         // do polyak averaging
         const tau = tf.scalar(this.config.polyak)
@@ -283,6 +275,11 @@ export class SoftActorCritic {
 
         this.targetQ1.setWeights(updateTargetQ1)
         this.targetQ2.setWeights(updateTargetQ2)
+
+        return {
+            lossQ: lossValueQ.arraySync(),
+            lossPolicy: lossValuePolicy.arraySync(),
+        }
     }
 
     private computeBackup(batch: ExperienceTensor) {
@@ -291,12 +288,12 @@ export class SoftActorCritic {
         }) as tf.Tensor<tf.Rank.R2>[]
 
         const targetQ1 = tf.squeeze(
-            this.targetQ1.apply(tf.concat([batch.nextObservation, action], 1)),
+            this.targetQ1.apply(tf.concat([batch.nextObservation, action], 1)) as tf.Tensor2D,
             [-1],
         ) as tf.Tensor<tf.Rank.R1>
 
         const targetQ2 = tf.squeeze(
-            this.targetQ2.apply(tf.concat([batch.nextObservation, action], 1)),
+            this.targetQ2.apply(tf.concat([batch.nextObservation, action], 1)) as tf.Tensor2D,
             [-1],
         ) as tf.Tensor<tf.Rank.R1>
 

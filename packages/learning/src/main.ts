@@ -307,7 +307,7 @@ import "@tensorflow/tfjs-backend-webgl"
 import "@tensorflow/tfjs-backend-webgpu"
 import { SoftActorCritic } from "./soft-actor-critic/soft-actor-critic"
 
-if (false) {
+if (true) {
     tf.setBackend("cpu").then(() => {
         const env = new CartPole()
 
@@ -333,7 +333,15 @@ if (false) {
             polyak: 0.995,
         })
 
-        sac.learn(new CartPole())
+        sac.learn(new CartPole(), {
+            epochs: 1000,
+            stepsPerEpoch: 100,
+            startAfter: 1000,
+            renderEvery: 1,
+            onEpochFinish: info => {
+                console.log("Length: ", info.episodeLength)
+            },
+        })
 
         function iteration() {
             requestAnimationFrame(iteration)
@@ -424,7 +432,7 @@ if (false) {
     })
 }
 
-if (true) {
+if (false) {
     tf.setBackend("cpu").then(() => {
         const env = new CartPole()
 

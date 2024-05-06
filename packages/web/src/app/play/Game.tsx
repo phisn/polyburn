@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react"
 import { WorldModel } from "runtime/proto/world"
 import { Game as NativeGame } from "web-game/src/game/game"
+import { GameAgentAsPlayer } from "web-game/src/game/game-agent-as-player"
 import { GameLoop } from "web-game/src/game/game-loop"
 import { GameHooks, GameInstanceType, GameSettings } from "web-game/src/game/game-settings"
-import { GameAgentAsPlayer } from "../../../../web-game/src/game/game-agent-wrapper"
 
 export function Game(props: {
     worldname: string

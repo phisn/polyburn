@@ -18,7 +18,7 @@
         "gl": "^8.0.2",
         "pngjs": "^7.0.0",
         "custom-rapier2d-node": "*",
-        "three": "^0.124.0",
+        "three": "0.145.0",
         "tsconfig": "*",
         "web-game": "*"
     },

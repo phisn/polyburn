@@ -86,10 +86,14 @@ export class ModuleSceneAgent {
             const tl = currentLevel.components.level.boundsTL
             const br = currentLevel.components.level.boundsBR
 
-            this.upBound.position.set((tl.x + br.x) / 2, br.y + 87.25, 0)
-            this.leftBound.position.set(tl.x - 50, (tl.y + br.y) / 2, 0)
-            this.downBound.position.set((tl.x + br.x) / 2, tl.y - 87.25, 0)
-            this.rightBound.position.set(br.x + 50, (tl.y + br.y) / 2, 0)
+            const center = new THREE.Vector2((tl.x + br.x) / 2, (tl.y + br.y) / 2)
+            const width = Math.abs(br.x - tl.x)
+            const height = Math.abs(br.y - tl.y)
+
+            this.upBound.position.set(center.x, center.y + height / 2 + 50, 0)
+            this.downBound.position.set(center.x, center.y - height / 2 - 50, 0)
+            this.leftBound.position.set(center.x - width / 2 - 50, center.y, 0)
+            this.rightBound.position.set(center.x + width / 2 + 50, center.y, 0)
 
             this.previousCurrentLevel = currentLevel
         }

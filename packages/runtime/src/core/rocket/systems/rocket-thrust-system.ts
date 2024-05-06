@@ -5,7 +5,7 @@ import { RuntimeSystemFactory } from "../../runtime-system-factory"
 import { RocketEntityComponents } from "../rocket-entity"
 import { rocketGroundRay } from "../rocket-ground-ray"
 
-export const newRocketThrustSystem: RuntimeSystemFactory = ({ config, store, physics }) => {
+export const newRocketThrustSystem: RuntimeSystemFactory = ({ config, store, physics, rapier }) => {
     const rockets = store.newSet(...RocketEntityComponents)
 
     return context => {
@@ -21,7 +21,9 @@ export const newRocketThrustSystem: RuntimeSystemFactory = ({ config, store, phy
                 y: config.thrustValue,
             }
 
-            if (rocketGroundRay(physics, rocket.components.rigidBody, config.thrustDistance)) {
+            if (
+                rocketGroundRay(rapier, physics, rocket.components.rigidBody, config.thrustDistance)
+            ) {
                 force.x *= config.thrustGroundMultiplier
                 force.y *= config.thrustGroundMultiplier
             }

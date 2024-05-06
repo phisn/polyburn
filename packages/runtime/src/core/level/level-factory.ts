@@ -1,4 +1,3 @@
-import RAPIER from "@dimforge/rapier2d"
 import { EntityType, LevelModel } from "../../../proto/world"
 import { captureBox } from "../../model/world/level-model"
 import { RuntimeComponents } from "../runtime-components"
@@ -22,9 +21,13 @@ export const newLevel = (
         flagRotation: level.rotation,
     }
 
-    const body = factoryContext.physics.createRigidBody(RAPIER.RigidBodyDesc.fixed())
+    const body = factoryContext.physics.createRigidBody(
+        new factoryContext.rapier.RigidBodyDesc(factoryContext.rapier.RigidBodyType.Fixed),
+    )
 
-    const colliderDesc = RAPIER.ColliderDesc.polyline(
+    console.log(body.handle)
+
+    const colliderDesc = factoryContext.rapier.ColliderDesc.polyline(
         new Float32Array([
             levelEntity.camera.topLeft.x,
             levelEntity.camera.topLeft.y,
@@ -44,12 +47,11 @@ export const newLevel = (
     }
 
     const boundsCollider = factoryContext.physics.createCollider(colliderDesc, body)
-
     boundsCollider.setSensor(true)
 
     const { size, transformed } = captureBox(level)
 
-    const captureColliderDesc = RAPIER.ColliderDesc.cuboid(size.width, size.height)
+    const captureColliderDesc = factoryContext.rapier.ColliderDesc.cuboid(size.width, size.height)
         .setTranslation(transformed.x, transformed.y)
         .setRotation(level.rotation)
         .setSensor(true)
@@ -63,8 +65,15 @@ export const newLevel = (
     return factoryContext.store.create({
         level: {
             ...levelEntity,
+
             boundsCollider,
             captureCollider,
+
+            capturePosition: { x: transformed.x, y: transformed.y },
+            captureSize: { x: size.width, y: size.height },
+
+            boundsTL: { x: levelEntity.camera.topLeft.x, y: levelEntity.camera.topLeft.y },
+            boundsBR: { x: levelEntity.camera.bottomRight.x, y: levelEntity.camera.bottomRight.y },
         },
 
         entityType: EntityType.LEVEL,

@@ -6,8 +6,8 @@ import { RuntimeComponents } from "../runtime-components"
 import { RuntimeFactoryContext } from "../runtime-factory-context"
 
 export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shape: ShapeModel) => {
-    const vertices = bytesToVertices(shape.vertices)
-    const rigidBody = createShapeRigidBody(context.physics, vertices)
+    const vertices = bytesToVertices(context.rapier, shape.vertices)
+    const rigidBody = createShapeRigidBody(context.rapier, context.physics, vertices)
 
     return context.store.create({
         entityType: EntityType.SHAPE,
@@ -16,12 +16,16 @@ export const newShape = (context: RuntimeFactoryContext<RuntimeComponents>, shap
     })
 }
 
-export function createShapeRigidBody(physics: RAPIER.World, vertices: ShapeVertex[]) {
+export function createShapeRigidBody(
+    rapier: typeof RAPIER,
+    physics: RAPIER.World,
+    vertices: ShapeVertex[],
+) {
     const [verticesRaw, top, left] = verticesForShape(vertices)
 
-    const body = physics.createRigidBody(RAPIER.RigidBodyDesc.fixed().setTranslation(left, top))
+    const body = physics.createRigidBody(rapier.RigidBodyDesc.fixed().setTranslation(left, top))
 
-    const collider = RAPIER.ColliderDesc.polyline(verticesRaw).setCollisionGroups(0x00_02_00_05)
+    const collider = rapier.ColliderDesc.polyline(verticesRaw).setCollisionGroups(0x00_02_00_05)
 
     if (collider === null) {
         throw new Error("Failed to create collider")

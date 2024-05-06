@@ -37,11 +37,15 @@ export function actor(observationSize: number, actionSize: number, mlpSpec: MlpS
 }
 
 class InnerActorLayer extends tf.layers.Layer {
-    computeOutputShape(inputShape: tf.Shape | tf.Shape[]): tf.Shape | tf.Shape[] {
+    computeOutputShape(inputShape: tf.Shape[]): tf.Shape | tf.Shape[] {
         return [inputShape[0], inputShape[0]]
     }
 
     call([mu, logstd]: tf.Tensor<tf.Rank>[], kwargs: Kwargs): tf.Tensor<tf.Rank>[] {
+        if (kwargs.deterministic && kwargs.noLogProb) {
+            return [mu, tf.tensor([])]
+        }
+
         const logstdClipped = tf.clipByValue(logstd, LOG_STD_MIN, LOG_STD_MAX)
         const sigma = tf.exp(logstdClipped)
 
@@ -56,33 +60,24 @@ class InnerActorLayer extends tf.layers.Layer {
             )
         }
 
-        let actionLogProb = this.logProb(action, mu, sigma).sum(-1)
+        if (kwargs.noLogProb) {
+            return [action, tf.tensor([])]
+        }
 
-        actionLogProb = actionLogProb.sub(
+        const actionLogProbCorrected = tf.sub(
+            this.logProb(action, mu, sigma).sum(-1),
             tf.sum(
                 tf.mul(2, tf.sub(Math.log(2), tf.add(action, tf.softplus(tf.mul(-2, action))))),
                 1,
             ),
         )
 
-        action = tf.tanh(action)
+        const tanhAction = tf.tanh(action)
 
-        return [action, actionLogProb]
+        return [tanhAction, actionLogProbCorrected]
     }
 
     private logProb(x: tf.Tensor<tf.Rank>, mu: tf.Tensor<tf.Rank>, sigma: tf.Tensor<tf.Rank>) {
-        /*
-        var = self.scale**2
-        log_scale = (
-            math.log(self.scale) if isinstance(self.scale, Real) else self.scale.log()
-        )
-        return (
-            -((value - self.loc) ** 2) / (2 * var)
-            - log_scale
-            - math.log(math.sqrt(2 * math.pi))
-        )
-        */
-
         const variance = tf.square(sigma)
         const logScale = tf.log(sigma)
 

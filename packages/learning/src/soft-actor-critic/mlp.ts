@@ -20,8 +20,6 @@ export function mlp(spec: MlpSpecification) {
                 activation: nextActivation,
             }),
         )
-
-        console.log(`Added layer with inputDim: ${spec.sizes[i]} and units: ${spec.sizes[i + 1]}`)
     }
 
     return model

@@ -16,9 +16,8 @@ class BeforeCriticLayer extends tf.layers.Layer {
         super()
     }
 
-    computeOutputShape(inputShape: tf.Shape | tf.Shape[]): tf.Shape | tf.Shape[] {
-        console.log("inputShape: ", inputShape)
-        return [inputShape[0][0], inputShape[0][1] + inputShape[1][1]]
+    computeOutputShape(inputShape: tf.Shape[]): tf.Shape | tf.Shape[] {
+        return [inputShape[0][0]!, inputShape[0][1]! + inputShape[1][1]!]
     }
 
     call([obs, act]: tf.Tensor<tf.Rank>[]): tf.Tensor<tf.Rank> {

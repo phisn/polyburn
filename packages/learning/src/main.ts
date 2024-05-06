@@ -6,7 +6,7 @@ import { LevelCapturedMessage } from "runtime/src/core/level-capture/level-captu
 import { RocketDeathMessage } from "runtime/src/core/rocket/rocket-death-message"
 import { RuntimeComponents } from "runtime/src/core/runtime-components"
 import { Runtime, newRuntime } from "runtime/src/runtime"
-import { Environment, PPO } from "./ppo/ppo"
+import { Environment } from "./ppo/ppo"
 
 export class PolyburnEnvironment implements Environment {
     private runtime: Runtime
@@ -25,8 +25,12 @@ export class PolyburnEnvironment implements Environment {
     private touchedFlag = false
 
     constructor() {
+        const worldStr2 =
+            "ClwKBkdsb2JhbBJSEigNzcxUwBXJdsBBJQAA7MEtAADKQTUAAO5BPQAAmMBFAAAAQE0AAABAGiYKJAAANEEAAEA/AAD/AODPAACAgP8AAABAxMDA/wDgTwC0////AAo1CgJGMRIvEi0NMzMbQBWLbFdAHdsPyUAlAADswS0AALhANQAA7kE9AACYwEUAAABATQAAAEAKEgoCRzESDAoKDWZmDsEVZmbEQQoSCgJHMhIMCgoNZmYKwRVmZsJBChIKAkczEgwKCg1mZma/FWZmwkEKEgoCRzQSDAoKDWZmRkAVZmbEQQo1CgJGMhIvEi0NzcwywRWLbFdAHdsPyUAlAACawS0AAMpBNQAAIEE9AACYwEUAAABATQAAAEASHAoITm9ybWFsIDESEAoCRzEKAkYxCgZHbG9iYWwSHAoITm9ybWFsIDISEAoCRzIKAkYxCgZHbG9iYWwSHAoITm9ybWFsIDMSEAoCRzMKAkYxCgZHbG9iYWwSHAoITm9ybWFsIDQSEAoCRzQKAkYxCgZHbG9iYWwSHAoITm9ybWFsIDUSEAoCRjIKAkcxCgZHbG9iYWwSHAoITm9ybWFsIDYSEAoCRjIKAkcyCgZHbG9iYWwSHAoITm9ybWFsIDcSEAoCRjIKAkczCgZHbG9iYWwSHAoITm9ybWFsIDgSEAoCRzQKAkYyCgZHbG9iYWw="
+
         const worldStr =
             "CqAJCgZOb3JtYWwSlQkKDw0fhZ3BFR+FB0Id2w/JQBItDR+FtsEVgZUDQh3bD8lAJQAAEMItpHBhQjWuR9lBPR+Fm0FFAAAAQE0AAABAEi0Nrkc/QRVt5wZCHdsPyUAlAAD4QC2kcBZCNezRjUI94KMwP0UAAABATQAAAEASLQ2k8B5CFX9qWEEd2w/JQCUAAP5BLaRwFkI17NG9Qj3gozA/RQAAAEBNAAAAQBItDeyRm0IVPzWGQR3bD8lAJQCAjUItSOHsQTX26AVDPYTr6cBFAAAAQE0AAABAEi0Nw0XwQhUcd4lAHTMeejwlAIDnQi2kcA5CNfboMkM9EK6nv0UAAABATQAAAEASLQ2PYhxDFT813EEd2w/JQCUAAM9CLaRwbEI1AMAmQz0fhbFBRQAAAEBNAAAAQBItDcM15UIVYxBJQh3bD8lAJQAAeUItUrijQjXs0fpCPZDCM0JFAAAAQE0AAABAEi0N9WiFQhXVeIhCHdsPyUAlw7WBQi3sUY9CNcO1kUI9AACBQkUAAABATQAAAEAaTgpMpHA9wXE9ukHAwP8AAEAAPYCA/wAAtIBDAAD/AIDFAEBAQP8AgMgAAICA/wBAxgC+oKD/AABGAMf///8AV0dxQry8+QBSQPHA////ABpOCkyuR3FBSOHKQf/++ABAxgAA//3wAAA/QMT/++AAQEoAQv/3wAAAPkBF/++AAADHAD//3gAAgMYAAP/vgAAAAIDD////AKxGCq////8AGpcCCpQC9qjBQpqZJEL///8AMNEAOv///wDqy9pH////AOzHNML///8AAMIAx////wAAQkDE////AABFAL3///8AAELAx////wCARgBF////AEBGgMb///8AwEYAv////wAgSQBF////AOBIgMP///8A4EjAR////wAARYDE////AAC+oMj///8AAD8AAP///wAAAODK////AGBJAEf///8AwMTASP///wAgSQAA////AEBEwMb///8AAEOAQ////wBASQC/////AAA+wEj///8AwEqAw////wAAvMBL////AODIAAD///8AQMoAQP///wAAPgBI////ACDIAAD///8AgMCARv///wCAyQAA////AEBFgMb///8AGqcCCqQCpHAZQqRwOcH///8AmFgAwP///wCAxwhU////AGDK4E3///8AwM1gyf///wAAv+DI////AKBLAMP///8AADpgyf///wCARgAA////AAA6YMv///8AQMgAAP///wAAvuDJ////AIBFYMj///8AQMyAwf///wAAtMDG////AGDLAL3///8AOMAMSP///wAkxgCu////AADC4Mj///8AAMNARv///wBgyQAA////AEDHgMP///8AwMeAQf///wAAAEBM////ACDJAAD///8AgMMAx////wAAyoBC////AAC9AMb///8AgMTARf///wCAwIDB////AABFAML///8AAMgANP///wBAxEBG////AADHAAD///8AAMFAyP///wBgyEDE////ABomCiSPQopCcT2DQv/AjQAAxAAA/+R0AAAAAMT/kwAAAEQAAP+bAAASEgoGTm9ybWFsEggKBk5vcm1hbA=="
+
         this.worldModel = WorldModel.decode(Buffer.from(worldStr, "base64"))
 
         this.runtime = newRuntime(this.worldModel, "Normal")
@@ -52,26 +56,42 @@ export class PolyburnEnvironment implements Environment {
         this.bestDistance = distance
     }
 
-    inputFromAction(action: number[]) {
-        const input = {
-            rotation: this.currentRotation + action[0],
-            thrust: action[1] > 0 ? true : false,
-        }
-
-        return input
-    }
-
     step(action: number | number[]): [number[], number, boolean] {
-        if (typeof action === "number") {
-            throw new Error("Wrong action type")
+        if (Array.isArray(action)) {
+            action = action[0]
         }
 
         this.remainingTime--
+        let thrust = false
 
-        const input = this.inputFromAction(action)
-        this.currentRotation += action[0]
+        switch (action) {
+            case 0:
+                break
+            case 1:
+                thrust = true
+                break
+            case 2:
+                this.currentRotation += 0.05
+                break
+            case 3:
+                thrust = true
+                this.currentRotation += 0.05
+                break
+            case 4:
+                this.currentRotation -= 0.05
+                break
+            case 5:
+                thrust = true
+                this.currentRotation -= 0.05
+                break
+            default:
+                throw new Error("Wrong action")
+        }
 
-        this.runtime.step(input)
+        this.runtime.step({
+            thrust,
+            rotation: this.currentRotation,
+        })
 
         const { distance, observation, velMag, angDiff } = this.state()
 
@@ -95,8 +115,12 @@ export class PolyburnEnvironment implements Environment {
         const deathMessage = [...this.deathMessages].at(-1)
 
         if (deathMessage) {
-            const reward = -(velMag + angDiff)
+            const reward = -velMag * 10 - angDiff * 10
             return [observation, reward, true]
+        }
+
+        if (this.remainingTime <= 0) {
+            return [observation, -3000, true]
         }
 
         const reward = Math.max(0, this.bestDistance - distance)
@@ -104,7 +128,11 @@ export class PolyburnEnvironment implements Environment {
 
         const done = this.remainingTime <= 0
 
-        return [observation, reward * 10 + (newTouch ? 100 : 0), done]
+        return [
+            observation,
+            reward * 10 + (newTouch ? 100 : 0) + 100 * (this.touchedFlag ? 1 : 0),
+            done,
+        ]
     }
 
     state() {
@@ -305,11 +333,14 @@ export class CartPole implements Environment {
 
 import "@tensorflow/tfjs-backend-webgl"
 import "@tensorflow/tfjs-backend-webgpu"
+import { DQN } from "./dqn/dqn"
 import { SoftActorCritic } from "./soft-actor-critic/soft-actor-critic"
 
-if (true) {
-    tf.setBackend("cpu").then(() => {
+if (false) {
+    tf.setBackend("webgl").then(() => {
+        // const env = new PolyburnEnvironment()
         const env = new CartPole()
+        const envTest = new CartPole()
 
         const sac = new SoftActorCritic({
             mlpSpec: {
@@ -322,8 +353,8 @@ if (true) {
             observationSize: 4,
 
             maxEpisodeLength: 1000,
-            bufferSize: 1e6,
-            batchSize: 100,
+            bufferSize: 10_000,
+            batchSize: 128,
             updateAfter: 1000,
             updateEvery: 50,
 
@@ -333,13 +364,67 @@ if (true) {
             polyak: 0.995,
         })
 
-        sac.learn(new CartPole(), {
-            epochs: 1000,
+        /*
+        function possibleLifetime() {
+            let observation = env.reset()
+
+            let totalReward = 0
+            const inputs = []
+
+            while (true) {
+                const action = sac.act(observation, true)
+                inputs.push(env.inputFromAction(action as number[]))
+
+                const [nextObservation, reward, done] = env.step(action)
+
+                totalReward += reward
+                observation = nextObservation
+
+                if (done) {
+                    break
+                }
+            }
+
+            return {
+                totalReward,
+                touched: env.state().touched,
+                distance: env.state().distance,
+                inputs,
+            }
+        }
+
+        sac.learn(env, {
             stepsPerEpoch: 100,
-            startAfter: 1000,
-            renderEvery: 1,
-            onEpochFinish: info => {
-                console.log("Length: ", info.episodeLength)
+            epochs: 1000,
+            onFirstEpisodeInEpoch() {
+                const lt = possibleLifetime()
+                console.log(
+                    `Reward: ${lt.totalReward}, touched: ${lt.touched}, distance: ${lt.distance}`,
+                )
+            },
+        })
+        */
+
+        sac.learn(env, {
+            stepsPerEpoch: 100,
+            epochs: 1000,
+            onEpochFinish() {
+                let observation = envTest.reset()
+                let t = 0
+
+                while (t < 1000) {
+                    const action = sac.act(observation, true)
+                    const [nextObservation, , done] = envTest.step(action)
+
+                    if (done) {
+                        break
+                    }
+
+                    observation = nextObservation
+                    t++
+                }
+
+                console.log("Length: ", t)
             },
         })
 
@@ -636,28 +721,45 @@ if (false) {
     })
 }
 
-if (false) {
-    tf.setBackend("cpu").then(() => {
+if (true) {
+    tf.setBackend("webgl").then(() => {
         const env = new PolyburnEnvironment()
 
         const inputDim = 5
 
+        const dqn = new DQN(
+            {
+                actionDim: 6,
+                observationDim: inputDim,
+
+                learningRate: 1e-4,
+                bufferSize: 1e6,
+                gamma: 0.99,
+                tau: 0.001,
+                targetNetworkFrequency: 5,
+                batchSize: 128,
+
+                learningStartFrom: 10000,
+                trainingFrequency: 10,
+            },
+            [128, 128],
+        )
+
+        /*
         const ppo = new PPO(
             {
                 steps: 512,
-                epochs: 15,
-                policyLearningRate: 1e-3,
-                valueLearningRate: 1e-3,
+                epochs: 20,
+                policyLearningRate: 1e-4,
+                valueLearningRate: 1e-4,
                 clipRatio: 0.2,
                 targetKL: 0.01,
                 gamma: 0.99,
                 lambda: 0.95,
                 observationDimension: inputDim,
                 actionSpace: {
-                    class: "Box",
-                    len: 2,
-                    low: -1,
-                    high: 1,
+                    class: "Discrete",
+                    len: 6,
                 },
             },
             env,
@@ -665,11 +767,15 @@ if (false) {
                 layers: [
                     tf.layers.dense({
                         inputDim: inputDim,
-                        units: 64,
+                        units: 128,
                         activation: "relu",
                     }),
                     tf.layers.dense({
-                        units: 64,
+                        units: 128,
+                        activation: "relu",
+                    }),
+                    tf.layers.dense({
+                        units: 128,
                         activation: "relu",
                     }),
                 ],
@@ -678,27 +784,30 @@ if (false) {
                 layers: [
                     tf.layers.dense({
                         inputDim: inputDim,
-                        units: 64,
+                        units: 128,
                         activation: "relu",
                     }),
                     tf.layers.dense({
-                        units: 64,
+                        units: 128,
+                        activation: "relu",
+                    }),
+                    tf.layers.dense({
+                        units: 128,
                         activation: "relu",
                     }),
                 ],
             }),
         )
+        */
 
         function possibleLifetime() {
             let observation = env.reset()
 
             let totalReward = 0
-            const inputs = []
+            const inputs: number[] = []
 
             while (true) {
-                const action = ppo.act(observation)
-                inputs.push(env.inputFromAction(action as number[]))
-
+                const action = dqn.act(observation)
                 const [nextObservation, reward, done] = env.step(action)
 
                 totalReward += reward
@@ -717,13 +826,30 @@ if (false) {
             }
         }
 
-        let currentAverage = 0
-        let i = 0
+        dqn.learn(env, {
+            stepsPerEpoch: 100,
+            epochs: 1000,
+            startEpsilon: 0.5,
+            endEpsilon: 0.01,
+            explorationStepsFraction: 0.1,
+            onTest() {
+                const info = possibleLifetime()
 
-        const previousTwenty: number[] = []
+                console.log(
+                    `Reward ${0}: reward(${info.totalReward}), distance(${info.distance}), touched(${info.touched})`,
+                )
+            },
+        })
 
         function iteration() {
-            ppo.learn(512 * i)
+            requestAnimationFrame(iteration)
+        }
+
+        requestAnimationFrame(iteration)
+
+        /*
+        function iteration() {
+            
             const info = possibleLifetime()
 
             console.log(
@@ -733,7 +859,6 @@ if (false) {
             if (info.totalReward > currentAverage && previousTwenty.length === 20) {
                 currentAverage = info.totalReward
                 console.log("Saved")
-                ppo.save()
             }
 
             if (previousTwenty.length === 20) {
@@ -754,14 +879,21 @@ if (false) {
             ) {
                 console.log("Restoring")
 
-                ppo.restore().finally(() => {
-                    requestAnimationFrame(iteration)
-                })
+                requestAnimationFrame(iteration)
             } else {
                 requestAnimationFrame(iteration)
             }
         }
 
+        const { totalReward, inputs } = possibleLifetime()
+        currentAverage = totalReward
+
+        console.log(JSON.stringify(inputs))
+
+        console.log("Start with: ", currentAverage)
+        requestAnimationFrame(iteration)
+
+        /*
         ppo.restore().finally(() => {
             const { totalReward, inputs } = possibleLifetime()
             currentAverage = totalReward
@@ -771,5 +903,6 @@ if (false) {
             console.log("Start with: ", currentAverage)
             requestAnimationFrame(iteration)
         })
+        */
     })
 }

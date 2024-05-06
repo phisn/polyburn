@@ -14,6 +14,12 @@ export interface LevelComponent {
     flag: Point
     flagRotation: number
 
+    capturePosition: Point
+    captureSize: Point
+
+    boundsTL: Point
+    boundsBR: Point
+
     boundsCollider: RAPIER.Collider
     captureCollider: RAPIER.Collider
 }

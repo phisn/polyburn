@@ -1,8 +1,8 @@
-import { Vector2 } from "@dimforge/rapier2d"
+import RAPIER from "@dimforge/rapier2d"
 import { f16round, getFloat16, setFloat16 } from "@petamoriken/float16"
 
 export interface ShapeVertex {
-    position: Vector2
+    position: RAPIER.Vector2
     color: number
 }
 
@@ -36,8 +36,9 @@ export function verticesToBytes(vertices: ShapeVertex[]) {
     return u8
 }
 
-export function bytesToVertices(bytes: Uint8Array) {
+export function bytesToVertices(rapier: typeof RAPIER, bytes: Uint8Array) {
     const vertices: ShapeVertex[] = []
+
     const view = new DataView(
         bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
     )
@@ -60,7 +61,7 @@ export function bytesToVertices(bytes: Uint8Array) {
         aggregated.y += getFloat16(view, byteCount + 2, true)
 
         vertices.push({
-            position: new Vector2(aggregated.x, aggregated.y),
+            position: new rapier.Vector2(aggregated.x, aggregated.y),
             color: view.getUint32(byteCount + 4, true),
         })
     }

@@ -8,6 +8,7 @@ let rayDirection: RAPIER.Vector | undefined
 let ray: RAPIER.Ray | undefined
 
 export const rocketGroundRayRaw = (
+    rapier: typeof RAPIER,
     physics: RAPIER.World,
     rocket: RAPIER.RigidBody,
     length: number,
@@ -31,8 +32,8 @@ export const rocketGroundRayRaw = (
     )
 
     if (ray === undefined || rayDirection === undefined) {
-        rayDirection = new RAPIER.Vector2(0, 1)
-        ray = new RAPIER.Ray(new RAPIER.Vector2(0, 0), new RAPIER.Vector2(0, 1))
+        rayDirection = new rapier.Vector2(0, 1)
+        ray = new rapier.Ray(new rapier.Vector2(0, 0), new rapier.Vector2(0, 1))
     }
 
     rayDirection.x = rayTarget.x - rayStart.x
@@ -51,5 +52,9 @@ export const rocketGroundRayRaw = (
     }
 }
 
-export const rocketGroundRay = (physics: RAPIER.World, rocket: RAPIER.RigidBody, length: number) =>
-    rocketGroundRayRaw(physics, rocket, length)?.cast
+export const rocketGroundRay = (
+    rapier: typeof RAPIER,
+    physics: RAPIER.World,
+    rocket: RAPIER.RigidBody,
+    length: number,
+) => rocketGroundRayRaw(rapier, physics, rocket, length)?.cast

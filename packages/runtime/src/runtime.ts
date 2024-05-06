@@ -10,7 +10,7 @@ import { runtimeSystemFactories } from "./core/runtime-system-factories"
 import { RuntimeSystemContext } from "./core/runtime-system-stack"
 import { newShape } from "./core/shape/shape-factory"
 
-export const newRuntime = (world: WorldModel, gamemodeName: string) => {
+export const newRuntime = (rapier: typeof RAPIER, world: WorldModel, gamemodeName: string) => {
     const gamemode = world.gamemodes[gamemodeName]
 
     if (gamemode === undefined) {
@@ -19,16 +19,19 @@ export const newRuntime = (world: WorldModel, gamemodeName: string) => {
 
     const groups = gamemode.groups.map(group => world.groups[group])
 
+    console.log("VECTOR2: ", rapier)
+
     const context: RuntimeFactoryContext<RuntimeComponents> = {
         store: createEntityStore(),
         messageStore: createMessageStore(),
 
-        physics: new RAPIER.World(new RAPIER.Vector2(0, 0)),
-        queue: new RAPIER.EventQueue(true),
+        rapier,
+        physics: new rapier.World(new rapier.Vector2(0, 0)),
+        queue: new rapier.EventQueue(true),
         config: defaultConfig,
     }
 
-    context.physics.gravity = new RAPIER.Vector2(0, -20)
+    context.physics.gravity = new rapier.Vector2(0, -20)
 
     for (const level of groups.flatMap(group => group.levels)) {
         newLevel(context, level)

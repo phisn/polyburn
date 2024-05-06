@@ -1,0 +1,31 @@
+{
+    "name": "learning-gym",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "local": "npx tsx ./src/main.ts"
+    },
+    "devDependencies": {
+        "@types/gl": "^6.0.5",
+        "@types/pngjs": "^6.0.5",
+        "tslib": "^2.6.2",
+        "tsx": "^4.7.3",
+        "typescript": "^5.4.2"
+    },
+    "dependencies": {
+        "@types/node": "^20.12.8",
+        "gl": "^8.0.2",
+        "pngjs": "^7.0.0",
+        "custom-rapier2d-node": "*",
+        "three": "^0.124.0",
+        "tsconfig": "*",
+        "web-game": "*"
+    },
+    "eslintConfig": {
+        "root": true,
+        "extends": [
+            "custom"
+        ]
+    }
+}

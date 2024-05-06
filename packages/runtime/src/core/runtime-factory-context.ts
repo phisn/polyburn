@@ -9,6 +9,7 @@ export interface RuntimeFactoryContext<Components extends RuntimeComponents> {
     store: EntityStoreState<Components>
     messageStore: MessageStore<Components, RuntimeMessages>
 
+    rapier: typeof RAPIER
     physics: RAPIER.World
     queue: RAPIER.EventQueue
 }

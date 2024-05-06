@@ -1,4 +1,4 @@
-import { Game } from "./game"
+import { GameInterface } from "./game"
 
 export class GameLoop {
     private animationFrame: number | undefined
@@ -7,7 +7,7 @@ export class GameLoop {
 
     private tickrate = 1000 / 60
 
-    constructor(private game: Game) {
+    constructor(private game: GameInterface) {
         this.tick = this.tick.bind(this)
     }
 

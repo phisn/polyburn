@@ -7,7 +7,15 @@ import { ModuleParticles } from "./modules/module-particles/module-particles"
 import { ModuleScene } from "./modules/module-scene/module-scene"
 import { ExtendedRuntime, newExtendedRuntime } from "./runtime-extension/new-extended-runtime"
 
-export class Game {
+export interface GameInterface {
+    dispose(): void
+
+    onPreFixedUpdate(delta: number): void
+    onFixedUpdate(last: boolean): void
+    onUpdate(delta: number, overstep: number): void
+}
+
+export class Game implements GameInterface {
     runtime: ExtendedRuntime
 
     camera: ModuleCamera

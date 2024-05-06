@@ -1,3 +1,4 @@
+import RAPIER from "@dimforge/rapier2d"
 import { SystemStack } from "runtime-framework"
 import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
 import { ReplayCaptureService } from "runtime/src/model/replay/replay-capture-service"
@@ -8,6 +9,7 @@ import { ExtendedFactoryContext } from "./extended-factory-context"
 
 export function newExtendedRuntime(settings: GameSettings, scene: Scene, renderer: WebGLRenderer) {
     const runtime: SystemStack<ExtendedFactoryContext, RuntimeSystemContext> = newRuntime(
+        RAPIER,
         settings.world,
         settings.gamemode,
     ).extend({

@@ -1,4 +1,3 @@
-import RAPIER from "@dimforge/rapier2d"
 import { EntityType, RocketModel } from "../../../proto/world"
 import { Point } from "../../model/point"
 import { changeAnchor } from "../../model/world/change-anchor"
@@ -27,7 +26,7 @@ export const newRocket = (
     )
 
     const body = context.physics.createRigidBody(
-        RAPIER.RigidBodyDesc.dynamic()
+        context.rapier.RigidBodyDesc.dynamic()
             .setTranslation(positionAtCenter.x, positionAtCenter.y)
             .setRotation(rocket.rotation)
             .setCcdEnabled(true)
@@ -35,14 +34,14 @@ export const newRocket = (
     )
 
     rocketColliders.forEach((vertices, index) => {
-        const collider = RAPIER.ColliderDesc.convexHull(new Float32Array(vertices))
+        const collider = context.rapier.ColliderDesc.convexHull(new Float32Array(vertices))
 
         if (collider === null) {
             throw new Error("Failed to create collider")
         }
 
         collider
-            .setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS)
+            .setActiveEvents(context.rapier.ActiveEvents.COLLISION_EVENTS)
             .setMass(index === 0 ? 20 : 0.5)
             .setCollisionGroups(0x00_01_00_02)
 

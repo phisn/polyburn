@@ -1,0 +1,28 @@
+{
+    "name": "custom-rapier2d-node",
+    "collaborators": [
+        "Sébastien Crozet <developer@crozet.re>"
+    ],
+    "description": "2-dimensional physics engine in Rust - official JS bindings.",
+    "version": "0.11.2",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dimforge/rapier.js"
+    },
+    "files": [
+        "rapier_wasm2d_bg.wasm",
+        "rapier_wasm2d.js",
+        "rapier_wasm2d.d.ts"
+    ],
+    "main": "rapier_wasm2d.js",
+    "homepage": "https://rapier.rs",
+    "types": "rapier_wasm2d.d.ts",
+    "keywords": [
+        "physics",
+        "dynamics",
+        "rigid",
+        "real-time",
+        "joints"
+    ]
+}

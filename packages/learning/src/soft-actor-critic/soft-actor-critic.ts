@@ -21,6 +21,8 @@ export interface Config {
     alpha: number
     gamma: number
     polyak: number
+
+    deterministic?: boolean
 }
 
 export interface SacLearningInfo {
@@ -39,8 +41,8 @@ export interface SacLearningConfig {
     epochs: number
     stepsPerEpoch: number
 
-    startAfter: number
-    renderEvery: number
+    startAfter?: number // default 10 000
+    renderEvery?: number // default 1
 
     onEpochFinish?: (progress: SacLearningInfo) => void
 
@@ -56,6 +58,10 @@ export class SoftActorCritic {
     private policy: tf.LayersModel
     private policyOptimizer: tf.Optimizer
 
+    private targetEntropy: number
+    private logAlpha: tf.Variable<tf.Rank.R0>
+    private logAlphaOptimizer: tf.Optimizer
+
     private q1: tf.LayersModel
     private q2: tf.LayersModel
     private targetQ1: tf.LayersModel
@@ -63,9 +69,6 @@ export class SoftActorCritic {
     private qOptimizer: tf.Optimizer
 
     private deterministic: boolean
-    private episodeReturn: number
-    private episodeLength: number
-
     private t: number
 
     constructor(private config: Config) {
@@ -78,16 +81,21 @@ export class SoftActorCritic {
         this.targetQ1 = critic(config.observationSize, config.actionSize, config.mlpSpec)
         this.targetQ2 = critic(config.observationSize, config.actionSize, config.mlpSpec)
 
-        this.deterministic = false
-        this.episodeReturn = 0
-        this.episodeLength = 0
+        this.deterministic = config.deterministic ?? false
         this.t = 0
+
+        this.targetEntropy = -config.actionSize
+        this.logAlpha = tf.variable(tf.scalar(Math.log(1)))
 
         this.policyOptimizer = tf.train.adam(config.learningRate)
         this.qOptimizer = tf.train.adam(config.learningRate)
+        this.logAlphaOptimizer = tf.train.adam(config.learningRate)
     }
 
     async learn(env: Environment, learningConfig: SacLearningConfig) {
+        const startAfter = learningConfig.startAfter ?? 1_000
+        const renderEvery = learningConfig.renderEvery ?? 1
+
         let observation = env.reset()
         let episodeLength = 0
         let episodeReturn = 0
@@ -103,10 +111,10 @@ export class SoftActorCritic {
         while (this.t < steps) {
             let action: number[]
 
-            if (this.t > learningConfig.startAfter) {
+            if (this.t > startAfter) {
                 action = this.act(observation, false)
             } else {
-                action = [Math.random() * 2 - 1]
+                action = Array.from({ length: this.config.actionSize }, () => 2 * Math.random() - 1)
             }
 
             const [nextObservation, reward, done] = env.step(action)
@@ -145,6 +153,8 @@ export class SoftActorCritic {
             }
 
             if (this.t % learningConfig.stepsPerEpoch === 0) {
+                console.log("Alpha: ", this.logAlpha.exp().arraySync())
+
                 if (learningConfig.onEpochFinish) {
                     learningConfig.onEpochFinish({
                         episodeReturn: maxEpochEpisodeReturn,
@@ -156,10 +166,10 @@ export class SoftActorCritic {
                 maxEpochEpisodeReturn = 0
                 maxEpochEpisodeLength = 0
 
-                hasEpisodeAlreadyEndedInEpoch = true
+                hasEpisodeAlreadyEndedInEpoch = false
             }
 
-            if (learningConfig.renderEvery > 0 && this.t % learningConfig.renderEvery === 0) {
+            if (renderEvery > 0 && this.t % renderEvery === 0) {
                 await tf.nextFrame()
             }
         }
@@ -169,9 +179,10 @@ export class SoftActorCritic {
         return tf.tidy(() => {
             const [action] = this.policy.apply(tf.tensor2d([observation]), {
                 deterministic,
+                noLogProb: true,
             }) as tf.Tensor<tf.Rank.R2>[]
 
-            return action.squeeze([1]).arraySync() as number[]
+            return action.squeeze([0]).arraySync() as number[]
         })
     }
 
@@ -184,17 +195,13 @@ export class SoftActorCritic {
             let averageLossPolicy = 0
 
             for (let i = 0; i < this.config.updateEvery; i++) {
-                const batch = this.replayBuffer.sample()
-                const updateInfo = this.update(batch)
+                tf.tidy(() => {
+                    const batch = this.replayBuffer.sample()
+                    const updateInfo = this.update(batch)
 
-                tf.dispose(batch.observation)
-                tf.dispose(batch.action)
-                tf.dispose(batch.reward)
-                tf.dispose(batch.nextObservation)
-                tf.dispose(batch.done)
-
-                averageLossQ += updateInfo.lossQ
-                averageLossPolicy += updateInfo.lossPolicy
+                    averageLossQ += updateInfo.lossQ
+                    averageLossPolicy += updateInfo.lossPolicy
+                })
             }
 
             averageLossQ /= this.config.updateEvery
@@ -251,7 +258,7 @@ export class SoftActorCritic {
 
             const minPiQ = tf.minimum(piQ1, piQ2)
 
-            return tf.mean(logpPi.mul(this.config.alpha).sub(minPiQ)) as tf.Scalar
+            return logpPi.mul(this.logAlpha.exp()).sub(minPiQ).mean() as tf.Scalar
         }
 
         const { value: lossValuePolicy, grads: gradsPolicy } = tf.variableGrads(
@@ -260,6 +267,19 @@ export class SoftActorCritic {
         )
 
         this.policyOptimizer.applyGradients(gradsPolicy)
+
+        const [, logpPi] = this.policy.apply(batch.observation, {
+            deterministic: this.deterministic,
+        }) as tf.Tensor<tf.Rank.R2>[]
+
+        const alphaLoss = () => {
+            return tf.neg(
+                this.logAlpha.exp().mul(logpPi.add(this.targetEntropy)).mean(),
+            ) as tf.Scalar
+        }
+
+        const { grads: gradsAlpha } = tf.variableGrads(alphaLoss, [this.logAlpha])
+        this.logAlphaOptimizer.applyGradients(gradsAlpha)
 
         // do polyak averaging
         const tau = tf.scalar(this.config.polyak)
@@ -297,12 +317,10 @@ export class SoftActorCritic {
             [-1],
         ) as tf.Tensor<tf.Rank.R1>
 
-        const minTargetQ = tf.minimum(targetQ1, targetQ2)
-        const softQTarget = tf.sub(minTargetQ, tf.mul(this.config.alpha, logpPi))
+        const softQTarget = tf.minimum(targetQ1, targetQ2).sub(logpPi.mul(this.logAlpha.exp()))
 
-        const backup = tf.add(
-            batch.reward,
-            tf.mul(this.config.gamma, tf.mul(tf.scalar(1).sub(batch.done), softQTarget)),
+        const backup = batch.reward.add(
+            softQTarget.mul(tf.scalar(1).sub(batch.done)).mul(this.config.gamma),
         ) as tf.Tensor<tf.Rank.R1>
 
         return backup

@@ -36,7 +36,7 @@ export class DefaultGameReward implements Reward {
         this.distanceToReward = 16 / this.previousDistanceToLevel
 
         this.steps = 0
-        this.maxSteps = 15 * 20 * 4 // 20 seconds
+        this.maxSteps = 10 * 20 * 4 // 20 seconds
     }
 
     next(steps: () => void): [number, boolean] {
@@ -45,11 +45,14 @@ export class DefaultGameReward implements Reward {
         ++this.steps
 
         if (this.steps >= this.maxSteps) {
-            return [-128, true]
+            return [-80, true]
         }
 
         for (const message of this.deathCollector) {
-            return [-32, true]
+            const velocity = this.rocket.components.rigidBody.linvel()
+            const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y)
+
+            return [-32 - speed, true]
         }
 
         const distanceToFlag = this.findDistanceToFlag(this.nextLevel)
@@ -67,6 +70,8 @@ export class DefaultGameReward implements Reward {
             reward += 512
             this.nextLevel = nextFlag(this.runtime, this.rocket)
             this.previousDistanceToLevel = this.findDistanceToFlag(this.nextLevel)
+
+            return [512, true]
         }
 
         return [reward, false]

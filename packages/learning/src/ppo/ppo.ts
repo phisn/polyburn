@@ -1,4 +1,4 @@
-import * as tf from "@tensorflow/tfjs"
+import * as tf from "@tensorflow/tfjs-node-gpu"
 
 class ReplayBuffer {
     private gamma: number
@@ -134,7 +134,6 @@ interface PPOConfig {
     clipRatio: number
     targetKL: number
 
-    observationDimension: number
     actionSpace: Space
 }
 
@@ -198,13 +197,13 @@ export class PPO {
     }
 
     async save() {
-        await this.actor.save("localstorage://actor")
-        await this.critic.save("localstorage://critic")
+        await this.actor.save("file://./training/actor")
+        await this.critic.save("file://./training/critic")
     }
 
     async restore() {
-        this.actor = await tf.loadLayersModel("localstorage://actor")
-        this.critic = await tf.loadLayersModel("localstorage://critic")
+        this.actor = await tf.loadLayersModel("file://./training/actor/model.json")
+        this.critic = await tf.loadLayersModel("file://./training/critic/model.json")
     }
 
     act(observation: number[]): number | number[] {

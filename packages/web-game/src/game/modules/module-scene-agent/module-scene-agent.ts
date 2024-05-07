@@ -4,6 +4,7 @@ import { RuntimeFactoryContext } from "runtime/src/core/runtime-factory-context"
 import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
 import { Runtime } from "runtime/src/runtime"
 import * as THREE from "three"
+import { AgentColors, agentColorsGrayScale, agentColorsRGB } from "./colors"
 import { MutatableShapeGeometry } from "./mutatable-shape-geometry"
 import { Flag } from "./objects/flag"
 import { Rocket } from "./objects/rocket"
@@ -22,26 +23,29 @@ export class ModuleSceneAgent {
     constructor(
         private scene: THREE.Scene,
         private runtime: Runtime,
+        private grayScale: boolean,
     ) {
+        const colors = grayScale ? agentColorsGrayScale : agentColorsRGB
+
         const [rocketEntity] = runtime.factoryContext.store.find("rocket", "rigidBody")
-        this.rocket = new Rocket(rocketEntity)
+        this.rocket = new Rocket(rocketEntity, colors)
         this.scene.add(this.rocket)
 
-        this.initShapes(runtime)
+        this.initShapes(runtime, colors)
 
         for (const levelEntity of runtime.factoryContext.store.find("level")) {
             if (levelEntity.components.level.hideFlag) {
                 continue
             }
 
-            const flag = new Flag(levelEntity)
+            const flag = new Flag(levelEntity, colors)
             scene.add(flag)
             this.flags.push(flag)
         }
 
         this.upBound = new THREE.Mesh(
             new THREE.PlaneGeometry(100, 100),
-            new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+            new THREE.MeshBasicMaterial({ color: colors.outOfBounds }),
         )
 
         this.downBound = this.upBound.clone()
@@ -58,6 +62,7 @@ export class ModuleSceneAgent {
 
     private initShapes(
         runtime: SystemStack<RuntimeFactoryContext<RuntimeComponents>, RuntimeSystemContext>,
+        colors: AgentColors,
     ) {
         const shapes = runtime.factoryContext.store.newSet("shape")
 
@@ -65,7 +70,7 @@ export class ModuleSceneAgent {
             const shapeGeometry = new MutatableShapeGeometry(
                 shape.components.shape.vertices.map(vertex => ({
                     position: new THREE.Vector2(vertex.position.x, vertex.position.y),
-                    color: 0xff0000,
+                    color: colors.shape,
                 })),
             )
             const shapeMaterial = new THREE.MeshBasicMaterial({ vertexColors: true })
@@ -81,8 +86,6 @@ export class ModuleSceneAgent {
         const currentLevel = this.rocket.entity.components.rocket!.currentLevel
 
         if (currentLevel !== this.previousCurrentLevel) {
-            console.log("Current level changed: ", currentLevel)
-
             const tl = currentLevel.components.level.boundsTL
             const br = currentLevel.components.level.boundsBR
 

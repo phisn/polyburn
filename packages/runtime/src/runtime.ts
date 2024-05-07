@@ -19,8 +19,6 @@ export const newRuntime = (rapier: typeof RAPIER, world: WorldModel, gamemodeNam
 
     const groups = gamemode.groups.map(group => world.groups[group])
 
-    console.log("VECTOR2: ", rapier)
-
     const context: RuntimeFactoryContext<RuntimeComponents> = {
         store: createEntityStore(),
         messageStore: createMessageStore(),

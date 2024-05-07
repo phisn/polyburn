@@ -1,6 +1,7 @@
 import { EntityWith } from "runtime-framework"
 import { RuntimeComponents } from "runtime/src/core/runtime-components"
 import * as THREE from "three"
+import { AgentColors } from "../colors"
 
 /*
 const prototypeRed = new Svg(
@@ -13,11 +14,11 @@ const prototypeGreen = new Svg(
 */
 
 export class Flag extends THREE.Object3D {
-    constructor(levelEntity: EntityWith<RuntimeComponents, "level">) {
+    constructor(levelEntity: EntityWith<RuntimeComponents, "level">, colors: AgentColors) {
         super()
 
         const geometry = new THREE.BoxGeometry(1, 1, 1)
-        const materialRed = new THREE.MeshBasicMaterial({ color: 0x0000ff })
+        const materialRed = new THREE.MeshBasicMaterial({ color: colors.flagCaptureRegion })
 
         const mesh = new THREE.Mesh(geometry, materialRed)
 

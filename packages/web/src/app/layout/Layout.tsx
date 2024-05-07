@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom"
 import { AuthButton } from "../../common/components/auth-button/AuthButton"
+import { BackArrowSvg } from "../../common/components/inline-svg/BackArrow"
 import { BoxArrowInRight } from "../../common/components/inline-svg/BoxArrowInRight"
 import { useAppStore } from "../../common/storage/app-store"
 import { Alert } from "./Alert"
@@ -58,7 +59,7 @@ function Logo() {
 export function LayoutWithMenu() {
     function ResponsiveLoginButton() {
         return (
-            <AuthButton className="btn btn-outline btn-square hxs:w-auto hxs:h-auto hxs:pr-3 relative z-20 px-2">
+            <AuthButton className="btn btn-lg btn-outline btn-square hxs:w-auto hxs:h-auto hxs:pr-3 relative z-20 px-2">
                 <div className="flex items-center space-x-2">
                     <BoxArrowInRight width="30" height="30" className="pr-1" />
                     <div className="hxs:block hidden">LOGIN</div>
@@ -72,7 +73,10 @@ export function LayoutWithMenu() {
             <div className="relative grow">
                 <Layout />
             </div>
-            <div className="hxs:absolute hxs:pr-5 hxs:w-full flex justify-end pr-2 pt-6">
+            <div className="hxs:absolute hxs:pr-5 hxs:w-full items--end flex flex-col space-y-2 pr-2 pt-2">
+                <div className="btn btn-lg btn-outline btn-square">
+                    <BackArrowSvg width="30" height="30" />
+                </div>
                 <ResponsiveLoginButton />
             </div>
         </div>

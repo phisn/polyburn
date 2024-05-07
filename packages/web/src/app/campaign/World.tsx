@@ -33,7 +33,7 @@ export function World(props: { world?: WorldView; locked?: boolean; onSelected: 
     return (
         <WorldContainerOuter>
             <ButtonOverlay />
-            <Overlay world={props.world} />
+            <Overlay world={props.world} locked={props.locked} />
             <WorldContainerInner>
                 {props.world === undefined && <div className="h-full w-full rounded-none" />}
                 <Transition
@@ -58,7 +58,7 @@ export function World(props: { world?: WorldView; locked?: boolean; onSelected: 
 
 function WorldContainerInner(props: { children: React.ReactNode }) {
     return (
-        <div className="h-full p-4">
+        <div className="@hxs:p-4 h-full p-0">
             <div className="border-base-100 h-full overflow-hidden rounded-2xl border-2">
                 <div className="relative z-10 h-full bg-black">{props.children}</div>
             </div>
@@ -68,7 +68,7 @@ function WorldContainerInner(props: { children: React.ReactNode }) {
 
 function WorldContainerOuter(props: { children: React.ReactNode }) {
     return (
-        <div className="relative h-[16rem] w-full max-w-[28rem]">
+        <div className="@container relative h-[16rem] w-full max-w-[28rem]">
             <div className="absolute inset-0">{props.children}</div>
         </div>
     )
@@ -136,9 +136,7 @@ function LockedOverlay() {
         <div className="group absolute inset-0 z-50 flex rounded-2xl text-zinc-300">
             <BrowserView>
                 <div className="absolute inset-0 flex w-full items-center justify-center group-hover:hidden">
-                    <div className="flex rounded p-4 drop-shadow">
-                        <LockedSvg width="24" height="24" />
-                    </div>
+                    <div className="flex rounded p-4 drop-shadow"></div>
                 </div>
             </BrowserView>
 
@@ -147,45 +145,46 @@ function LockedOverlay() {
                     isMobile ? "flex" : "hidden group-hover:flex"
                 }`}
             >
-                <LockedSvg width="24" height="24" />
                 <div className="ml-2">Beat the previous map!</div>
             </div>
         </div>
     )
 }
 
-export function Overlay(props: { world?: WorldView }) {
+export function Overlay(props: { world?: WorldView; locked?: boolean }) {
+    function Title(props: { children: React.ReactNode }) {
+        return (
+            <div className="@hxs:min-h-14 hxs:rounded-2xl shadow-base-200 border-base-300 @hxs:py-3 flex h-fit min-h-10 min-w-40 max-w-[16rem] items-center justify-center rounded-xl border-2 bg-white px-8 py-2 text-center text-xl text-black">
+                {props.children}
+            </div>
+        )
+    }
+
     function TitleInLocked() {
         return (
-            <div className="bg-base-200 min-h-14 min-w-40 rounded-2xl p-3 px-8 text-xl text-zinc-300 shadow">
-                Locked
-            </div>
+            <Title>
+                <LockedSvg width="24" height="24" />
+            </Title>
         )
     }
 
     function TitleInNormal() {
-        return (
-            <div className="min-h-14 w-fit min-w-40 rounded-2xl bg-white p-3 px-8 text-center text-xl text-black shadow">
-                {props.world?.id.name}
-            </div>
-        )
+        return <Title>{props.world?.id.name}</Title>
     }
 
     function TitleInUndefined() {
         return (
-            <div className="flex min-h-14 w-fit min-w-40 items-center justify-center rounded-2xl bg-white p-3 px-8 text-xl text-black shadow">
+            <Title>
                 <div className="loading loading-sm" />
-            </div>
+            </Title>
         )
     }
 
     return (
-        <div className="absolute inset-0 isolate z-20">
-            <div className="absolute left-1/2 -translate-x-1/2 transform">
-                {!todoProgressFeature && <TitleInLocked />}
-                {!!todoProgressFeature && props.world && <TitleInNormal />}
-                {!props.world && <TitleInUndefined />}
-            </div>
+        <div className="@hxs:p-0 absolute inset-0 isolate z-20 flex justify-center p-2">
+            {props.locked && <TitleInLocked />}
+            {!props.locked && props.world && <TitleInNormal />}
+            {!props.world && <TitleInUndefined />}
         </div>
     )
 }

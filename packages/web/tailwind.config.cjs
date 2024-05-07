@@ -1,3 +1,5 @@
+import { betterContainersPlugin } from "./tailwind.better-containers.cjs"
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx,mdx}"],
@@ -11,9 +13,14 @@ module.exports = {
                 hsm: { raw: "(min-height: 640px)" },
                 hmd: { raw: "(min-height: 768px)" },
             },
+            containers: {
+                hxs: { raw: "(min-height: 14rem)" },
+                hsm: { raw: "(min-height: 18rem)" },
+                hmd: { raw: "(min-height: 22rem)" },
+            },
         },
     },
-    plugins: [require("daisyui"), require("tailwind-scrollbar")],
+    plugins: [require("daisyui"), require("tailwind-scrollbar"), betterContainersPlugin],
     daisyui: {
         themes: [
             {

@@ -25,8 +25,6 @@ export const newLevel = (
         new factoryContext.rapier.RigidBodyDesc(factoryContext.rapier.RigidBodyType.Fixed),
     )
 
-    console.log(body.handle)
-
     const colliderDesc = factoryContext.rapier.ColliderDesc.polyline(
         new Float32Array([
             levelEntity.camera.topLeft.x,

@@ -14,11 +14,21 @@ export class GameAgentWrapper {
     constructor(
         private runtime: Runtime,
         scene: THREE.Scene,
+        grayScale: boolean,
+        cameraSize: number,
     ) {
         scene.background = new THREE.Color(0)
-        this.sceneModule = new ModuleSceneAgent(scene, runtime)
+        this.sceneModule = new ModuleSceneAgent(scene, runtime, grayScale)
 
-        this.camera = new THREE.OrthographicCamera(-16, 16, 16, -16, -1000, 1000)
+        this.camera = new THREE.OrthographicCamera(
+            -cameraSize,
+            cameraSize,
+            cameraSize,
+            -cameraSize,
+            -1000,
+            1000,
+        )
+
         this.rocket = runtime.factoryContext.store.find("rocket", "rigidBody")[0]
 
         this.camera.position.set(

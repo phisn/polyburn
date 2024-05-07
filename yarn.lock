@@ -3617,6 +3617,11 @@
   dependencies:
     "@swc/counter" "^0.1.3"
 
+"@tailwindcss/container-queries@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@tailwindcss/container-queries/-/container-queries-0.1.1.tgz#9a759ce2cb8736a4c6a0cb93aeb740573a731974"
+  integrity sha512-p18dswChx6WnTSaJCSGx6lTmrGzNNvm2FtXmiO6AuA1V4U5REyoqwmT6kgAsIMdjo07QdAfYXHJ4hnMtfHzWgA==
+
 "@tanstack/query-core@4.36.1":
   version "4.36.1"
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.36.1.tgz#79f8c1a539d47c83104210be2388813a7af2e524"
@@ -3699,10 +3704,10 @@
   resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-layers/-/tfjs-layers-4.19.0.tgz#73b5a3f5580807d5d56188d9b6ad4658d810fefa"
   integrity sha512-NufvuRaZdIyoG+R13d7oL8G5Bywox+ihPMiMZ3tWU+me8C8Y0pVC69mrnhOS9R8an7GDxKKSTTNEZhUvPvMGiQ==
 
-"@tensorflow/tfjs-node@^4.19.0":
+"@tensorflow/tfjs-node-gpu@^4.19.0":
   version "4.19.0"
-  resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-node/-/tfjs-node-4.19.0.tgz#a922db9cd8284cee8eb7655e539dab12c32c272c"
-  integrity sha512-1HLIAuu5azP8SW7t5EZc1W5VOdjWndJYz1N1agz0It/tMtnuWIdAfcY08VjfuiI/NhAwuPShehqv6CZ3SYh+Vg==
+  resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-node-gpu/-/tfjs-node-gpu-4.19.0.tgz#18bd846df48dc561986a742d716938ffef6da939"
+  integrity sha512-LKpCZ44xZ1OTln5c02xtN0c02w/wy8fQ4tiZvOzIIjHp5yu8+kY55jpD6pMAsii/tIo4Glda+8j/9SDZjl1p8Q==
   dependencies:
     "@mapbox/node-pre-gyp" "1.0.9"
     "@tensorflow/tfjs" "4.19.0"

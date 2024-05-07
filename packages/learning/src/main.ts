@@ -221,11 +221,11 @@ function testReward() {
 function averageReward() {
     let sum = 0
 
-    for (let i = 0; i < 16; ++i) {
+    for (let i = 0; i < 8; ++i) {
         sum += testReward()
     }
 
-    return sum / 16
+    return sum / 8
 }
 
 ppo.restore()
@@ -243,21 +243,30 @@ ppo.restore()
             const potential = testReward()
 
             if (potential > bestReward) {
-                const reward = averageReward()
+                const aReward = averageReward()
 
-                if (reward > bestReward) {
-                    bestReward = reward
-                    console.log(`New best reward: ${bestReward}`)
+                if (aReward > bestReward) {
+                    const bReward = averageReward()
+                    const closeConsideration = 0.3 * aReward + 0.7 * bReward
 
-                    await ppo
-                        .save()
-                        .catch(e => console.log("Model not saved: ", e))
-                        .then(() => {
-                            console.log("Model saved")
-                        })
+                    if (closeConsideration > bestReward) {
+                        bestReward = (aReward + bReward) / 2
+                        console.log(`New best reward: ${bestReward}`)
+
+                        await ppo
+                            .save()
+                            .catch(e => console.log("Model not saved: ", e))
+                            .then(() => {
+                                console.log("Model saved")
+                            })
+                    } else {
+                        console.log(
+                            `Iteration ${i + 1}, Potential: ${potential}, A Reward: ${aReward}, B Reward ${bReward}, Reward: ${closeConsideration}, Best: ${bestReward} (was closely considered)`,
+                        )
+                    }
                 } else {
                     console.log(
-                        `Iteration ${i + 1}, Reward: ${reward}, Best: ${bestReward} (was considered)`,
+                        `Iteration ${i + 1}, Potential: ${potential}, A Reward: ${aReward}, Best: ${bestReward} (was considered)`,
                     )
                 }
             } else {

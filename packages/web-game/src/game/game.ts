@@ -33,6 +33,8 @@ export class Game implements GameInterface {
             alpha: true,
         })
 
+        settings.gamemode = "Normal 2"
+
         renderer.setClearColor(Color.NAMES["black"], 1)
 
         this.runtime = newExtendedRuntime(settings, scene, renderer)

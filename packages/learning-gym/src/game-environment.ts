@@ -90,6 +90,10 @@ export class GameEnvironment {
     }
 
     reset(): [Buffer, Buffer] {
+        if (this.runtime) {
+            this.runtime.factoryContext.physics.free()
+        }
+
         this.runtime = newRuntime(
             RAPIER as any,
             this.world,

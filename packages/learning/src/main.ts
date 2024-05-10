@@ -1,5 +1,6 @@
 import * as tf from "@tensorflow/tfjs-node-gpu"
 import { Buffer } from "buffer"
+import { mkdirSync, writeFileSync } from "fs"
 import { GameEnvironment } from "learning-gym/src/game-environment"
 import { WorldModel } from "runtime/proto/world"
 import { DefaultGameReward } from "web-game/src/game/reward/default-reward"
@@ -50,6 +51,8 @@ const worldStr2 =
 
 const world = WorldModel.decode(Buffer.from(worldStr2, "base64"))
 
+let i = 0
+
 function newEnvWrapped() {
     const inputBuffer = Buffer.alloc(1)
 
@@ -63,13 +66,15 @@ function newEnvWrapped() {
         return floats
     }
 
-    const modes = [...Array(8).keys()].map(i => `Normal ${i + 1}`)
+    const modes = [...Array(8).keys()]
+        .filter(i => i === 8 || i === 5 || i === 7 || i === 6)
+        .map(i => `Normal ${i + 1}`)
 
     const rawEnv = new GameEnvironment(
         world,
         modes,
         {
-            grayScale: true,
+            grayScale: false,
             stepsPerFrame: 6,
             size: 64,
             pixelsPerUnit: 2,
@@ -100,11 +105,11 @@ function newEnvWrapped() {
         },
     }
 
-    return envWrapped
+    return [envWrapped, rawEnv] as const
 }
 
-const env = newEnvWrapped()
-const testEnv = newEnvWrapped()
+const [env, envRaw] = newEnvWrapped()
+const [testEnv, testEnvRaw] = newEnvWrapped()
 
 /*
 for (let i = 0; i < 60; ++i) {
@@ -121,19 +126,17 @@ function model() {
     const featureCount = 6
     const size = 64
 
-    const input = tf.input({ shape: [size * size + featureCount] })
+    const input = tf.input({ shape: [size * size * 3 + featureCount] })
 
-    const [addedFeatures, imageFlat] = new SplitLayer(featureCount).apply(
-        input,
-    ) as tf.SymbolicTensor[]
+    const [addedFeatures, imageFlat] = new SplitLayer().apply(input) as tf.SymbolicTensor[]
 
     let image = tf.layers
-        .reshape({ targetShape: [size, size, 1] })
+        .reshape({ targetShape: [size, size, 3] })
         .apply(imageFlat) as tf.SymbolicTensor
 
     image = tf.layers
         .conv2d({
-            filters: 16,
+            filters: 32,
             kernelSize: 8,
             strides: 4,
             activation: "relu",
@@ -142,7 +145,7 @@ function model() {
 
     image = tf.layers
         .conv2d({
-            filters: 32,
+            filters: 64,
             kernelSize: 4,
             strides: 2,
             activation: "relu",
@@ -151,27 +154,23 @@ function model() {
 
     image = tf.layers
         .conv2d({
-            filters: 32,
+            filters: 64,
             kernelSize: 3,
             strides: 1,
             activation: "relu",
         })
         .apply(image) as tf.SymbolicTensor
 
-    const imageProcessedFlat = tf.layers.flatten().apply(image)
-
-    const imageReduced = tf.layers
-        .dense({ units: 256 })
-        .apply(imageProcessedFlat) as tf.SymbolicTensor
-
-    let features = tf.layers.concatenate().apply([imageReduced, addedFeatures])
+    let features = tf.layers
+        .concatenate()
+        .apply([tf.layers.flatten().apply(image) as tf.SymbolicTensor, addedFeatures])
 
     features = tf.layers
         .dense({ units: 256, activation: "relu" })
         .apply(features) as tf.SymbolicTensor
 
     features = tf.layers
-        .dense({ units: 64, activation: "relu" })
+        .dense({ units: 512, activation: "relu" })
         .apply(features) as tf.SymbolicTensor
 
     return tf.model({ inputs: input, outputs: features })
@@ -179,10 +178,10 @@ function model() {
 
 const ppo = new PPO(
     {
-        steps: 2048,
-        epochs: 5,
-        policyLearningRate: 1e-4,
-        valueLearningRate: 1e-4,
+        steps: 256,
+        epochs: 3,
+        policyLearningRate: 2e-4,
+        valueLearningRate: 2e-4,
         clipRatio: 0.2,
         targetKL: 0.01,
         gamma: 0.99,
@@ -205,7 +204,7 @@ function testReward() {
         const actionRaw = ppo.act(observation)
         const action = Array.isArray(actionRaw) ? actionRaw[0] : actionRaw
 
-        const [newObservation, r, done] = testEnv.step(0)
+        const [newObservation, r, done] = testEnv.step(action)
 
         observation = newObservation
         reward += r
@@ -228,6 +227,71 @@ function averageReward() {
     return sum / 8
 }
 
+function saveReward() {
+    let bestActions: number[] = []
+    let bestImages: Buffer[] = []
+    let bestReward = -Infinity
+
+    let rewardSum = 0
+
+    const rewardsInMode: Record<string, number> = {}
+
+    for (let i = 0; i < 16; ++i) {
+        const actions: number[] = []
+        const images: Buffer[] = []
+        let reward = 0
+
+        let observation = testEnv.reset()
+
+        for (;;) {
+            const actionRaw = ppo.act(observation)
+            const action = Array.isArray(actionRaw) ? actionRaw[0] : actionRaw
+
+            const [newObservation, r, done] = testEnv.step(action)
+            observation = newObservation
+
+            actions.push(action)
+            images.push(testEnvRaw.generatePng())
+            reward += r
+
+            if (done) {
+                break
+            }
+        }
+
+        rewardsInMode[testEnvRaw.getGamemode()] = reward
+
+        if (reward > bestReward) {
+            bestReward = reward
+            bestActions = actions
+            bestImages = images
+        }
+
+        rewardSum += reward
+    }
+
+    const time = new Date().toISOString().replace(/:/g, "-")
+
+    const rewardStr = bestReward.toFixed(2) + "_" + (rewardSum / 16).toFixed(2)
+    mkdirSync(`imgs/${time}__${rewardStr}`, { recursive: true })
+
+    const policy = {
+        gamemode: testEnvRaw.getGamemode(),
+        actions: bestActions,
+    }
+
+    for (let i = 0; i < bestImages.length; ++i) {
+        writeFileSync(`imgs/${time}__${rewardStr}/frame_${i}.png`, bestImages[i])
+    }
+
+    writeFileSync(`imgs/${time}__${rewardStr}/rewards.json`, JSON.stringify(rewardsInMode))
+    writeFileSync(`imgs/${time}__${rewardStr}/policy.json`, JSON.stringify(policy))
+
+    env.reset()
+
+    return bestReward
+}
+
 ppo.restore()
     .then(() => {
         console.log("Model restored")
@@ -236,41 +300,26 @@ ppo.restore()
         console.log("Model not restored: ", e)
     })
     .finally(async () => {
-        let bestReward = averageReward()
+        const start = (averageReward() + averageReward() + averageReward() + averageReward()) / 4
+        console.log(`Initial average reward: ${start}`)
 
-        for (let i = 0; ; ++i) {
-            ppo.learn(2048 * (i + 1))
+        for (let i = 0; i < 50; ++i) {
+            ppo.learn()
+
             const potential = testReward()
-
-            if (potential > bestReward) {
-                const aReward = averageReward()
-
-                if (aReward > bestReward) {
-                    const bReward = averageReward()
-                    const closeConsideration = 0.3 * aReward + 0.7 * bReward
-
-                    if (closeConsideration > bestReward) {
-                        bestReward = (aReward + bReward) / 2
-                        console.log(`New best reward: ${bestReward}`)
-
-                        await ppo
-                            .save()
-                            .catch(e => console.log("Model not saved: ", e))
-                            .then(() => {
-                                console.log("Model saved")
-                            })
-                    } else {
-                        console.log(
-                            `Iteration ${i + 1}, Potential: ${potential}, A Reward: ${aReward}, B Reward ${bReward}, Reward: ${closeConsideration}, Best: ${bestReward} (was closely considered)`,
-                        )
-                    }
-                } else {
-                    console.log(
-                        `Iteration ${i + 1}, Potential: ${potential}, A Reward: ${aReward}, Best: ${bestReward} (was considered)`,
-                    )
-                }
-            } else {
-                console.log(`Iteration ${i + 1}, Potential: ${potential}, Best: ${bestReward}`)
-            }
+            console.log(`(${i + 1}) Potential reward: ${potential}, start: ${start}`)
         }
+
+        console.log(`Final best reward: ${saveReward()}`)
+
+        await ppo
+            .save()
+            .catch(e => {
+                console.log("Model not saved: ", e)
+            })
+            .then(() => {
+                console.log("Model saved")
+            })
+
+        process.exit(0)
     })

@@ -27,7 +27,12 @@ export class GameAgentAsPlayer implements GameInterface {
 
         renderer.setClearColor(THREE.Color.NAMES["black"], 1)
 
-        this.gameWrapper = new GameAgentWrapper(this.runtime, this.runtime.factoryContext.scene)
+        this.gameWrapper = new GameAgentWrapper(
+            this.runtime,
+            this.runtime.factoryContext.scene,
+            true,
+            64,
+        )
         this.input = new ModuleInput(this.runtime)
 
         this.reward = new DefaultGameReward(this.runtime)

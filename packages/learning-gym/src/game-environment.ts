@@ -35,10 +35,12 @@ export class GameEnvironment {
     private capturedCollector!: MessageCollector<LevelCapturedMessage>
 
     private png: PNG
+    private memory: RuntimeSystemContext[] = []
+    private previousGamemode = "<none>"
 
     constructor(
         private world: WorldModel,
-        private gamemode: string[],
+        private gamemodes: string[],
         private config: GameEnvironmentConfig,
         private rewardFactory: RewardFactory,
     ) {
@@ -89,16 +91,27 @@ export class GameEnvironment {
         this.reset()
     }
 
+    getGamemode() {
+        return this.previousGamemode
+    }
+
     reset(): [Buffer, Buffer] {
         if (this.runtime) {
+            /*
+            console.log(
+                `memory(b64) ${this.previousGamemode} `,
+                Buffer.from(JSON.stringify(this.memory)).toString("base64"),
+            )
+            */
+
             this.runtime.factoryContext.physics.free()
         }
 
-        this.runtime = newRuntime(
-            RAPIER as any,
-            this.world,
-            this.gamemode[Math.floor(Math.random() * this.gamemode.length)],
-        )
+        this.memory = []
+
+        this.previousGamemode = this.gamemodes[Math.floor(Math.random() * this.gamemodes.length)]
+
+        this.runtime = newRuntime(RAPIER as any, this.world, this.previousGamemode)
 
         this.game = new GameAgentWrapper(
             this.runtime,
@@ -120,10 +133,19 @@ export class GameEnvironment {
     }
 
     step(action: Buffer): [number, boolean, Buffer, Buffer] {
-        const input = this.stepWithActionToInput(action.readInt8(0))
+        const sourceRotation = this.rotation
+        const thrust = this.stepWithActionToInput(action.readInt8(0))
 
         const [reward, done] = this.reward.next(() => {
             for (let i = 0; i < this.config.stepsPerFrame; ++i) {
+                const input = {
+                    thrust,
+                    rotation:
+                        sourceRotation +
+                        (this.rotation - sourceRotation) * ((i + 1) / this.config.stepsPerFrame),
+                }
+
+                // this.memory.push(input)
                 this.game.step(input)
             }
         })
@@ -136,24 +158,24 @@ export class GameEnvironment {
         return [reward, done, this.observationImageBuffer, this.observationFeatureBuffer]
     }
 
-    stepWithActionToInput(action: number): RuntimeSystemContext {
+    stepWithActionToInput(action: number): boolean {
         switch (action) {
             case 0:
-                return { thrust: false, rotation: this.rotation }
+                return false
             case 1:
                 this.rotation += 0.1
-                return { thrust: false, rotation: this.rotation }
+                return false
             case 2:
                 this.rotation -= 0.1
-                return { thrust: false, rotation: this.rotation }
+                return false
             case 3:
-                return { thrust: true, rotation: this.rotation }
+                return true
             case 4:
                 this.rotation += 0.1
-                return { thrust: true, rotation: this.rotation }
+                return true
             case 5:
                 this.rotation -= 0.1
-                return { thrust: true, rotation: this.rotation }
+                return true
             default:
                 throw new Error(`Invalid action: ${action}`)
         }
@@ -199,7 +221,7 @@ export class GameEnvironment {
 
     prepareFeatureBuffer() {
         for (const message of this.capturedCollector) {
-            this.targetFlag = nextFlag(this.runtime, this.rocket)
+            // this.targetFlag = nextFlag(this.runtime, this.rocket)
         }
 
         const dx =

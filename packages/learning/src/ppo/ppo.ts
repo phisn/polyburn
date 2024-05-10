@@ -213,11 +213,19 @@ export class PPO {
         })
     }
 
-    learn(upToTimesteps: number) {
-        while (this.numTimeSteps < upToTimesteps) {
-            this.collectRollouts()
-            this.train()
-        }
+    learn() {
+        const time = Date.now()
+        this.collectRollouts()
+        const afterRollout = Date.now()
+        this.train()
+        const afterTrain = Date.now()
+
+        console.log(
+            "Rollout s: ",
+            (afterRollout - time) / 1000,
+            "Train s: ",
+            (afterTrain - afterRollout) / 1000,
+        )
     }
 
     private train() {

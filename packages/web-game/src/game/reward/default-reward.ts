@@ -32,7 +32,7 @@ export class DefaultGameReward implements Reward {
         // next level is nearest level that is not captured
         this.nextLevel = nextFlag(runtime, this.rocket)
 
-        this.previousDistanceToLevel = this.findDistanceToFlag(this.nextLevel)
+        this.previousDistanceToLevel = this.findDistanceToLevel(this.nextLevel)
         this.distanceToReward = 16 / this.previousDistanceToLevel
 
         this.steps = 0
@@ -45,7 +45,7 @@ export class DefaultGameReward implements Reward {
         ++this.steps
 
         if (this.steps >= this.maxSteps) {
-            return [-80, true]
+            return [-32, true]
         }
 
         for (const message of this.deathCollector) {
@@ -55,11 +55,14 @@ export class DefaultGameReward implements Reward {
             return [-32 - speed, true]
         }
 
-        const distanceToFlag = this.findDistanceToFlag(this.nextLevel)
+        const distanceToLevel = this.findDistanceToLevel(this.nextLevel)
+        const deltaDistance = this.previousDistanceToLevel - distanceToLevel
+        this.previousDistanceToLevel = distanceToLevel
 
-        if (distanceToFlag < this.previousDistanceToLevel) {
-            reward += this.distanceToReward * (this.previousDistanceToLevel - distanceToFlag)
-            this.previousDistanceToLevel = distanceToFlag
+        if (deltaDistance < 0) {
+            reward += this.distanceToReward * deltaDistance * 2
+        } else {
+            reward += this.distanceToReward * deltaDistance
         }
 
         if (this.nextLevel.components.level.inCapture) {
@@ -67,17 +70,18 @@ export class DefaultGameReward implements Reward {
         }
 
         for (const message of this.captureCollector) {
-            reward += 512
-            this.nextLevel = nextFlag(this.runtime, this.rocket)
-            this.previousDistanceToLevel = this.findDistanceToFlag(this.nextLevel)
+            reward += (this.maxSteps - this.steps) * 8
 
-            return [512, true]
+            // this.nextLevel = nextFlag(this.runtime, this.rocket)
+            // this.previousDistanceToLevel = this.findDistanceToLevel(this.nextLevel)
+
+            return [reward, true]
         }
 
         return [reward, false]
     }
 
-    findDistanceToFlag(flagEntity: EntityWith<RuntimeComponents, "level">) {
+    findDistanceToLevel(flagEntity: EntityWith<RuntimeComponents, "level">) {
         const dx =
             this.rocket.components.rigidBody.translation().x - flagEntity.components.level.flag.x
         const dy =

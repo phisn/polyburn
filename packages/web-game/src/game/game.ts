@@ -33,7 +33,7 @@ export class Game implements GameInterface {
             alpha: true,
         })
 
-        settings.gamemode = "Normal 2"
+        settings.gamemode = "Normal 5"
 
         renderer.setClearColor(Color.NAMES["black"], 1)
 
@@ -68,6 +68,7 @@ export class Game implements GameInterface {
 
     onFixedUpdate(last: boolean) {
         this.scene.onFixedUpdate(last)
+        this.input.onFixedUpdate()
 
         const context = {
             thrust: this.input.thrust(),

@@ -1,4 +1,4 @@
-import { writeFileSync } from "fs"
+import * as process from "process"
 import { WorldModel } from "runtime/proto/world"
 import { DefaultGameReward } from "web-game/src/game/reward/default-reward"
 import { GameEnvironment } from "./game-environment"
@@ -12,26 +12,57 @@ const worldStr3 =
 
 const world = WorldModel.decode(Buffer.from(worldStr2, "base64"))
 
-const env = new GameEnvironment(
+const environment = new GameEnvironment(
     world,
     ["Normal 1"],
     {
-        grayScale: true,
+        grayScale: false,
         size: 64,
         pixelsPerUnit: 2,
-        stepsPerFrame: 6,
+        stepsPerFrame: 4,
     },
     game => new DefaultGameReward(game),
 )
 
-for (let i = 0; i < 30; ++i) {
-    const [r, ,] = env.step(Buffer.from([0]))
-    console.log(r)
-    writeFileSync(`imgs/output${i}.png`, env.generatePng())
+process.stdin.resume()
+process.stdin.setEncoding("utf8")
+
+function handleCommand(command: any) {
+    if (command.command === "reset") {
+        const [image, features] = environment.reset()
+        process.stdout.write(image)
+    } else if (command.command === "step") {
+        const action = Buffer.from([command.rotation, command.thrust])
+        const [reward, done, image, features] = environment.step(action)
+        const rewardBuffer = Buffer.alloc(4)
+        rewardBuffer.writeFloatLE(reward, 0)
+        const doneBuffer = Buffer.from([done ? 1 : 0])
+        process.stdout.write(Buffer.concat([image, rewardBuffer, doneBuffer]))
+    } else if (command.command === "render") {
+        const image = environment.generatePixels()
+        process.stdout.write(image)
+    } else {
+        process.stdout.write(`Unknown command: ${command.command}`)
+    }
 }
 
-/*
-fs.writeFileSync("output.png", PNG.sync.write(png, { colorType: 2, inputHasAlpha: false }))
+process.stdin.on("data", function (input) {
+    try {
+        const commands = input
+            .toString("utf-8")
+            .split("\n")
+            .filter(line => line)
 
-process.exit(0)
-*/
+        for (const commandString of commands) {
+            const command = JSON.parse(commandString)
+            handleCommand(command)
+        }
+    } catch (error) {
+        console.error("Error processing input", error)
+    }
+})
+
+process.on("SIGINT", () => {
+    console.log("Received SIGINT, shutting down.")
+    process.exit(0)
+})

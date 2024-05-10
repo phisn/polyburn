@@ -9,7 +9,11 @@ import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
 import { Runtime, newRuntime } from "runtime/src/runtime"
 import * as THREE from "three"
 import { GameAgentWrapper } from "web-game/src/game/game-agent-wrapper"
-import { Reward, RewardFactory } from "../../web-game/src/game/reward/default-reward"
+import {
+    DefaultGameReward,
+    Reward,
+    RewardFactory,
+} from "../../web-game/src/game/reward/default-reward"
 
 export interface GameEnvironmentConfig {
     grayScale: boolean
@@ -249,6 +253,10 @@ export class GameEnvironment {
             inputHasAlpha: false,
         })
     }
+
+    generatePixels(): Buffer {
+        return this.observationImageBuffer
+    }
 }
 
 function nextFlag(runtime: Runtime, rocket: EntityWith<RuntimeComponents, "rocket" | "rigidBody">) {
@@ -270,3 +278,25 @@ function nextFlag(runtime: Runtime, rocket: EntityWith<RuntimeComponents, "rocke
 }
 
 global.navigator = { userAgent: "node" } as any
+
+interface Environment {
+    reset(): [Buffer, Buffer]
+    step(action: Buffer): [number, boolean, Buffer, Buffer]
+    generatePng(): Buffer
+}
+
+export class GameEnvironmentWrapped extends GameEnvironment implements Environment {
+    constructor() {
+        super(
+            {} as any,
+            [],
+            {
+                grayScale: false,
+                size: 64,
+                pixelsPerUnit: 16,
+                stepsPerFrame: 1,
+            },
+            () => new DefaultGameReward({} as any),
+        )
+    }
+}

@@ -15,13 +15,15 @@ export class DefaultGameReward implements Reward {
     private deathCollector: MessageCollector<RocketDeathMessage>
 
     private rocket: EntityWith<RuntimeComponents, "rocket" | "rigidBody">
-    private nextLevel: EntityWith<RuntimeComponents, "level">
+    private nextLevel: EntityWith<RuntimeComponents, "level"> | undefined
 
     private previousDistanceToLevel: number
     private distanceToReward: number
 
     private steps: number
     private maxSteps: number
+
+    private hasBeenInCaptureFor: number
 
     constructor(private runtime: Runtime) {
         this.captureCollector = runtime.factoryContext.messageStore.collect("levelCaptured")
@@ -36,7 +38,8 @@ export class DefaultGameReward implements Reward {
         this.distanceToReward = 16 / this.previousDistanceToLevel
 
         this.steps = 0
-        this.maxSteps = 10 * 20 * 4 // 20 seconds
+        this.maxSteps = 10 * 60 * 5 * 4 // 5 min
+        this.hasBeenInCaptureFor = 0
     }
 
     next(steps: () => void): [number, boolean] {
@@ -45,14 +48,18 @@ export class DefaultGameReward implements Reward {
         ++this.steps
 
         if (this.steps >= this.maxSteps) {
-            return [-32, true]
+            return [0, true]
         }
 
         for (const message of this.deathCollector) {
             const velocity = this.rocket.components.rigidBody.linvel()
             const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y)
 
-            return [-32 - speed, true]
+            return [-1, true]
+        }
+
+        if (this.nextLevel === undefined) {
+            return [(1 - this.steps / this.maxSteps) * 1024, true]
         }
 
         const distanceToLevel = this.findDistanceToLevel(this.nextLevel)
@@ -65,23 +72,28 @@ export class DefaultGameReward implements Reward {
             reward += this.distanceToReward * deltaDistance
         }
 
-        if (this.nextLevel.components.level.inCapture) {
+        if (this.nextLevel.components.level.inCapture && this.hasBeenInCaptureFor < 4) {
             reward += 4
+            this.hasBeenInCaptureFor += 1
         }
 
         for (const message of this.captureCollector) {
-            reward += (this.maxSteps - this.steps) * 8
+            reward += (1 - this.steps / this.maxSteps) * 512
 
-            // this.nextLevel = nextFlag(this.runtime, this.rocket)
-            // this.previousDistanceToLevel = this.findDistanceToLevel(this.nextLevel)
+            this.nextLevel = nextFlag(this.runtime, this.rocket)
+            this.previousDistanceToLevel = this.findDistanceToLevel(this.nextLevel)
 
-            return [reward, true]
+            this.hasBeenInCaptureFor = 0
         }
 
         return [reward, false]
     }
 
-    findDistanceToLevel(flagEntity: EntityWith<RuntimeComponents, "level">) {
+    findDistanceToLevel(flagEntity: EntityWith<RuntimeComponents, "level"> | undefined) {
+        if (flagEntity === undefined) {
+            return 0
+        }
+
         const dx =
             this.rocket.components.rigidBody.translation().x - flagEntity.components.level.flag.x
         const dy =
@@ -97,9 +109,15 @@ function nextFlag(runtime: Runtime, rocket: EntityWith<RuntimeComponents, "rocke
         return Math.sqrt(dx * dx + dy * dy)
     }
 
-    const nextLevel = runtime.factoryContext.store
+    const uncapturedLevels = runtime.factoryContext.store
         .find("level")
         .filter(level => !level.components.level.captured)
+
+    if (uncapturedLevels.length === 0) {
+        return undefined
+    }
+
+    const nextLevel = uncapturedLevels
         .map(level => [level, distanceToFlag(level)] as const)
         .reduce(([minLevel, minDistance], [level, distance]) =>
             distance < minDistance ? [level, distance] : [minLevel, minDistance],

@@ -14,7 +14,10 @@ const prototypeGreen = new Svg(
 */
 
 export class Flag extends THREE.Object3D {
-    constructor(levelEntity: EntityWith<RuntimeComponents, "level">, colors: AgentColors) {
+    constructor(
+        private levelEntity: EntityWith<RuntimeComponents, "level">,
+        colors: AgentColors,
+    ) {
         super()
 
         const geometry = new THREE.BoxGeometry(1, 1, 1)
@@ -36,5 +39,11 @@ export class Flag extends THREE.Object3D {
             levelEntity.components.level.captureSize.y * 2,
             1.0,
         )
+    }
+
+    onUpdate() {
+        if (this.levelEntity.components.level.captured && this.visible) {
+            this.visible = false
+        }
     }
 }

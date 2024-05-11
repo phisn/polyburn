@@ -81,6 +81,10 @@ export class ModuleSceneAgent {
     }
 
     onUpdate() {
+        for (const flag of this.flags) {
+            flag.onUpdate()
+        }
+
         this.rocket.onUpdate()
 
         const currentLevel = this.rocket.entity.components.rocket!.currentLevel

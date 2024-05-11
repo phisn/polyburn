@@ -19,9 +19,9 @@ If you find this code useful, please reference in your paper:
 
 To learn more:
 
-- [Research paper][paper]
-- [Project website][website]
-- [Twitter summary][tweet]
+-   [Research paper][paper]
+-   [Project website][website]
+-   [Twitter summary][tweet]
 
 ## DreamerV3
 
@@ -61,8 +61,7 @@ Install [JAX][jax] and then the other dependencies:
 
 ```sh
 pip install -U -r embodied/requirements.txt
-pip install -U -r dreamerv3/requirements.txt \
-  -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+pip install -U -r dreamerv3/requirements.txt -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 ```
 
 Simple training script:
@@ -85,33 +84,33 @@ such as `--configs atari --task atari_pong`.
 
 # Tips
 
-- All config options are listed in `configs.yaml` and you can override them
-  as flags from the command line.
-- The `debug` config block reduces the network size, batch size, duration
-  between logs, and so on for fast debugging (but does not learn a good model).
-- By default, the code tries to run on GPU. You can switch to CPU or TPU using
-  the `--jax.platform cpu` flag.
-- You can use multiple config blocks that will override defaults in the
-  order they are specified, for example `--configs crafter size50m`.
-- By default, metrics are printed to the terminal, appended to a JSON lines
-  file, and written as TensorBoard summaries. Other outputs like WandB can be
-  enabled in the training script.
-- If you get a `Too many leaves for PyTreeDef` error, it means you're
-  reloading a checkpoint that is not compatible with the current config. This
-  often happens when reusing an old logdir by accident.
-- If you are getting CUDA errors, scroll up because the cause is often just an
-  error that happened earlier, such as out of memory or incompatible JAX and
-  CUDA versions. Try `--batch_size 1` to rule out an out of memory error.
-- Many environments are included, some of which require installing additional
-  packages. See the `Dockerfile` for reference.
-- When running on custom environments, make sure to specify the observation
-  keys the agent should be using via the `enc.spaces` and `dec.spaces` regex
-  patterns.
-- To log metrics from environments without showing them to the agent or storing
-  them in the replay buffer, return them as observation keys with `log_` prefix
-  and enable logging via the `run.log_keys_...` options.
-- To continue stopped training runs, simply run the same command line again and
-  make sure that the `--logdir` points to the same directory.
+-   All config options are listed in `configs.yaml` and you can override them
+    as flags from the command line.
+-   The `debug` config block reduces the network size, batch size, duration
+    between logs, and so on for fast debugging (but does not learn a good model).
+-   By default, the code tries to run on GPU. You can switch to CPU or TPU using
+    the `--jax.platform cpu` flag.
+-   You can use multiple config blocks that will override defaults in the
+    order they are specified, for example `--configs crafter size50m`.
+-   By default, metrics are printed to the terminal, appended to a JSON lines
+    file, and written as TensorBoard summaries. Other outputs like WandB can be
+    enabled in the training script.
+-   If you get a `Too many leaves for PyTreeDef` error, it means you're
+    reloading a checkpoint that is not compatible with the current config. This
+    often happens when reusing an old logdir by accident.
+-   If you are getting CUDA errors, scroll up because the cause is often just an
+    error that happened earlier, such as out of memory or incompatible JAX and
+    CUDA versions. Try `--batch_size 1` to rule out an out of memory error.
+-   Many environments are included, some of which require installing additional
+    packages. See the `Dockerfile` for reference.
+-   When running on custom environments, make sure to specify the observation
+    keys the agent should be using via the `enc.spaces` and `dec.spaces` regex
+    patterns.
+-   To log metrics from environments without showing them to the agent or storing
+    them in the replay buffer, return them as observation keys with `log_` prefix
+    and enable logging via the `run.log_keys_...` options.
+-   To continue stopped training runs, simply run the same command line again and
+    make sure that the `--logdir` points to the same directory.
 
 # Disclaimer
 

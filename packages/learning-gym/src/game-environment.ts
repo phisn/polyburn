@@ -9,11 +9,7 @@ import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
 import { Runtime, newRuntime } from "runtime/src/runtime"
 import * as THREE from "three"
 import { GameAgentWrapper } from "web-game/src/game/game-agent-wrapper"
-import {
-    DefaultGameReward,
-    Reward,
-    RewardFactory,
-} from "../../web-game/src/game/reward/default-reward"
+import { Reward, RewardFactory } from "../../web-game/src/game/reward/default-reward"
 
 export interface GameEnvironmentConfig {
     grayScale: boolean
@@ -35,7 +31,7 @@ export class GameEnvironment {
 
     private rotation!: number
     private rocket!: EntityWith<RuntimeComponents, "rocket" | "rigidBody">
-    private targetFlag!: EntityWith<RuntimeComponents, "level">
+    private targetFlag: EntityWith<RuntimeComponents, "level"> | undefined
     private capturedCollector!: MessageCollector<LevelCapturedMessage>
 
     private png: PNG
@@ -225,17 +221,23 @@ export class GameEnvironment {
 
     prepareFeatureBuffer() {
         for (const message of this.capturedCollector) {
-            // this.targetFlag = nextFlag(this.runtime, this.rocket)
+            this.targetFlag = nextFlag(this.runtime, this.rocket)
         }
 
-        const dx =
-            this.rocket.components.rigidBody.translation().x -
-            this.targetFlag.components.level.flag.x
-        const dy =
-            this.rocket.components.rigidBody.translation().y -
-            this.targetFlag.components.level.flag.y
+        let dx = 0
+        let dy = 0
+        let inCapture = false
 
-        const inCapture = this.targetFlag.components.level.inCapture
+        if (this.targetFlag) {
+            dx =
+                this.rocket.components.rigidBody.translation().x -
+                this.targetFlag.components.level.flag.x
+            dy =
+                this.rocket.components.rigidBody.translation().y -
+                this.targetFlag.components.level.flag.y
+
+            inCapture = this.targetFlag.components.level.inCapture
+        }
 
         this.observationFeatureBuffer.writeFloatLE(this.rocket.components.rigidBody.linvel().x, 0)
         this.observationFeatureBuffer.writeFloatLE(this.rocket.components.rigidBody.linvel().y, 4)
@@ -266,9 +268,15 @@ function nextFlag(runtime: Runtime, rocket: EntityWith<RuntimeComponents, "rocke
         return Math.sqrt(dx * dx + dy * dy)
     }
 
-    const nextLevel = runtime.factoryContext.store
+    const uncapturedLevels = runtime.factoryContext.store
         .find("level")
         .filter(level => !level.components.level.captured)
+
+    if (uncapturedLevels.length === 0) {
+        return undefined
+    }
+
+    const nextLevel = uncapturedLevels
         .map(level => [level, distanceToFlag(level)] as const)
         .reduce(([minLevel, minDistance], [level, distance]) =>
             distance < minDistance ? [level, distance] : [minLevel, minDistance],
@@ -283,20 +291,4 @@ interface Environment {
     reset(): [Buffer, Buffer]
     step(action: Buffer): [number, boolean, Buffer, Buffer]
     generatePng(): Buffer
-}
-
-export class GameEnvironmentWrapped extends GameEnvironment implements Environment {
-    constructor() {
-        super(
-            {} as any,
-            [],
-            {
-                grayScale: false,
-                size: 64,
-                pixelsPerUnit: 16,
-                stepsPerFrame: 1,
-            },
-            () => new DefaultGameReward({} as any),
-        )
-    }
 }

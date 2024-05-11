@@ -4,74 +4,103 @@ import subprocess
 import json
 import numpy as np
 
+size = 64
+
 class NodeJsEnvironment(gym.Env):
     metadata = {"render.modes": ["binary"]}
 
     def __init__(self, script_path):
         super(NodeJsEnvironment, self).__init__()
-        self.process = subprocess.Popen(script_path.split(),
-                                        stdin=subprocess.PIPE,
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE,
-                                        text=False,
-                                        bufsize=0)
-        
-        # ignore the first line
-        self.process.stdout.readline()
-        self.process.stdout.readline()
+    
+        self.script_path = script_path
+        self.prepare_process()
 
-        self.observation_space = spaces.Box(low=0, high=255, shape=(64, 64, 3), dtype=np.uint8)
+        self.observation_space = spaces.Dict({
+            "image": spaces.Box(low=0, high=255, shape=(size, size, 3), dtype=np.uint8),
+            "features": spaces.Box(low=-1000, high=1000, shape=(6,), dtype=np.float32)
+        })
+
         self.action_space = spaces.Discrete(6)
 
     def step(self, action):
-        command = json.dumps({ "command": "step", "action": action.item() }) + "\n"
+        if isinstance(action, np.int32):
+            action = action.item()
+
+        command = json.dumps({ "command": "step", "action": action }) + "\n"
         command = command.encode("utf-8")
         self.process.stdin.write(command)
         self.process.stdin.flush()
 
-        data = self.process.stdout.read(64*64*3 + 4 + 1)
-        observation = np.frombuffer(data[:64*64*3], dtype=np.uint8).reshape(64, 64, 3)
-        reward = np.frombuffer(data[64*64*3:64*64*3+4], dtype=np.float32)[0]
+        if self.process.poll() is not None:
+            self.restart_process()
+            return self.reset(), 0, True, {}
+
+        data = self.process.stdout.read(size*size*3 + 6*4 + 4 + 1)
+        image = np.frombuffer(data[:size*size*3], dtype=np.uint8).reshape(size, size, 3)
+        features = np.frombuffer(data[size*size*3:size*size*3+ 6*4], dtype=np.float32)
+        reward = np.frombuffer(data[size*size*3 + 6*4:size*size*3 + 6*4 + 4], dtype=np.float32)[0]
         done = data[-1] == 1
         
-        return observation, reward, done, {}
+        return { "image": image, "features": features }, reward, done, {}
 
     def reset(self):
+        if self.process.poll() is not None:
+            self.restart_process()
+
         command = json.dumps({"command": "reset"}) + "\n"
         command = command.encode("utf-8")
         self.process.stdin.write(command)
         self.process.stdin.flush()
-        data = self.process.stdout.read(64*64*3)
-        observation = np.frombuffer(data, dtype=np.uint8).reshape(64, 64, 3)
+        data = self.process.stdout.read(size*size*3 + 6 * 4)
+        image = np.frombuffer(data[:size*size*3], dtype=np.uint8).reshape(size, size, 3)
+        features = np.frombuffer(data[size*size*3:], dtype=np.float32)
+
+        return { "image": image, "features": features }
+
+    def prepare_process(self):
+        self.process = subprocess.Popen(
+            self.script_path.split(),
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=False,
+            bufsize=0
+        )
+
+        # Wait for the initial startup messages to clear.
+        self.process.stdout.readline()
+        self.process.stdout.readline()
+        self.process.stderr.readline()
+
+    def render(self, mode="binary"):
+        self.process.stdin.write(b'{"command":"render"}\n')
+        self.process.stdin.flush()
+        data = self.process.stdout.read(size*size*3)
+        observation = np.frombuffer(data, dtype=np.uint8).reshape(size, size, 3)
         return observation
 
-    def render(self, mode="binary"):
-        command = json.dumps({"command": "render"}) + "\n"
-        command = command.encode("utf-8")
-        self.process.stdin.write(command)
-        self.process.stdin.flush()
-        data = self.process.stdout.read(64*64*3)
-        return np.frombuffer(data, dtype=np.uint8).reshape(64, 64, 3)
+    def restart_process(self):
+        self.close()
+        self.prepare_process()
 
     def close(self):
-        self.process.terminate()
-        self.process.wait()
+        if self.process is not None:
+            self.process.terminate()
+            self.process.wait()
 
-class PolyburnEnvironment(NodeJsEnvironment):
-    def __init__(self):
-        super(PolyburnEnvironment, self).__init__("yarn tsx ./src/main.ts")
-        self.observation_space = spaces.Box(low=0, high=255, shape=(64, 64, 3), dtype=np.uint8)
-        self.action_space = spaces.Discrete(6)
+if __name__ == "__main__":
+    env = NodeJsEnvironment("yarn tsx ./src/main.ts")
+    env.reset()
 
-    def step(self, action):
-        observation, reward, done, _ = super(PolyburnEnvironment, self).step(action)
-        return observation, reward, done, {}
+    import matplotlib.pyplot as plt
+    # grid 4 x 4
+    fig, axs = plt.subplots(4, 4)
+    for i in range(4):
+        for j in range(4):
+            axs[i, j].imshow(env.render())
+            axs[i, j].axis("off")
+            env.step(0)
 
-    def reset(self):
-        return super(PolyburnEnvironment, self).reset()
+    plt.show()
 
-    def render(self, mode="binary"):
-        return super(PolyburnEnvironment, self).render()
-
-    def close(self):
-        return super(PolyburnEnvironment, self).close()
+    env.close()

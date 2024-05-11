@@ -10,8 +10,8 @@ def main():
   config = embodied.Config(dreamerv3.Agent.configs['defaults'])
   
   config = config.update({
-      **dreamerv3.Agent.configs['size12m'],
-      'logdir': f'~/logdir/{embodied.timestamp()}-example',
+      **dreamerv3.Agent.configs['size50m'],
+      'logdir': f'./logdir/polyburn-1',
       'run.train_ratio': 32,
   })
 
@@ -47,7 +47,7 @@ def main():
   def make_env(config, env_id=0):
     import polyburn_env
     from embodied.envs import from_gym
-    env = polyburn_env.PolyburnEnvironment()
+    env = polyburn_env.NodeJsEnvironment("yarn tsx ./src/main.ts")
     env = from_gym.FromGym(env)
     env = dreamerv3.wrap_env(env, config)
     return env

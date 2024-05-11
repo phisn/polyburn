@@ -10,8 +10,40 @@ function base64ToBytes(base64: string) {
     return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
 }
 
-const input =
-    "W3sidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMDE2NjY2NjY2NjY2NjY2NjY2fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjAzMzMzMzMzMzMzMzMzMzMzfSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjA1fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjA2NjY2NjY2NjY2NjY2NjY3fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjA4MzMzMzMzMzMzMzMzMzM0fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjF9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOi0wLjA4MzMzMzMzMzMzMzMzMzM0fSx7InRocnVzdCI6ZmFsc2UsInJvdGF0aW9uIjotMC4wNjY2NjY2NjY2NjY2NjY2OH0seyJ0aHJ1c3QiOmZhbHNlLCJyb3RhdGlvbiI6LTAuMDV9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOi0wLjAzMzMzMzMzMzMzMzMzMzM0fSx7InRocnVzdCI6ZmFsc2UsInJvdGF0aW9uIjotMC4wMTY2NjY2NjY2NjY2NjY2NjN9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOjB9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOjAuMDE2NjY2NjY2NjY2NjY2NjY2fSx7InRocnVzdCI6ZmFsc2UsInJvdGF0aW9uIjowLjAzMzMzMzMzMzMzMzMzMzMzfSx7InRocnVzdCI6ZmFsc2UsInJvdGF0aW9uIjowLjA1fSx7InRocnVzdCI6ZmFsc2UsInJvdGF0aW9uIjowLjA2NjY2NjY2NjY2NjY2NjY3fSx7InRocnVzdCI6ZmFsc2UsInJvdGF0aW9uIjowLjA4MzMzMzMzMzMzMzMzMzM0fSx7InRocnVzdCI6ZmFsc2UsInJvdGF0aW9uIjowLjF9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOjAuMTE2NjY2NjY2NjY2NjY2Njd9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOjAuMTMzMzMzMzMzMzMzMzMzMzN9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOjAuMTUwMDAwMDAwMDAwMDAwMDJ9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOjAuMTY2NjY2NjY2NjY2NjY2Njl9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOjAuMTgzMzMzMzMzMzMzMzMzMzV9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOjAuMn0seyJ0aHJ1c3QiOmZhbHNlLCJyb3RhdGlvbiI6MC4yMTY2NjY2NjY2NjY2NjY2N30seyJ0aHJ1c3QiOmZhbHNlLCJyb3RhdGlvbiI6MC4yMzMzMzMzMzMzMzMzMzMzNH0seyJ0aHJ1c3QiOmZhbHNlLCJyb3RhdGlvbiI6MC4yNX0seyJ0aHJ1c3QiOmZhbHNlLCJyb3RhdGlvbiI6MC4yNjY2NjY2NjY2NjY2NjY3fSx7InRocnVzdCI6ZmFsc2UsInJvdGF0aW9uIjowLjI4MzMzMzMzMzMzMzMzMzR9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOjAuMzAwMDAwMDAwMDAwMDAwMDR9LHsidGhydXN0IjpmYWxzZSwicm90YXRpb24iOjAuMzE2NjY2NjY2NjY2NjY2N30seyJ0aHJ1c3QiOmZhbHNlLCJyb3RhdGlvbiI6MC4zMzMzMzMzMzMzMzMzMzMzN30seyJ0aHJ1c3QiOmZhbHNlLCJyb3RhdGlvbiI6MC4zNTAwMDAwMDAwMDAwMDAwM30seyJ0aHJ1c3QiOmZhbHNlLCJyb3RhdGlvbiI6MC4zNjY2NjY2NjY2NjY2NjY3fSx7InRocnVzdCI6ZmFsc2UsInJvdGF0aW9uIjowLjM4MzMzMzMzMzMzMzMzMzM2fSx7InRocnVzdCI6ZmFsc2UsInJvdGF0aW9uIjowLjR9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4zODMzMzMzMzMzMzMzMzMzNn0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjM2NjY2NjY2NjY2NjY2Njd9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4zNTAwMDAwMDAwMDAwMDAwM30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjMzMzMzMzMzMzMzMzMzMzM3fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOjAuMzE2NjY2NjY2NjY2NjY2N30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjMwMDAwMDAwMDAwMDAwMDA0fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOjAuMjgzMzMzMzMzMzMzMzMzNH0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjI2NjY2NjY2NjY2NjY2Njd9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4yNTAwMDAwMDAwMDAwMDAwNn0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjIzMzMzMzMzMzMzMzMzMzR9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4yMTY2NjY2NjY2NjY2NjY3fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOjAuMjAwMDAwMDAwMDAwMDAwMDR9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4xODMzMzMzMzMzMzMzMzMzOH0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjE2NjY2NjY2NjY2NjY2Njd9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4xNTAwMDAwMDAwMDAwMDAwMn0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjEzMzMzMzMzMzMzMzMzMzM2fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOjAuMTE2NjY2NjY2NjY2NjY2N30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjEwMDAwMDAwMDAwMDAwMDAzfSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOjAuMTE2NjY2NjY2NjY2NjY2N30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjEzMzMzMzMzMzMzMzMzMzM2fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOjAuMTUwMDAwMDAwMDAwMDAwMDJ9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4xNjY2NjY2NjY2NjY2NjY2OX0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjE4MzMzMzMzMzMzMzMzMzM4fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOjAuMjAwMDAwMDAwMDAwMDAwMDR9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4xODMzMzMzMzMzMzMzMzMzOH0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjE2NjY2NjY2NjY2NjY2Njd9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4xNTAwMDAwMDAwMDAwMDAwMn0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjEzMzMzMzMzMzMzMzMzMzM2fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOjAuMTE2NjY2NjY2NjY2NjY2N30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjEwMDAwMDAwMDAwMDAwMDAzfSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOjAuMDgzMzMzMzMzMzMzMzMzMzd9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4wNjY2NjY2NjY2NjY2NjY3MX0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjowLjA1MDAwMDAwMDAwMDAwMDAzfSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOjAuMDMzMzMzMzMzMzMzMzMzMzd9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6MC4wMTY2NjY2NjY2NjY2NjY2OX0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjoyLjc3NTU1NzU2MTU2Mjg5MTRlLTE3fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjAxNjY2NjY2NjY2NjY2NjY0fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjAzMzMzMzMzMzMzMzMzMzMwNX0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4wNDk5OTk5OTk5OTk5OTk5NzV9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMDY2NjY2NjY2NjY2NjY2NjR9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMDgzMzMzMzMzMzMzMzMzMzF9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMDk5OTk5OTk5OTk5OTk5OTh9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMTE2NjY2NjY2NjY2NjY2NjR9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMTMzMzMzMzMzMzMzMzMzM30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4xNDk5OTk5OTk5OTk5OTk5N30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4xNjY2NjY2NjY2NjY2NjY2M30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4xODMzMzMzMzMzMzMzMzMzMn0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4xOTk5OTk5OTk5OTk5OTk5OH0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4yMTY2NjY2NjY2NjY2NjY2NX0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4yMzMzMzMzMzMzMzMzMzMzfSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjI1fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjI2NjY2NjY2NjY2NjY2NjY2fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjI4MzMzMzMzMzMzMzMzMzN9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuM30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4zMTY2NjY2NjY2NjY2NjY2NX0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4zMzMzMzMzMzMzMzMzMzMzfSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjM1fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjM2NjY2NjY2NjY2NjY2Njd9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMzgzMzMzMzMzMzMzMzMzMzZ9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNH0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC40MTY2NjY2NjY2NjY2NjY3fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjQzMzMzMzMzMzMzMzMzMzM1fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjQ1fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjQ2NjY2NjY2NjY2NjY2Njd9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNDgzMzMzMzMzMzMzMzMzMzR9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNX0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC41MTY2NjY2NjY2NjY2NjY2fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjUzMzMzMzMzMzMzMzMzMzN9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNTV9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNTY2NjY2NjY2NjY2NjY2N30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC41ODMzMzMzMzMzMzMzMzMzfSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjZ9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNTgzMzMzMzMzMzMzMzMzM30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC41NjY2NjY2NjY2NjY2NjY3fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjU1fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjUzMzMzMzMzMzMzMzMzMzN9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNTE2NjY2NjY2NjY2NjY2Nn0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC41fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjUxNjY2NjY2NjY2NjY2NjZ9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNTMzMzMzMzMzMzMzMzMzM30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC41NX0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC41NjY2NjY2NjY2NjY2NjY3fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjU4MzMzMzMzMzMzMzMzMzN9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNn0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC41ODMzMzMzMzMzMzMzMzMzfSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjU2NjY2NjY2NjY2NjY2Njd9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNTV9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNTMzMzMzMzMzMzMzMzMzM30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC41MTY2NjY2NjY2NjY2NjY2fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjV9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNDgzMzMzMzMzMzMzMzMzMzR9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuNDY2NjY2NjY2NjY2NjY2N30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC40NX0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC40MzMzMzMzMzMzMzMzMzMzNX0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC40MTY2NjY2NjY2NjY2NjY3fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjR9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMzgzMzMzMzMzMzMzMzMzMzZ9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMzY2NjY2NjY2NjY2NjY2N30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4zNTAwMDAwMDAwMDAwMDAwM30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4zMzMzMzMzMzMzMzMzMzMzN30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4zMTY2NjY2NjY2NjY2NjY3fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjMwMDAwMDAwMDAwMDAwMDA0fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjI4MzMzMzMzMzMzMzMzMzR9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMjY2NjY2NjY2NjY2NjY2N30seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4yNTAwMDAwMDAwMDAwMDAwNn0seyJ0aHJ1c3QiOnRydWUsInJvdGF0aW9uIjotMC4yMzMzMzMzMzMzMzMzMzM0fSx7InRocnVzdCI6dHJ1ZSwicm90YXRpb24iOi0wLjIxNjY2NjY2NjY2NjY2Njd9LHsidGhydXN0Ijp0cnVlLCJyb3RhdGlvbiI6LTAuMjAwMDAwMDAwMDAwMDAwMDR9XQ"
+const input = [
+    4, 3, 5, 5, 5, 5, 4, 5, 4, 4, 5, 5, 4, 4, 4, 5, 4, 4, 5, 4, 5, 4, 5, 4, 0, 4, 5, 4, 5, 4, 5, 4,
+    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 2, 2, 4, 4, 2, 2, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 1, 0, 4, 4, 5, 5, 5, 5, 5, 4, 5, 4, 4, 4, 4, 5, 4, 4, 5, 4, 5, 4, 5, 4, 5, 5, 4, 5, 4,
+    5, 5, 4, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 1, 1, 1, 5, 5, 0, 4, 5, 5, 5, 5, 5, 4, 4, 5, 4, 5, 4, 5, 4, 4, 5, 4, 4, 5, 4, 5, 4, 4, 5,
+    5, 4, 5, 4, 5, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 5, 5, 5, 5, 5, 5, 5, 0, 4, 5, 5, 5, 5, 5, 4, 4, 5, 4, 5, 4, 5, 4, 4, 4, 5, 4, 4, 5, 4,
+    4, 5, 4, 4, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 5, 5, 5, 5, 2, 2,
+    2, 2, 2, 2, 5, 5, 5, 5, 5, 5, 0, 4, 5, 5, 5, 5, 5, 4, 4, 5, 5, 4, 4, 5, 4, 4, 4, 4, 4, 5, 4, 5,
+    4, 5, 4, 5, 4, 5, 4, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5, 5, 5, 0, 4, 4, 5, 5, 5, 5, 5, 4, 4, 5, 4, 5, 4, 4, 4, 4, 5,
+    4, 5, 4, 4, 5, 5, 4, 5, 5, 4, 5, 4, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 5, 5, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5, 5, 0, 4, 5, 5, 5, 5, 5, 4, 4, 5, 4, 5, 4, 4, 4, 5,
+    4, 4, 5, 4, 5, 4, 5, 4, 5, 5, 4, 5, 5, 4, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5, 5, 0, 4, 5, 5, 5, 5, 5, 4, 4, 5, 4, 5, 4, 4, 5,
+    4, 4, 4, 4, 5, 5, 4, 5, 4, 5, 5, 4, 5, 4, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 5, 4, 5, 5, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 5, 5, 5, 5, 5, 0, 4, 5, 5, 5, 5, 5, 4, 4, 5, 4, 5, 4, 4,
+    4, 4, 5, 3, 4, 5, 4, 5, 4, 5, 5, 5, 4, 5, 4, 5, 5, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 4, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5, 0, 4, 5, 5, 5, 5, 5, 4, 4, 5, 4, 4, 5,
+    4, 5, 4, 4, 4, 5, 4, 5, 5, 5, 4, 5, 4, 5, 4, 5, 4, 5, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 5, 5, 0, 4, 5, 5, 5, 5, 5, 4, 4, 4,
+    5, 5, 4, 4, 4, 5, 5, 4, 4, 4, 5, 5, 4, 5, 4, 5, 4, 5, 5, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+    5, 5, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 0, 4, 5, 5, 5, 5, 4, 5,
+    5, 4, 4, 5, 4, 4, 5, 4, 4, 4, 4, 5, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5,
+    5, 5, 4, 5, 2, 2, 2, 2, 2, 2, 0, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 4, 4, 5, 5, 5, 5,
+    4, 5, 4, 5, 4, 4, 5, 4, 4, 4, 5, 4, 5, 4, 5, 5, 4, 5, 4, 3, 5, 5, 5, 4, 5, 5, 5, 5, 5, 4, 5, 5,
+    5, 5, 4, 5, 0, 2, 4, 2, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 5, 0, 4, 4, 5, 5,
+    5, 5, 5, 4, 4, 5, 4, 4, 5, 4, 4, 4, 4, 5, 5, 4, 5, 5, 5, 4, 5, 4, 5, 5, 4, 5, 4, 5, 5, 5, 5, 5,
+    5, 5, 5, 5, 5, 4, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 4, 4, 5, 5,
+    5, 5, 4, 5, 4, 5, 4, 5, 4, 4, 4, 4, 5, 4, 5, 4, 5, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5, 5, 5, 5, 5, 5,
+    5, 5, 5, 5, 4, 5, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 4, 4, 5, 5,
+    5, 5, 5, 4, 4, 4, 5, 4, 4, 5, 4, 4, 5, 4, 5, 5, 4, 5, 4, 5, 4, 5, 5, 5, 4, 5, 4, 5, 5, 5, 5, 4,
+]
 
 export class ModuleInput {
     private keyboard: Keyboard
@@ -33,7 +65,20 @@ export class ModuleInput {
         this.onKeyboardDown = this.onKeyboardDown.bind(this)
         window.addEventListener("keydown", this.onKeyboardDown)
 
-        this.precomputed = JSON.parse(atob(input))
+        this.precomputed = []
+        let rotation = 0
+
+        for (let i = 0; i < input.length; ++i) {
+            const thrust = input[i] >= 3
+
+            if (input[i] === 1 || input[i] === 4) {
+                rotation += 0.1
+            } else if (input[i] === 2 || input[i] === 5) {
+                rotation -= 0.1
+            }
+
+            this.precomputed.push({ rotation, thrust })
+        }
     }
 
     dispose() {

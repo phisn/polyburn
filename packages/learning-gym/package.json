@@ -14,10 +14,12 @@
         "typescript": "^5.4.2"
     },
     "dependencies": {
+        "@types/jsdom": "^21.1.6",
         "@types/node": "^20.12.8",
-        "gl": "^8.0.2",
-        "pngjs": "^7.0.0",
         "custom-rapier2d-node": "*",
+        "gl": "^8.0.2",
+        "jsdom": "^24.0.0",
+        "pngjs": "^7.0.0",
         "three": "0.145.0",
         "tsconfig": "*",
         "web-game": "*"

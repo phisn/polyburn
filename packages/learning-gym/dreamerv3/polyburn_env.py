@@ -4,7 +4,7 @@ import subprocess
 import json
 import numpy as np
 
-size = 64
+size = 96
 
 class NodeJsEnvironment(gym.Env):
     metadata = {"render.modes": ["binary"]}
@@ -17,7 +17,7 @@ class NodeJsEnvironment(gym.Env):
 
         self.observation_space = spaces.Dict({
             "image": spaces.Box(low=0, high=255, shape=(size, size, 3), dtype=np.uint8),
-            "features": spaces.Box(low=-1000, high=1000, shape=(6,), dtype=np.float32)
+            "features": spaces.Box(low=-1000, high=1000, shape=(4,), dtype=np.float32)
         })
 
         self.action_space = spaces.Discrete(6)
@@ -35,10 +35,10 @@ class NodeJsEnvironment(gym.Env):
             self.restart_process()
             return self.reset(), 0, True, {}
 
-        data = self.process.stdout.read(size*size*3 + 6*4 + 4 + 1)
+        data = self.process.stdout.read(size*size*3 + 4*4 + 4 + 1)
         image = np.frombuffer(data[:size*size*3], dtype=np.uint8).reshape(size, size, 3)
-        features = np.frombuffer(data[size*size*3:size*size*3+ 6*4], dtype=np.float32)
-        reward = np.frombuffer(data[size*size*3 + 6*4:size*size*3 + 6*4 + 4], dtype=np.float32)[0]
+        features = np.frombuffer(data[size*size*3:size*size*3+ 4*4], dtype=np.float32)
+        reward = np.frombuffer(data[size*size*3 + 4*4:size*size*3 + 4*4 + 4], dtype=np.float32)[0]
         done = data[-1] == 1
         
         return { "image": image, "features": features }, reward, done, {}
@@ -51,7 +51,7 @@ class NodeJsEnvironment(gym.Env):
         command = command.encode("utf-8")
         self.process.stdin.write(command)
         self.process.stdin.flush()
-        data = self.process.stdout.read(size*size*3 + 6 * 4)
+        data = self.process.stdout.read(size*size*3 + 4 * 4)
         image = np.frombuffer(data[:size*size*3], dtype=np.uint8).reshape(size, size, 3)
         features = np.frombuffer(data[size*size*3:], dtype=np.float32)
 
@@ -62,7 +62,7 @@ class NodeJsEnvironment(gym.Env):
             self.script_path.split(),
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            
             text=False,
             bufsize=0
         )
@@ -70,7 +70,7 @@ class NodeJsEnvironment(gym.Env):
         # Wait for the initial startup messages to clear.
         self.process.stdout.readline()
         self.process.stdout.readline()
-        self.process.stderr.readline()
+        
 
     def render(self, mode="binary"):
         self.process.stdin.write(b'{"command":"render"}\n')
@@ -99,8 +99,13 @@ if __name__ == "__main__":
         for j in range(4):
             axs[i, j].imshow(env.render())
             axs[i, j].axis("off")
-            env.step(0)
+            o, r, _, _ = env.step(5)
+            print(o["features"])
 
-    plt.show()
+    for i in range(16):
+        o, r, _, _ = env.step(0)
+        print(o["features"])
+
+    # plt.show()
 
     env.close()

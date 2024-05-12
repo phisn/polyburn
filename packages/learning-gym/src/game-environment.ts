@@ -62,7 +62,7 @@ export class GameEnvironment {
         // - distance to flag x
         // - distance to flag y
         // - flag in capture
-        this.observationFeatureBuffer = Buffer.alloc(4 * 6)
+        this.observationFeatureBuffer = Buffer.alloc(4 * 4)
 
         // image (3 channels)
         this.observationImageBuffer = Buffer.alloc(
@@ -271,10 +271,7 @@ export class GameEnvironment {
             8,
         )
 
-        this.observationFeatureBuffer.writeFloatLE(dxTarget / 8, 12)
-        this.observationFeatureBuffer.writeFloatLE(dyTarget / 8, 16)
-
-        this.observationFeatureBuffer.writeFloatLE(inCapture ? 1 : -1, 20)
+        this.observationFeatureBuffer.writeFloatLE(inCapture ? 1 : -1, 12)
     }
 
     generatePng(): Buffer {

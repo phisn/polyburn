@@ -37,7 +37,7 @@ export class DefaultGameReward implements Reward {
         this.nextLevel = nextFlag(runtime, this.rocket)
 
         this.steps = 0
-        this.maxSteps = 5000 // ~~ 5 min
+        this.maxSteps = 10000 // ~~ 5 min
         this.hasBeenInCaptureFor = 0
         this.stepsSinceCapture = 0
     }
@@ -46,6 +46,7 @@ export class DefaultGameReward implements Reward {
         let reward = 0
         steps()
         ++this.steps
+        ++this.stepsSinceCapture
 
         if (this.steps >= this.maxSteps) {
             return [-1, true]

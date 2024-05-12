@@ -75,6 +75,7 @@ export class ModuleSceneAgent {
             )
             const shapeMaterial = new THREE.MeshBasicMaterial({ vertexColors: true })
             const shapeMesh = new THREE.Mesh(shapeGeometry, shapeMaterial)
+            shapeMesh.position.setZ(1)
 
             this.scene.add(shapeMesh)
         }

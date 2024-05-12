@@ -90,20 +90,20 @@ export class ModuleInput {
     }
 
     rotation() {
-        return this.iter < this.precomputed.length ? this.precomputed[this.iter].rotation : 0
-        // return this.mouse.rotation() + this.keyboard.rotation()
+        // return this.iter < this.precomputed.length ? this.precomputed[this.iter].rotation : 0
+        return this.mouse.rotation() + this.keyboard.rotation()
     }
 
     thrust() {
-        return this.iter < this.precomputed.length ? this.precomputed[this.iter].thrust : false
-        // return this.mouse.thrust() || this.keyboard.thrust()
+        // return this.iter < this.precomputed.length ? this.precomputed[this.iter].thrust : false
+        return this.mouse.thrust() || this.keyboard.thrust()
     }
 
     onPreFixedUpdate(delta: number) {
         this.keyboard.onPreFixedUpdate(delta)
     }
 
-    onFixedUpdate(delta: number) {
+    onFixedUpdate() {
         ++this.iter
     }
 

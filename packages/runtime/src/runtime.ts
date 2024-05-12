@@ -23,6 +23,8 @@ export const newRuntime = (rapier: typeof RAPIER, world: WorldModel, gamemodeNam
         store: createEntityStore(),
         messageStore: createMessageStore(),
 
+        gamemode: gamemodeName,
+        worldmodel: world,
         rapier,
         physics: new rapier.World(new rapier.Vector2(0, 0)),
         queue: new rapier.EventQueue(true),

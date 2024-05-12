@@ -3,12 +3,13 @@ import { LevelCapturedMessage } from "runtime/src/core/level-capture/level-captu
 import { RocketDeathMessage } from "runtime/src/core/rocket/rocket-death-message"
 import { RuntimeComponents } from "runtime/src/core/runtime-components"
 import { Runtime } from "runtime/src/runtime"
+import { ReplayFollowTracker } from "./replay-follow-tracker"
 
 export interface Reward {
     next: (steps: () => void) => [number, boolean]
 }
 
-export type RewardFactory = (game: Runtime) => Reward
+export type RewardFactory = (game: Runtime, replay: ReplayFollowTracker) => Reward
 
 export class DefaultGameReward implements Reward {
     private captureCollector: MessageCollector<LevelCapturedMessage>
@@ -21,8 +22,12 @@ export class DefaultGameReward implements Reward {
     private maxSteps: number
 
     private hasBeenInCaptureFor: number
+    private stepsSinceCapture: number
 
-    constructor(private runtime: Runtime) {
+    constructor(
+        private runtime: Runtime,
+        private tracker: ReplayFollowTracker,
+    ) {
         this.captureCollector = runtime.factoryContext.messageStore.collect("levelCaptured")
         this.deathCollector = runtime.factoryContext.messageStore.collect("rocketDeath")
 
@@ -32,8 +37,9 @@ export class DefaultGameReward implements Reward {
         this.nextLevel = nextFlag(runtime, this.rocket)
 
         this.steps = 0
-        this.maxSteps = 10 * 60 * 5 * 4 // 5 min
+        this.maxSteps = 5000 // ~~ 5 min
         this.hasBeenInCaptureFor = 0
+        this.stepsSinceCapture = 0
     }
 
     next(steps: () => void): [number, boolean] {
@@ -42,8 +48,10 @@ export class DefaultGameReward implements Reward {
         ++this.steps
 
         if (this.steps >= this.maxSteps) {
-            return [0, true]
+            return [-1, true]
         }
+
+        reward += 16 * this.tracker.step()
 
         for (const message of this.deathCollector) {
             const velocity = this.rocket.components.rigidBody.linvel()
@@ -62,11 +70,13 @@ export class DefaultGameReward implements Reward {
         }
 
         for (const message of this.captureCollector) {
-            reward += (1 - this.steps / this.maxSteps) * 512
+            reward +=
+                Math.max(0, (1 - this.steps / this.maxSteps) * 500) +
+                Math.max(0, (1 - this.stepsSinceCapture / (15 * 60)) * 500)
 
             this.nextLevel = nextFlag(this.runtime, this.rocket)
-
             this.hasBeenInCaptureFor = 0
+            this.stepsSinceCapture = 0
         }
 
         return [reward, false]

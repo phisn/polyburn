@@ -4,6 +4,7 @@ import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
 import { Runtime } from "runtime/src/runtime"
 import * as THREE from "three"
 import { ModuleSceneAgent } from "./modules/module-scene-agent/module-scene-agent"
+import { ReplayFollowTracker } from "./reward/replay-follow-tracker"
 
 export class GameAgentWrapper {
     sceneModule: ModuleSceneAgent
@@ -11,11 +12,14 @@ export class GameAgentWrapper {
 
     private rocket: EntityWith<RuntimeComponents, "rigidBody">
 
+    private trackerIndicator?: THREE.Mesh
+
     constructor(
         private runtime: Runtime,
         scene: THREE.Scene,
         grayScale: boolean,
         cameraSize: number,
+        private tracker?: ReplayFollowTracker,
     ) {
         scene.background = new THREE.Color(0)
         this.sceneModule = new ModuleSceneAgent(scene, runtime, grayScale)
@@ -38,6 +42,15 @@ export class GameAgentWrapper {
         )
 
         this.sceneModule.onUpdate()
+
+        if (tracker) {
+            this.trackerIndicator = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 1, 1),
+                new THREE.MeshBasicMaterial({ color: 0xffffff }),
+            )
+
+            this.sceneModule.getScene().add(this.trackerIndicator)
+        }
     }
 
     step(context: RuntimeSystemContext) {
@@ -50,5 +63,10 @@ export class GameAgentWrapper {
             this.rocket.components.rigidBody.translation().y,
             10,
         )
+
+        if (this.tracker && this.trackerIndicator) {
+            this.tracker.step()
+            this.trackerIndicator.position.set(this.tracker.next().x, this.tracker.next().y, 0)
+        }
     }
 }

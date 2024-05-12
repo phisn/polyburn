@@ -6,8 +6,6 @@ import { ExtendedComponents } from "./extended-components"
 
 export interface ExtendedFactoryContext extends RuntimeFactoryContext<ExtendedComponents> {
     worldname: string
-    gamemode: string
-
     replayCapture: ReplayCaptureService
 
     hooks?: GameHooks

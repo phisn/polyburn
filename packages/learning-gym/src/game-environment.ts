@@ -2,6 +2,7 @@ import RAPIER from "custom-rapier2d-node/rapier"
 import * as gl from "gl"
 import { PNG } from "pngjs"
 import { EntityWith, MessageCollector } from "runtime-framework"
+import { ReplayModel } from "runtime/proto/replay"
 import { WorldModel } from "runtime/proto/world"
 import { LevelCapturedMessage } from "runtime/src/core/level-capture/level-captured-message"
 import { RuntimeComponents } from "runtime/src/core/runtime-components"
@@ -9,6 +10,11 @@ import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
 import { Runtime, newRuntime } from "runtime/src/runtime"
 import * as THREE from "three"
 import { GameAgentWrapper } from "web-game/src/game/game-agent-wrapper"
+import {
+    ReplayFollowTracker,
+    ReplayProcessed,
+    processReplayForAgent,
+} from "web-game/src/game/reward/replay-follow-tracker"
 import { Reward, RewardFactory } from "../../web-game/src/game/reward/default-reward"
 
 export interface GameEnvironmentConfig {
@@ -33,10 +39,13 @@ export class GameEnvironment {
     private rocket!: EntityWith<RuntimeComponents, "rocket" | "rigidBody">
     private targetFlag: EntityWith<RuntimeComponents, "level"> | undefined
     private capturedCollector!: MessageCollector<LevelCapturedMessage>
+    private replayTracker!: ReplayFollowTracker
 
     private png: PNG
     private memory: RuntimeSystemContext[] = []
     private previousGamemode = "<none>"
+
+    private replayProcessed: ReplayProcessed | undefined
 
     constructor(
         private world: WorldModel,
@@ -113,6 +122,18 @@ export class GameEnvironment {
 
         this.runtime = newRuntime(RAPIER as any, this.world, this.previousGamemode)
 
+        if (this.replayProcessed === undefined) {
+            const replayToFollow =
+                "CuUmcggAAAAACGaizaTNpGaeZp5momemZqrNqACozaTNpGWeZp4AAAFmomeeZ54AAAVmnmaiZ54AAAFnngAAAWaeZ55mngAABGaeAAACZ54AAAdmIs0kMyuaKTMtZyozLZopzChnKgAozShlIgAAAmYeZx5mHgAAAWYeAAAFZp5momeiZqZnomaeZ6Jmos2kZp5momeiZqJmogAABGeeAAAFZh5mImciZiJnIs0kzCTNJGciZh4AAAFnHgAADM2kzaRmps2kzajMpGeiZp5nnmaeAAABZ54AAAFmngAAWWaiZ6YAqACoZZ5momeeZp5nomaeZqJnngAAAWaeZqJnomaiZ54AAAJmnmeiZp4AAAJmngAACmYeZx4AAANmHmceAAAMZ55mnmaiZ6JmomeiZp5mngAAAmaiZ6IAAAFmomeeZqJnomaiZ55mnmaiZ55nos2kzKRongAAGWaiZ6Jmps2kzagAqGamZ55mngAACGYeAAABZiJnHmceZh5nHgAAAWYeZh5nHmYeAAABZx5mHs0kZh5mImciZh7NJGYiZibNJM0kzSQAKGYmZiZnJs0kZibNJGYiZibNJGcmzCQAKGcmZiaaKWYmACjNJGYiZh4AAAJmHmceZh5mIgAAAWcezSTNKMwkAChnImYiZx5nHgAABmYeAAABZh5nHmYeAAABZx4AADJnnmaeZqJnnmeeAAAHZp5nngAAAWaeZp5nnmaiZ6IAAAJmngAAC2aeZqJnns2kZp5momeeZ55momeiAAAOZp5momeeZqIAAAFnngAAAmaeAAABZ54AAAFmnmaiZ6ZmomaiZ55mos2kzaRmomaezaRmngAAAWaeAAAXZh4AAAdnHgAAAmYeZx4AAAFmHgAAAWYeAABTzaTMpGieZ6JmomaizaTNqM2oZqrNqGaszajNqDOrAKjNqGemZqbNpACozaTNpACoZqbNpGaiAAABZp4AAApmHgAABmYeAAACZx5mHmceZh5mHmciZh5mHmYiZyJmImceZh4AAAFnHmYeZh5nHmYeAAABZx5mHmYezSRmHmYiZyJmImcizSRlHmYiZx5mImciZh5mHmciZiJmImcmZiJmJmceZiJnHmYmZyZmJjMrzSgzK2cmzShmImYeZh4AABJmomeeZqJnnmaeZ6JmnmaeZp4AAAJnnmaeAAABZ55mngAAAmaeZ55mngAA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"
+
+            this.replayProcessed = processReplayForAgent(
+                ReplayModel.decode(Buffer.from(replayToFollow, "base64")),
+                this.runtime,
+            )
+        }
+
+        this.replayTracker = new ReplayFollowTracker(this.runtime, this.replayProcessed)
+
         this.game = new GameAgentWrapper(
             this.runtime,
             new THREE.Scene() as any,
@@ -124,7 +145,7 @@ export class GameEnvironment {
         this.capturedCollector = this.runtime.factoryContext.messageStore.collect("levelCaptured")
         this.targetFlag = nextFlag(this.runtime, this.rocket)
         this.rotation = 0
-        this.reward = this.rewardFactory(this.runtime)
+        this.reward = this.rewardFactory(this.runtime, this.replayTracker)
 
         this.extractPixelsToObservationBuffer()
         this.prepareFeatureBuffer()
@@ -224,27 +245,36 @@ export class GameEnvironment {
             this.targetFlag = nextFlag(this.runtime, this.rocket)
         }
 
-        let dx = 0
-        let dy = 0
         let inCapture = false
 
         if (this.targetFlag) {
-            dx =
-                this.rocket.components.rigidBody.translation().x -
-                this.targetFlag.components.level.flag.x
-            dy =
-                this.rocket.components.rigidBody.translation().y -
-                this.targetFlag.components.level.flag.y
-
             inCapture = this.targetFlag.components.level.inCapture
         }
 
-        this.observationFeatureBuffer.writeFloatLE(this.rocket.components.rigidBody.linvel().x, 0)
-        this.observationFeatureBuffer.writeFloatLE(this.rocket.components.rigidBody.linvel().y, 4)
-        this.observationFeatureBuffer.writeFloatLE(this.rotation, 8)
-        this.observationFeatureBuffer.writeFloatLE(dx, 12)
-        this.observationFeatureBuffer.writeFloatLE(dy, 16)
-        this.observationFeatureBuffer.writeFloatLE(inCapture ? 1 : 0, 20)
+        const target = this.replayTracker.next()
+
+        const dxTarget = target.x - this.rocket.components.rigidBody.translation().x
+        const dyTarget = target.y - this.rocket.components.rigidBody.translation().y
+
+        this.observationFeatureBuffer.writeFloatLE(
+            this.rocket.components.rigidBody.linvel().x / 10,
+            0,
+        )
+
+        this.observationFeatureBuffer.writeFloatLE(
+            this.rocket.components.rigidBody.linvel().y / 10,
+            4,
+        )
+
+        this.observationFeatureBuffer.writeFloatLE(
+            this.rocket.components.rigidBody.rotation() / (0.5 * 3.14),
+            8,
+        )
+
+        this.observationFeatureBuffer.writeFloatLE(dxTarget / 8, 12)
+        this.observationFeatureBuffer.writeFloatLE(dyTarget / 8, 16)
+
+        this.observationFeatureBuffer.writeFloatLE(inCapture ? 1 : -1, 20)
     }
 
     generatePng(): Buffer {
@@ -286,9 +316,3 @@ function nextFlag(runtime: Runtime, rocket: EntityWith<RuntimeComponents, "rocke
 }
 
 global.navigator = { userAgent: "node" } as any
-
-interface Environment {
-    reset(): [Buffer, Buffer]
-    step(action: Buffer): [number, boolean, Buffer, Buffer]
-    generatePng(): Buffer
-}

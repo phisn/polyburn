@@ -4,6 +4,7 @@ import { WorldModel } from "runtime/proto/world"
 import { DefaultGameReward } from "web-game/src/game/reward/default-reward"
 import { GameEnvironment } from "./game-environment"
 
+global.navigator = { userAgent: "node" } as any
 global.DOMParser = new JSDOM().window.DOMParser
 
 const worldStr2 =
@@ -22,11 +23,11 @@ const environment = new GameEnvironment(
     ["Normal"],
     {
         grayScale: false,
-        size: 64,
+        size: 96,
         pixelsPerUnit: 2.0,
         stepsPerFrame: 4,
     },
-    game => new DefaultGameReward(game),
+    (game, tracker) => new DefaultGameReward(game, tracker),
 )
 
 process.stdin.resume()

@@ -17,9 +17,6 @@ export class DefaultGameReward implements Reward {
     private rocket: EntityWith<RuntimeComponents, "rocket" | "rigidBody">
     private nextLevel: EntityWith<RuntimeComponents, "level"> | undefined
 
-    private bestDistanceToLevel: number
-    private distanceToReward: number
-
     private steps: number
     private maxSteps: number
 
@@ -33,9 +30,6 @@ export class DefaultGameReward implements Reward {
 
         // next level is nearest level that is not captured
         this.nextLevel = nextFlag(runtime, this.rocket)
-
-        this.bestDistanceToLevel = this.findDistanceToLevel(this.nextLevel)
-        this.distanceToReward = 16 / this.bestDistanceToLevel
 
         this.steps = 0
         this.maxSteps = 10 * 60 * 5 * 4 // 5 min
@@ -62,14 +56,6 @@ export class DefaultGameReward implements Reward {
             return [(1 - this.steps / this.maxSteps) * 1024, true]
         }
 
-        const distanceToLevel = this.findDistanceToLevel(this.nextLevel)
-        const deltaDistance = this.bestDistanceToLevel - distanceToLevel
-
-        if (deltaDistance > 0) {
-            reward += this.distanceToReward * deltaDistance
-            this.bestDistanceToLevel = distanceToLevel
-        }
-
         if (this.nextLevel.components.level.inCapture && this.hasBeenInCaptureFor < 4) {
             reward += 4
             this.hasBeenInCaptureFor += 1
@@ -79,8 +65,6 @@ export class DefaultGameReward implements Reward {
             reward += (1 - this.steps / this.maxSteps) * 512
 
             this.nextLevel = nextFlag(this.runtime, this.rocket)
-            this.bestDistanceToLevel = this.findDistanceToLevel(this.nextLevel)
-            this.distanceToReward = 16 / this.bestDistanceToLevel
 
             this.hasBeenInCaptureFor = 0
         }

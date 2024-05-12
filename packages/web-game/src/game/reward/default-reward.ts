@@ -21,7 +21,7 @@ export class DefaultGameReward implements Reward {
     private steps: number
     private maxSteps: number
 
-    private hasBeenInCaptureFor: number
+    private hasBeenInCapture: boolean
     private stepsSinceCapture: number
 
     constructor(
@@ -38,7 +38,7 @@ export class DefaultGameReward implements Reward {
 
         this.steps = 0
         this.maxSteps = 10000 // ~~ 5 min
-        this.hasBeenInCaptureFor = 0
+        this.hasBeenInCapture = false
         this.stepsSinceCapture = 0
     }
 
@@ -65,9 +65,9 @@ export class DefaultGameReward implements Reward {
             return [(1 - this.steps / this.maxSteps) * 1024, true]
         }
 
-        if (this.nextLevel.components.level.inCapture && this.hasBeenInCaptureFor < 4) {
+        if (this.nextLevel.components.level.inCapture && this.hasBeenInCapture === false) {
             reward += 4
-            this.hasBeenInCaptureFor += 1
+            this.hasBeenInCapture = true
         }
 
         for (const message of this.captureCollector) {
@@ -76,7 +76,7 @@ export class DefaultGameReward implements Reward {
                 Math.max(0, (1 - this.stepsSinceCapture / (15 * 60)) * 500)
 
             this.nextLevel = nextFlag(this.runtime, this.rocket)
-            this.hasBeenInCaptureFor = 0
+            this.hasBeenInCapture = false
             this.stepsSinceCapture = 0
         }
 

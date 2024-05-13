@@ -32,12 +32,12 @@ export interface WebappRuntimeProps {
 }
 
 export const newWebappRuntime = (props: WebappRuntimeProps): WebappSystemStack => {
-    const stack = newRuntime(props.world, props.gamemode)
+    const stack = newRuntime(RAPIER, props.world, props.gamemode)
 
     const particlePhysics = new RAPIER.World(stack.factoryContext.physics.gravity)
 
     for (const entity of stack.factoryContext.store.find("shape")) {
-        createShapeRigidBody(particlePhysics, entity.components.shape.vertices)
+        createShapeRigidBody(RAPIER, particlePhysics, entity.components.shape.vertices)
     }
 
     const stackExtended: SystemStack<WebappFactoryContext, RuntimeSystemContext> = stack.extend({

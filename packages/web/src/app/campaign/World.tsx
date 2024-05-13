@@ -3,8 +3,6 @@ import { BrowserView, isMobile } from "react-device-detect"
 import { WorldView } from "shared/src/views/world-view"
 import { LockedSvg } from "../../common/components/inline-svg/Locked"
 
-const todoProgressFeature = true
-
 export function World(props: { world?: WorldView; locked?: boolean; onSelected: () => void }) {
     //    return <div className="m-2 h-[18rem] w-[28rem] bg-white"></div>
     function ButtonOverlay() {

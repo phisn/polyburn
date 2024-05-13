@@ -72,18 +72,14 @@ export const userRouter = router({
         )
         .query(async ({ input: { code }, ctx: { oauth, env, db } }) => {
             try {
-                console.error(1)
                 const { access_token } = await oauth.validateAuthorizationCode(code, {
                     credentials: env.AUTH_GOOGLE_CLIENT_SECRET,
                     authenticateWith: "request_body",
                 })
-                console.error(2)
 
                 const userInfoRequest = await fetch(
                     `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${access_token}`,
                 )
-
-                console.error(3)
 
                 if (!userInfoRequest.ok) {
                     throw new TRPCError({
@@ -91,8 +87,6 @@ export const userRouter = router({
                         message: "Failed to fetch user info",
                     })
                 }
-
-                console.error(4)
 
                 const userInfo = z
                     .object({

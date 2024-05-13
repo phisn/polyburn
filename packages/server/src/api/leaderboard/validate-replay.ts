@@ -1,3 +1,4 @@
+import RAPIER from "@dimforge/rapier2d"
 import { TRPCError } from "@trpc/server"
 import { and, count, eq, lt } from "drizzle-orm"
 import { DrizzleD1Database } from "drizzle-orm/d1"
@@ -135,7 +136,7 @@ function serverValidateReplay(worldname: string, gamemode: string, replayBuffer:
         const replayModel = ReplayModel.decode(replayBuffer)
         const worldModel = WorldModel.decode(Buffer.from(world.model, "base64"))
 
-        const stats = validateReplay(replayModel, worldModel, gamemode)
+        const stats = validateReplay(RAPIER, replayModel, worldModel, gamemode)
 
         if (!stats) {
             console.log("replay is invalid")

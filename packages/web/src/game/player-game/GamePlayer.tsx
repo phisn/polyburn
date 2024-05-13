@@ -1,3 +1,4 @@
+import RAPIER from "@dimforge/rapier2d"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useMessage } from "../../common/runtime-framework/use-message"
 import { prepareReplay } from "../runtime-extension/replay/prepare/prepare-replay"
@@ -17,6 +18,7 @@ export const GamePlayer = withCanvas(function GamePlayer(props: {
         }
 
         return prepareReplay(
+            RAPIER,
             props.runtimeProps.replay,
             props.runtimeProps.world,
             props.runtimeProps.gamemode,

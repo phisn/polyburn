@@ -45,5 +45,19 @@ export function Game(props: {
         }
     }, [gameLoop])
 
-    return <canvas className="absolute inset-0 z-0 h-full w-full" ref={canvasRef} />
+    return (
+        <canvas
+            style={{
+                position: "relative",
+                height: "100%",
+                width: "100%",
+                overflow: "hidden",
+                pointerEvents: "auto",
+                touchAction: "none",
+                WebkitUserSelect: "none",
+            }}
+            className="absolute inset-0 z-0 h-full w-full select-none"
+            ref={canvasRef}
+        />
+    )
 }

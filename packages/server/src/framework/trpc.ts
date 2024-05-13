@@ -18,7 +18,7 @@ export const createContext =
                 "https://accounts.google.com/o/oauth2/auth",
                 "https://accounts.google.com/o/oauth2/token",
                 {
-                    redirectURI: env.CLIENT_URL,
+                    redirectURI: env.CLIENT_URL.split(",").at(-1),
                 },
             ),
             env,

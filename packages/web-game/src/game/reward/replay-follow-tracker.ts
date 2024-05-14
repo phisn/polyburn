@@ -2,17 +2,19 @@ import { EntityWith, MessageCollector } from "runtime-framework"
 import { ReplayModel } from "runtime/proto/replay"
 import { LevelCapturedMessage } from "runtime/src/core/level-capture/level-captured-message"
 import { RuntimeComponents } from "runtime/src/core/runtime-components"
+import { RuntimeSystemContext } from "runtime/src/core/runtime-system-stack"
 import { Point } from "runtime/src/model/point"
 import { runtimeFromReplay } from "runtime/src/model/replay/runtime-from-replay"
 import { Runtime } from "runtime/src/runtime"
 
 export interface ReplayProcessed {
     positionsInLevels: Point[][]
+    inputsInLevels: RuntimeSystemContext[][]
 }
 
 export function processReplayForAgent(replay: ReplayModel, runtime: Runtime): ReplayProcessed {
-    const time = Date.now()
     const positionsInLevels: Point[][] = [[]]
+    const inputsInLevels: RuntimeSystemContext[][] = [[]]
 
     const resultStack = runtimeFromReplay(
         runtime.factoryContext.rapier,
@@ -22,9 +24,10 @@ export function processReplayForAgent(replay: ReplayModel, runtime: Runtime): Re
         stack => {
             return stack.factoryContext.messageStore.collect("levelCaptured")
         },
-        (stack, context) => {
-            for (const message of context!) {
+        (stack, input, context) => {
+            for (const _ of context!) {
                 positionsInLevels.push([])
+                inputsInLevels.push([])
             }
 
             const vector = stack.factoryContext.store
@@ -35,6 +38,8 @@ export function processReplayForAgent(replay: ReplayModel, runtime: Runtime): Re
                 x: vector.x,
                 y: vector.y,
             })
+
+            inputsInLevels.at(-1)?.push(input)
         },
     )
 
@@ -42,6 +47,7 @@ export function processReplayForAgent(replay: ReplayModel, runtime: Runtime): Re
 
     return {
         positionsInLevels,
+        inputsInLevels,
     }
 }
 
@@ -67,7 +73,7 @@ export class ReplayFollowTracker {
 
     // returns progress
     step(): number {
-        for (const message of this.captureCollector) {
+        for (const _ of this.captureCollector) {
             this.level++
             this.i = 0
         }
@@ -79,7 +85,7 @@ export class ReplayFollowTracker {
         const rocketPosition = this.rocket.components.rigidBody.translation()
         const previousI = this.i
 
-        while (true) {
+        for (;;) {
             if (this.i + 1 >= this.replayProcessed.positionsInLevels[this.level].length) {
                 break
             }

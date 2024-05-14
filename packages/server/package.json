@@ -13,7 +13,7 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
-        "@cloudflare/workers-types": "^4.20230821.0",
+        "@cloudflare/workers-types": "^4.20240512.0",
         "@types/node": "^20.5.7",
         "dotenv-cli": "^7.3.0",
         "drizzle-kit": "^0.20.14",

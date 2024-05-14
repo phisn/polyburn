@@ -10,9 +10,9 @@ def main():
   config = embodied.Config(dreamerv3.Agent.configs['defaults'])
   
   config = config.update({
-      **dreamerv3.Agent.configs['size100m'],
-      'logdir': f'./logdir/polyburn-1',
-      'run.train_ratio': 32,
+      **dreamerv3.Agent.configs['size50m'],
+      'logdir': f'./logdir/polyburn-2',
+      'run.train_ratio': 16,
   })
 
   config = embodied.Flags(config).parse()

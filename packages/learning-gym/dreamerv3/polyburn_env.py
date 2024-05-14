@@ -17,7 +17,7 @@ class NodeJsEnvironment(gym.Env):
 
         self.observation_space = spaces.Dict({
             "image": spaces.Box(low=0, high=255, shape=(size, size, 3), dtype=np.uint8),
-            "features": spaces.Box(low=-1000, high=1000, shape=(4,), dtype=np.float32)
+            "features": spaces.Box(low=-1000, high=1000, shape=(6,), dtype=np.float32)
         })
 
         self.action_space = spaces.Discrete(6)
@@ -35,10 +35,10 @@ class NodeJsEnvironment(gym.Env):
             self.restart_process()
             return self.reset(), 0, True, {}
 
-        data = self.process.stdout.read(size*size*3 + 4*4 + 4 + 1)
+        data = self.process.stdout.read(size*size*3 + 6*4 + 4 + 1)
         image = np.frombuffer(data[:size*size*3], dtype=np.uint8).reshape(size, size, 3)
-        features = np.frombuffer(data[size*size*3:size*size*3+ 4*4], dtype=np.float32)
-        reward = np.frombuffer(data[size*size*3 + 4*4:size*size*3 + 4*4 + 4], dtype=np.float32)[0]
+        features = np.frombuffer(data[size*size*3:size*size*3+ 6*4], dtype=np.float32)
+        reward = np.frombuffer(data[size*size*3 + 6*4:size*size*3 + 6*4 + 4], dtype=np.float32)[0]
         done = data[-1] == 1
         
         return { "image": image, "features": features }, reward, done, {}
@@ -51,7 +51,7 @@ class NodeJsEnvironment(gym.Env):
         command = command.encode("utf-8")
         self.process.stdin.write(command)
         self.process.stdin.flush()
-        data = self.process.stdout.read(size*size*3 + 4 * 4)
+        data = self.process.stdout.read(size*size*3 + 6 * 4)
         image = np.frombuffer(data[:size*size*3], dtype=np.uint8).reshape(size, size, 3)
         features = np.frombuffer(data[size*size*3:], dtype=np.float32)
 
@@ -106,6 +106,6 @@ if __name__ == "__main__":
         o, r, _, _ = env.step(0)
         print(o["features"])
 
-    # plt.show()
+    plt.show()
 
     env.close()

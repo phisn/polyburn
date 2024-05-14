@@ -21,8 +21,7 @@ export class DefaultGameReward implements Reward {
     private steps: number
     private maxSteps: number
 
-    private hasBeenInCapture: boolean
-    private stepsSinceCapture: number
+    private beenInCaptureFor: number
 
     constructor(
         private runtime: Runtime,
@@ -38,43 +37,42 @@ export class DefaultGameReward implements Reward {
 
         this.steps = 0
         this.maxSteps = 10000 // ~~ 5 min
-        this.hasBeenInCapture = false
-        this.stepsSinceCapture = 0
+        this.beenInCaptureFor = 0
     }
 
     next(steps: () => void): [number, boolean] {
-        let reward = 0
+        let reward = -0.01
         steps()
         ++this.steps
-        ++this.stepsSinceCapture
 
         if (this.steps >= this.maxSteps) {
             return [-1, true]
         }
 
-        reward += 16 * this.tracker.step()
+        // step will return acc reward of 1.0 for each level
+        // we scale it down to 0.5 so that we on average need 50 frames to reach the next level
+        reward += 0.5 * this.tracker.step()
 
         for (const _ of this.deathCollector) {
-            return [-1, true]
+            return [-0.5, true]
         }
 
-        if (this.nextLevel === undefined) {
-            return [(1 - this.steps / this.maxSteps) * 1024, true]
-        }
-
-        if (this.nextLevel.components.level.inCapture && this.hasBeenInCapture === false) {
-            reward += 4
-            this.hasBeenInCapture = true
+        if (this.nextLevel!.components.level.inCapture) {
+            if (this.beenInCaptureFor < 4) {
+                reward += 0.1
+                this.beenInCaptureFor++
+            } else {
+                reward += 0.01
+            }
         }
 
         for (const _ of this.captureCollector) {
-            reward +=
-                Math.max(0, (1 - this.steps / this.maxSteps) * 500) +
-                Math.max(0, (1 - this.stepsSinceCapture / (15 * 60)) * 500)
-
             this.nextLevel = nextFlag(this.runtime, this.rocket)
-            this.hasBeenInCapture = false
-            this.stepsSinceCapture = 0
+            this.beenInCaptureFor = 0
+
+            const noNextLevel = this.nextLevel === undefined
+
+            return [1, noNextLevel]
         }
 
         return [reward, false]

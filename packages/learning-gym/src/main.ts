@@ -18,12 +18,14 @@ const worldStr4 =
 
 const world = WorldModel.decode(Buffer.from(worldStr4, "base64"))
 
+const size = 96
+
 const environment = new GameEnvironment(
     world,
     ["Normal"],
     {
         grayScale: false,
-        size: 96,
+        size,
         pixelsPerUnit: 2.0,
         stepsPerFrame: 4,
     },

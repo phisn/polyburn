@@ -1,8 +1,7 @@
+import { makeCCW, quickDecomp } from "poly-decomp-es"
 import { Point } from "runtime/src/model/point"
 import * as SAT from "sat"
 import * as THREE from "three"
-
-import { makeCCW, quickDecomp } from "poly-decomp-es"
 import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 import { Environment, aabbFromCircle, newEnvironment } from "./particle-environment"
 import {
@@ -59,7 +58,7 @@ export class ParticleSimulation {
                 this.polygons.push(
                     new SAT.Polygon(
                         new SAT.Vector(0, 0),
-                        decomp.map(([x, y]) => new SAT.Vector(x, y)),
+                        decomp.map(([x, y]: any) => new SAT.Vector(x, y)),
                     ),
                 )
             }

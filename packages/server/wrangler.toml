@@ -5,6 +5,7 @@ compatibility_date = "2024-03-04"
 compatibility_flags = [ "nodejs_compat" ]
 
 usage_model = "unbound"
+upload_source_maps = true 
 
 [dev]
 port = 3002

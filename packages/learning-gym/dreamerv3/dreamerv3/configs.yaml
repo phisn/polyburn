@@ -14,7 +14,7 @@ defaults:
         prio: { exponent: 0.8, maxfrac: 0.5, initial: inf, zero_on_sample: True }
         priosignal: model
         recexp: 1.0
-        chunksize: 1024
+        chunksize: 4096
         save_wait: False
 
     jax:
@@ -196,7 +196,7 @@ defaults:
                 symlog: True,
                 outer: True,
                 kernel: 5,
-                minres: 6,
+                minres: 4,
             }
     dec:
         spaces: ".*"
@@ -215,7 +215,7 @@ defaults:
                 winit: normal,
                 outer: True,
                 kernel: 5,
-                minres: 6,
+                minres: 4,
                 block_space: 8,
                 block_fans: False,
                 block_norm: False,

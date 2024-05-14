@@ -3,7 +3,7 @@
     "scripts": {
         "postinstall": "yarn workspace server postinstall",
         "build": "turbo run build --no-daemon",
-        "dev": "turbo run dev --no-daemon",
+        "dev": "turbo run dev --no-daemon --concurrency 20",
         "lint": "turbo run lint --no-daemon",
         "format": "prettier --write \"**/*.{ts,tsx,md}\"",
         "preview": "turbo run preview --no-daemon"

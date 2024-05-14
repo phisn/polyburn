@@ -7,11 +7,12 @@
         "lint": "eslint \"src/**/*.{tsx,ts}\""
     },
     "dependencies": {
-        "typescript": "latest"
+        "typescript": "latest",
+        "zod": "^3.23.8"
     },
     "devDependencies": {
         "eslint-config-custom": "*",
-        "tsconfig": "*",
-        "runtime": "*"
+        "runtime": "*",
+        "tsconfig": "*"
     }
 }

@@ -25,6 +25,24 @@ export async function fetch(request: Request, env: Env): Promise<Response> {
         })
     }
 
+    const url = new URL(request.url)
+
+    if (url.pathname.startsWith("/lobby")) {
+        const upgradeHeader = request.headers.get("Upgrade")
+
+        if (upgradeHeader !== "websocket") {
+            console.log("Invalid upgrade header")
+            return new Response("Invalid upgrade header", {
+                status: 426,
+            })
+        }
+
+        const id = env.LOBBY_DO.idFromName("lobby")
+        const lobby = env.LOBBY_DO.get(id)
+
+        return lobby.fetch(request)
+    }
+
     const response = await fetchRequestHandler({
         endpoint: "/trpc",
         req: request,

@@ -26,7 +26,7 @@ export const createContext =
         }
     }
 
-type Context = inferAsyncReturnType<inferAsyncReturnType<typeof createContext>>
+export type Context = inferAsyncReturnType<inferAsyncReturnType<typeof createContext>>
 
 const t = initTRPC.context<Context>().create({
     transformer: superjson,

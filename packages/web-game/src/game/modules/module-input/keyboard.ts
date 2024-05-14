@@ -1,6 +1,8 @@
 export class Keyboard {
     private keyboardLeft = false
     private keyboardRight = false
+    private keyboardUpA = false
+    private keyboardUpD = false
 
     private keyboardUpArrow = false
     private keyboardUpW = false
@@ -37,11 +39,11 @@ export class Keyboard {
     }
 
     onPreFixedUpdate(delta: number) {
-        if (this.keyboardLeft) {
+        if (this.keyboardLeft || this.keyboardUpA) {
             this._rotation += delta * 0.001 * this.rotationSpeed
         }
 
-        if (this.keyboardRight) {
+        if (this.keyboardRight || this.keyboardUpD) {
             this._rotation -= delta * 0.001 * this.rotationSpeed
         }
 
@@ -62,6 +64,12 @@ export class Keyboard {
             case "w":
                 this.keyboardUpW = true
                 break
+            case "a":
+                this.keyboardUpA = true
+                break
+            case "d":
+                this.keyboardUpD = true
+                break
             case " ":
                 this.keyboardUpSpace = true
                 break
@@ -81,6 +89,12 @@ export class Keyboard {
                 break
             case "w":
                 this.keyboardUpW = false
+                break
+            case "a":
+                this.keyboardUpA = false
+                break
+            case "d":
+                this.keyboardUpD = false
                 break
             case " ":
                 this.keyboardUpSpace = false

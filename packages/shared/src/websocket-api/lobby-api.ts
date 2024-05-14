@@ -18,9 +18,11 @@ const positionsPacket = z.object({
 
 export type PositionsPacket = z.infer<typeof positionsPacket>
 
-const user = z.object({
+const otherUser = z.object({
     username: z.string(),
 })
+
+export type OtherUser = z.infer<typeof otherUser>
 
 export const updateFromClient = z
     .object({
@@ -38,8 +40,8 @@ export const updateFromServer = z
     .object({
         type: z.literal("serverUpdate"),
         positionPackets: z.array(positionsPacket),
-        usersConnected: z.array(user),
-        usersDisconnected: z.array(user),
+        usersConnected: z.array(otherUser),
+        usersDisconnected: z.array(otherUser),
     })
     .strict()
 

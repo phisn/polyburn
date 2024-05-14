@@ -43,6 +43,9 @@ export class Game implements GameInterface {
         this.particles = new ModuleParticles(this.runtime)
         this.scene = new ModuleScene(this.runtime)
 
+        if (settings.instanceType === "play" && settings.userToken) {
+        }
+
         this.onCanvasResize = this.onCanvasResize.bind(this)
         const observer = new ResizeObserver(this.onCanvasResize)
         observer.observe(renderer.domElement)

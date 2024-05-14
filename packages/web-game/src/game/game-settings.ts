@@ -7,19 +7,28 @@ export interface GameHooks {
     onFinished: undefined | ((runtime: ExtendedRuntime) => void)
 }
 
-export enum GameInstanceType {
-    Play,
-    Replay,
-}
-
-export interface GameSettings {
-    instanceType: GameInstanceType
-    canvas: HTMLCanvasElement
+export interface PlayGameSettings {
+    instanceType: "play"
 
     worldname: string
     world: WorldModel
     gamemode: string
 
+    // if userToken is provided the game will connect to the lobby
+    userToken?: string
+}
+
+export interface ReplayGameSettings {
+    instanceType: "replay"
+
+    worldname: string
+    world: WorldModel
+    gamemode: string
+
+    replay: ReplayModel
+}
+
+export type GameSettings = (PlayGameSettings | ReplayGameSettings) & {
+    canvas: HTMLCanvasElement
     hooks?: GameHooks
-    replay?: ReplayModel
 }

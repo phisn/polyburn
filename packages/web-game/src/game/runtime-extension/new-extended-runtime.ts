@@ -13,9 +13,8 @@ export function newExtendedRuntime(settings: GameSettings, scene: Scene, rendere
         settings.world,
         settings.gamemode,
     ).extend({
-        worldname: settings.worldname,
+        settings,
         replayCapture: new ReplayCaptureService(),
-        hooks: settings.hooks,
         scene,
         renderer,
     })

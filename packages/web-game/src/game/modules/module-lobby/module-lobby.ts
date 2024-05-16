@@ -39,7 +39,7 @@ export class OtherUserGhost {
         text.anchorX = "center"
         text.anchorY = "bottom"
 
-        this.mesh.add(text)
+        this.mesh.add(text as any)
 
         this.runtime.factoryContext.scene.add(this.mesh)
     }

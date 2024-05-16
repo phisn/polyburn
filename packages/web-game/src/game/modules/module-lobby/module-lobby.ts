@@ -116,7 +116,7 @@ export class OtherUserGhosts {
         for (const packet of packets) {
             if (
                 this.runtime.factoryContext.settings.instanceType === "play" &&
-                this.runtime.factoryContext.settings?.user?.username === packet.username
+                this.runtime.factoryContext.settings?.lobby?.username === packet.username
             ) {
                 continue
             }
@@ -134,7 +134,7 @@ export class OtherUserGhosts {
     addPlayer(user: OtherUser) {
         if (
             this.runtime.factoryContext.settings.instanceType === "play" &&
-            this.runtime.factoryContext.settings?.user?.username === user.username
+            this.runtime.factoryContext.settings?.lobby?.username === user.username
         ) {
             return
         }
@@ -149,7 +149,7 @@ export class OtherUserGhosts {
     removePlayer(username: string) {
         if (
             this.runtime.factoryContext.settings.instanceType === "play" &&
-            this.runtime.factoryContext.settings?.user?.username === username
+            this.runtime.factoryContext.settings?.lobby?.username === username
         ) {
             return
         }
@@ -187,6 +187,7 @@ export class ModuleLobby {
     private lastSend = 0
     private ws: WebSocket | undefined
     private disposed = false
+    private url: string
 
     private lastSetup: number
     private setupEveryMs = 1000 * 30
@@ -198,23 +199,31 @@ export class ModuleLobby {
             throw new Error("ModuleLobby can only be used in play mode")
         }
 
-        if (runtime.factoryContext.settings.user === undefined) {
+        if (runtime.factoryContext.settings.lobby === undefined) {
             throw new Error("ModuleLobby requires a user token")
         }
+
+        const lobbyId = `${runtime.factoryContext.settings.worldname}-${runtime.factoryContext.settings.gamemode}`
+
+        const url = new URL(`ws://${runtime.factoryContext.settings.lobby.host}/lobby`)
+        url.searchParams.set("authorization", runtime.factoryContext.settings.lobby.token)
+        url.searchParams.set("id", lobbyId)
+
+        this.url = url.toString()
 
         this.otherPlayers = new OtherUserGhosts(runtime)
 
         this.lastSetup = Date.now()
 
         this.packet = {
-            username: runtime.factoryContext.settings.user.username,
+            username: runtime.factoryContext.settings.lobby.username,
             frames: [],
         }
 
         this.rocket = runtime.factoryContext.store.find("rocket", "rigidBody")[0]
         this.lastSend = Date.now()
 
-        const token = runtime.factoryContext.settings.user.token
+        const token = runtime.factoryContext.settings.lobby.token
         this.setup(token)
     }
 
@@ -262,14 +271,8 @@ export class ModuleLobby {
             this.ws.close()
         }
 
-        const lobbyId = `${this.runtime.factoryContext.settings.worldname}-${this.runtime.factoryContext.settings.gamemode}`
-
-        const url = new URL("ws://localhost:3002/lobby")
-        url.searchParams.set("authorization", token)
-        url.searchParams.set("id", lobbyId)
-
-        console.log("Connecting to lobby websocket at ", url.toString())
-        this.ws = new WebSocket(url.toString())
+        console.log("Connecting to lobby websocket at ", this.url)
+        this.ws = new WebSocket(this.url)
 
         const previousWs = this.ws
 

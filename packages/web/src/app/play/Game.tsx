@@ -45,7 +45,7 @@ export function Game(props: {
                 gamemode: props.gamemode,
                 hooks: props.hooks,
 
-                user,
+                lobby: user,
             }
 
             if (window.location.hash.includes("ai")) {

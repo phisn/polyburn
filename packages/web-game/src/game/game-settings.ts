@@ -12,7 +12,8 @@ export interface GameHooks {
     onConnected: undefined | ((userCount: number) => void)
 }
 
-export interface PlayUser {
+export interface LobbySettings {
+    host: string
     username: string
     token: string
 }
@@ -25,7 +26,7 @@ export interface PlayGameSettings {
     gamemode: string
 
     // if user is provided the game will connect to the lobby
-    user?: PlayUser
+    lobby?: LobbySettings
 }
 
 export interface ReplayGameSettings {

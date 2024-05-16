@@ -45,7 +45,7 @@ export class Game implements GameInterface {
         this.particles = new ModuleParticles(this.runtime)
         this.scene = new ModuleScene(this.runtime)
 
-        if (settings.instanceType === "play" && settings.user) {
+        if (settings.instanceType === "play" && settings.lobby) {
             this.lobby = new ModuleLobby(this.runtime)
         }
 

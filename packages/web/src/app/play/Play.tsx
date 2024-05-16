@@ -37,10 +37,11 @@ export function GameWrapper(props: {
         }
 
         const state = useAppStore.getState()
-        let user
+        let lobby
 
         if (state.jwt && state.user) {
-            user = {
+            lobby = {
+                host: new URL(import.meta.env.VITE_SERVER_URL).host,
                 username: state.user.username,
                 token: state.jwt,
             }
@@ -55,7 +56,7 @@ export function GameWrapper(props: {
                 gamemode: props.gamemode,
 
                 hooks: props.hooks,
-                user,
+                lobby: lobby,
 
                 canvas: canvasRef.current!,
             }),

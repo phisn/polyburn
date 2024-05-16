@@ -26,7 +26,6 @@
         "@prisma/client": "5.2.0",
         "@trpc/server": "^10.38.1",
         "@tsndr/cloudflare-worker-jwt": "^2.5.3",
-        "cloudflare-worker-jwt": "^21.37.0",
         "drizzle-orm": "^0.30.8",
         "morgan": "^1.10.0",
         "oslo": "^1.2.0",

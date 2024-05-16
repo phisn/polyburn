@@ -1,22 +1,23 @@
 import { z } from "zod"
 
 // limit of amount of positions to be received from the client
-export const UPDATE_POSITIONS_EVERY_MS = 500
+export const UPDATE_POSITIONS_EVERY_MS = 250
 export const UPDATE_POSITIONS_COUNT = Math.floor(60 * (UPDATE_POSITIONS_EVERY_MS / 1000))
 
-const positions = z.array(
-    z.object({
-        x: z.number(),
-        y: z.number(),
-    }),
-)
-
-const positionsPacket = z.object({
-    username: z.string(),
-    positions,
+const frame = z.object({
+    x: z.number(),
+    y: z.number(),
+    rotation: z.number(),
 })
 
-export type PositionsPacket = z.infer<typeof positionsPacket>
+export type Frame = z.infer<typeof frame>
+
+const framePacket = z.object({
+    username: z.string(),
+    frames: z.array(frame),
+})
+
+export type FramePacket = z.infer<typeof framePacket>
 
 const otherUser = z.object({
     username: z.string(),
@@ -26,8 +27,8 @@ export type OtherUser = z.infer<typeof otherUser>
 
 export const updateFromClient = z
     .object({
-        type: z.literal("clientUpdate"),
-        positions,
+        type: z.literal("update"),
+        frames: z.array(frame),
     })
     .strict()
 
@@ -38,8 +39,8 @@ export type MessageFromClient = z.infer<typeof messageFromClient>
 
 export const updateFromServer = z
     .object({
-        type: z.literal("serverUpdate"),
-        positionPackets: z.array(positionsPacket),
+        type: z.literal("update"),
+        framePackets: z.array(framePacket),
         usersConnected: z.array(otherUser),
         usersDisconnected: z.array(otherUser),
     })
@@ -47,5 +48,14 @@ export const updateFromServer = z
 
 export type UpdateFromServer = z.infer<typeof updateFromServer>
 
-export const messageFromServer = updateFromServer
+export const initializeFromServer = z
+    .object({
+        type: z.literal("initialize"),
+        users: z.array(otherUser),
+    })
+    .strict()
+
+export type InitializeFromServer = z.infer<typeof initializeFromServer>
+
+export const messageFromServer = z.union([updateFromServer, initializeFromServer])
 export type MessageFromServer = z.infer<typeof messageFromServer>

@@ -1,6 +1,7 @@
 import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 import { Keyboard } from "./keyboard"
 import { Mouse } from "./mouse"
+import { Touch } from "./touch"
 
 const CHARCODE_ONE = "1".charCodeAt(0)
 const CHARCODE_NINE = "9".charCodeAt(0)
@@ -8,6 +9,7 @@ const CHARCODE_NINE = "9".charCodeAt(0)
 export class ModuleInput {
     private keyboard: Keyboard
     private mouse: Mouse
+    private touch: Touch
 
     private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
     private rotationSpeedIndex = 2
@@ -18,6 +20,7 @@ export class ModuleInput {
     constructor(runtime: ExtendedRuntime) {
         this.keyboard = new Keyboard()
         this.mouse = new Mouse(runtime)
+        this.touch = new Touch(runtime)
 
         this.onContextMenu = this.onContextMenu.bind(this)
         document.addEventListener("contextmenu", this.onContextMenu)
@@ -61,12 +64,12 @@ export class ModuleInput {
 
     rotation() {
         // return this.iter < this.precomputed.length ? this.precomputed[this.iter].rotation : 0
-        return this.mouse.rotation() + this.keyboard.rotation()
+        return this.mouse.rotation() + this.keyboard.rotation() + this.touch.rotation()
     }
 
     thrust() {
         // return this.iter < this.precomputed.length ? this.precomputed[this.iter].thrust : false
-        return this.mouse.thrust() || this.keyboard.thrust()
+        return this.mouse.thrust() || this.keyboard.thrust() || this.touch.thrust()
     }
 
     onPreFixedUpdate(delta: number) {

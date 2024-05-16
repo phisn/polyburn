@@ -34,7 +34,7 @@ export function FinishedPopup(props: { runtime: ExtendedRuntime }) {
         setTimeout(
             () =>
                 mutate({
-                    world: props.runtime.factoryContext.worldname,
+                    world: props.runtime.factoryContext.settings.worldname,
                     gamemode: props.runtime.factoryContext.gamemode,
                     replay: bytesToBase64(
                         ReplayModel.encode(

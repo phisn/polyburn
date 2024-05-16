@@ -1,13 +1,17 @@
 import { create } from "zustand"
 import { StateStorage, createJSONStorage, persist } from "zustand/middleware"
 import { AlertProps } from "../../app/layout/Alert"
+import { trpcNative } from "../trpc/trpc-native"
 import { db } from "./db"
 
 export interface AppStore {
+    hasUserLoaded: boolean
+    setUserLoaded: () => void
+
     jwt: string | undefined
     user: { username: string } | undefined
 
-    updateJwt: (jwt: string) => void
+    updateJwt: (jwt: string | undefined) => void
     updateUser: (user: { username: string }) => void
 
     alerts: AlertProps[]
@@ -31,6 +35,11 @@ const storage: StateStorage = {
 export const useAppStore = create<AppStore>()(
     persist(
         set => ({
+            hasUserLoaded: false,
+            setUserLoaded: () => {
+                set({ hasUserLoaded: true })
+            },
+
             jwt: undefined,
             user: undefined,
 
@@ -64,8 +73,24 @@ export const useAppStore = create<AppStore>()(
             partialize: state => ({
                 jwt: state.jwt,
             }),
-            onRehydrateStorage: () => state => {
-                console.log("rehydrated", state)
+            onRehydrateStorage: () => async state => {
+                if (!state) {
+                    return
+                }
+
+                try {
+                    const me = await trpcNative.user.me.query()
+                    state.updateUser(me)
+                    state.setUserLoaded()
+                } catch (e) {
+                    state.updateJwt(undefined)
+                    console.error("Failed to retrieve user", e)
+
+                    state.newAlert({
+                        type: "warning",
+                        message: "Failed to retrieve user. Login again.",
+                    })
+                }
             },
         },
     ),

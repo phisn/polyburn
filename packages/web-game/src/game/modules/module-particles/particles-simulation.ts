@@ -183,7 +183,7 @@ export class ParticleSimulation {
     ) {
         const instance = template()
 
-        console.log("lifetime", instance.lifetime)
+        // console.log("lifetime", instance.lifetime)
 
         const velocityWithoutSourceX = instance.velocity * Math.sin(instance.angle + sourceRotation)
         const velocityWithoutSourceY =

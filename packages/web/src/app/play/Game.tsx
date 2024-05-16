@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { WorldModel } from "runtime/proto/world"
-import { Game as NativeGame } from "web-game/src/game/game"
+import { GameInterface, Game as NativeGame } from "web-game/src/game/game"
 import { GameAgentAsPlayer } from "web-game/src/game/game-agent-as-player"
 import { GameLoop } from "web-game/src/game/game-loop"
-import { GameHooks, GameInstanceType, GameSettings } from "web-game/src/game/game-settings"
+import { GameHooks, GameSettings } from "web-game/src/game/game-settings"
+import { useAppStore } from "../../common/storage/app-store"
 
 export function Game(props: {
     worldname: string
@@ -11,28 +12,48 @@ export function Game(props: {
     model: WorldModel
     hooks: GameHooks
 }) {
+    const gameRef = useRef<GameInterface | null>(null)
     const [gameLoop, setGameLoop] = useState<GameLoop | null>(null)
 
     const canvasRef = useCallback(
         (canvas: HTMLCanvasElement | null) => {
-            if (canvas === null) {
+            if (gameRef.current) {
+                console.log("Disposing game")
+                gameRef.current.dispose()
+            }
+
+            if (!canvas) {
                 return
             }
 
+            const state = useAppStore.getState()
+            let user
+
+            if (state.user && state.jwt) {
+                user = {
+                    username: state.user.username,
+                    token: state.jwt,
+                }
+            }
+
             const settings: GameSettings = {
-                instanceType: GameInstanceType.Play,
+                instanceType: "play",
                 canvas,
 
                 worldname: props.worldname,
                 world: props.model,
                 gamemode: props.gamemode,
                 hooks: props.hooks,
+
+                user,
             }
 
             if (window.location.hash.includes("ai")) {
-                setGameLoop(new GameLoop(new GameAgentAsPlayer(settings)))
+                gameRef.current = new GameAgentAsPlayer(settings)
+                setGameLoop(new GameLoop(gameRef.current!))
             } else {
-                setGameLoop(new GameLoop(new NativeGame(settings)))
+                gameRef.current = new NativeGame(settings)
+                setGameLoop(new GameLoop(gameRef.current))
             }
         },
         [props.model, props.hooks, props.gamemode, props.worldname],

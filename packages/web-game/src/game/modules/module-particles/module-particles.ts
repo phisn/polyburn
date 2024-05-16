@@ -26,7 +26,7 @@ const PARTICLE_TEMPLATE_THRUST: ParticleTemplate = () => {
     const angleRange = Math.PI / 16
     const angle = randomBetween(-angleRange, angleRange)
 
-    console.log("angle", 1 - Math.abs(angle / angleRange))
+    // console.log("angle", 1 - Math.abs(angle / angleRange))
     const lifetimeBoost = 250 * downBias(1 - Math.abs(angle / angleRange), 0.3)
 
     return {
@@ -119,7 +119,7 @@ export class ModuleParticles {
                 const normal = message.normal
                 const rotationFromNormal = Math.atan2(normal.y, normal.x)
 
-                console.log("death", message.position, message.contactPoint)
+                // console.log("death", message.position, message.contactPoint)
 
                 this.simulation.createParticle(
                     PARTICLE_TEMPLATE_DEATH,

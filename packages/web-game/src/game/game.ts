@@ -3,6 +3,7 @@ import { GameSettings } from "./game-settings"
 import { ModuleCamera } from "./modules/module-camera"
 import { ModuleHookHandler } from "./modules/module-hook-handler"
 import { ModuleInput } from "./modules/module-input/module-input"
+import { ModuleLobby } from "./modules/module-lobby/module-lobby"
 import { ModuleParticles } from "./modules/module-particles/module-particles"
 import { ModuleScene } from "./modules/module-scene/module-scene"
 import { ExtendedRuntime, newExtendedRuntime } from "./runtime-extension/new-extended-runtime"
@@ -23,6 +24,7 @@ export class Game implements GameInterface {
     input: ModuleInput
     particles: ModuleParticles
     scene: ModuleScene
+    lobby?: ModuleLobby
 
     constructor(settings: GameSettings) {
         const scene = new Scene()
@@ -43,7 +45,8 @@ export class Game implements GameInterface {
         this.particles = new ModuleParticles(this.runtime)
         this.scene = new ModuleScene(this.runtime)
 
-        if (settings.instanceType === "play" && settings.userToken) {
+        if (settings.instanceType === "play" && settings.user) {
+            this.lobby = new ModuleLobby(this.runtime)
         }
 
         this.onCanvasResize = this.onCanvasResize.bind(this)
@@ -54,6 +57,7 @@ export class Game implements GameInterface {
     dispose() {
         this.input.dispose()
         this.runtime.factoryContext.renderer.dispose()
+        this.lobby?.dispose()
     }
 
     private onCanvasResize() {
@@ -81,6 +85,8 @@ export class Game implements GameInterface {
 
         this.runtime.step(context)
 
+        this.lobby?.onFixedUpdate()
+
         if (last) {
             this.camera.onFixedUpdate()
         }
@@ -89,6 +95,7 @@ export class Game implements GameInterface {
     onUpdate(delta: number, overstep: number) {
         this.particles.update(delta)
         this.scene.onUpdate(delta, overstep)
+        this.lobby?.onUpdate(overstep)
         this.camera.onUpdate(delta)
 
         this.runtime.factoryContext.renderer.render(this.runtime.factoryContext.scene, this.camera)

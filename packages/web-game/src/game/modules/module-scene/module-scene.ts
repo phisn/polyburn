@@ -109,13 +109,13 @@ class EntityInterpolation {
         this.previousRotation = entity.components.rigidBody.rotation()
     }
 
-    onUpdate(delta: number, overstep: number) {
+    onUpdate(_delta: number, overstep: number) {
         const translation = this.entity.components.rigidBody.translation()
         const rotation = this.entity.components.rigidBody.rotation()
 
-        this.object.position.x = this.lerp(this.previousX, translation.x, overstep)
-        this.object.position.y = this.lerp(this.previousY, translation.y, overstep)
-        this.object.rotation.z = this.slerp(this.previousRotation, rotation, overstep)
+        this.object.position.x = lerp(this.previousX, translation.x, overstep)
+        this.object.position.y = lerp(this.previousY, translation.y, overstep)
+        this.object.rotation.z = slerp(this.previousRotation, rotation, overstep)
 
         this.entity.components.interpolation.position.x = this.object.position.x
         this.entity.components.interpolation.position.y = this.object.position.y
@@ -151,16 +151,15 @@ class EntityInterpolation {
         this.previousY = translation.y
         this.previousRotation = rotation
     }
+}
 
-    private lerp(previous: number, next: number, t: number) {
-        return (1 - t) * previous + t * next
-    }
+export function lerp(previous: number, next: number, t: number) {
+    return (1 - t) * previous + t * next
+}
 
-    private slerp(previous: number, next: number, t: number) {
-        const difference = next - previous
-        const shortestAngle =
-            (((difference % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI)) - Math.PI
+export function slerp(previous: number, next: number, t: number) {
+    const difference = next - previous
+    const shortestAngle = (((difference % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI)) - Math.PI
 
-        return previous + shortestAngle * t
-    }
+    return previous + shortestAngle * t
 }

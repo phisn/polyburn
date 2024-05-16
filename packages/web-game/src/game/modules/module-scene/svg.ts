@@ -2,7 +2,7 @@ import * as THREE from "three"
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader"
 
 export class Svg extends THREE.Group {
-    constructor(svgText: string) {
+    constructor(svgText: string, opacity?: number) {
         super()
 
         const svgLoader = new SVGLoader()
@@ -11,6 +11,8 @@ export class Svg extends THREE.Group {
         for (const path of svg.paths) {
             const material = new THREE.MeshBasicMaterial({
                 color: path.color,
+                opacity: opacity ?? 1,
+                transparent: opacity !== undefined,
             })
 
             const shapes = SVGLoader.createShapes(path)

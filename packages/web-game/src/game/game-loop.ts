@@ -22,6 +22,10 @@ export class GameLoop {
         }
     }
 
+    public getGame() {
+        return this.game
+    }
+
     private tick(time: DOMHighResTimeStamp) {
         this.animationFrame = requestAnimationFrame(this.tick)
 
@@ -39,8 +43,6 @@ export class GameLoop {
             this.loop_time -= this.tickrate
             this.game.onFixedUpdate(this.loop_time <= this.tickrate)
         }
-
-        // console.log("delta: ", delta, "overstep: ", this.loop_time / this.tickrate)
 
         this.game.onUpdate(delta, this.loop_time / this.tickrate)
     }

@@ -230,6 +230,8 @@ export class ModuleLobby {
     dispose() {
         this.ws?.close()
         this.disposed = true
+
+        console.log("Disposed lobby module")
     }
 
     onFixedUpdate() {
@@ -265,9 +267,11 @@ export class ModuleLobby {
     }
 
     private setup(token: string) {
+        console.log("Setting up lobby websocket")
         this.lastSetup = Date.now()
 
         if (this.ws) {
+            console.log("Closing previous lobby websocket")
             this.ws.close()
         }
 
@@ -314,8 +318,8 @@ export class ModuleLobby {
             console.log("Lobby websocket connected")
         }
 
-        this.ws.onclose = () => {
-            console.warn("Lobby websocket closed")
+        this.ws.onclose = event => {
+            console.warn("Lobby websocket closed with reason: ", event.reason, event.code)
 
             if (this.ws === previousWs) {
                 this.rerunSetup(token)

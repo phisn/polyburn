@@ -131,82 +131,105 @@ export class DurableObjectLobby extends DurableObject {
     }
 
     async fetch(request: Request): Promise<Response> {
-        const { 0: client, 1: server } = new WebSocketPair()
+        try {
+            const { 0: client, 1: server } = new WebSocketPair()
 
-        const context = await this.contextFromRequest(request)
+            const context = await this.contextFromRequest(request)
 
-        if (!context) {
-            console.warn("Failed to load context for user")
-            return new Response(null, {
-                status: 401,
+            if (!context) {
+                console.log("Failed to load context for user")
+                return new Response(null, {
+                    status: 401,
+                })
+            }
+
+            const connectionId = randomUUID()
+
+            // why does server not have accept in type when all examples use it???
+            ;(server as any).accept()
+
+            const existingConnection = this.connections.get(context.username)
+
+            if (existingConnection) {
+                this.removeUser(context.username)
+            }
+
+            this.connections.set(context.username, {
+                connection: server,
+                connectionId,
+                lobbyName: context.lobbyName,
             })
-        }
 
-        const connectionId = randomUUID()
+            let lobby = this.lobbies.get(context.lobbyName)
 
-        // why does server not have accept when all examples use it???
-        ;(server as any).accept()
-
-        const existingConnection = this.connections.get(context.username)
-
-        if (existingConnection) {
-            this.removeUser(context.username)
-        }
-
-        this.connections.set(context.username, {
-            connection: server,
-            connectionId,
-            lobbyName: context.lobbyName,
-        })
-
-        let lobby = this.lobbies.get(context.lobbyName)
-
-        if (!lobby) {
-            lobby = new SingleLobby()
-            this.lobbies.set(context.lobbyName, lobby)
-        }
-
-        lobby.addUser({
-            user: {
-                username: context.username,
-            },
-            connection: server,
-        })
-
-        server.addEventListener("message", event => {
-            const message = updateFromClient.safeParse(JSON.parse(event.data))
-
-            if (message.success === false) {
-                server.close(1008, "Invalid message")
-                return
+            if (!lobby) {
+                lobby = new SingleLobby()
+                this.lobbies.set(context.lobbyName, lobby)
             }
 
-            switch (message.data.type) {
-                case "update": {
-                    lobby.onClientUpdate(message.data, context)
+            lobby.addUser({
+                user: {
+                    username: context.username,
+                },
+                connection: server,
+            })
 
-                    break
+            console.log("Client connected", context.username)
+
+            server.addEventListener("message", event => {
+                try {
+                    const message = updateFromClient.safeParse(JSON.parse(event.data))
+
+                    if (message.success === false) {
+                        server.close(1008, "Invalid message")
+                        return
+                    }
+
+                    switch (message.data.type) {
+                        case "update": {
+                            lobby?.onClientUpdate(message.data, context)
+
+                            break
+                        }
+                    }
+
+                    return undefined
+                } catch (e) {
+                    console.log(e)
+                    throw e
                 }
-            }
+            })
 
-            return undefined
-        })
+            server.addEventListener("error", event => {
+                console.log("Client error", event)
+            })
 
-        server.addEventListener("close", () => {
-            const connection = this.connections.get(context.username)
+            server.addEventListener("close", event => {
+                try {
+                    // reason
+                    console.log("Client disconnected", event.reason, event.code)
+                    const connection = this.connections.get(context.username)
 
-            // check if connection has been overwritten
-            if (connection?.connectionId !== connectionId) {
-                return
-            }
+                    // check if connection has been overwritten
+                    if (connection?.connectionId !== connectionId) {
+                        return
+                    }
 
-            this.removeUser(context.username)
-        })
+                    this.removeUser(context.username)
+                } catch (e) {
+                    console.log(e)
+                    throw e
+                }
+            })
 
-        return new Response(null, {
-            status: 101,
-            webSocket: client,
-        })
+            return new Response(null, {
+                status: 101,
+                webSocket: client,
+            })
+        } catch (e) {
+            console.log("::: -> ", e)
+            throw e
+        }
     }
 
     private removeUser(username: string) {

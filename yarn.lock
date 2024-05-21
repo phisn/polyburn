@@ -4939,11 +4939,6 @@ cliui@^7.0.2:
     strip-ansi "^6.0.0"
     wrap-ansi "^7.0.0"
 
-cloudflare-worker-jwt@^21.37.0:
-  version "21.37.0"
-  resolved "https://registry.yarnpkg.com/cloudflare-worker-jwt/-/cloudflare-worker-jwt-21.37.0.tgz#e52e476ea4eb58afd161eb4f6229ffb187a3586f"
-  integrity sha512-xIKg8qb9vAHQ51h/ZOH4G6dEhhMEtyyLz19A6ojyOH7fgeBhKImgGcRseon+MALkOrlXtH4K6qJajw3wL0bPRA==
-
 clsx@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/clsx/-/clsx-2.1.1.tgz#eed397c9fd8bd882bfb18deab7102049a2f32999"

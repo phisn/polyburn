@@ -6,7 +6,7 @@
         "dev": "turbo run dev --no-daemon --concurrency 20",
         "lint": "turbo run lint --no-daemon",
         "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-        "preview": "turbo run preview --no-daemon"
+        "preview": "turbo run preview --no-daemon --concurrency 20"
     },
     "packageManager": "yarn@1.22.19",
     "devDependencies": {

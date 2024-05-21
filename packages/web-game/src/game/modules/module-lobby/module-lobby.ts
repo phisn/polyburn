@@ -205,7 +205,7 @@ export class ModuleLobby {
 
         const lobbyId = `${runtime.factoryContext.settings.worldname}-${runtime.factoryContext.settings.gamemode}`
 
-        const url = new URL(`wss://${runtime.factoryContext.settings.lobby.host}/lobby`)
+        const url = new URL(`ws://${runtime.factoryContext.settings.lobby.host}/lobby`)
         url.searchParams.set("authorization", runtime.factoryContext.settings.lobby.token)
         url.searchParams.set("id", lobbyId)
 
@@ -320,6 +320,8 @@ export class ModuleLobby {
 
         this.ws.onclose = event => {
             console.warn("Lobby websocket closed with reason: ", event.reason, event.code)
+
+            this.runtime.factoryContext.settings.hooks?.onDisconnected?.()
 
             if (this.ws === previousWs) {
                 this.rerunSetup(token)

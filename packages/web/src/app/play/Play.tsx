@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { Ref, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { WorldModel } from "runtime/proto/world"
 import { base64ToBytes } from "runtime/src/model/base64-to-bytes"
@@ -6,29 +6,58 @@ import { Game } from "web-game/src/game/game"
 import { GameLoop } from "web-game/src/game/game-loop"
 import { GameHooks } from "web-game/src/game/game-settings"
 import { useAppStore } from "../../common/storage/app-store"
+import { FinishedPopup } from "./FinishedPopup"
 
 export function Play() {
+    const gameRef = useRef<Game | null>(null)
+    const [finished, setFinished] = useState(false)
+
+    const hooks: GameHooks = useMemo(() => {
+        return {
+            onFinished: () => {
+                setFinished(true)
+            },
+
+            onUserJoined: () => {},
+            onUserLeft: () => {},
+
+            onConnected: () => {},
+            onDisconnected: () => {},
+        }
+    }, [])
+
     return (
-        <PlayParamterLoader>
-            {props => (
-                <GameWrapper
-                    worldname={props.worldname}
-                    gamemode={props.gamemode}
-                    model={props.world}
-                />
-            )}
-        </PlayParamterLoader>
+        <>
+            {gameRef.current && finished && <FinishedPopup runtime={gameRef.current.runtime} />}
+
+            <PlayParamterLoader>
+                {props => (
+                    <GameWrapper
+                        ref={gameRef}
+                        worldname={props.worldname}
+                        gamemode={props.gamemode}
+                        model={props.world}
+                        hooks={hooks}
+                    />
+                )}
+            </PlayParamterLoader>
+        </>
     )
 }
 
-export function GameWrapper(props: {
-    worldname: string
-    gamemode: string
-    model: WorldModel
-    hooks?: GameHooks
-}) {
+const GameWrapper = forwardRef(function _GameWrapper(
+    props: {
+        worldname: string
+        gamemode: string
+        model: WorldModel
+        hooks?: GameHooks
+    },
+    ref: Ref<Game | null>,
+) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null)
     const gameLoopRef = useRef<GameLoop | null>(null)
+
+    useImperativeHandle(ref, () => gameLoopRef.current?.getGame() as Game | null)
 
     useEffect(() => {
         if (gameLoopRef.current) {
@@ -64,6 +93,8 @@ export function GameWrapper(props: {
         gameLoopRef.current.start()
 
         return () => {
+            console.log("Disposing game loop")
+
             gameLoopRef.current?.stop()
             gameLoopRef.current?.getGame().dispose()
             gameLoopRef.current = null
@@ -85,7 +116,7 @@ export function GameWrapper(props: {
             ref={canvasRef}
         />
     )
-}
+})
 
 export function PlayParamterLoader(props: {
     children: (props: { world: WorldModel; worldname: string; gamemode: string }) => JSX.Element

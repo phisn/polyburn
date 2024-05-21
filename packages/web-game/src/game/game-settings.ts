@@ -9,7 +9,9 @@ export interface GameHooks {
 
     onUserJoined: undefined | ((username: OtherUser) => void)
     onUserLeft: undefined | ((username: OtherUser) => void)
+
     onConnected: undefined | ((userCount: number) => void)
+    onDisconnected: undefined | (() => void)
 }
 
 export interface LobbySettings {

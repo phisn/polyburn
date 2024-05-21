@@ -55,6 +55,7 @@ export function WorldSelection() {
 
             const worldnames = await trpcNative.world.list.query()
 
+            console.log("Play other")
             const worlds = await trpcNative.world.get.query({
                 names: worldnames,
             })

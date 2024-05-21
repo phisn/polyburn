@@ -19,9 +19,11 @@ export class UserFrameTracker {
             }
             this.trackers.set(packet.username, tracker)
         } else {
+            /*
             if (Date.now() - tracker.receivedLastAt < RECEIVE_POS_TOLERANCE_MS) {
                 return false
             }
+            */
         }
 
         tracker.receivedLastAt = Date.now()

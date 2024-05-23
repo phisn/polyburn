@@ -82,6 +82,10 @@ export class GameEnvironment {
             height: config.size,
             addEventListener: () => {},
             removeEventListener: () => {},
+            getContext: () =>
+                gl.default(config.size, config.size, {
+                    preserveDrawingBuffer: true,
+                }),
         }
 
         this.renderer = new THREE.WebGLRenderer({

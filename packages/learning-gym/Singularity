@@ -1,0 +1,95 @@
+Bootstrap: docker
+From: tensorflow/tensorflow:latest-gpu
+
+%post
+    # Set environment variables
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt-get remove -y --purge python3-apt
+
+    # Add deadsnakes PPA and NodeSource PPA for Node.js
+    apt-get update && apt-get install -y --no-install-recommends \
+        software-properties-common \
+        curl \
+        python3-apt \
+        gnupg2
+
+    add-apt-repository ppa:deadsnakes/ppa
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+
+    # Install required dependencies
+    apt-get update && apt-get install -y --no-install-recommends \
+        python3.12 \
+        python3.12-venv \
+        python3.12-dev \
+        python3-pip \
+        nodejs \
+        build-essential \
+        git \
+        wget \
+        libssl-dev \
+        zlib1g-dev \
+        libbz2-dev \
+        libreadline-dev \
+        libsqlite3-dev \
+        llvm \
+        libncurses5-dev \
+        libncursesw5-dev \
+        xz-utils \
+        tk-dev \
+        libffi-dev \
+        liblzma-dev \
+        python3-openssl \
+        xvfb \
+        ffmpeg
+
+    # Upgrade pip and install virtualenv
+    python3.12 -m ensurepip --upgrade
+    python3.12 -m pip install setuptools --upgrade
+    python3.12 -m pip install virtualenv
+
+    git clone https://github.com/phisn/rocket-game.git
+
+    # Clean up
+    apt-get clean
+
+%environment
+    # Set environment variables for CUDA
+    export PATH=/usr/local/cuda/bin:$PATH
+    export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+%post
+    cd /rocket-game
+    npm i -g yarn
+    yarn
+
+    cd packages/learning-gym/dreamerv3
+    python3.12 -m pip install -r ./embodied/requirements.txt
+    python3.12 -m pip install -r ./dreamerv3/requirements.txt
+
+    python3.12 -m pip install gymnasium
+    python3.12 -m pip install gym
+    python3.12 -m pip install matplotlib
+    
+    # hack
+    python3.12 -m pip uninstall six
+    python3.12 -m pip install six
+
+    python3.12 -m pip install -U "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+    python3.12 -m pip install git+https://github.com/deepmind/chex.git
+    python3.12 -m pip install git+https://github.com/google-deepmind/optax.git
+
+    # sudo xvfb-run --auto-servernum --server-num=1 -s "-ac -screen 0 1280x1024x24" `which python` polyburn_env.py
+    # sudo xvfb-run --auto-servernum --server-num=1 -s "-ac -screen 0 1280x1024x24" `which <program>` <args>
+
+    # Install your RL program dependencies
+#    pip install -r ./dreamerv3/embodied/requirements.txt
+#    pip install -r ./dreamerv3/dreamerv3/requirements.txt
+
+    # Install Node.js dependencies if any
+#    cd /path/to/your/rl/program/frontend
+#    npm install
+
+# %runscript
+    # This will be executed when the container runs
+#    exec python3.12 /path/to/your/rl/program/main.py

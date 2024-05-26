@@ -6,7 +6,8 @@ import { Env } from "../../env"
 export function userFromAuthorizationHeader(env: Env, authorization: string | null): User | null {
     try {
         if (authorization && authorization !== "undefined") {
-            console.log("authorization", authorization)
+            console.log("Authorization", authorization)
+
             if (!jwt.verify(authorization, env.JWT_SECRET)) {
                 return null
             }

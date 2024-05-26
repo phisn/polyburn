@@ -48,9 +48,11 @@ export function GameHandler(props: GameHandlerProps) {
                     hook: {
                         finished: replay => {
                             validateReplay.mutate({
-                                world: props.worldSelected.id.name,
+                                worldname: props.worldSelected.id.name,
                                 gamemode: props.gamemodeSelected.name,
-                                replay: bytesToBase64(ReplayModel.encode(replay).finish()),
+                                replayModelBase64: bytesToBase64(
+                                    ReplayModel.encode(replay).finish(),
+                                ),
                             })
                         },
                     },

@@ -42,6 +42,5 @@ export interface ReplayGameSettings {
 }
 
 export type GameSettings = (PlayGameSettings | ReplayGameSettings) & {
-    canvas: HTMLCanvasElement
     hooks?: GameHooks
 }

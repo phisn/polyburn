@@ -51,18 +51,24 @@ export function WorldSelection() {
 
     useEffect(() => {
         const f = async () => {
-            const waitMinimum = new Promise(resolve => setTimeout(resolve, 500))
+            try {
+                console.log("Pre Worldnames: ")
+                const waitMinimum = new Promise(resolve => setTimeout(resolve, 500))
 
-            const worldnames = await trpcNative.world.list.query()
+                const worldnames = await trpcNative.world.list.query()
 
-            console.log("Play other")
-            const worlds = await trpcNative.world.get.query({
-                names: worldnames,
-            })
+                console.log("Worldnames: ", worldnames)
 
-            await waitMinimum
+                const worlds = await trpcNative.world.get.query({
+                    names: worldnames,
+                })
 
-            setWorlds(worlds)
+                await waitMinimum
+
+                setWorlds(worlds)
+            } catch (e) {
+                console.error("Failed to retrieve worlds", e)
+            }
         }
 
         f()

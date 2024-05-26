@@ -1,10 +1,13 @@
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client"
+import { TRPCClientError, createTRPCProxyClient, httpBatchLink, loggerLink } from "@trpc/client"
 import superjson from "superjson"
 import { AppRouter } from "../../../../server/src/worker/framework/trpc-router"
 import { useAppStore } from "../storage/app-store"
+import { authSyncLink } from "./auth-sync-link"
 
 export const options = {
     links: [
+        loggerLink(),
+        authSyncLink,
         httpBatchLink({
             url: `${import.meta.env.VITE_SERVER_URL}/trpc`,
             // Needed to support session cookies
@@ -15,15 +18,14 @@ export const options = {
                 })
             },
             headers() {
-                const jwt = useAppStore.getState().jwt
+                const appState = useAppStore.getState()
+                const headers: any = {}
 
-                if (jwt) {
-                    return {
-                        authorization: jwt,
-                    }
+                if (appState.jwt) {
+                    headers["Authorization"] = appState.jwt
                 }
 
-                return {}
+                return headers
             },
         }),
     ],
@@ -31,3 +33,7 @@ export const options = {
 }
 
 export const trpcNative = createTRPCProxyClient<AppRouter>(options)
+
+export function isTRPCClientError(cause: unknown): cause is TRPCClientError<AppRouter> {
+    return cause instanceof TRPCClientError
+}

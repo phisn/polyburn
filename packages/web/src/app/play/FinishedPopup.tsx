@@ -1,107 +1,87 @@
 import { Transition } from "@headlessui/react"
-import { useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { ReplayModel } from "runtime/proto/replay"
-import { ExtendedRuntime } from "web-game/src/game/runtime-extension/new-extended-runtime"
-import { bytesToBase64 } from "../../../src-campaign-old/player-handlers/GameHandler"
+import { useContext, useEffect } from "react"
+import { useStore } from "zustand"
 import { AuthButton } from "../../common/components/auth-button/AuthButton"
 import { BackArrowSvg } from "../../common/components/inline-svg/BackArrow"
 import { useAppStore } from "../../common/storage/app-store"
-import { trpc } from "../../common/trpc/trpc"
+import { FinishedStatus, playStoreContext } from "./play-store"
 
-export function FinishedPopup(props: { runtime: ExtendedRuntime }) {
-    const stats = props.runtime.factoryContext.store.world.components.stats!
-    const user = useAppStore(x => x.user)
-    const newAlert = useAppStore(x => x.newAlert)
-    const navigate = useNavigate()
+export function FinishedPopup() {
+    const playStore = useContext(playStoreContext)
 
-    const validation = trpc.validateReplay.useMutation({
-        onError: () => {
-            newAlert({
-                type: "error",
-                message: "Error validating replay",
-            })
-        },
-    })
-
-    const { mutate } = validation
-
-    useEffect(() => {
-        if (!user) {
-            return
-        }
-
-        setTimeout(
-            () =>
-                mutate({
-                    world: props.runtime.factoryContext.settings.worldname,
-                    gamemode: props.runtime.factoryContext.gamemode,
-                    replay: bytesToBase64(
-                        ReplayModel.encode(
-                            props.runtime.factoryContext.replayCapture.replay,
-                        ).finish(),
-                    ),
-                }),
-            0,
-        )
-    }, [mutate, props, user])
-
-    function onClickCompleted() {
-        navigate("/")
+    if (!playStore) {
+        throw new Error("playStore is undefined")
     }
 
+    const status = useStore(playStore, x => x.status)
+    const user = useAppStore(x => x.user)
+
+    useEffect(() => {
+        const playState = playStore.getState()
+
+        if (
+            playState.status.type === "finished" &&
+            playState.status.uploadingStatus === "unauthenticated" &&
+            user
+        ) {
+            playState.uploadReplay(
+                playState.status.model,
+                playState.status.ticks,
+                playState.status.deaths,
+            )
+        }
+    }, [user, playStore])
+
+    function onClickCompleted() {}
+
     return (
-        <CenterOnScreen>
-            <div className="flex w-full max-w-[26rem] flex-col items-center">
-                <InfoContainerTitle className="p-6">Map Completed</InfoContainerTitle>
+        <Transition
+            show={status.type === "finished"}
+            enter="duration-200 transform ease-out"
+            enterFrom="opacity-0 scale-95"
+            enterTo="opacity-100 scale-100"
+        >
+            <CenterOnScreen>
+                <div className="flex w-full max-w-[26rem] flex-col items-center">
+                    <InfoContainerTitle className="p-6">Map Completed</InfoContainerTitle>
 
-                <div className="h-56 w-full">
-                    <FinishedInfoContainer
-                        loading={validation.isLoading}
-                        onClick={onClickCompleted}
-                        ticks={stats.ticks}
-                        deaths={stats.deaths}
-                        rank={validation.data?.rank}
-                        personalBestRank={validation.data?.personalBestRank}
-                    />
+                    <div className="h-56 w-full">
+                        <FinishedInfoContainer
+                            status={status as FinishedStatus}
+                            onClick={onClickCompleted}
+                        />
+                    </div>
+
+                    {status.type === "finished" && status.uploadingStatus === "unauthenticated" && (
+                        <AuthButton className="btn btn-primary m-2 w-full">
+                            Login to save your time
+                        </AuthButton>
+                    )}
                 </div>
-
-                {!user && (
-                    <AuthButton className="btn btn-primary m-2 w-full">
-                        Login to save your time
-                    </AuthButton>
-                )}
-            </div>
-        </CenterOnScreen>
+            </CenterOnScreen>
+        </Transition>
     )
 }
 
-export function FinishedInfoContainer(props: {
-    loading: boolean
-    onClick: () => void
-    ticks: number
-    deaths: number
-    rank?: number
-    personalBestRank?: number
-}) {
+export function FinishedInfoContainer(props: { status: FinishedStatus; onClick(): void }) {
     return (
         <InfoContainer
             className="hover:bg-base-100 active:bg-base-200 relative flex items-center justify-center transition hover:cursor-pointer"
             onClick={props.onClick}
         >
             <Transition
-                show={!props.loading}
+                show={props.status.uploadingStatus !== "uploading"}
                 className="absolute"
                 enter="ease-out duration-200 translate transform"
                 enterFrom="opacity-0 translate-y-2"
                 enterTo="opacity-100 translate-y-0"
             >
                 <div className="flex flex-col items-center">
-                    <RunStats
-                        ticks={props.ticks}
-                        deaths={props.deaths}
-                        rank={props.rank}
-                        personalBestRank={props.personalBestRank}
+                    <ReplayStats
+                        ticks={props.status.ticks}
+                        deaths={props.status.deaths}
+                        rank={props.status.rank}
+                        personalBestRank={props.status.personalBest}
                     />
 
                     <div className="flex items-center self-center">
@@ -111,7 +91,7 @@ export function FinishedInfoContainer(props: {
             </Transition>
 
             <Transition
-                show={props.loading}
+                show={props.status.uploadingStatus === "uploading"}
                 className="absolute"
                 enter="ease-out duration-200 translate transform"
                 enterFrom="opacity-0 translate-y-2"
@@ -126,11 +106,11 @@ export function FinishedInfoContainer(props: {
     )
 }
 
-function RunStats(props: {
+function ReplayStats(props: {
     ticks: number
     deaths: number
     rank?: number
-    personalBestRank?: number
+    personalBestRank?: { rank: number; ticks: number; deaths: number }
 }) {
     return (
         <div className="col-span-3 flex space-x-10 p-4 text-xl">
@@ -140,17 +120,89 @@ function RunStats(props: {
                 <div>Rank</div>
             </div>
             <div className="flex flex-col items-center space-y-3">
-                <div>{formatTicks(props.ticks)}</div>
-                <div>{props.deaths}</div>
+                <ReplayStatsTime
+                    ticks={props.ticks}
+                    personalBestTicks={props.personalBestRank?.ticks}
+                />
 
-                {undefined !== props.rank && !props.personalBestRank && <div>{props.rank + 1}</div>}
-                {undefined !== props.rank && !!props.personalBestRank && (
-                    <div>
-                        {props.rank + 1} (Best {props.personalBestRank + 1})
-                    </div>
+                <ReplayStatsDeaths
+                    deaths={props.deaths}
+                    personalBestDeaths={props.personalBestRank?.deaths}
+                />
+
+                {undefined !== props.rank && (
+                    <ReplayStatsRank
+                        rank={props.rank}
+                        personalBestRank={props.personalBestRank?.rank}
+                    />
                 )}
                 {undefined === props.rank && <div>No rank</div>}
             </div>
+        </div>
+    )
+}
+
+function ReplayStatsDeaths(props: { deaths: number; personalBestDeaths: number | undefined }) {
+    let hintDiff = undefined
+
+    if (props.personalBestDeaths !== undefined && props.deaths < props.personalBestDeaths) {
+        hintDiff = (
+            <div className="text-sm text-green-500">-{props.personalBestDeaths - props.deaths}</div>
+        )
+    } else if (props.personalBestDeaths !== undefined && props.deaths > props.personalBestDeaths) {
+        hintDiff = (
+            <div className="text-sm text-red-500">+{props.deaths - props.personalBestDeaths}</div>
+        )
+    }
+
+    return (
+        <ReplayStatsHint hint={hintDiff}>
+            {props.deaths === 0 ? <div>No deaths</div> : <div>{props.deaths}</div>}
+        </ReplayStatsHint>
+    )
+}
+
+function ReplayStatsTime(props: { ticks: number; personalBestTicks: number | undefined }) {
+    let hintDiff = undefined
+
+    if (props.personalBestTicks !== undefined && props.ticks < props.personalBestTicks) {
+        hintDiff = (
+            <div className="text-sm text-green-500">
+                -{formatTicksShort(props.personalBestTicks - props.ticks)}
+            </div>
+        )
+    } else if (props.personalBestTicks !== undefined && props.ticks > props.personalBestTicks) {
+        hintDiff = (
+            <div className="text-sm text-red-500">
+                +{formatTicksShort(props.ticks - props.personalBestTicks)}
+            </div>
+        )
+    }
+
+    return <ReplayStatsHint hint={hintDiff}>{formatTicks(props.ticks)}</ReplayStatsHint>
+}
+
+function ReplayStatsRank(props: { rank: number; personalBestRank: number | undefined }) {
+    let hintDiff = undefined
+
+    if (props.personalBestRank !== undefined && props.rank < props.personalBestRank) {
+        hintDiff = (
+            <div className="text-sm text-green-500">-{props.personalBestRank - props.rank}</div>
+        )
+    } else if (props.personalBestRank !== undefined && props.rank > props.personalBestRank) {
+        hintDiff = (
+            <div className="text-sm text-red-500">+{props.rank - props.personalBestRank}</div>
+        )
+    }
+
+    return <ReplayStatsHint hint={hintDiff}>{props.rank}</ReplayStatsHint>
+}
+
+function ReplayStatsHint(props: { children: React.ReactNode; hint: React.ReactNode }) {
+    return (
+        <div className="relative">
+            {props.children}
+            <div className="absolute -right-2 top-0 translate-x-full transform">{props.hint}</div>
         </div>
     )
 }
@@ -211,4 +263,26 @@ function formatTicks(ticks: number) {
     }
 
     return `${base}${paddedMinutes}:${paddedSeconds}.${paddedHundredths}`
+}
+
+function formatTicksShort(ticks: number) {
+    // first check if hours are needed
+    const totalSeconds = ticks / 60
+    const hours = Math.floor(totalSeconds / 3600)
+
+    if (hours >= 1) {
+        return `${hours}h`
+    }
+
+    const minutes = Math.floor(totalSeconds / 60)
+
+    if (minutes >= 1) {
+        return `${minutes}m`
+    }
+
+    if (totalSeconds >= 1) {
+        return `${Math.floor(totalSeconds)}s`
+    }
+
+    return `${Math.floor(totalSeconds * 1000)}ms`
 }

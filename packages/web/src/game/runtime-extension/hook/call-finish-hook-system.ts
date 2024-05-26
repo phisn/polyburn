@@ -7,7 +7,7 @@ export const newCallFinishHookSystem: WebappSystemFactory = ({
 }) => {
     messageStore.listenTo("finished", () => {
         if (hook) {
-            hook.finished?.(replayCaptureService.replay)
+            hook.finished?.(replayCaptureService.constructReplay)
         }
     })
 }

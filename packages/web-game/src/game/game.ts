@@ -30,7 +30,6 @@ export class Game implements GameInterface {
         const scene = new Scene()
 
         const renderer = new WebGLRenderer({
-            canvas: settings.canvas,
             antialias: true,
             alpha: true,
         })
@@ -99,5 +98,9 @@ export class Game implements GameInterface {
         this.camera.onUpdate(delta)
 
         this.runtime.factoryContext.renderer.render(this.runtime.factoryContext.scene, this.camera)
+    }
+
+    domElement() {
+        return this.runtime.factoryContext.renderer.domElement
     }
 }

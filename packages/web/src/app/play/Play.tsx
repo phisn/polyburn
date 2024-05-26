@@ -1,13 +1,39 @@
-import { Ref, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react"
+import { useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { WorldModel } from "runtime/proto/world"
 import { base64ToBytes } from "runtime/src/model/base64-to-bytes"
-import { Game } from "web-game/src/game/game"
-import { GameLoop } from "web-game/src/game/game-loop"
-import { GameHooks } from "web-game/src/game/game-settings"
 import { useAppStore } from "../../common/storage/app-store"
 import { FinishedPopup } from "./FinishedPopup"
+import { PlayStoreProvider } from "./PlayStoreProvider"
+import { usePlayStore } from "./play-store"
 
+export function Play() {
+    return (
+        <ProvidePlayStoreFromParams>
+            <>
+                <FinishedPopup />
+                <GameCanvas />
+                <GameSettings />
+            </>
+        </ProvidePlayStoreFromParams>
+    )
+}
+
+function GameSettings() {
+    const [resume, stop, _reset] = usePlayStore(x => [x.resume, x.stop, x.reset])
+
+    useEffect(() => {
+        resume()
+
+        return () => {
+            stop()
+        }
+    }, [resume, stop])
+
+    return <></>
+}
+
+/*
 export function Play() {
     const gameRef = useRef<Game | null>(null)
     const [finished, setFinished] = useState(false)
@@ -44,82 +70,50 @@ export function Play() {
         </>
     )
 }
+*/
 
-const GameWrapper = forwardRef(function _GameWrapper(
-    props: {
-        worldname: string
-        gamemode: string
-        model: WorldModel
-        hooks?: GameHooks
-    },
-    ref: Ref<Game | null>,
-) {
-    const canvasRef = useRef<HTMLCanvasElement | null>(null)
-    const gameLoopRef = useRef<GameLoop | null>(null)
-
-    useImperativeHandle(ref, () => gameLoopRef.current?.getGame() as Game | null)
+export function GameCanvas() {
+    const canvas = usePlayStore(x => x.getCanvas())
 
     useEffect(() => {
-        if (gameLoopRef.current) {
+        console.log("Setting up new canvas")
+
+        const root = document.getElementById("canvas-root")
+
+        if (!root) {
+            console.error("Canvas root not found")
             return
         }
 
-        const state = useAppStore.getState()
-        let lobby
+        root.appendChild(canvas)
 
-        if (state.jwt && state.user) {
-            lobby = {
-                host: new URL(import.meta.env.VITE_SERVER_URL).host,
-                username: state.user.username,
-                token: state.jwt,
-            }
-        }
+        canvas.style.height = "100%"
+        canvas.style.width = "100%"
+        canvas.style.overflow = "hidden"
+        canvas.style.pointerEvents = "auto"
+        canvas.style.touchAction = "none"
+        canvas.style.userSelect = "none"
 
-        gameLoopRef.current = new GameLoop(
-            new Game({
-                instanceType: "play",
-
-                worldname: props.worldname,
-                world: props.model,
-                gamemode: props.gamemode,
-
-                hooks: props.hooks,
-                lobby: lobby,
-
-                canvas: canvasRef.current!,
-            }),
-        )
-
-        gameLoopRef.current.start()
+        canvas.className = "absolute inset-0 z-0 h-full w-full"
 
         return () => {
-            console.log("Disposing game loop")
-
-            gameLoopRef.current?.stop()
-            gameLoopRef.current?.getGame().dispose()
-            gameLoopRef.current = null
+            root.removeChild(canvas)
         }
-    }, [props.worldname, props.model, props.gamemode, props.hooks])
+    }, [canvas])
 
+    return <div id="canvas-root"></div>
+}
+
+export function ProvidePlayStoreFromParams(props: { children: JSX.Element }) {
     return (
-        <canvas
-            style={{
-                position: "relative",
-                height: "100%",
-                width: "100%",
-                overflow: "hidden",
-                pointerEvents: "auto",
-                touchAction: "none",
-                WebkitUserSelect: "none",
-            }}
-            className="absolute inset-0 z-0 h-full w-full select-none"
-            ref={canvasRef}
-        />
+        <PlayParamterLoader>
+            {inner => <PlayStoreProvider {...inner}>{props.children}</PlayStoreProvider>}
+        </PlayParamterLoader>
     )
-})
+}
 
 export function PlayParamterLoader(props: {
-    children: (props: { world: WorldModel; worldname: string; gamemode: string }) => JSX.Element
+    children: (props: { model: WorldModel; worldname: string; gamemode: string }) => JSX.Element
 }) {
     const navigate = useNavigate()
     const params = useParams()
@@ -148,10 +142,14 @@ export function PlayParamterLoader(props: {
     }
 
     if (!hasHydrated) {
+        console.error("User has not been hydrated")
         return undefined
+    } else {
+        console.log("User has been hydrated")
     }
 
     if (worldQuery.isLoading) {
+        console.log("Loading world")
         return undefined
     }
 
@@ -173,10 +171,10 @@ export function PlayParamterLoader(props: {
         return null
     }
 
-    const world = WorldModel.decode(base64ToBytes(worldView.model))
+    const model = WorldModel.decode(base64ToBytes(worldView.model))
 
     return props.children({
-        world,
+        model,
         worldname: params.world,
         gamemode: params.gamemode,
     })

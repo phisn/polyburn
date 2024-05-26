@@ -7,7 +7,7 @@ export class ReplayCaptureService {
     private frames: ReplayFrame[] = []
     private accRotation = 0
 
-    get replay() {
+    constructReplay() {
         return ReplayModel.create({
             frames: replayFramesToBytes(this.frames),
         })

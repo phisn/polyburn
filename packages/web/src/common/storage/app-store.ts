@@ -14,6 +14,8 @@ export interface AppStore {
     updateJwt: (jwt: string | undefined) => void
     updateUser: (user: { username: string }) => void
 
+    logout: () => void
+
     alerts: AlertProps[]
     modalCount: number
     newAlert: (alert: AlertProps) => void
@@ -51,6 +53,10 @@ export const useAppStore = create<AppStore>()(
                 set({ user })
             },
 
+            logout: () => {
+                set({ jwt: undefined, user: undefined })
+            },
+
             alerts: [],
             modalCount: 0,
             newAlert: (alert: AlertProps) => {
@@ -78,19 +84,22 @@ export const useAppStore = create<AppStore>()(
                     return
                 }
 
-                try {
-                    const me = await trpcNative.user.me.query()
-                    state.updateUser(me)
-                    state.setUserLoaded()
-                } catch (e) {
-                    state.updateJwt(undefined)
-                    console.error("Failed to retrieve user", e)
+                if (state.jwt) {
+                    try {
+                        const me = await trpcNative.user.me.query()
+                        state.updateUser(me)
+                    } catch (e) {
+                        state.updateJwt(undefined)
+                        console.error("Failed to retrieve user", e)
 
-                    state.newAlert({
-                        type: "warning",
-                        message: "Failed to retrieve user. Login again.",
-                    })
+                        state.newAlert({
+                            type: "warning",
+                            message: "Failed to retrieve user. Login again.",
+                        })
+                    }
                 }
+
+                state.setUserLoaded()
             },
         },
     ),

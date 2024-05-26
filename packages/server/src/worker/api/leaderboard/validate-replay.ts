@@ -15,9 +15,9 @@ export const validateReplayProcedure = publicProcedure
     .input(
         z
             .object({
-                world: z.string(),
+                worldname: z.string(),
                 gamemode: z.string(),
-                replay: z.string(),
+                replayModelBase64: z.string(),
             })
             .required(),
     )
@@ -31,53 +31,37 @@ export const validateReplayProcedure = publicProcedure
             })
         }
 
-        const replayBuffer = Buffer.from(input.replay, "base64")
-        const stats = serverValidateReplay(input.world, input.gamemode, replayBuffer)
+        const replayBuffer = Buffer.from(input.replayModelBase64, "base64")
+        const replayStats = serverValidateReplay(input.worldname, input.gamemode, replayBuffer)
 
-        const [[personalBest], [rank]] = await db.batch([
-            db
-                .select({
-                    id: leaderboard.id,
-                    ticks: leaderboard.ticks,
-                })
-                .from(leaderboard)
-                .where(
-                    and(
-                        eq(leaderboard.world, input.world),
-                        eq(leaderboard.gamemode, input.gamemode),
-                        eq(leaderboard.userId, user.id),
-                    ),
-                )
-                .limit(1),
-            db
-                .select({ count: count() })
-                .from(leaderboard)
-                .where(
-                    and(
-                        eq(leaderboard.world, input.world),
-                        eq(leaderboard.gamemode, input.gamemode),
-                        lt(leaderboard.ticks, stats.ticks),
-                    ),
-                ),
+        const [[bestReplayEntry], [replayRank]] = await db.batch([
+            personalBestQuery(db, user.id, input.worldname, input.gamemode),
+            rankForTicksQuery(db, replayStats.ticks, input.worldname, input.gamemode),
         ])
 
-        let personalBestRank = undefined
+        let personalBest = undefined
 
-        if (personalBest) {
-            personalBestRank = await rankForTicks(
+        if (bestReplayEntry) {
+            const rank = await rankForTicks(
                 db,
-                personalBest.ticks,
-                input.world,
+                bestReplayEntry.ticks,
+                input.worldname,
                 input.gamemode,
             )
+
+            personalBest = {
+                rank,
+                ticks: bestReplayEntry.ticks,
+                deaths: bestReplayEntry.deaths,
+            }
         }
 
-        if (personalBest === undefined || stats.ticks <= personalBest.ticks) {
+        if (personalBest === undefined || replayStats.ticks <= personalBest.ticks) {
             const update = {
                 userId: user.id,
 
-                deaths: stats.deaths,
-                ticks: stats.ticks,
+                deaths: replayStats.deaths,
+                ticks: replayStats.ticks,
 
                 model: replayBuffer,
             }
@@ -86,9 +70,9 @@ export const validateReplayProcedure = publicProcedure
                 await db
                     .insert(leaderboard)
                     .values({
-                        id: personalBest?.id,
+                        id: bestReplayEntry?.id,
 
-                        world: input.world,
+                        world: input.worldname,
                         gamemode: input.gamemode,
 
                         ...update,
@@ -98,11 +82,6 @@ export const validateReplayProcedure = publicProcedure
                         set: update,
                     })
                     .execute()
-
-                return {
-                    rank: rank?.count,
-                    personalBestRank,
-                }
             } catch (e) {
                 console.log(e)
 
@@ -111,12 +90,19 @@ export const validateReplayProcedure = publicProcedure
                     code: "INTERNAL_SERVER_ERROR",
                 })
             }
-        } else {
-            console.log(`replay is worse, existing ${personalBest.ticks}, new ${stats.ticks}`)
 
-            return {
-                personalBestRank,
-            }
+            console.log(
+                `replay is better, existing ${personalBest?.ticks}, new ${replayStats.ticks}`,
+            )
+        } else {
+            console.log(
+                `replay is worse, existing ${bestReplayEntry?.ticks}, new ${replayStats.ticks}`,
+            )
+        }
+
+        return {
+            personalBest,
+            rank: replayRank?.count,
         }
     })
 
@@ -157,8 +143,26 @@ function serverValidateReplay(worldname: string, gamemode: string, replayBuffer:
     }
 }
 
-async function rankForTicks(db: DrizzleD1Database, ticks: number, world: string, gamemode: string) {
-    const result = await db
+function personalBestQuery(db: DrizzleD1Database, userId: number, world: string, gamemode: string) {
+    return db
+        .select({
+            id: leaderboard.id,
+            ticks: leaderboard.ticks,
+            deaths: leaderboard.deaths,
+        })
+        .from(leaderboard)
+        .where(
+            and(
+                eq(leaderboard.userId, userId),
+                eq(leaderboard.world, world),
+                eq(leaderboard.gamemode, gamemode),
+            ),
+        )
+        .limit(1)
+}
+
+function rankForTicksQuery(db: DrizzleD1Database, ticks: number, world: string, gamemode: string) {
+    return db
         .select({ count: count() })
         .from(leaderboard)
         .where(
@@ -168,7 +172,15 @@ async function rankForTicks(db: DrizzleD1Database, ticks: number, world: string,
                 lt(leaderboard.ticks, ticks),
             ),
         )
-        .execute()
+}
 
-    return result.at(0)?.count
+async function rankForTicks(db: DrizzleD1Database, ticks: number, world: string, gamemode: string) {
+    const [result] = await rankForTicksQuery(db, ticks, world, gamemode).execute()
+
+    if (result === undefined) {
+        console.error("Failed to get rank")
+        throw new Error("Failed to get rank")
+    }
+
+    return result.count
 }

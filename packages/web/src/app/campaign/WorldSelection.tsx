@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { WorldView } from "shared/src/views/world-view"
 import { IndependentContainer } from "../../common/components/IndependentContainer"
 import { trpcNative } from "../../common/trpc/trpc-native"
 import { World } from "./World"
 
-export function WorldSelection() {
+export function WorldSelection(props: { onSelected: (world: WorldView) => void }) {
     /*
     const chapterBackgroundColors = [
         "bg-red-500", // Light Blue
@@ -77,7 +76,13 @@ export function WorldSelection() {
     return (
         <div className="hxs:space-y-4 flex h-full max-h-[40rem] w-full flex-col space-y-0 px-1 py-2">
             <IndependentContainer className="max-h-[32rem] grow">
-                <WorldSquare tl={worlds[0]} tr={worlds[1]} bl={worlds[2]} br={worlds[3]} />
+                <WorldSquare
+                    tl={worlds[0]}
+                    tr={worlds[1]}
+                    bl={worlds[2]}
+                    br={worlds[3]}
+                    onSelected={props.onSelected}
+                />
             </IndependentContainer>
             {/*
             <div className="hxs:pb-6 flex w-full justify-center space-x-8 p-2 pb-3">
@@ -95,30 +100,27 @@ export function WorldSquare(props: {
     tr?: WorldView
     bl?: WorldView
     br?: WorldView
+    onSelected: (world: WorldView) => void
 }) {
-    const navigate = useNavigate()
+    function WorldHooked(innerProps: { world?: WorldView; locked?: boolean }) {
+        function onSelected() {
+            if (innerProps.world) {
+                props.onSelected(innerProps.world)
+            }
+        }
 
-    function WorldWithNavigate(props: { world?: WorldView; locked?: boolean }) {
-        return (
-            <World
-                locked={props.locked}
-                world={props.world}
-                onSelected={() => {
-                    navigate(`/play/${props.world?.id.name}/Normal`)
-                }}
-            />
-        )
+        return <World world={innerProps.world} locked={innerProps.locked} onSelected={onSelected} />
     }
 
     return (
         <div className="flex max-h-full max-w-full space-x-2">
             <div className="flex max-h-full w-full flex-col items-end justify-center space-y-2">
-                <WorldWithNavigate world={props.tl} />
-                <WorldWithNavigate world={props.bl} locked={props.bl !== undefined} />
+                <WorldHooked world={props.tl} />
+                <WorldHooked world={props.bl} locked={props.bl !== undefined} />
             </div>
             <div className="flex max-h-full w-full flex-col items-start justify-center space-y-2">
-                <WorldWithNavigate world={props.tr} />
-                <WorldWithNavigate world={props.br} locked={props.br !== undefined} />
+                <WorldHooked world={props.tr} />
+                <WorldHooked world={props.br} locked={props.br !== undefined} />
             </div>
         </div>
     )

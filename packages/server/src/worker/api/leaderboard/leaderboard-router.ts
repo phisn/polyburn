@@ -61,9 +61,19 @@ export const leaderboardRouter = router({
         )
         .query(async ({ input, ctx: { db } }) => {
             const replays = await db
-                .select()
+                .select({
+                    leaderboard: {
+                        id: leaderboard.id,
+                        deaths: leaderboard.deaths,
+                        ticks: leaderboard.ticks,
+                        model: leaderboard.model,
+                    },
+                    users: {
+                        username: users.username,
+                    },
+                })
                 .from(leaderboard)
-                .innerJoin(users, eq(leaderboard.userId, users.id))
+                .innerJoin(users, eq(users.id, leaderboard.userId))
                 .where(
                     and(
                         eq(leaderboard.world, input.world),

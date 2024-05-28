@@ -11,3 +11,17 @@ export const defaultConfig: RuntimeConfig = {
     thrustGroundMultiplier: 1.3,
     explosionAngle: 0.3,
 }
+
+export const hardConfig: RuntimeConfig = {
+    thrustDistance: 1.0,
+    thrustValue: 6.5, // 7.3,
+    thrustGroundMultiplier: 1.2,
+    explosionAngle: 0.3,
+}
+
+export const impossibleConfig: RuntimeConfig = {
+    thrustDistance: 0.7,
+    thrustValue: 6.6, // 7.3,
+    thrustGroundMultiplier: 1.2,
+    explosionAngle: 0.3,
+}

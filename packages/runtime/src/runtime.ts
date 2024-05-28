@@ -4,7 +4,7 @@ import { WorldModel } from "../proto/world"
 import { newLevel } from "./core/level/level-factory"
 import { newRocket } from "./core/rocket/rocket-factory"
 import { RuntimeComponents } from "./core/runtime-components"
-import { defaultConfig } from "./core/runtime-config"
+import { defaultConfig, hardConfig } from "./core/runtime-config"
 import { RuntimeFactoryContext } from "./core/runtime-factory-context"
 import { runtimeSystemFactories } from "./core/runtime-system-factories"
 import { RuntimeSystemContext } from "./core/runtime-system-stack"
@@ -19,6 +19,12 @@ export const newRuntime = (rapier: typeof RAPIER, world: WorldModel, gamemodeNam
 
     const groups = gamemode.groups.map(group => world.groups[group])
 
+    let config = defaultConfig
+
+    if (gamemodeName.toLowerCase().includes("hard")) {
+        config = hardConfig
+    }
+
     const context: RuntimeFactoryContext<RuntimeComponents> = {
         store: createEntityStore(),
         messageStore: createMessageStore(),
@@ -28,7 +34,7 @@ export const newRuntime = (rapier: typeof RAPIER, world: WorldModel, gamemodeNam
         rapier,
         physics: new rapier.World(new rapier.Vector2(0, 0)),
         queue: new rapier.EventQueue(true),
-        config: defaultConfig,
+        config,
     }
 
     context.physics.gravity = new rapier.Vector2(0, -20)

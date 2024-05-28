@@ -1,6 +1,6 @@
 import { FramePacket, UPDATE_POSITIONS_EVERY_MS } from "shared/src/websocket-api/lobby-api"
 
-const RECEIVE_POS_TOLERANCE_MS = UPDATE_POSITIONS_EVERY_MS * 0.9
+const _RECEIVE_POS_TOLERANCE_MS = UPDATE_POSITIONS_EVERY_MS * 0.9
 
 interface TrackerForUser {
     receivedLastAt: number

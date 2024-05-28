@@ -1,5 +1,6 @@
 import { Transition } from "@headlessui/react"
 import { useContext, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { useStore } from "zustand"
 import { AuthButton } from "../../common/components/auth-button/AuthButton"
 import { BackArrowSvg } from "../../common/components/inline-svg/BackArrow"
@@ -15,6 +16,8 @@ export function FinishedPopup() {
 
     const status = useStore(playStore, x => x.status)
     const user = useAppStore(x => x.user)
+
+    const navigate = useNavigate()
 
     useEffect(() => {
         const playState = playStore.getState()
@@ -32,7 +35,13 @@ export function FinishedPopup() {
         }
     }, [user, playStore])
 
-    function onClickCompleted() {}
+    function onClickCompleted() {
+        if (window.history.length > 1) {
+            window.history.back()
+        } else {
+            navigate("/")
+        }
+    }
 
     return (
         <Transition

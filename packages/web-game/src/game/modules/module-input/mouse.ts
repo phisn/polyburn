@@ -1,5 +1,7 @@
 import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+
 export class Mouse {
     private wasPointerDown = false
     private startPointerX = 0
@@ -56,11 +58,26 @@ export class Mouse {
                     this.startRotation -
                     (event.clientX - this.startPointerX) * 0.005 * this.rotationSpeed
             } else {
+                if (
+                    !isSafari &&
+                    this.runtime.factoryContext.renderer.domElement.requestPointerLock
+                ) {
+                    this.runtime.factoryContext.renderer.domElement.style.cursor = "none"
+                    this.runtime.factoryContext.renderer.domElement.requestPointerLock()
+                }
+
                 this.wasPointerDown = true
                 this.startPointerX = event.clientX
                 this.startRotation = this._rotation
             }
         } else {
+            if (this.wasPointerDown) {
+                if (!isSafari && document.exitPointerLock) {
+                    document.exitPointerLock()
+                    this.runtime.factoryContext.renderer.domElement.style.cursor = "auto"
+                }
+            }
+
             this.wasPointerDown = false
         }
 

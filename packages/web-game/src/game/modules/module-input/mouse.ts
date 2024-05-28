@@ -59,11 +59,19 @@ export class Mouse {
                     (event.clientX - this.startPointerX) * 0.005 * this.rotationSpeed
             } else {
                 if (
+                    false &&
                     !isSafari &&
                     this.runtime.factoryContext.renderer.domElement.requestPointerLock
                 ) {
                     this.runtime.factoryContext.renderer.domElement.style.cursor = "none"
-                    this.runtime.factoryContext.renderer.domElement.requestPointerLock()
+
+                    const requestPointerLock = this.runtime.factoryContext.renderer.domElement
+                        .requestPointerLock as any
+
+                    // https://developer.mozilla.org/en-US/docs/Web/API/Pointer_Lock_API
+                    requestPointerLock({
+                        unadjustedMovement: true,
+                    })
                 }
 
                 this.wasPointerDown = true
@@ -72,7 +80,7 @@ export class Mouse {
             }
         } else {
             if (this.wasPointerDown) {
-                if (!isSafari && document.exitPointerLock) {
+                if (false && !isSafari && document.exitPointerLock) {
                     document.exitPointerLock()
                     this.runtime.factoryContext.renderer.domElement.style.cursor = "auto"
                 }

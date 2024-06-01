@@ -49,6 +49,7 @@ export class ModuleScene {
             const shapeMaterial = new THREE.MeshBasicMaterial({ vertexColors: true })
             const shapeMesh = new THREE.Mesh(shapeGeometry, shapeMaterial)
 
+            shapeMaterial.depthTest = false
             this.runtime.factoryContext.scene.add(shapeMesh)
         }
     }

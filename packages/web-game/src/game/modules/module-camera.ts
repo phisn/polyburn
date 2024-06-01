@@ -189,7 +189,7 @@ export class ModuleCamera extends THREE.OrthographicCamera {
         }
     }
 
-    private updateViewport() {
+    updateViewport() {
         const rendererWidth = this.runtime.factoryContext.renderer.domElement.clientWidth
         const rendererHeight = this.runtime.factoryContext.renderer.domElement.clientHeight
 

@@ -21,7 +21,7 @@ export class Timer extends Object3D {
 
         this.text.frustumCulled = false
 
-        this.add(this.text)
+        this.add(this.text as any)
         this.position.set(0, -0.85, 0)
     }
 

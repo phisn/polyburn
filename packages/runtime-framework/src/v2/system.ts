@@ -1,3 +1,5 @@
+export {}
+/*
 import RAPIER from "@dimforge/rapier2d"
 
 interface SchedulePhysicsEvent {
@@ -29,3 +31,4 @@ class MySystem implements System {
 const system = new MySystem()
 
 system.schedulePhysics(...[1, 2])
+*/

@@ -6,6 +6,7 @@ import { ModuleInput } from "./modules/module-input/module-input"
 import { ModuleLobby } from "./modules/module-lobby/module-lobby"
 import { ModuleParticles } from "./modules/module-particles/module-particles"
 import { ModuleScene } from "./modules/module-scene/module-scene"
+import { ModuleUI } from "./modules/module-ui/module-ui"
 import { ExtendedRuntime, newExtendedRuntime } from "./runtime-extension/new-extended-runtime"
 
 export interface GameInterface {
@@ -25,6 +26,7 @@ export class Game implements GameInterface {
     particles: ModuleParticles
     scene: ModuleScene
     lobby?: ModuleLobby
+    ui: ModuleUI
 
     constructor(settings: GameSettings) {
         const scene = new Scene()
@@ -34,6 +36,7 @@ export class Game implements GameInterface {
             alpha: true,
         })
 
+        renderer.autoClear = false
         renderer.setClearColor(Color.NAMES["black"], 1)
 
         this.runtime = newExtendedRuntime(settings, scene, renderer)
@@ -43,6 +46,7 @@ export class Game implements GameInterface {
         this.input = new ModuleInput(this.runtime)
         this.particles = new ModuleParticles(this.runtime)
         this.scene = new ModuleScene(this.runtime)
+        this.ui = new ModuleUI(this.runtime)
 
         if (settings.instanceType === "play" && settings.lobby) {
             this.lobby = new ModuleLobby(this.runtime)
@@ -89,6 +93,8 @@ export class Game implements GameInterface {
         if (last) {
             this.camera.onFixedUpdate()
         }
+
+        this.ui.onFixedUpdate()
     }
 
     onUpdate(delta: number, overstep: number) {
@@ -97,7 +103,12 @@ export class Game implements GameInterface {
         this.lobby?.onUpdate(overstep)
         this.camera.onUpdate(delta)
 
+        this.runtime.factoryContext.renderer.clear()
+
+        this.camera.updateViewport()
         this.runtime.factoryContext.renderer.render(this.runtime.factoryContext.scene, this.camera)
+
+        this.ui.onUpdate()
     }
 
     domElement() {

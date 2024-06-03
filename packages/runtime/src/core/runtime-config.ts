@@ -16,5 +16,5 @@ export const hardConfig: RuntimeConfig = {
     thrustDistance: 1.0,
     thrustValue: 6.5, // 7.3,
     thrustGroundMultiplier: 1.3,
-    explosionAngle: 10,
+    explosionAngle: 1,
 }

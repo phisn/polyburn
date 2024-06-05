@@ -1,34 +1,56 @@
-export {}
-/*
-import RAPIER from "@dimforge/rapier2d"
+export type System<E extends object> = Partial<E>
 
-interface SchedulePhysicsEvent {
-    schedulePhysics(delta: number): void
+export type SystemStack<E extends object> = Partial<E> & {
+    add(system: Partial<E>): void
 }
 
-interface CollisionEvent {
-    collisionEvent(target: RAPIER.Collider, other: RAPIER.Collider, started: boolean): void
-}
+export function newSystemStack<E extends object>(): SystemStack<E> {
+    const systems = new Map()
 
-type Args<T> = T extends (...args: infer U) => any ? U : never
+    function add(system: Partial<E>) {
+        const possibleEvents = Object.getOwnPropertyNames(system).filter(
+            x => typeof system[x as keyof E] === "function",
+        )
 
-type SystemEvents = SchedulePhysicsEvent
+        for (const property of possibleEvents as (keyof E)[]) {
+            const existing = systems.get(property)
+            const rawMethod = system[property]
 
-interface SystemContext {
-    rapier: typeof RAPIER
-    eventStore: EventStore
-}
+            if (typeof rawMethod !== "function") {
+                throw new Error(`Method ${property.toString()} is not defined`)
+            }
 
-type System = Partial<SystemEvents>
+            const method = rawMethod.bind(system)
 
-class MySystem implements System {
-    schedulePhysics(delta: number, world: RAPIER.World) {
-        console.log("Schedule physics", delta)
-        this.context.eventStore.dispatch.schedulePhysics(delta)
+            if (existing) {
+                existing.push(method)
+
+                if (existing.length === 2) {
+                    const [first, second] = existing
+
+                    // increases performance 5x
+                    store[property] = (...args: any[]) => {
+                        first(...args)
+                        second(...args)
+                    }
+
+                    // do it only once when there are 3 handlers
+                } else if (existing.length === 3) {
+                    store[property] = function (...args: any[]) {
+                        for (const handler of existing) {
+                            handler(...args)
+                        }
+                    }
+                }
+            } else {
+                systems.set(property, [method])
+
+                // increases performance 10x
+                store[property] = method
+            }
+        }
     }
+
+    const store: any = { add }
+    return store
 }
-
-const system = new MySystem()
-
-system.schedulePhysics(...[1, 2])
-*/

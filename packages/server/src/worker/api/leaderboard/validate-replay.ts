@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier2d"
 import { TRPCError } from "@trpc/server"
-import { and, count, eq, lt } from "drizzle-orm"
+import { and, count, eq, lt, sql } from "drizzle-orm"
 import { DrizzleD1Database } from "drizzle-orm/d1"
 import { Buffer } from "node:buffer"
 import { ReplayModel } from "runtime/proto/replay"
@@ -163,7 +163,7 @@ function personalBestQuery(db: DrizzleD1Database, userId: number, world: string,
 
 function rankForTicksQuery(db: DrizzleD1Database, ticks: number, world: string, gamemode: string) {
     return db
-        .select({ count: count() })
+        .select({ count: sql<number>`${count()} + 1` })
         .from(leaderboard)
         .where(
             and(

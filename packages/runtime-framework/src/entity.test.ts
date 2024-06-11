@@ -14,7 +14,6 @@ beforeEach(() => {
 })
 
 describe("EntityStore", () => {
-    /*
     it("should create and retrieve a single entity with specified components", () => {
         const entity = store.create({ position: { x: 0, y: 0 } })
         const retrieved = store.single("position")
@@ -115,7 +114,6 @@ describe("EntityStore", () => {
 
         expect(() => single.position).toThrow()
     })
-    */
 
     it("should handle multiple components correctly on a single entity", () => {
         store.create({ position: { x: 0, y: 0 }, velocity: { dx: 1, dy: 1 } })
@@ -143,7 +141,6 @@ describe("EntityStore", () => {
         }
     })
 
-    /*
     it("should handle creation and removal of hundreds of entities with random interactions", () => {
         const entities: EntityWith<Components, keyof Components>[] = []
 
@@ -237,5 +234,63 @@ describe("EntityStore", () => {
         const single = store.single("position", "not-velocity")
         expect(() => single.position).toThrow()
     })
-    */
+
+    it("should allow singles with only negative", () => {
+        const entity = store.create({ position: { x: 0, y: 0 } })
+
+        const single = store.single("not-velocity")
+        expect(single.position).toEqual(entity.position)
+
+        const single2 = store.single("not-health")
+        const entity2 = store.create({ velocity: { dx: 1, dy: 1 } })
+        expect(single2.velocity).toEqual(entity2.velocity)
+    })
+
+    it("should record entities changing correctly", () => {
+        store.create({ position: { x: 0, y: 0 } })
+        const a = store.create({ position: { x: 1, y: 1 }, velocity: { dx: 1, dy: 1 } })
+
+        const changing = store.changing("position")
+        const changes = changing()
+
+        const changing2 = store.changing("not-velocity")
+
+        expect(changes.length).toBe(2)
+        expect(changes[0].type).toBe("created")
+        expect(changes[0].entity.position).toEqual({ x: 0, y: 0 })
+        expect(changes[1].type).toBe("created")
+        expect(changes[1].entity.position).toEqual({ x: 1, y: 1 })
+
+        const b = store.create({ position: { x: 2, y: 2 } })
+        store.create({ position: { x: 3, y: 3 }, velocity: { dx: 3, dy: 3 } })
+
+        const newChanges = changing()
+
+        expect(newChanges.length).toBe(2)
+        expect(newChanges[0].type).toBe("created")
+        expect(newChanges[0].entity.position).toEqual({ x: 2, y: 2 })
+        expect(newChanges[1].type).toBe("created")
+        expect(newChanges[1].entity.position).toEqual({ x: 3, y: 3 })
+
+        store.remove(a)
+        store.remove(b)
+
+        const removedChanges = changing()
+
+        expect(removedChanges.length).toBe(2)
+        expect(removedChanges[0].type).toBe("removed")
+        expect(removedChanges[0].entity.position).toEqual({ x: 1, y: 1 })
+        expect(removedChanges[1].type).toBe("removed")
+        expect(removedChanges[1].entity.position).toEqual({ x: 2, y: 2 })
+
+        const changes2 = changing2()
+
+        expect(changes2.length).toBe(3)
+        expect(changes2[0].type).toBe("created")
+        expect(changes2[0].entity.position).toEqual({ x: 0, y: 0 })
+        expect(changes2[1].type).toBe("created")
+        expect(changes2[1].entity.position).toEqual({ x: 2, y: 2 })
+        expect(changes2[2].type).toBe("removed")
+        expect(changes2[2].entity.position).toEqual({ x: 2, y: 2 })
+    })
 })

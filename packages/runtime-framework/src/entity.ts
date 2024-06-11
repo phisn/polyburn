@@ -20,6 +20,11 @@ type FilterModifier<
     Components extends object,
 > = C extends keyof Components ? C : never
 
+export interface EntityChange<Components extends object, C extends keyof Components> {
+    type: "created" | "removed"
+    entity: Readonly<EntityWith<Components, C>>
+}
+
 export interface EntityStore<Components extends object> {
     create<K extends keyof Components>(components: Pick<Components, K>): EntityWith<Components, K>
     remove<K extends keyof Components>(entity: EntityWith<Components, K>): void
@@ -32,8 +37,13 @@ export interface EntityStore<Components extends object> {
         ...components: C
     ): readonly EntityWith<Components, FilterModifier<C[number], Components>>[]
 
+    changing<K extends ComponentsWithModifier<Components>[]>(
+        ...components: K
+    ): () => EntityChange<Components, FilterModifier<K[number], Components>>[]
+
     // works using a weak set. if the callee does not reference the function it will be garbage collected
     // will return all new entities created/removed since the last call
+
     /*
     created<K extends ComponentsWithModifier<Components>[]>(
         ...components: K
@@ -59,6 +69,15 @@ class WeakList<T extends WeakKey> {
         return values[Symbol.iterator]()
     }
 
+    get length() {
+        if (this.list.length === 0) {
+            return 0
+        }
+
+        this.clean()
+        return this.list.length
+    }
+
     private clean() {
         this.list = this.list.filter(x => x.deref() !== undefined)
     }
@@ -74,12 +93,13 @@ class EntityKeyCache<T> {
     private componentsToKeys = new Map<PropertyKey, EntityKeyCacheEntry[]>()
     private keyToValues = new Map<string, T>()
 
-    getValue(components: string[]) {
-        return this.keyToValues.get(this.keyFromComponents(components))
+    getValue(key: string) {
+        return this.keyToValues.get(key)
     }
 
     insert(value: T, componentFilters: string[]) {
-        const key = this.keyFromComponents(componentFilters)
+        componentFilters.sort()
+        const key = componentFilters.join(",")
 
         const has: PropertyKey[] = []
         const not: PropertyKey[] = []
@@ -138,9 +158,107 @@ class EntityKeyCache<T> {
     valuesThatRequireNot(not: string, components: string[]) {
         return this.valuesThatRequire(`${ModifierNot}${not}`, components)
     }
+}
 
-    private keyFromComponents(components: string[]) {
-        return components.toSorted().join(",")
+class EntityListCache {
+    private entityListKeyCache = new EntityKeyCache<any[]>()
+    private requireNothing: any[][] = []
+
+    insert(entities: any[], componentFilters: string[]) {
+        this.entityListKeyCache.insert(entities, componentFilters)
+
+        if (componentFilters.filter(x => !x.startsWith(ModifierNot)).length === 0) {
+            this.requireNothing.push(entities)
+        }
+    }
+
+    get(key: string) {
+        return this.entityListKeyCache.getValue(key)
+    }
+
+    notifyCreateComponent(entity: any, newComponent: string) {
+        const components = Object.getOwnPropertyNames(entity)
+
+        const toAdd = this.entityListKeyCache.valuesThatRequire(newComponent, components)
+
+        for (const entityList of toAdd) {
+            entityList.push(entity)
+        }
+
+        const toRemove = this.entityListKeyCache.valuesThatRequireNot(newComponent, components)
+
+        for (const entityList of toRemove) {
+            entityList.splice(entityList.indexOf(entity), 1)
+        }
+    }
+
+    notifyRemoveComponent(entity: any, removedComponent: string) {
+        const components = Object.getOwnPropertyNames(entity)
+
+        const toRemove = this.entityListKeyCache.valuesThatRequire(removedComponent, components)
+
+        for (const entityList of toRemove) {
+            entityList.splice(entityList.indexOf(entity), 1)
+        }
+
+        const toAdd = this.entityListKeyCache.valuesThatRequireNot(removedComponent, components)
+
+        for (const entityList of toAdd) {
+            entityList.push(entity)
+        }
+    }
+
+    notifyCreate(entity: any) {
+        for (const entityList of this.requireNothing) {
+            entityList.push(entity)
+        }
+    }
+}
+
+class EntityChangeCache {
+    private entityListKeyCache = new EntityKeyCache<WeakList<EntityChange<any, any>[]>>()
+
+    emplace(componentFilters: string[]) {
+        let list = this.entityListKeyCache.getValue(componentFilters.join(","))
+
+        if (list === undefined) {
+            list = new WeakList()
+            this.entityListKeyCache.insert(list, componentFilters)
+        }
+
+        return list
+    }
+
+    get(key: string) {
+        return this.entityListKeyCache.getValue(key)
+    }
+
+    notifyCreateComponent(entity: any, newComponent: string) {
+        this.notifyChange(entity, `${ModifierNot}${newComponent}`, newComponent)
+    }
+
+    notifyRemoveComponent(entity: any, removedComponent: string) {
+        this.notifyChange(entity, removedComponent, `${ModifierNot}${removedComponent}`)
+    }
+
+    private notifyChange(entity: any, previousComponent: string, newComponent: string) {
+        const components = Object.getOwnPropertyNames(entity)
+
+        const created = this.entityListKeyCache.valuesThatRequire(newComponent, components)
+
+        for (const bucket of created) {
+            for (const listener of bucket) {
+                listener.push({ type: "created", entity: { ...entity } })
+            }
+        }
+
+        const removed = this.entityListKeyCache.valuesThatRequire(previousComponent, components)
+
+        for (const bucket of removed) {
+            for (const listener of bucket) {
+                listener.push({ type: "removed", entity: { ...entity } })
+            }
+        }
     }
 }
 
@@ -152,9 +270,8 @@ class EntityKeyCache<T> {
 export function newEntityStore<Components extends object>() {
     let nextId = 0
 
-    const entityListKeyCache = new EntityKeyCache<any[]>()
-    const createdKeyCache = new EntityKeyCache<WeakList<any[]>>()
-    const removedKeyCache = new EntityKeyCache<WeakList<any[]>>()
+    const entityListKeyCache = new EntityListCache()
+    const entityChangeCache = new EntityChangeCache()
 
     const entities = new Map<number, any>()
 
@@ -182,69 +299,21 @@ export function newEntityStore<Components extends object>() {
                     }
 
                     if (isNewKey) {
-                        const targetComponents = Object.getOwnPropertyNames(target)
-
-                        const toAdd = entityListKeyCache.valuesThatRequire(key, targetComponents)
-
-                        for (const entityList of toAdd) {
-                            console.log(entityList)
-                            entityList.push(entity)
-                        }
-
-                        const toRemove = entityListKeyCache.valuesThatRequireNot(
-                            key,
-                            targetComponents,
-                        )
-
-                        for (const entityList of toRemove) {
-                            entityList.splice(entityList.indexOf(entity), 1)
-                        }
-
-                        const toCreateListenerBuckets = createdKeyCache.valuesThatRequire(
-                            key,
-                            targetComponents,
-                        )
-
-                        for (const bucket of toCreateListenerBuckets) {
-                            for (const listener of bucket) {
-                                listener.push(entity)
-                            }
-                        }
-
-                        const toRemoveListenerBuckets = removedKeyCache.valuesThatRequireNot(
-                            key,
-                            targetComponents,
-                        )
-
-                        for (const bucket of toRemoveListenerBuckets) {
-                            for (const listener of bucket) {
-                                listener.push(entity)
-                            }
-                        }
+                        entityListKeyCache.notifyCreateComponent(entity, key)
+                        entityChangeCache.notifyCreateComponent(entity, key)
                     }
 
                     return true
                 },
-                deleteProperty(target, key) {
-                    const toRemove = entityListKeyCache.valuesThatRequire(key, target)
-
-                    if (!Reflect.deleteProperty(target, key)) {
+                deleteProperty(target, key: string) {
+                    if (key in target === false) {
                         return false
                     }
 
-                    for (const entityList of toRemove) {
-                        entityList.splice(entityList.indexOf(entity), 1)
-                    }
+                    entityListKeyCache.notifyRemoveComponent(entity, key)
+                    entityChangeCache.notifyRemoveComponent(entity, key)
 
-                    const toRemoveListenerBuckets = removedKeyCache.findThatHas(key, target)
-
-                    for (const bucket of toRemoveListenerBuckets) {
-                        for (const listener of bucket) {
-                            listener.push(entity)
-                        }
-                    }
-
-                    return true
+                    return Reflect.deleteProperty(target, key)
                 },
             },
         )
@@ -271,6 +340,7 @@ export function newEntityStore<Components extends object>() {
     function single<C extends ComponentsWithModifier<Components>[]>(
         ...componentsWithModifier: string[]
     ): EntityWith<Components, FilterModifier<C[number], Components>> {
+        componentsWithModifier.sort()
         const key = componentsWithModifier.join(",")
         const existing = singles.get(key)
 
@@ -278,7 +348,7 @@ export function newEntityStore<Components extends object>() {
             return existing
         }
 
-        let entityList = entityListKeyCache.getValue(key)
+        let entityList = entityListKeyCache.get(key)
 
         if (entityList === undefined) {
             entityList = multiple(...componentsWithModifier) as any[]
@@ -318,8 +388,9 @@ export function newEntityStore<Components extends object>() {
     function multiple<C extends ComponentsWithModifier<Components>[]>(
         ...componentsWithModifier: string[]
     ): readonly EntityWith<Components, FilterModifier<C[number], Components>>[] {
+        componentsWithModifier.sort()
         const key = componentsWithModifier.join(",")
-        const entityList = entityListKeyCache.getValue(key)
+        const entityList = entityListKeyCache.get(key)
 
         if (entityList) {
             return entityList
@@ -343,7 +414,7 @@ export function newEntityStore<Components extends object>() {
         }
 
         const newEntityList: any[] = []
-        entityListKeyCache.insert(newEntityList, key, componentsRequired)
+        entityListKeyCache.insert(newEntityList, componentsWithModifier)
 
         for (const [, entity] of entities) {
             const entityComponents = Object.getOwnPropertyNames(entity)
@@ -359,39 +430,28 @@ export function newEntityStore<Components extends object>() {
         return newEntityList
     }
 
-    function eventCacheToFunction<K extends ComponentsWithModifier<Components>[]>(
-        cache: EntityKeyCache<WeakList<any[]>>,
-    ): (
-        ...componentsWithModifier: K
-    ) => () => EntityWith<Components, FilterModifier<K[number], Components>>[] {
-        return (...componentsWithModifier) => {
-            const key = componentsWithModifier.join(",")
-            let existing = cache.getValue(key)
+    function changing<K extends ComponentsWithModifier<Components>[]>(
+        ...components: string[]
+    ): () => EntityChange<Components, FilterModifier<K[number], Components>>[] {
+        const changeLists = entityChangeCache.emplace(components)
+        const changeList: EntityChange<any, any>[] = []
 
-            if (existing === undefined) {
-                existing = new WeakList()
-                cache.insert(existing, key, componentsWithModifier)
+        changeLists.push(changeList)
+
+        for (const entity of multiple(...components)) {
+            changeList.push({ type: "created", entity: { ...entity } })
+        }
+
+        return () => {
+            if (changeList.length === 0) {
+                return []
             }
 
-            const empty: any[] = []
-            const created: any[] = []
-
-            existing.push(created)
-
-            return () => {
-                if (created.length === 0) {
-                    return empty
-                }
-
-                const result = created.slice()
-                created.length = 0
-                return result
-            }
+            const changes = [...changeList]
+            changeList.length = 0
+            return changes
         }
     }
 
-    const created = eventCacheToFunction(createdKeyCache)
-    const removed = eventCacheToFunction(removedKeyCache)
-
-    return { create, remove, single, multiple, created, removed }
+    return { create, remove, single, multiple, changing }
 }

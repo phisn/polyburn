@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest"
-import { EntityStore, newEntityStore2 } from "./entity"
+import { EntityStore, newEntityStore } from "./entity"
 
 interface Components {
     position: { x: number; y: number }
@@ -10,7 +10,7 @@ interface Components {
 let store: EntityStore<Components>
 
 beforeEach(() => {
-    store = newEntityStore2<Components>()
+    store = newEntityStore<Components>()
 })
 
 describe("EntityStore", () => {

@@ -9,7 +9,7 @@ port = 3002
 
 [vars]
 CLIENT_URL = "https://new.rocketgame.app,https://rust-game.rocket-game.pages.dev,https://polyburn.com"
-API_URL="https://api.polyburn.com"
+API_URL = "https://api.polyburn.com"
 
 [[d1_databases]]
 migrations_dir = "drizzle"

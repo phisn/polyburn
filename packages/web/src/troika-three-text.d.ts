@@ -4,7 +4,6 @@ declare module "troika-three-text" {
 
     export class Text extends Object3D {
         constructor()
-
         text: string
         fontSize: number
         font: string

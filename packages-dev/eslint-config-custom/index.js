@@ -26,6 +26,8 @@ module.exports = {
         "@typescript-eslint/unbound-method": "off",
         "filenames-simple/named-export": "off",
 
+        "no-inner-declarations": "off",
+
         eqeqeq: "error",
         "no-var": "error",
 

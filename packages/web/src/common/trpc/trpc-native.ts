@@ -1,7 +1,7 @@
 import { TRPCClientError, createTRPCProxyClient, httpBatchLink, loggerLink } from "@trpc/client"
 import superjson from "superjson"
 import { AppRouter } from "../../../../server/src/worker/framework/trpc-router"
-import { useAppStore } from "../storage/app-store"
+import { useAppStore } from "../store/app-store"
 import { authSyncLink } from "./auth-sync-link"
 
 export const options = {

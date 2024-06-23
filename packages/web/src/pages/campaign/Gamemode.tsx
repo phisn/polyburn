@@ -2,23 +2,23 @@ import { Suspense, useState } from "react"
 import { BrowserView, isMobile } from "react-device-detect"
 import { useNavigate } from "react-router-dom"
 import { ReplayStats } from "runtime/src/model/replay/replay-stats"
-import { GamemodeView } from "shared/src/views/gamemode-view"
-import { WorldView } from "shared/src/views/world-view"
+import { GamemodeInfo } from "../../../../shared/src/worker-api/gamemode-info"
+import { WorldInfo } from "../../../../shared/src/worker-api/world-info"
 import { trpc } from "../../common/trpc/trpc"
-import { Modal, ModalPanel } from "../../components/common/Modal"
 import { ArrowClockwise } from "../../components/common/svg/ArrowClockwise"
 import { LockedSvg } from "../../components/common/svg/Locked"
 import { PlayFilled } from "../../components/common/svg/PlayFilled"
 import { TrophySvg } from "../../components/common/svg/Trophy"
+import { Modal, ModalPanel } from "../../components/modals/Modal"
 
 const todoLockedFeature = false
 
-export function Gamemode(props: { worldview: WorldView; gamemodeview: GamemodeView }) {
+export function Gamemode(props: { world: WorldInfo; gamemodeview: GamemodeInfo }) {
     const [open, setOpen] = useState(false)
     const navigate = useNavigate()
 
     function onGamemodeSelected() {
-        navigate(`/play/${props.worldview.id.name}/${props.gamemodeview.name}`)
+        navigate(`/play/${props.world.id.name}/${props.gamemodeview.name}`)
     }
 
     return (
@@ -57,8 +57,8 @@ export function Gamemode(props: { worldview: WorldView; gamemodeview: GamemodeVi
                 closeDialog={() => {
                     setOpen(false)
                 }}
-                worldview={props.worldview}
-                gamemodeview={props.gamemodeview}
+                world={props.world}
+                gamemode={props.gamemodeview}
             />
         </>
     )
@@ -66,8 +66,8 @@ export function Gamemode(props: { worldview: WorldView; gamemodeview: GamemodeVi
 
 function LeaderboardModal(props: {
     open: boolean
-    worldview: WorldView
-    gamemodeview: GamemodeView
+    world: WorldInfo
+    gamemode: GamemodeInfo
     closeDialog: () => void
 }) {
     return (
@@ -87,10 +87,7 @@ function LeaderboardModal(props: {
                 <ModalPanel className="bg-base-300 flex h-min w-full flex-col space-y-4 rounded-2xl border border-zinc-700 p-6">
                     <div className="flex flex-col">
                         <Suspense fallback={<div>Loading ...</div>}>
-                            <LeaderboardList
-                                worldview={props.worldview}
-                                gamemodeview={props.gamemodeview}
-                            />
+                            <LeaderboardList world={props.world} gamemode={props.gamemode} />
                         </Suspense>
                     </div>
                 </ModalPanel>
@@ -100,10 +97,10 @@ function LeaderboardModal(props: {
     )
 }
 
-function LeaderboardList(props: { worldview: WorldView; gamemodeview: GamemodeView }) {
+function LeaderboardList(props: { world: WorldInfo; gamemode: GamemodeInfo }) {
     const [replays] = trpc.replay.list.useSuspenseQuery({
-        world: props.worldview.id.name,
-        gamemode: props.gamemodeview.name,
+        world: props.world.id.name,
+        gamemode: props.gamemode.name,
     })
 
     function onCompeteReplay(leaderboardId: number) {

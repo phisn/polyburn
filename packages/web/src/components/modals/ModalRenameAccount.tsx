@@ -1,16 +1,25 @@
 import { Dialog } from "@headlessui/react"
-import { useRef, useState } from "react"
-import { useAppStore } from "../../../common/store/app-store"
-import { trpcNative } from "../../../common/trpc/trpc-native"
-import { Modal } from "../../../components/common/Modal"
+import { useEffect, useRef, useState } from "react"
+import { useAppStore } from "../../common/store/app-store"
+import { trpcNative } from "../../common/trpc/trpc-native"
+import { Modal } from "./Modal"
 
-export function RenameAccount(props: { open: boolean; onFinished: () => void }) {
+export function ModalRenameAccount(props: { open: boolean; onFinished: () => void }) {
     const usernameRef = useRef<HTMLInputElement>(null)
 
     const [loading, setLoading] = useState(false)
 
+    const user = useAppStore(x => x.user)
     const newAlert = useAppStore(x => x.newAlert)
     const updateUser = useAppStore(x => x.updateUser)
+
+    useEffect(() => {
+        if (user === undefined) {
+            return
+        }
+
+        usernameRef.current!.value = user.username
+    }, [])
 
     async function onRename() {
         try {

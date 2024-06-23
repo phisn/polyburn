@@ -3,7 +3,7 @@ import { useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useStore } from "zustand"
 import { useAppStore } from "../../common/store/app-store"
-import { AuthButton } from "../../components/common/auth-button/AuthButton"
+import { AuthButton } from "../../components/common/AuthButton"
 import { BackArrowSvg } from "../../components/common/svg/BackArrow"
 import { FinishedStatus, playStoreContext } from "./play-store"
 

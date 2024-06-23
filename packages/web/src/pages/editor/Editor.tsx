@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from "react"
 import { EntityType } from "runtime/proto/world"
-import { entityGraphicRegistry } from "../../game/runtime-view/graphics-assets/entity-graphic-registry"
-import { EntityGraphicType } from "../../game/runtime-view/graphics-assets/entity-graphic-type"
 import { isPointInsideEntity } from "./entities/is-point-inside-entity"
+import { entityGraphicRegistry } from "./graphics-assets/entity-graphic-registry"
+import { EntityGraphicType } from "./graphics-assets/entity-graphic-type"
 import { createEditorStore, editorStoreContext } from "./store/store"
 import { Canvas } from "./views/view-canvas/Canvas"
 

@@ -1,4 +1,5 @@
-import { FramePacket, UPDATE_POSITIONS_EVERY_MS } from "shared/src/websocket-api/lobby-api"
+import { FramePacket } from "shared/src/lobby-api/frame-packet"
+import { UPDATE_POSITIONS_EVERY_MS } from "shared/src/lobby-api/lobby-api"
 
 const _RECEIVE_POS_TOLERANCE_MS = UPDATE_POSITIONS_EVERY_MS * 0.9
 

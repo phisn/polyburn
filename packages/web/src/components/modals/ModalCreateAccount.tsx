@@ -1,10 +1,10 @@
 import { Dialog } from "@headlessui/react"
 import { useRef, useState } from "react"
-import { useAppStore } from "../../../common/store/app-store"
-import { trpcNative } from "../../../common/trpc/trpc-native"
-import { Modal } from "../../../components/common/Modal"
+import { useAppStore } from "../../common/store/app-store"
+import { trpcNative } from "../../common/trpc/trpc-native"
+import { Modal } from "./Modal"
 
-export function CreateAccount(props: {
+export function ModalCreateAccount(props: {
     creationJwt: string | undefined
     onCancel: () => void
     onCreated: () => void

@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { and, asc, eq, inArray } from "drizzle-orm"
-import { WorldView } from "shared/src/views/world-view"
 import { z } from "zod"
+import { WorldInfo } from "../../../../../shared/src/worker-api/world-info"
 import { worlds } from "../../domain/worlds"
 import { leaderboard } from "../../framework/db-schema"
 import { publicProcedure, router } from "../../framework/trpc"
@@ -44,7 +44,7 @@ export const worldRouter = router({
             }
 
             return requested.map(
-                (world): WorldView => ({
+                (world): WorldInfo => ({
                     id: world.id,
                     model: world.model,
                     gamemodes: world.gamemodes.map(gamemode => {

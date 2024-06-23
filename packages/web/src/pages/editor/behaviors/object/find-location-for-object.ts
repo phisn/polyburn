@@ -1,6 +1,6 @@
 import { Point } from "runtime/src/model/point"
 import { changeAnchor } from "runtime/src/model/world/change-anchor"
-import { snapDistance } from "../../../../common/constants"
+import { snapDistance } from "../../constants"
 import { ImmutableEntityWith } from "../../entities/entity"
 import { PipelineEvent } from "../../views/view-canvas/pipeline/pipeline-event"
 import { findClosestEdge } from "../shape/find-closest-edge"

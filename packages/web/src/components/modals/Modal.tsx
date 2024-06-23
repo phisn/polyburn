@@ -8,7 +8,7 @@ export function Modal(props: {
     className?: string
 }) {
     return (
-        <Transition show={props.open} as={Fragment}>
+        <Transition show={props.open} as={Fragment} appear>
             <NativeDialog onClose={() => props.closeDialog()} as="div" className="relative z-50">
                 <Transition.Child
                     as={Fragment}

@@ -1,9 +1,4 @@
-type AlertType = "warning" | "error" | "info" | "success"
-
-export interface AlertProps {
-    message: string
-    type: AlertType
-}
+import { AlertProps, AlertType } from "./alert-props"
 
 const successSvg = (
     <svg

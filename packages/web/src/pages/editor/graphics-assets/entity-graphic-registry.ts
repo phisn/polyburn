@@ -1,6 +1,6 @@
 import { EntityType } from "runtime/proto/world"
 import { entityRegistry } from "runtime/src/model/world/entity-registry"
-import { baseZoomFactor } from "../../../common/constants"
+import { baseZoomFactor } from "../constants"
 import { EntityGraphicType } from "./entity-graphic-type"
 
 export interface EntityGraphicRegisterEntry {

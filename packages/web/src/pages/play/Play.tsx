@@ -118,7 +118,7 @@ export function PlayParamterLoader(props: {
 }) {
     const navigate = useNavigate()
     const params = useParams()
-    const hasHydrated = useAppStore(x => x.hasUserLoaded)
+    const hasHydrated = useAppStore(x => x.hasHydrated())
 
     if (!params.world || !params.gamemode) {
         console.error("World or gamemode not found in params")

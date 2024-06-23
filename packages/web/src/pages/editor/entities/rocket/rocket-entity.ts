@@ -1,9 +1,9 @@
 import { EntityType } from "runtime/proto/world"
 import { Point } from "runtime/src/model/point"
-import { entityGraphicRegistry } from "../../../../game/runtime-view/graphics-assets/entity-graphic-registry"
-import { EntityGraphicType } from "../../../../game/runtime-view/graphics-assets/entity-graphic-type"
 import { Behaviors } from "../../behaviors/behaviors"
 import { ObjectBehavior } from "../../behaviors/object/object-behavior"
+import { entityGraphicRegistry } from "../../graphics-assets/entity-graphic-registry"
+import { EntityGraphicType } from "../../graphics-assets/entity-graphic-type"
 import { Entity, ImmutableEntity } from "../entity"
 import { isPointInsideEntity } from "../is-point-inside-entity"
 

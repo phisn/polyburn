@@ -1,4 +1,4 @@
-export interface WorldIdentifier {
+export interface WorldId {
     name: string
     version: number
 }

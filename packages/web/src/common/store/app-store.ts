@@ -1,24 +1,13 @@
 import { create } from "zustand"
 import { StateStorage, createJSONStorage, persist } from "zustand/middleware"
-import { AlertProps } from "../../app/layout/alerts/Alert"
-import { trpcNative } from "../trpc/trpc-native"
 import { db } from "./db"
+import { AuthSlice, authHydrateStorageSideEffect, authSlice } from "./slice-auth"
+import { PopupSlice, popupSlice } from "./slice-popup"
 
-export interface AppStore {
-    hasUserLoaded: boolean
-    setUserLoaded: () => void
-
-    jwt: string | undefined
-    user: { username: string } | undefined
-
-    updateJwt: (jwt: string | undefined) => void
-    updateUser: (user: { username: string }) => void
-
-    logout: () => void
-
-    alerts: AlertProps[]
-    modalCount: number
-    newAlert: (alert: AlertProps) => void
+export interface AppStore extends AuthSlice, PopupSlice {
+    hydrated: boolean
+    setHydrated: () => void
+    hasHydrated: () => boolean
 }
 
 const storage: StateStorage = {
@@ -36,40 +25,16 @@ const storage: StateStorage = {
 
 export const useAppStore = create<AppStore>()(
     persist(
-        set => ({
-            hasUserLoaded: false,
-            setUserLoaded: () => {
-                set({ hasUserLoaded: true })
+        (set, get, ...a) => ({
+            hydrated: false,
+            setHydrated: () => {
+                set({ hydrated: true })
             },
-
-            jwt: undefined,
-            user: undefined,
-
-            updateJwt: jwt => {
-                set({ jwt })
+            hasHydrated: () => {
+                return get().hydrated
             },
-
-            updateUser: user => {
-                set({ user })
-            },
-
-            logout: () => {
-                set({ jwt: undefined, user: undefined })
-            },
-
-            alerts: [],
-            modalCount: 0,
-            newAlert: (alert: AlertProps) => {
-                setTimeout(() => {
-                    set(state => ({
-                        alerts: state.alerts.filter(a => a !== alert),
-                    }))
-                }, 3000)
-
-                set(state => ({
-                    alerts: [...state.alerts, alert],
-                }))
-            },
+            ...authSlice(set, get, ...a),
+            ...popupSlice(set, get, ...a),
         }),
         {
             name: "rocket-game",
@@ -84,22 +49,9 @@ export const useAppStore = create<AppStore>()(
                     return
                 }
 
-                if (state.jwt) {
-                    try {
-                        const me = await trpcNative.user.me.query()
-                        state.updateUser(me)
-                    } catch (e) {
-                        state.updateJwt(undefined)
-                        console.error("Failed to retrieve user", e)
+                await authHydrateStorageSideEffect(state)
 
-                        state.newAlert({
-                            type: "warning",
-                            message: "Failed to retrieve user. Login again.",
-                        })
-                    }
-                }
-
-                state.setUserLoaded()
+                state.setHydrated()
             },
         },
     ),

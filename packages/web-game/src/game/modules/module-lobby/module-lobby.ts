@@ -1,12 +1,11 @@
 import { EntityWith } from "runtime-framework"
+import { Frame, FramePacket } from "shared/src/lobby-api/frame-packet"
 import {
-    Frame,
-    FramePacket,
-    OtherUser,
     UPDATE_POSITIONS_EVERY_MS,
     UpdateFromClient,
     messageFromServer,
-} from "shared/src/websocket-api/lobby-api"
+} from "shared/src/lobby-api/lobby-api"
+import { UserOther } from "shared/src/lobby-api/user-other"
 import { Text } from "troika-three-text"
 import { ExtendedComponents } from "../../runtime-extension/extended-components"
 import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
@@ -24,7 +23,7 @@ export class OtherUserGhost {
 
     constructor(
         private runtime: ExtendedRuntime,
-        private user: OtherUser,
+        private user: UserOther,
     ) {
         this.mesh = new Rocket(0.2)
 
@@ -131,7 +130,7 @@ export class OtherUserGhosts {
         }
     }
 
-    addPlayer(user: OtherUser) {
+    addPlayer(user: UserOther) {
         if (
             this.runtime.factoryContext.settings.instanceType === "play" &&
             this.runtime.factoryContext.settings?.lobby?.username === user.username

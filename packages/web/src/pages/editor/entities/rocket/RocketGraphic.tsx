@@ -2,8 +2,8 @@ import { Svg } from "@react-three/drei"
 import { Suspense, useRef } from "react"
 import { EntityType } from "runtime/proto/world"
 import { Euler, MeshBasicMaterial, Object3D } from "three"
-import { entityGraphicRegistry } from "../../../../game/runtime-view/graphics-assets/entity-graphic-registry"
-import { EntityGraphicType } from "../../../../game/runtime-view/graphics-assets/entity-graphic-type"
+import { entityGraphicRegistry } from "../../graphics-assets/entity-graphic-registry"
+import { EntityGraphicType } from "../../graphics-assets/entity-graphic-type"
 import { useEventListener } from "../../store/use-event-listener"
 import { useIsHighlighted } from "../../store/use-is-highlighted"
 import { useIsSelected } from "../../store/use-is-selected"
@@ -40,10 +40,10 @@ export function RocketGraphic(props: { entity: ImmutableRocketEntity }) {
                     highlighted && selected
                         ? new MeshBasicMaterial({ color: "#cc9900" })
                         : highlighted
-                        ? new MeshBasicMaterial({ color: "#dd7700" })
-                        : selected
-                        ? new MeshBasicMaterial({ color: "#ffbb00" })
-                        : undefined
+                          ? new MeshBasicMaterial({ color: "#dd7700" })
+                          : selected
+                            ? new MeshBasicMaterial({ color: "#ffbb00" })
+                            : undefined
                 }
             />
         </Suspense>

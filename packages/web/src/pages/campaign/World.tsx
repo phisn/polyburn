@@ -8,7 +8,7 @@ export function World(props: { world?: WorldInfo; onSelected: () => void }) {
     function ButtonOverlay() {
         return (
             <div
-                className="absolute inset-0 z-30 rounded-2xl opacity-30 transition hover:cursor-pointer hover:bg-white active:opacity-70"
+                className="absolute inset-0 z-30 rounded-2xl opacity-30 transition hover:cursor-pointer hover:bg-white"
                 onClick={() => props.onSelected()}
             ></div>
         )

@@ -6,7 +6,9 @@ export function LayoutWithMenu() {
     const mobileClass = isMobile ? "" : "space-y-2"
 
     return (
-        <div className={`bg-base-300 flex h-screen w-screen flex-col overflow-clip ${mobileClass}`}>
+        <div
+            className={`bg-base-300 flex h-screen w-screen touch-none select-none flex-col overflow-clip ${mobileClass}`}
+        >
             <Navbar />
             <Layout />
         </div>

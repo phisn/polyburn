@@ -19,7 +19,7 @@ export function ModalRenameAccount(props: { open: boolean; onFinished: () => voi
         }
 
         usernameRef.current!.value = user.username
-    }, [])
+    }, [user])
 
     async function onRename() {
         try {

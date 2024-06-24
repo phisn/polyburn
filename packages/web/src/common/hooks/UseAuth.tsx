@@ -20,7 +20,7 @@ export function useAuth(): [AuthState, AuthApi] {
     const [me, jwt, hasHydrated] = useAppStore(state => [state.user, state.jwt, state.hydrated])
     const [loading, setLoading] = useState(false)
 
-    const login = useGoogleLogin({
+    const googleLogin = useGoogleLogin({
         onSuccess: async ({ code }) => {
             try {
                 const response = await trpcNative.user.getToken.query({ code })
@@ -71,7 +71,7 @@ export function useAuth(): [AuthState, AuthApi] {
         () => ({
             login() {
                 setLoading(true)
-                login()
+                googleLogin()
             },
             rename() {
                 useAppStore.getState().newModal({
@@ -91,7 +91,7 @@ export function useAuth(): [AuthState, AuthApi] {
                 setLoading(true)
             },
         }),
-        [me, jwt],
+        [me, jwt, googleLogin],
     )
 
     if ((jwt && !me) || loading || hasHydrated === false) {

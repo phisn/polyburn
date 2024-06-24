@@ -1,3 +1,3 @@
-export function AuthButton(props: { children: React.ReactNode; className?: string }) {
+export function AuthButton(_props: { children: React.ReactNode; className?: string }) {
     return <></>
 }

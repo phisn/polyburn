@@ -3,7 +3,7 @@ import { BrowserView, isMobile } from "react-device-detect"
 import { WorldInfo } from "../../../../shared/src/worker-api/world-info"
 import { LockedSvg } from "../../components/common/svg/Locked"
 
-export function World(props: { world?: WorldInfo; locked?: boolean; onSelected: () => void }) {
+export function World(props: { world?: WorldInfo; onSelected: () => void }) {
     //    return <div className="m-2 h-[18rem] w-[28rem] bg-white"></div>
     function ButtonOverlay() {
         return (
@@ -28,10 +28,12 @@ export function World(props: { world?: WorldInfo; locked?: boolean; onSelected: 
         }
     }
 
+    const isLocked = props.world?.type === "locked"
+
     return (
-        <div className="@container aspect-[5/3] h-fit w-full max-w-[28rem]">
+        <div className="@container aspect-[7/4] w-full max-w-[28rem]">
             <ButtonOverlay />
-            <Overlay world={props.world} locked={props.locked} />
+            <Overlay world={props.world} locked={isLocked} />
 
             <WorldContainerInner>
                 {props.world === undefined && <div className="h-full w-full rounded-none" />}
@@ -42,12 +44,12 @@ export function World(props: { world?: WorldInfo; locked?: boolean; onSelected: 
                     enterTo="opacity-100"
                 >
                     <img
-                        className={"" + (props.locked ? "transform-gpu blur-3xl" : "")}
+                        className={"" + (isLocked ? "transform-gpu blur-3xl" : "")}
                         src={bgPath()}
                     />
                 </Transition>
             </WorldContainerInner>
-            {props.locked && <LockedOverlay />}
+            {isLocked && <LockedOverlay />}
         </div>
     )
 }

@@ -1,5 +1,5 @@
 import { Transition } from "@headlessui/react"
-import { useContext, useEffect } from "react"
+import { forwardRef, useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useStore } from "zustand"
 import { useAppStore } from "../../common/store/app-store"
@@ -244,15 +244,18 @@ function InfoContainer(props: {
     )
 }
 
-function CenterOnScreen(props: { children: React.ReactNode }) {
+const CenterOnScreen = forwardRef(function (
+    props: { children?: React.ReactNode; className?: string },
+    ref: React.Ref<HTMLDivElement>,
+) {
     return (
-        <div className="absolute inset-0 z-10 bg-black bg-opacity-30 backdrop-blur-sm">
+        <div ref={ref} className="absolute inset-0 z-10 bg-black bg-opacity-30 backdrop-blur-sm">
             <div className="flex h-full w-full items-center justify-center p-3">
                 {props.children}
             </div>
         </div>
     )
-}
+})
 
 function formatTicks(ticks: number) {
     const totalSeconds = ticks / 60

@@ -44,8 +44,11 @@ export const worldRouter = router({
             }
 
             return requested.map(
-                (world): WorldInfo => ({
+                (world, i): WorldInfo => ({
                     id: world.id,
+
+                    type: i > 1 ? "locked" : "unlocked",
+                    image: "",
                     model: world.model,
                     gamemodes: world.gamemodes.map(gamemode => {
                         const replay = replaysFound?.find(

@@ -1,8 +1,8 @@
-import { WorldInfo } from "../../../../shared/src/worker-api/world-info"
+import { WorldInfoUnlocked } from "../../../../shared/src/worker-api/world-info"
 import { Modal, ModalPanel } from "../../components/modals/Modal"
 import { Gamemode } from "./Gamemode"
 
-export function GamemodeModal(props: { world: WorldInfo | undefined; onUnselect(): void }) {
+export function GamemodeModal(props: { world: WorldInfoUnlocked | undefined; onUnselect(): void }) {
     return (
         <Modal
             open={props.world !== undefined}

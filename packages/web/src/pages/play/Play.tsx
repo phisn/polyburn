@@ -152,6 +152,17 @@ export function PlayParamterLoader(props: {
 
     const [worldView] = worldQuery.data
 
+    if (worldView.type === "locked") {
+        console.error(`World ${params.world} is locked`)
+
+        useAppStore.getState().newAlert({
+            type: "warning",
+            message: `World ${params.world} is locked`,
+        })
+        navigate("/")
+        return null
+    }
+
     if (worldView.gamemodes.every(gamemode => gamemode.name !== params.gamemode)) {
         console.log(worldView.model)
         console.log(`Gamemodes: ${worldView.gamemodes.map(x => x.name).join(", ")}`)

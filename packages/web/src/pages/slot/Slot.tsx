@@ -23,7 +23,6 @@ function SlotItem(props: { item: string; blur?: boolean }) {
 function SlotRunner(props: { target: string; running: boolean }) {
     const line = useRef<HTMLDivElement>(null)
     const boxRef = useRef<HTMLDivElement>(null)
-    const [found, setFound] = useState(false)
 
     function randoms(len: number) {
         const values = {

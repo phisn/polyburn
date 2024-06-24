@@ -1,12 +1,12 @@
 import { useState } from "react"
-import { WorldInfo } from "../../../../shared/src/worker-api/world-info"
+import { WorldInfoUnlocked } from "../../../../shared/src/worker-api/world-info"
 import { GamemodeModal } from "./GamemodeModal"
 import { WorldSelection } from "./WorldSelection"
 
 export function Campaign() {
-    const [worldSelected, setWorldSelected] = useState<WorldInfo | undefined>()
+    const [worldSelected, setWorldSelected] = useState<WorldInfoUnlocked | undefined>()
 
-    function onWorldSelected(world: WorldInfo) {
+    function onWorldSelected(world: WorldInfoUnlocked) {
         setWorldSelected(world)
     }
 

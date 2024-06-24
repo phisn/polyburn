@@ -88,6 +88,7 @@ function SelectInRow(props: {
 
             api.start({
                 y: ty + (active ? my : 0),
+                immediate: active,
             })
         },
         {

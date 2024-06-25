@@ -60,10 +60,14 @@ function SelectInRow(props: {
 
     const [springs, api] = useSpring(() => ({
         y: 0,
+        config: {
+            tension: 210,
+            friction: 20,
+        },
     }))
 
     const binds = useDrag(
-        ({ event, active, movement: [, my], swipe: [, swipeY] }) => {
+        ({ event, active, movement: [, my], swipe: [, swipeY], velocity: [, vy] }) => {
             event.preventDefault()
 
             if (swipeY && oldElementIndex.current === newElementIndex.current) {
@@ -86,10 +90,21 @@ function SelectInRow(props: {
                 ty = Math.min(ty, 0)
             }
 
-            api.start({
-                y: ty + (active ? my : 0),
-                immediate: active,
-            })
+            if (active) {
+                api.start({
+                    y: ty + (active ? my : 0),
+                    /*
+                    immediate: active,
+                    */
+                    config: {
+                        velocity: my,
+                    },
+                })
+            } else {
+                api.start({
+                    y: ty,
+                })
+            }
         },
         {
             filterTaps: true,

@@ -64,9 +64,7 @@ export class Touch {
                             startRotation: this._rotation,
                         }
 
-                        if (touchPosition.y <= window.innerHeight * 0.75) {
-                            this._thrust = true
-                        }
+                        this._thrust = true
                     }
 
                     break
@@ -75,8 +73,6 @@ export class Touch {
                         this._rotation =
                             this.pointer.startRotation -
                             (touchPosition.x - this.pointer.startPointerX) * 0.005
-
-                        this._thrust = touchPosition.y <= window.innerHeight * 0.75
                     }
 
                     break

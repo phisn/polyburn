@@ -1,7 +1,7 @@
 import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 import { Keyboard } from "./keyboard"
 import { Mouse } from "./mouse"
-import { Touch } from "./touch"
+import { TouchAlt } from "./touch-alt"
 
 const CHARCODE_ONE = "1".charCodeAt(0)
 const CHARCODE_NINE = "9".charCodeAt(0)
@@ -9,7 +9,7 @@ const CHARCODE_NINE = "9".charCodeAt(0)
 export class ModuleInput {
     private keyboard: Keyboard
     private mouse: Mouse
-    private touch: Touch
+    private touch: TouchAlt
 
     private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
     private rotationSpeedIndex = 2
@@ -20,7 +20,7 @@ export class ModuleInput {
     constructor(runtime: ExtendedRuntime) {
         this.keyboard = new Keyboard()
         this.mouse = new Mouse(runtime)
-        this.touch = new Touch(runtime)
+        this.touch = new TouchAlt(runtime)
 
         this.onContextMenu = this.onContextMenu.bind(this)
         document.addEventListener("contextmenu", this.onContextMenu)

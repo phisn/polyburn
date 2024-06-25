@@ -1,10 +1,9 @@
 import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 
 export class Touch {
-    private thrustPointerId?: number
-
-    private rotatePointer?: {
+    private pointer?: {
         pointerId: number
+
         startPointerX: number
         startRotation: number
     }
@@ -58,54 +57,33 @@ export class Touch {
 
             switch (event.type) {
                 case "touchstart":
-                    console.log(
-                        "start with id " + touch.identifier,
-                        " and tpid " + this.thrustPointerId,
-                        " and rpid " + this.rotatePointer?.pointerId,
-                    )
-
-                    if (touchPosition.x > window.innerWidth / 2) {
-                        if (this.thrustPointerId === undefined) {
-                            ;(this.thrustPointerId = touch.identifier), (this._thrust = true)
-
-                            console.log("thrust start")
+                    if (this.pointer === undefined) {
+                        this.pointer = {
+                            pointerId: touch.identifier,
+                            startPointerX: touchPosition.x,
+                            startRotation: this._rotation,
                         }
-                    } else {
-                        if (this.rotatePointer === undefined) {
-                            this.rotatePointer = {
-                                pointerId: touch.identifier,
-                                startPointerX: touchPosition.x,
-                                startRotation: this._rotation,
-                            }
+
+                        if (touchPosition.y <= window.innerHeight * 0.75) {
+                            this._thrust = true
                         }
                     }
 
                     break
                 case "touchmove":
-                    if (this.rotatePointer && this.rotatePointer.pointerId === touch.identifier) {
+                    if (this.pointer && this.pointer.pointerId === touch.identifier) {
                         this._rotation =
-                            this.rotatePointer.startRotation -
-                            (touchPosition.x - this.rotatePointer.startPointerX) * 0.005
+                            this.pointer.startRotation -
+                            (touchPosition.x - this.pointer.startPointerX) * 0.005
+
+                        this._thrust = touchPosition.y <= window.innerHeight * 0.75
                     }
 
                     break
                 case "touchend":
-                case "touchcancel":
-                    console.log(
-                        "cancel with id " + touch.identifier,
-                        " and tpid " + this.thrustPointerId,
-                        " and rpid " + this.rotatePointer?.pointerId,
-                    )
-
-                    if (this.thrustPointerId === touch.identifier) {
+                    if (this.pointer && this.pointer.pointerId === touch.identifier) {
+                        this.pointer = undefined
                         this._thrust = false
-                        this.thrustPointerId = undefined
-
-                        console.log("thrust stop")
-                    }
-
-                    if (this.rotatePointer && this.rotatePointer.pointerId === touch.identifier) {
-                        this.rotatePointer = undefined
                     }
 
                     break

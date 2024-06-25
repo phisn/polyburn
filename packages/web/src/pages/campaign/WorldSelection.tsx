@@ -97,7 +97,7 @@ function SelectInRow(props: {
                     immediate: active,
                     */
                     config: {
-                        velocity: my,
+                        velocity: vy,
                     },
                 })
             } else {

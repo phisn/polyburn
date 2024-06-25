@@ -1,4 +1,5 @@
-import { Suspense, useState } from "react"
+import { animated } from "@react-spring/web"
+import { useMemo, useRef, useState } from "react"
 import { BrowserView, isMobile } from "react-device-detect"
 import { useNavigate } from "react-router-dom"
 import { ReplayStats } from "runtime/src/model/replay/replay-stats"
@@ -79,21 +80,63 @@ function LeaderboardModal(props: {
             }}
             className="flex items-center justify-center rounded-2xl p-6"
         >
-            <div className="hxs:flex-col flex h-min w-full max-w-[40rem] flex-row">
-                <div className="hxs:h-auto flex h-min justify-center justify-self-center p-6">
-                    <div className="whitespace-nowrap text-xl text-white">Leaderboard</div>
-                </div>
-
-                <ModalPanel className="bg-base-300 flex h-min w-full flex-col space-y-4 rounded-2xl border border-zinc-700 p-6">
-                    <div className="flex flex-col">
-                        <Suspense fallback={<div>Loading ...</div>}>
-                            <LeaderboardList world={props.world} gamemode={props.gamemode} />
-                        </Suspense>
-                    </div>
-                </ModalPanel>
-                <div className="h-20" />
-            </div>
+            <ModalPanel>
+                <Leaderboard
+                    world={props.world}
+                    gamemode={props.gamemode}
+                    closeDialog={props.closeDialog}
+                />
+            </ModalPanel>
         </Modal>
+    )
+}
+
+function Leaderboard(props: { world: WorldInfo; gamemode: GamemodeInfo; closeDialog: () => void }) {
+    const list = [
+        { username: "a", ticks: 100, leaderboardId: 1 },
+        { username: "b", ticks: 200, leaderboardId: 2 },
+        { username: "c", ticks: 300, leaderboardId: 3 },
+        { username: "d", ticks: 400, leaderboardId: 4 },
+        { username: "e", ticks: 500, leaderboardId: 5 },
+        { username: "f", ticks: 600, leaderboardId: 6 },
+        { username: "g", ticks: 700, leaderboardId: 7 },
+        { username: "h", ticks: 800, leaderboardId: 8 },
+        { username: "i", ticks: 900, leaderboardId: 9 },
+        { username: "j", ticks: 1000, leaderboardId: 10 },
+    ]
+
+    return (
+        <div className="max-h-screen">
+            <DraggableList
+                length={10}
+                className="bg-base-300 h-screen w-[10rem] space-y-8 rounded-xl"
+            >
+                {index => <div>{index}</div>}
+            </DraggableList>
+        </div>
+    )
+}
+
+function DraggableList(props: {
+    length: number
+    className?: string
+    children: (index: number) => React.ReactNode
+}) {
+    const firstChildRef = useRef<HTMLDivElement>(null)
+    const parentRef = useRef<HTMLDivElement>(null)
+
+    const elements = useMemo(() => Array.from({ length: props.length }), [props.length])
+
+    return (
+        <div ref={parentRef} className={"relative " + props.className}>
+            <animated.div className="absolute inset-0 flex flex-col items-center p-8">
+                {elements.map((_, index) => (
+                    <div ref={index === 0 ? firstChildRef : undefined} key={index}>
+                        {props.children(index)}
+                    </div>
+                ))}
+            </animated.div>
+        </div>
     )
 }
 
@@ -102,6 +145,10 @@ function LeaderboardList(props: { world: WorldInfo; gamemode: GamemodeInfo }) {
         world: props.world.id.name,
         gamemode: props.gamemode.name,
     })
+
+    while (replays.length < 10) {
+        replays.push(replays[0])
+    }
 
     function onCompeteReplay(leaderboardId: number) {
         console.log("compete", leaderboardId)

@@ -1,4 +1,5 @@
-import { animated } from "@react-spring/web"
+import { animated, useResize, useSpring } from "@react-spring/web"
+import { useDrag } from "@use-gesture/react"
 import { useMemo, useRef, useState } from "react"
 import { BrowserView, isMobile } from "react-device-detect"
 import { useNavigate } from "react-router-dom"
@@ -78,9 +79,10 @@ function LeaderboardModal(props: {
                 console.log("close leaderboard")
                 props.closeDialog()
             }}
-            className="flex items-center justify-center rounded-2xl p-6"
+            className="flex h-full items-center justify-center rounded-2xl p-6"
         >
-            <ModalPanel>
+            <ModalPanel className="flex h-full w-full max-w-[48rem] flex-col items-center space-y-4">
+                <div className="justify-center">Leaderboard</div>
                 <Leaderboard
                     world={props.world}
                     gamemode={props.gamemode}
@@ -106,12 +108,14 @@ function Leaderboard(props: { world: WorldInfo; gamemode: GamemodeInfo; closeDia
     ]
 
     return (
-        <div className="max-h-screen">
-            <DraggableList
-                length={10}
-                className="bg-base-300 h-screen w-[10rem] space-y-8 rounded-xl"
-            >
-                {index => <div>{index}</div>}
+        <div className="font-outfit flex h-full w-full flex-col rounded-xl bg-green-300">
+            <div className="w-full p-4 text-center">Some Title</div>
+            <DraggableList length={10} className="overflow-hidden rounded-xl bg-blue-300">
+                {index => (
+                    <div className="m-2 flex w-full justify-center bg-white p-8">
+                        <div className="btn">{index}</div>
+                    </div>
+                )}
             </DraggableList>
         </div>
     )
@@ -123,15 +127,125 @@ function DraggableList(props: {
     children: (index: number) => React.ReactNode
 }) {
     const firstChildRef = useRef<HTMLDivElement>(null)
-    const parentRef = useRef<HTMLDivElement>(null)
+    const relativeContainerRef = useRef<HTMLDivElement>(null)
+    const absoluteContainerRef = useRef<HTMLDivElement>(null)
+
+    const oldElementIndex = useRef(0)
+    const newElementIndex = useRef(0)
 
     const elements = useMemo(() => Array.from({ length: props.length }), [props.length])
 
+    function clampElementIndex(index: number) {
+        return Math.max(0, Math.min(props.length - 1, index))
+    }
+
+    const { height: elementHeight } = useResize({
+        container: firstChildRef,
+    })
+
+    const { height: relativeContainerHeight } = useResize({
+        container: relativeContainerRef,
+    })
+
+    const { height: absoluteContainerHeight } = useResize({
+        container: absoluteContainerRef,
+    })
+
+    const [springs, api] = useSpring(() => ({
+        y: 0,
+        config: {
+            tension: 210,
+            friction: 20,
+        },
+    }))
+
+    function applyScrollCap(moveDownBy: number, smoothed?: number) {
+        const remainingHeight = absoluteContainerHeight.get() + moveDownBy
+
+        let overscroll = 0
+
+        const overscrollDown = relativeContainerHeight.get() - remainingHeight
+        if (overscrollDown > 0) {
+            overscroll = -overscrollDown
+        }
+
+        if (moveDownBy > 0) {
+            overscroll = moveDownBy
+        }
+
+        moveDownBy -= overscroll
+
+        if (smoothed) {
+            moveDownBy += Math.sign(overscroll) * Math.pow(Math.abs(overscroll), smoothed)
+        }
+
+        if (overscrollDown > 0) {
+            moveDownBy = Math.min(moveDownBy, 0)
+        }
+
+        return moveDownBy
+    }
+
+    const binds = useDrag(
+        ({ event, active, movement: [, my], swipe: [, swipeY], velocity: [, vy] }) => {
+            event.preventDefault()
+
+            if (active === false) {
+                oldElementIndex.current = newElementIndex.current
+            }
+
+            // allow swiping
+            if (swipeY && oldElementIndex.current === newElementIndex.current) {
+                const t = newElementIndex.current + (swipeY < 0 ? 1 : -1)
+                newElementIndex.current = clampElementIndex(t)
+            }
+
+            // calculate movement
+            let moveDownBy = -oldElementIndex.current * elementHeight.get()
+
+            moveDownBy = applyScrollCap(moveDownBy)
+
+            // apply change of gesture
+            if (active) {
+                moveDownBy += my
+                moveDownBy = applyScrollCap(moveDownBy, 0.7)
+            }
+
+            // stop at element
+            if (active) {
+                newElementIndex.current = clampElementIndex(
+                    Math.round((-moveDownBy + elementHeight.get() / 2) / elementHeight.get()),
+                )
+
+                console.log("n", newElementIndex.current)
+            }
+
+            api.start({
+                y: moveDownBy,
+                config: {
+                    velocity: active ? vy : undefined,
+                },
+            })
+        },
+        {
+            filterTaps: true,
+        },
+    )
+
     return (
-        <div ref={parentRef} className={"relative " + props.className}>
-            <animated.div className="absolute inset-0 flex flex-col items-center p-8">
+        <div ref={relativeContainerRef} className={"relative h-full " + props.className}>
+            <animated.div
+                ref={absoluteContainerRef}
+                className="absolute inset-0 flex h-max touch-none select-none flex-col items-center bg-red-300"
+                {...binds()}
+                style={springs}
+            >
                 {elements.map((_, index) => (
-                    <div ref={index === 0 ? firstChildRef : undefined} key={index}>
+                    <div
+                        ref={index === 0 ? firstChildRef : undefined}
+                        key={index}
+                        className="w-full"
+                    >
                         {props.children(index)}
                     </div>
                 ))}

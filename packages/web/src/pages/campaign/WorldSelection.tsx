@@ -1,4 +1,4 @@
-import { animated, useResize, useSpring } from "@react-spring/web"
+import { useResize, useSpring } from "@react-spring/web"
 import { useDrag } from "@use-gesture/react"
 import { useMemo, useRef } from "react"
 import {
@@ -7,6 +7,7 @@ import {
     isWorldUnlocked,
 } from "../../../../shared/src/worker-api/world-info"
 import { trpc } from "../../common/trpc/trpc"
+import { DraggableList } from "./Gamemode"
 import { World } from "./World"
 
 export function WorldSelection(props: { onSelected: (world: WorldInfoUnlocked) => void }) {
@@ -111,6 +112,7 @@ function SelectInRow(props: {
         },
     )
 
+    /*
     return (
         <div ref={parentRef} className="relative h-full w-full touch-none select-none">
             <div className="absolute inset-0 flex w-full justify-center">
@@ -129,6 +131,19 @@ function SelectInRow(props: {
                 </animated.div>
             </div>
         </div>
+    )
+    */
+
+    return (
+        <DraggableList length={pairsOfTwo.length} className="h-full w-full">
+            {index => (
+                <WorldPair
+                    world0={pairsOfTwo[index][0]}
+                    world1={pairsOfTwo[index][1]}
+                    onSelected={world => props.onSelected?.(world)}
+                />
+            )}
+        </DraggableList>
     )
 }
 

@@ -112,8 +112,10 @@ function Leaderboard(props: { world: WorldInfo; gamemode: GamemodeInfo; closeDia
             <div className="w-full p-4 text-center">Some Title</div>
             <DraggableList length={10} className="overflow-hidden rounded-xl bg-blue-300">
                 {index => (
-                    <div className="m-2 flex w-full justify-center bg-white p-8">
-                        <div className="btn">{index}</div>
+                    <div className="p-8">
+                        <div className="flex w-full justify-center bg-white ">
+                            <div className="btn">{index}</div>
+                        </div>
                     </div>
                 )}
             </DraggableList>
@@ -121,7 +123,7 @@ function Leaderboard(props: { world: WorldInfo; gamemode: GamemodeInfo; closeDia
     )
 }
 
-function DraggableList(props: {
+export function DraggableList(props: {
     length: number
     className?: string
     children: (index: number) => React.ReactNode
@@ -160,39 +162,32 @@ function DraggableList(props: {
     }))
 
     function applyScrollCap(moveDownBy: number, smoothed?: number) {
-        const remainingHeight = absoluteContainerHeight.get() + moveDownBy
-
-        let overscroll = 0
-
-        const overscrollDown = relativeContainerHeight.get() - remainingHeight
-        if (overscrollDown > 0) {
-            overscroll = -overscrollDown
-        }
-
         if (moveDownBy > 0) {
-            overscroll = moveDownBy
+            return Math.pow(moveDownBy, smoothed ?? 1)
         }
 
-        moveDownBy -= overscroll
+        const largerChild = relativeContainerHeight.get() - absoluteContainerHeight.get()
 
-        if (smoothed) {
-            moveDownBy += Math.sign(overscroll) * Math.pow(Math.abs(overscroll), smoothed)
+        if (largerChild > 0) {
+            return Math.sign(moveDownBy) * Math.pow(Math.abs(moveDownBy), smoothed ?? 1)
         }
+
+        const overscrollDown = largerChild - moveDownBy
 
         if (overscrollDown > 0) {
-            moveDownBy = Math.min(moveDownBy, 0)
+            moveDownBy += overscrollDown
+
+            if (smoothed) {
+                moveDownBy -= Math.pow(overscrollDown, smoothed)
+            }
         }
 
         return moveDownBy
     }
 
     const binds = useDrag(
-        ({ event, active, movement: [, my], swipe: [, swipeY], velocity: [, vy] }) => {
+        ({ event, active, movement: [, my], swipe: [, swipeY], velocity: [, vy], scrolling }) => {
             event.preventDefault()
-
-            if (active === false) {
-                oldElementIndex.current = newElementIndex.current
-            }
 
             // allow swiping
             if (swipeY && oldElementIndex.current === newElementIndex.current) {
@@ -200,9 +195,15 @@ function DraggableList(props: {
                 newElementIndex.current = clampElementIndex(t)
             }
 
+            if (active === false) {
+                if (oldElementIndex.current !== newElementIndex.current) {
+                    console.log("old", oldElementIndex.current, "new", newElementIndex.current)
+                }
+                oldElementIndex.current = newElementIndex.current
+            }
+
             // calculate movement
             let moveDownBy = -oldElementIndex.current * elementHeight.get()
-
             moveDownBy = applyScrollCap(moveDownBy)
 
             // apply change of gesture
@@ -214,10 +215,24 @@ function DraggableList(props: {
             // stop at element
             if (active) {
                 newElementIndex.current = clampElementIndex(
+                    Math.round(
+                        (-moveDownBy - Math.sign(my) * vy * 50 + elementHeight.get() / 2) /
+                            elementHeight.get(),
+                    ),
+                )
+
+                const a = clampElementIndex(
                     Math.round((-moveDownBy + elementHeight.get() / 2) / elementHeight.get()),
                 )
 
-                console.log("n", newElementIndex.current)
+                const b = clampElementIndex(
+                    Math.round(
+                        (-moveDownBy - Math.sign(my) * vy * 50 + elementHeight.get() / 2) /
+                            elementHeight.get(),
+                    ),
+                )
+
+                console.log("n", newElementIndex.current, "a", a, "b", b)
             }
 
             api.start({
@@ -236,7 +251,7 @@ function DraggableList(props: {
         <div ref={relativeContainerRef} className={"relative h-full " + props.className}>
             <animated.div
                 ref={absoluteContainerRef}
-                className="absolute inset-0 flex h-max touch-none select-none flex-col items-center bg-red-300"
+                className="absolute inset-0 flex h-max touch-none select-none flex-col items-center "
                 {...binds()}
                 style={springs}
             >

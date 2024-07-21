@@ -91,7 +91,7 @@ export function useAuth(): [AuthState, AuthApi] {
                 setLoading(true)
             },
         }),
-        [me, jwt, googleLogin],
+        [googleLogin],
     )
 
     if ((jwt && !me) || loading || hasHydrated === false) {

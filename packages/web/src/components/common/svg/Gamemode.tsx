@@ -11,7 +11,6 @@ import { Clock } from "../../components/common/svg/Clock"
 import { LockedSvg } from "../../components/common/svg/Locked"
 import { PlayCircle } from "../../components/common/svg/PlayCircle"
 import { Skull } from "../../components/common/svg/Skull"
-import { Star } from "../../components/common/svg/Star"
 import { Sword } from "../../components/common/svg/Sword"
 import { SwordFilled } from "../../components/common/svg/SwordFilled"
 import { TrophySvg } from "../../components/common/svg/Trophy"
@@ -123,7 +122,7 @@ function LeaderboardEntryStats(props: {
             </div>
             {props.entry?.deaths === 0 && (
                 <div className="flex items-center space-x-1">
-                    <Star width="12" height="12" className={props.iconClassName} />
+                    <Sword width="12" height="12" className={props.iconClassName} />
                 </div>
             )}
 
@@ -208,19 +207,7 @@ function Leaderboard(props: { world: WorldInfo; gamemode: GamemodeInfo; closeDia
         )
     }
 
-    /*
     replays.entries[0].deaths = 0
-
-    for (let i = replays.entries.length; i < 50; ++i) {
-        replays.entries.push({
-            leaderboardId: i,
-            place: i + 1,
-            username: "Anonymous",
-            ticks: replays.entries[i - 1].ticks + Math.round(Math.random() * 1000),
-            deaths: replays.entries[i - 1].deaths + Math.round(Math.random() * 5),
-        })
-    }
-    */
 
     if (replays.entries.length === 0) {
         return (
@@ -236,13 +223,7 @@ function Leaderboard(props: { world: WorldInfo; gamemode: GamemodeInfo; closeDia
 
     return (
         <LeaderboardContainer>
-            <DraggableList
-                length={replays.entries.length}
-                className="overflow-hidden rounded-xl"
-                onSwipeHorizontal={() => {
-                    props.closeDialog()
-                }}
-            >
+            <DraggableList length={replays.entries.length} className="overflow-hidden rounded-xl">
                 {index => <LeaderboardEntry entry={replays.entries[index]} key={index} />}
             </DraggableList>
         </LeaderboardContainer>

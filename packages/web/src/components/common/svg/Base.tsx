@@ -1,4 +1,4 @@
-export function newSvgFrom(children: JSX.Element) {
+export function newSvgFrom(children: JSX.Element, size: number = 16) {
     function Svg(props: { className?: string; width: string; height: string; fill?: string }) {
         return (
             <svg
@@ -7,7 +7,7 @@ export function newSvgFrom(children: JSX.Element) {
                 height={props.height}
                 fill={props.fill || "currentColor"}
                 className={props.className}
-                viewBox="0 0 16 16"
+                viewBox={`0 0 ${size} ${size}`}
             >
                 {children}
             </svg>

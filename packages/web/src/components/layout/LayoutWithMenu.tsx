@@ -7,7 +7,7 @@ export function LayoutWithMenu() {
 
     return (
         <div
-            className={`bg-base-300 flex h-screen w-screen touch-none select-none flex-col overflow-clip ${mobileClass}`}
+            className={`bg-base-300 flex h-dvh w-dvw touch-none select-none flex-col overflow-clip ${mobileClass}`}
         >
             <Navbar />
             <Layout />

@@ -1,13 +1,11 @@
-import { useResize, useSpring } from "@react-spring/web"
-import { useDrag } from "@use-gesture/react"
-import { useMemo, useRef } from "react"
+import { useMemo } from "react"
 import {
     WorldInfo,
     WorldInfoUnlocked,
     isWorldUnlocked,
 } from "../../../../shared/src/worker-api/world-info"
 import { trpc } from "../../common/trpc/trpc"
-import { DraggableList } from "./Gamemode"
+import { DraggableList } from "../../components/common/DraggableList"
 import { World } from "./World"
 
 export function WorldSelection(props: { onSelected: (world: WorldInfoUnlocked) => void }) {
@@ -40,99 +38,6 @@ function SelectInRow(props: {
         }
         return pairs
     }, [props.worlds])
-
-    const elementRef = useRef<HTMLDivElement>(null)
-    const parentRef = useRef<HTMLDivElement>(null)
-
-    const oldElementIndex = useRef(0)
-    const newElementIndex = useRef(0)
-
-    function clampElementIndex(index: number) {
-        return Math.max(0, Math.min(pairsOfTwo.length - 1, index))
-    }
-
-    const { height: elementHeight } = useResize({
-        container: elementRef,
-    })
-
-    const { height: parentHeight } = useResize({
-        container: parentRef,
-    })
-
-    const [springs, api] = useSpring(() => ({
-        y: 0,
-        config: {
-            tension: 210,
-            friction: 20,
-        },
-    }))
-
-    const binds = useDrag(
-        ({ event, active, movement: [, my], swipe: [, swipeY], velocity: [, vy] }) => {
-            event.preventDefault()
-
-            if (swipeY && oldElementIndex.current === newElementIndex.current) {
-                const t = newElementIndex.current + (swipeY < 0 ? 1 : -1)
-                newElementIndex.current = clampElementIndex(t)
-            }
-
-            if (active) {
-                newElementIndex.current = clampElementIndex(
-                    oldElementIndex.current - Math.round(my / elementHeight.get()),
-                )
-            } else {
-                oldElementIndex.current = newElementIndex.current
-            }
-
-            let ty = -oldElementIndex.current * elementHeight.get()
-
-            if (oldElementIndex.current === pairsOfTwo.length - 1) {
-                ty += parentHeight.get() - elementHeight.get()
-                ty = Math.min(ty, 0)
-            }
-
-            if (active) {
-                api.start({
-                    y: ty + (active ? my : 0),
-                    /*
-                    immediate: active,
-                    */
-                    config: {
-                        velocity: vy,
-                    },
-                })
-            } else {
-                api.start({
-                    y: ty,
-                })
-            }
-        },
-        {
-            filterTaps: true,
-        },
-    )
-
-    /*
-    return (
-        <div ref={parentRef} className="relative h-full w-full touch-none select-none">
-            <div className="absolute inset-0 flex w-full justify-center">
-                <animated.div className="h-fit w-[60rem]" {...binds()} style={springs}>
-                    <div className="flex flex-col">
-                        {pairsOfTwo.map((pair, index) => (
-                            <div ref={elementRef} className="" key={index}>
-                                <WorldPair
-                                    world0={pair[0]}
-                                    world1={pair[1]}
-                                    onSelected={world => props.onSelected?.(world)}
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </animated.div>
-            </div>
-        </div>
-    )
-    */
 
     return (
         <DraggableList length={pairsOfTwo.length} className="h-full w-full">

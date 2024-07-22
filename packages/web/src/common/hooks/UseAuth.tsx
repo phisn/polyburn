@@ -44,9 +44,9 @@ export function useAuth(): [AuthState, AuthApi] {
                         },
                     })
                 } else {
-                    const me = await trpcNative.user.me.query()
-
                     useAppStore.getState().updateJwt(response.token)
+
+                    const me = await trpcNative.user.me.query()
                     useAppStore.getState().updateUser(me)
 
                     setLoading(false)

@@ -73,9 +73,6 @@ export function DraggableList(props: {
         }
 
         if (props.active === false) {
-            if (oldElementIndex.current !== newElementIndex.current) {
-                console.log("old", oldElementIndex.current, "new", newElementIndex.current)
-            }
             oldElementIndex.current = newElementIndex.current
         }
 
@@ -91,7 +88,7 @@ export function DraggableList(props: {
 
         // stop at element
         if (props.active) {
-            const moveDownTarget = moveDownBy - Math.sign(props.my) * props.vy * 50
+            const moveDownTarget = moveDownBy + Math.sign(props.my) * props.vy * 50
             const moveDownTargetBounded = applyScrollCap(moveDownTarget, 0)
 
             newElementIndex.current = clampElementIndex(

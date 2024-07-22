@@ -127,7 +127,7 @@ function LeaderboardEntryStats(props: {
                 </div>
             )}
 
-            {props.entry.deaths && (
+            {props.entry.deaths > 0 && (
                 <div className="flex items-center space-x-1">
                     <Skull width="12" height="12" className={props.iconClassName} />
                     <div className={props.textClassName}>{props.entry.deaths}</div>

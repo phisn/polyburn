@@ -111,7 +111,7 @@ function LeaderboardContainer(props: { children: React.ReactNode; className?: st
 }
 
 function LeaderboardEntryStats(props: {
-    entry?: WorldLeaderboardEntry
+    entry: WorldLeaderboardEntry
     iconClassName?: string
     textClassName?: string
 }) {
@@ -119,25 +119,25 @@ function LeaderboardEntryStats(props: {
         <div className="flex text-sm text-gray-400">
             <div className="flex w-24 items-center space-x-1">
                 <Clock width="12" height="12" className={props.iconClassName} />
-                <div className={props.textClassName}>{secondsToMMSS(props.entry?.ticks ?? 0)}</div>
+                <div className={props.textClassName}>{ticksToMMSS(props.entry.ticks)}</div>
             </div>
-            {props.entry?.deaths === 0 && (
+            {props.entry.deaths === 0 && (
                 <div className="flex items-center space-x-1">
                     <Star width="12" height="12" className={props.iconClassName} />
                 </div>
             )}
 
-            {(props.entry?.deaths ?? 0) > 0 && (
+            {props.entry.deaths && (
                 <div className="flex items-center space-x-1">
                     <Skull width="12" height="12" className={props.iconClassName} />
-                    <div className={props.textClassName}>{props.entry?.deaths}</div>
+                    <div className={props.textClassName}>{props.entry.deaths}</div>
                 </div>
             )}
         </div>
     )
 }
 
-function LeaderboardEntry(props: { entry?: WorldLeaderboardEntry }) {
+function LeaderboardEntry(props: { entry: WorldLeaderboardEntry }) {
     const placeColorings: Record<number, any> = {
         1: {
             place: "text-xl text-yellow-500",
@@ -159,7 +159,7 @@ function LeaderboardEntry(props: { entry?: WorldLeaderboardEntry }) {
         },
     }
 
-    const placeColoring = placeColorings[props.entry?.place ?? 0]
+    const placeColoring = placeColorings[props.entry.place ?? 0]
 
     return (
         <>
@@ -168,7 +168,7 @@ function LeaderboardEntry(props: { entry?: WorldLeaderboardEntry }) {
                     <div>{props.entry?.place}</div>
                 </div>
                 <div>
-                    <div className="text-lg">{props.entry?.username}</div>
+                    <div className="text-lg">{props.entry.username}</div>
                     <LeaderboardEntryStats
                         entry={props.entry}
                         iconClassName={placeColoring?.icon}
@@ -262,14 +262,14 @@ function ReplayStatsDisplay(props: { stats: ReplayStats; onSelected: () => void 
                 }
             >
                 <div>Your Record</div>
-                <div className="flex justify-center">
-                    {secondsToMMSS((props.stats.ticks * 16.66667) | 0)}
-                </div>
+                <div className="flex justify-center">{ticksToMMSS(props.stats.ticks)}</div>
                 <div className="flex justify-end">{props.stats.deaths} Deaths</div>
             </div>
         </div>
     )
 }
+
+export const ticksToMMSS = (ticks: number) => secondsToMMSS((ticks * 100) / 6)
 
 export const secondsToMMSS = (seconds: number) => {
     const HH = `${Math.floor(seconds / (1000 * 60))}`.padStart(2, "0")
@@ -302,64 +302,3 @@ function LockedOverlay() {
         </div>
     )
 }
-
-/*
-
-type Rank = "Diamond" | "Platinum" | "Gold" | "Silver" | "Bronze" | "Iron"
-
-export interface GamemodeStats {
-    name: string
-    rank?: GamemodeRankProps
-    locked?: boolean
-}
-
-interface GamemodeProps extends GamemodeStats {
-    onClick: () => void
-}
-
-interface GamemodeRankProps {
-    rank: Rank
-    time: string
-    position: number
-}
-
-function RankInfo(props: GamemodeRankProps) {
-    const colorMap = {
-        Diamond: {
-            color: "bg-cyan-400",
-            hover: "hover:bg-cyan-500",
-            click: "active:bg-cyan-600",
-        },
-        Platinum: { color: "bg-gray-200", hover: "", click: "" },
-        Gold: {
-            color: "bg-yellow-500",
-            hover: "hover:bg-yellow-600",
-            click: "active:bg-yellow-700",
-        },
-        Silver: { color: "bg-gray-300", hover: "", click: "" },
-        Bronze: { color: "bg-orange-500", hover: "", click: "" },
-        Iron: { color: "bg-gray-500", hover: "", click: "" },
-    }
-
-    const color = colorMap[props.rank ?? "Iron"].color
-    const colorHover = colorMap[props.rank ?? "Iron"].hover
-    const colorClick = colorMap[props.rank ?? "Iron"].click
-
-    return (
-        <div
-            // margin of one pixel to prevent the border shining through
-            className={`absolute inset-0 m-[1px] flex items-end rounded-2xl rounded-t-3xl hover:cursor-pointer ${color} ${colorHover} ${colorClick}`}
-        >
-            <div
-                className={
-                    "grid h-6 w-full grid-cols-3 items-center justify-between px-6 text-left text-sm text-black"
-                }
-            >
-                <div>{props.rank}</div>
-                <div className="flex justify-center">{props.time}</div>
-                <div className="flex justify-end"># {props.position}</div>
-            </div>
-        </div>
-    )
-}
-*/

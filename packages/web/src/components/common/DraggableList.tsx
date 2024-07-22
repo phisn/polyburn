@@ -17,10 +17,6 @@ export function DraggableList(props: {
 
     const elements = useMemo(() => Array.from({ length: props.length }), [props.length])
 
-    function clampElementIndex(index: number) {
-        return Math.max(0, Math.min(props.length - 1, index))
-    }
-
     const { height: elementHeight } = useResize({
         container: firstChildRef,
     })
@@ -32,6 +28,14 @@ export function DraggableList(props: {
     const { height: absoluteContainerHeight } = useResize({
         container: absoluteContainerRef,
     })
+
+    function clampElementIndex(index: number) {
+        const allowed = Math.floor(
+            (absoluteContainerHeight.get() - relativeContainerHeight.get()) / elementHeight.get(),
+        )
+
+        return Math.max(0, Math.min(allowed + 1, index))
+    }
 
     const [springs, api] = useSpring(() => ({
         y: 0,
@@ -89,10 +93,9 @@ export function DraggableList(props: {
         // stop at element
         if (props.active) {
             const moveDownTarget = moveDownBy + Math.sign(props.my) * props.vy * 50
-            const moveDownTargetBounded = applyScrollCap(moveDownTarget, 0)
 
             newElementIndex.current = clampElementIndex(
-                -Math.round(moveDownTargetBounded / elementHeight.get()),
+                -Math.round(moveDownTarget / elementHeight.get()),
             )
         }
 

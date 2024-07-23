@@ -4,6 +4,8 @@ main = "src/index.ts"
 compatibility_date = "2024-03-04"
 compatibility_flags = [ "nodejs_compat" ]
 
+tail_consumers = [{service = "polyburn-worker-tail"}]
+
 [dev]
 port = 3002
 

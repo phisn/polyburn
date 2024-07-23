@@ -36,14 +36,9 @@ export const middleware = t.middleware
 export const router = t.router
 
 export const logger = middleware(async opts => {
-    try {
-        // format date as HH:MM:SS
-        console.log(`Req ${new Date().toISOString()}: ${opts.path}`)
-        return await opts.next()
-    } catch (e) {
-        console.error(e)
-        throw e
-    }
+    // format date as HH:MM:SS
+    console.log(`Req ${new Date().toISOString()}: ${opts.path}`)
+    return await opts.next()
 })
 
 export const publicProcedure = t.procedure.use(logger)

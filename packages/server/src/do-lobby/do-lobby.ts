@@ -4,11 +4,11 @@ import { drizzle } from "drizzle-orm/d1"
 import { randomUUID } from "node:crypto"
 import {
     InitializeFromServer,
-    OtherUser,
     UpdateFromClient,
     UpdateFromServer,
     updateFromClient,
-} from "shared/src/websocket-api/lobby-api"
+} from "shared/src/lobby-api/lobby-api"
+import { UserOther } from "shared/src/lobby-api/user-other"
 import { Env } from "../worker/env"
 import { users } from "../worker/framework/db-schema"
 import { userFromAuthorizationHeader as userFromRequest } from "../worker/framework/helper/user-from-authorization-header"
@@ -22,7 +22,7 @@ interface WebsocketClientContext {
 }
 
 interface ConnectedUser {
-    user: OtherUser
+    user: UserOther
     connection: WebSocket
 }
 
@@ -30,8 +30,8 @@ class SingleLobby {
     private frameTracker: UserFrameTracker
     private currentlyPlaying: Map<string, ConnectedUser> = new Map()
 
-    private usersJoined: OtherUser[]
-    private userLeft: OtherUser[]
+    private usersJoined: UserOther[]
+    private userLeft: UserOther[]
 
     private interval: ReturnType<typeof setInterval>
 

@@ -4,12 +4,14 @@ main = "src/index.ts"
 compatibility_date = "2024-03-04"
 compatibility_flags = [ "nodejs_compat" ]
 
+tail_consumers = [{service = "polyburn-worker-tail"}]
+
 [dev]
 port = 3002
 
 [vars]
 CLIENT_URL = "https://new.rocketgame.app,https://rust-game.rocket-game.pages.dev,https://polyburn.com"
-API_URL="https://api.polyburn.com"
+API_URL = "https://api.polyburn.com"
 
 [[d1_databases]]
 migrations_dir = "drizzle"

@@ -1,3 +1,4 @@
+// temporarly dirty hack found on stackoverflow. Why does this library not have types??
 declare module "troika-three-text" {
     import type { Color, Material, MeshBasicMaterial, MeshStandardMaterial } from "three"
     import { Object3D } from "three"

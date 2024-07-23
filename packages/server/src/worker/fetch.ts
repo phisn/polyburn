@@ -53,6 +53,9 @@ export async function fetch(request: Request, env: Env): Promise<Response> {
         req: request,
         router: appRouter,
         createContext: createContext(env),
+        onError: ({ error }) => {
+            console.error(error)
+        },
     })
 
     Object.entries(headers).forEach(([key, value]) => {

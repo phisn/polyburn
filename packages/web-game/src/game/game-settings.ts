@@ -1,5 +1,5 @@
 import { WorldModel } from "runtime/proto/world"
-import { OtherUser } from "shared/src/websocket-api/lobby-api"
+import { UserOther } from "../../../shared/src/lobby-api/user-other"
 import { ExtendedRuntime } from "./runtime-extension/new-extended-runtime"
 
 export interface ReplayModel {}
@@ -7,8 +7,8 @@ export interface ReplayModel {}
 export interface GameHooks {
     onFinished: undefined | ((runtime: ExtendedRuntime) => void)
 
-    onUserJoined: undefined | ((username: OtherUser) => void)
-    onUserLeft: undefined | ((username: OtherUser) => void)
+    onUserJoined: undefined | ((username: UserOther) => void)
+    onUserLeft: undefined | ((username: UserOther) => void)
 
     onConnected: undefined | ((userCount: number) => void)
     onDisconnected: undefined | (() => void)

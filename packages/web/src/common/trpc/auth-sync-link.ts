@@ -1,7 +1,7 @@
 import { TRPCLink } from "@trpc/client"
 import { observable } from "@trpc/server/observable"
 import { AppRouter } from "../../../../server/src/worker/framework/trpc-router"
-import { useAppStore } from "../storage/app-store"
+import { useAppStore } from "../store/app-store"
 
 // link to synchronize authentication status with the server. If requests fails with
 // a 401 status code, the user will be logged out.

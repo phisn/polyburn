@@ -58,6 +58,10 @@ export class Touch {
 
             switch (event.type) {
                 case "touchstart":
+                    if (window.innerWidth <= window.innerHeight) {
+                        break
+                    }
+
                     console.log(
                         "start with id " + touch.identifier,
                         " and tpid " + this.thrustPointerId,

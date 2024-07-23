@@ -1,7 +1,7 @@
-import { WorldIdentifier } from "shared/src/world-identifier"
+import { WorldId } from "shared/src/worker-api/world-id"
 
 export interface World {
-    id: WorldIdentifier
+    id: WorldId
     model: string
     gamemodes: string[]
 }

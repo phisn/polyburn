@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server"
 import { and, eq } from "drizzle-orm"
 import { Buffer } from "node:buffer"
+import { WorldLeaderboard } from "shared/src/worker-api/world-leaderboard"
 import { z } from "zod"
 import { leaderboard, users } from "../../framework/db-schema"
 import { publicProcedure, router } from "../../framework/trpc"
@@ -81,15 +82,19 @@ export const leaderboardRouter = router({
                     ),
                 )
                 .orderBy(leaderboard.ticks)
-                .limit(10)
+                .limit(50)
                 .execute()
 
-            return replays.map(replay => ({
-                leaderboardId: replay.leaderboard.id,
-                username: replay.users.username,
-                deaths: replay.leaderboard.deaths,
-                ticks: replay.leaderboard.ticks,
-                model: Buffer.from(replay.leaderboard.model).toString("base64"),
-            }))
+            const response: WorldLeaderboard = {
+                entries: replays.map((replay, i) => ({
+                    leaderboardId: replay.leaderboard.id,
+                    place: i + 1,
+                    deaths: replay.leaderboard.deaths,
+                    ticks: replay.leaderboard.ticks,
+                    username: replay.users.username,
+                })),
+            }
+
+            return response
         }),
 })

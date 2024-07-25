@@ -1,8 +1,24 @@
-export type EntityWith<Components extends object, C extends keyof Components> = Pick<
-    Components,
-    C
-> &
-    Partial<Components>
+export interface Entity<Type, Components extends Type> {
+    get id(): number
+
+    get<K extends keyof Type>(component: K): Type[K]
+
+    set<K extends keyof Components>(
+        component: K,
+        value: Components[K],
+    ): Entity<Pick<Components, K> & Type, Components>
+
+    has<K extends keyof Components>(
+        component: K,
+    ): this is Entity<Pick<Components, K> & Type, Components>
+
+    delete<K extends keyof Components>(component: K): Entity<Omit<Type, K>, Components>
+}
+
+export type EntityWith<Components extends object, C extends keyof Components> = Entity<
+    Pick<Components, C>,
+    Components
+>
 
 const ModifierNot = "not-"
 
@@ -18,12 +34,13 @@ type FilterModifier<
 > = C extends keyof Components ? C : never
 
 export interface EntityChange<Components extends object, C extends keyof Components> {
-    added: Iterable<EntityWith<Components, C>>
-    removed: Iterable<EntityWith<Components, C>>
+    added: EntityWith<Components, C>[]
+    removed: EntityWith<Components, C>[]
 }
 
 export interface EntityStore<Components extends object> {
     create<K extends keyof Components>(components: Pick<Components, K>): EntityWith<Components, K>
+
     remove<K extends keyof Components>(entity: EntityWith<Components, K>): void
 
     single<C extends ComponentsWithModifier<Components>[]>(
@@ -32,18 +49,11 @@ export interface EntityStore<Components extends object> {
 
     multiple<C extends ComponentsWithModifier<Components>[]>(
         ...components: C
-    ): Iterable<EntityWith<Components, FilterModifier<C[number], Components>>>
+    ): readonly EntityWith<Components, FilterModifier<C[number], Components>>[]
 
     changing<K extends ComponentsWithModifier<Components>[]>(
         ...components: K
     ): () => EntityChange<Components, FilterModifier<K[number], Components>>
-}
-
-const s: ReadonlySet<number> = new Set<number>()
-const k: Iterable<number> = s
-
-for (const x of k) {
-    console.log(x)
 }
 
 class WeakList<T extends WeakKey> {
@@ -82,13 +92,14 @@ class WeakList<T extends WeakKey> {
 }
 
 export function newEntityStore<Components extends object>(): EntityStore<Components> {
-    const forbiddenKeys = ["__id", "__key", "__archeType", "__internal", "__entity", ModifierNot]
-
     function componentsToKey(components: string[]) {
         return components.sort().join(",")
     }
 
-    function requirementsSatisfyComponents(requirements: string[], components: string[]) {
+    function requirementsSatisfyComponents(
+        requirements: readonly string[],
+        components: readonly string[],
+    ) {
         for (const requirement of requirements) {
             if (requirement.startsWith(ModifierNot)) {
                 const forbidden = requirement.slice(ModifierNot.length)
@@ -108,10 +119,10 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         return true
     }
 
-    function populateArcheTypeList(archeType: EntityArcheType, list: EntityList) {
-        archeType.lists.push(list)
+    function populateArcheTypeList(archeType: EntityArcheType, entityList: EntityList) {
+        archeType.multipleInstances.push(entityList)
 
-        for (const requirement of list.requirements) {
+        for (const requirement of entityList.requirements) {
             let componentToList = archeType.componentToLists.get(requirement)
 
             if (componentToList === undefined) {
@@ -119,7 +130,7 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
                 archeType.componentToLists.set(requirement, componentToList)
             }
 
-            componentToList.push(list)
+            componentToList.push(entityList)
         }
     }
 
@@ -152,11 +163,11 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
                 componentToLists: new Map(),
                 componentToChangeListeners: new Map(),
 
-                lists: [],
+                multipleInstances: [],
                 changeListeners: new WeakList(),
             }
 
-            const lists = [...keyToEntityList.values()].filter(x =>
+            const lists = [...keyToMultipleInstance.values()].filter(x =>
                 requirementsSatisfyComponents(x.requirements, components),
             )
 
@@ -178,73 +189,156 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
 
     // signals that a property changed from existing to not existing or vice versa
     function entityPropertyChanged(entity: EntityInternal, from: string, to: string) {
-        const toRemove = entity.__archeType.componentToLists.get(from)
+        const toRemove = entity.archeType.componentToLists.get(from)
 
         if (toRemove) {
             for (const list of toRemove) {
-                list.entities.delete(entity.__id)
+                list.remove(entity)
             }
         }
 
-        const notifyRemove = entity.__archeType.componentToChangeListeners.get(from)
+        const notifyRemove = entity.archeType.componentToChangeListeners.get(from)
 
         if (notifyRemove) {
             for (const listener of notifyRemove.values()) {
-                if (listener.added.has(entity.__id)) {
-                    listener.added.delete(entity.__id)
-                } else {
-                    listener.removed.set(entity.__id, { ...entity })
-                }
+                listener.notifyRemoved(entity)
             }
         }
 
-        entity.__archeType.entities.delete(entity.__id)
+        entity.archeType.entities.delete(entity.id)
 
-        const key = componentsToKey(Object.getOwnPropertyNames(entity))
+        entity.key = componentsToKey(Object.getOwnPropertyNames(entity.components))
 
-        entity.__key = key
-        entity.__archeType = emplaceEntityArcheType(key, Object.getOwnPropertyNames(entity))
-        entity.__archeType.entities.set(entity.__id, entity)
+        entity.archeType = emplaceEntityArcheType(
+            entity.key,
+            Object.getOwnPropertyNames(entity.components),
+        )
 
-        const toAdd = entity.__archeType.componentToLists.get(to)
+        entity.archeType.entities.set(entity.id, entity)
+
+        const toAdd = entity.archeType.componentToLists.get(to)
 
         if (toAdd) {
             for (const list of toAdd) {
-                list.entities.set(entity.__id, entity)
+                list.push(entity)
             }
         }
 
-        const notifyAdd = entity.__archeType.componentToChangeListeners.get(to)
+        const notifyAdd = entity.archeType.componentToChangeListeners.get(to)
 
         if (notifyAdd) {
             for (const listener of notifyAdd.values()) {
-                if (listener.removed.has(entity.__id)) {
-                    listener.removed.delete(entity.__id)
-                } else {
-                    listener.added.set(entity.__id, entity)
-                }
+                listener.notifyAdded(entity)
             }
         }
     }
 
-    type EntityInternal = {
-        __internal: EntityInternal
-        __entity: EntityInternal
-        __id: number
-        __key: string
-        __archeType: EntityArcheType
-    } & Record<string, any>
+    interface EntityInternal {
+        id: number
+        key: string
 
-    interface EntityList {
-        entities: Map<number, EntityInternal>
-        requirements: string[]
+        components: Record<string, unknown>
+        archeType: EntityArcheType
+
+        facade: Entity<any, Components>
     }
 
-    interface ChangeListener {
-        requirements: string[]
+    class EntityList {
+        private _entities: Entity<any, Components>[]
+        private _entityToIndex: Map<number, number>
+        private _requirements: string[]
 
-        added: Map<number, EntityInternal>
-        removed: Map<number, EntityInternal>
+        constructor(requirements: string[]) {
+            this._requirements = requirements
+            this._entities = []
+            this._entityToIndex = new Map()
+        }
+
+        get entities(): readonly Entity<any, Components>[] {
+            return this._entities
+        }
+
+        get requirements(): readonly string[] {
+            return this._requirements
+        }
+
+        push(entity: EntityInternal) {
+            this._entities.push(entity.facade)
+            this._entityToIndex.set(entity.id, this._entities.length - 1)
+        }
+
+        remove(entity: EntityInternal) {
+            const index = this._entityToIndex.get(entity.id)
+
+            if (index === undefined) {
+                throw new Error("Entity not found in list")
+            }
+
+            const last = this._entities.pop()!
+
+            if (index !== this._entities.length) {
+                this._entities[index] = last
+                this._entityToIndex.set(last.id, index)
+            }
+
+            this._entityToIndex.delete(entity.id)
+        }
+
+        has(entity: EntityInternal) {
+            return this._entityToIndex.has(entity.id)
+        }
+
+        pop() {
+            const temp = this._entities
+            this._entities = []
+            this._entityToIndex.clear()
+            return temp
+        }
+    }
+
+    class ChangeListener {
+        private _added: EntityList
+        private _removed: EntityList
+
+        constructor(requirements: string[]) {
+            this._added = new EntityList(requirements)
+            this._removed = new EntityList(requirements)
+        }
+
+        get added() {
+            return this._added.entities
+        }
+
+        get removed() {
+            return this._removed.entities
+        }
+
+        get requirements() {
+            return this._added.requirements
+        }
+
+        notifyAdded(entity: EntityInternal) {
+            if (this._removed.has(entity)) {
+                this._removed.remove(entity)
+            } else {
+                this._added.push(entity)
+            }
+        }
+
+        notifyRemoved(entity: EntityInternal) {
+            if (this._added.has(entity)) {
+                this._added.remove(entity)
+            } else {
+                this._removed.push(entity)
+            }
+        }
+
+        pop() {
+            return {
+                added: this._added.pop(),
+                removed: this._removed.pop(),
+            }
+        }
     }
 
     interface EntityArcheType {
@@ -254,114 +348,126 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         componentToLists: Map<string, EntityList[]>
         componentToChangeListeners: Map<string, WeakList<ChangeListener>>
 
-        lists: EntityList[]
+        multipleInstances: EntityList[]
         changeListeners: WeakList<ChangeListener>
     }
 
     let nextEntityId = 0
+    const entities = new Map<number, EntityInternal>()
 
     const entityArcheTypes = new Map<string, EntityArcheType>()
     const entityChangeListeners = new WeakList<ChangeListener>()
 
-    const keyToEntityList = new Map<string, EntityList>()
+    const keyToMultipleInstance = new Map<string, EntityList>()
     const keyToSingle = new Map<string, any>()
 
-    const entityProxyHandler: ProxyHandler<EntityInternal> = {
-        set(target, p: string, newValue, receiver) {
-            const exists = Reflect.has(target, p)
-            const result = Reflect.set(target, p, newValue, receiver)
-
-            if (exists) {
-                return result
-            }
-
-            entityPropertyChanged(target, ModifierNot + p, p)
-
-            return result
-        },
-        deleteProperty(target, p: string) {
-            const result = Reflect.deleteProperty(target, p)
-
-            if (result === false) {
-                return false
-            }
-
-            entityPropertyChanged(target, p, ModifierNot + p)
-
-            return result
-        },
-    }
-
-    function create<K extends keyof Components>(base: any): EntityWith<Components, K> {
+    function create<K extends keyof Components>(base: unknown): EntityWith<Components, K> {
         const components = Object.getOwnPropertyNames(base)
         const key = componentsToKey(components)
 
-        if (components.some(x => forbiddenKeys.includes(x))) {
-            throw new Error("Invalid component name")
+        const entity: EntityInternal = {
+            id: nextEntityId++,
+            key,
+
+            components: base as any,
+            archeType: emplaceEntityArcheType(key, components),
+
+            facade: {
+                get id() {
+                    return entity.id
+                },
+                get(component: string) {
+                    if (component in entity.components === false) {
+                        throw new Error("Component not found")
+                    }
+
+                    return entity.components[component]
+                },
+                set(component: string, value: any) {
+                    const exists = component in entity.components
+                    entity.components[component] = value
+
+                    if (exists === false) {
+                        entityPropertyChanged(entity, ModifierNot + component, component)
+                    }
+
+                    return entity.facade
+                },
+                has(component: string) {
+                    return component in entity.components
+                },
+                delete(component: string) {
+                    const result = delete entity.components[component]
+
+                    if (result) {
+                        entityPropertyChanged(entity, component, ModifierNot + component)
+                    }
+
+                    return result
+                },
+
+                // very ugly that we have to cast here. but has method
+                // wont work without it and complexity is manageable
+            } as any,
         }
 
-        base.__internal = base
-        base.__id = nextEntityId++
-        base.__key = key
-        base.__archeType = emplaceEntityArcheType(key, components)
-
-        const entity: EntityInternal = new Proxy(base, entityProxyHandler)
-
-        base.__entity = entity
-
-        for (const list of entity.__archeType.lists) {
-            list.entities.set(entity.__id, entity)
+        for (const list of entity.archeType.multipleInstances) {
+            list.push(entity)
         }
 
-        for (const changeListener of entity.__archeType.changeListeners.values()) {
-            changeListener.added.set(entity.__id, entity)
+        for (const changeListener of entity.archeType.changeListeners.values()) {
+            changeListener.notifyAdded(entity)
         }
 
-        base.__archeType.entities.add(entity)
+        entity.archeType.entities.set(entity.id, entity)
+        entities.set(entity.id, entity)
 
-        return entity as EntityWith<Components, K>
+        return entity.facade
     }
 
-    function remove(entityToResolve: any): void {
-        const entity = entityToResolve as EntityInternal
+    function remove(entity: Entity<any, Components>): void {
+        const internalEntity = entities.get(entity.id)
 
-        for (const list of entity.__archeType.lists) {
-            list.entities.delete(entity.__id)
+        if (internalEntity === undefined) {
+            throw new Error("Entity not found")
         }
 
-        for (const changeListener of entity.__archeType.changeListeners.values()) {
-            changeListener.removed.set(entity.__id, entity)
+        for (const list of internalEntity.archeType.multipleInstances) {
+            list.remove(internalEntity)
         }
 
-        entity.__archeType.entities.delete(entity.__id)
+        for (const changeListener of internalEntity.archeType.changeListeners.values()) {
+            changeListener.notifyRemoved(internalEntity)
+        }
+
+        internalEntity.archeType.entities.delete(internalEntity.id)
+        entities.delete(internalEntity.id)
     }
 
     function multiple<C extends ComponentsWithModifier<Components>[]>(
         ...requirements: string[]
-    ): Iterable<EntityWith<Components, FilterModifier<C[number], Components>>> {
+    ): readonly EntityWith<Components, FilterModifier<C[number], Components>>[] {
         const key = componentsToKey(requirements)
-        const list = keyToEntityList.get(key)
+        const multipleInstance = keyToMultipleInstance.get(key)
 
-        if (list) {
-            return list.entities as any
+        if (multipleInstance) {
+            return multipleInstance.entities
         }
 
-        const entities = new Map<number, EntityInternal>()
-        const newList: EntityList = { entities, requirements }
-
-        keyToEntityList.set(key, newList)
+        const newEntityList = new EntityList(requirements)
+        keyToMultipleInstance.set(key, newEntityList)
 
         for (const archeType of entityArcheTypes.values()) {
             if (requirementsSatisfyComponents(requirements, archeType.components)) {
-                for (const [id, entity] of archeType.entities) {
-                    entities.set(id, entity)
+                for (const [, entity] of archeType.entities) {
+                    newEntityList.push(entity)
                 }
 
-                populateArcheTypeList(archeType, newList)
+                populateArcheTypeList(archeType, newEntityList)
             }
         }
 
-        return entities.values() as Iterable<EntityWith<Components, any>>
+        return newEntityList.entities
     }
 
     function single<C extends ComponentsWithModifier<Components>[]>(
@@ -375,34 +481,45 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         }
 
         multiple<C>(...requirements)
-        const list = keyToEntityList.get(key)!
+        const list = keyToMultipleInstance.get(key)!
 
         function ensureSingleEntity() {
-            if (list.entities.size === 0) {
+            if (list.entities.length === 0) {
                 throw new Error(
                     `Single entity with components "${requirements.join(", ")}" does not exist`,
                 )
             }
 
-            if (list.entities.size > 1) {
+            if (list.entities.length > 1) {
                 throw new Error(
                     `Single entity with components "${requirements.join(", ")}" is not unique`,
                 )
             }
 
-            const [[, x]] = list.entities
+            const [x] = list.entities
             return x
         }
 
-        const newSingle = new Proxy(
-            {},
-            {
-                get: (_, prop: string) => ensureSingleEntity()[prop],
-                set: (_, prop: string, value) => (ensureSingleEntity()[prop] = value),
-                deleteProperty: (_, prop: string) => delete ensureSingleEntity()[prop],
-                ownKeys: () => Reflect.ownKeys(ensureSingleEntity()),
+        const newSingle: Entity<any, Components> = {
+            get id() {
+                return ensureSingleEntity().id
             },
-        )
+            get(component: string) {
+                return ensureSingleEntity().get(component)
+            },
+            set(component: string, value: any) {
+                return ensureSingleEntity().set(component as any, value)
+            },
+            has(component: string) {
+                return ensureSingleEntity().has(component as any)
+            },
+            delete(component: string) {
+                return ensureSingleEntity().delete(component as any)
+            },
+
+            // very ugly that we have to cast here. but has method
+            // wont work without it and complexity is manageable
+        } as any
 
         keyToSingle.set(key, newSingle)
 
@@ -412,16 +529,12 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
     function changing<K extends ComponentsWithModifier<Components>[]>(
         ...requirements: string[]
     ): () => EntityChange<Components, FilterModifier<K[number], Components>> {
-        const changeListener: ChangeListener = {
-            requirements,
-            added: new Map(),
-            removed: new Map(),
-        }
+        const changeListener: ChangeListener = new ChangeListener(requirements)
 
         for (const archeType of entityArcheTypes.values()) {
             if (requirementsSatisfyComponents(requirements, archeType.components)) {
-                for (const [id, entity] of archeType.entities) {
-                    changeListener.added.set(id, entity)
+                for (const [, entity] of archeType.entities) {
+                    changeListener.notifyAdded(entity)
                 }
 
                 populateArcheTypeChangeListener(archeType, changeListener)
@@ -430,20 +543,7 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
 
         entityChangeListeners.push(changeListener)
 
-        return () => {
-            const added = changeListener.added.values() as IterableIterator<
-                EntityWith<Components, any>
-            >
-
-            const removed = changeListener.removed.values() as IterableIterator<
-                EntityWith<Components, any>
-            >
-
-            changeListener.added = new Map()
-            changeListener.removed = new Map()
-
-            return { added, removed }
-        }
+        return () => changeListener.pop()
     }
 
     return {

@@ -41,19 +41,33 @@ export interface EntityChange<Components extends object, C extends keyof Compone
 export interface EntityStore<Components extends object> {
     create<K extends keyof Components>(components: Pick<Components, K>): EntityWith<Components, K>
 
-    remove<K extends keyof Components>(entity: EntityWith<Components, K>): void
+    remove<K extends keyof Components>(entity: number | EntityWith<Components, K>): void
 
-    single<C extends ComponentsWithModifier<Components>[]>(
-        ...components: C
-    ): EntityWith<Components, FilterModifier<C[number], Components>>
+    listen<K extends ComponentsWithModifier<Components>[]>(
+        requirements: [...K],
+        notifyAdded: (
+            entity: EntityWith<Components, FilterModifier<K[number], Components>>,
+        ) => void,
+        notifyRemoved: (
+            entity: EntityWith<Components, FilterModifier<K[number], Components>>,
+        ) => void,
+    ): () => void
 
-    multiple<C extends ComponentsWithModifier<Components>[]>(
-        ...components: C
-    ): readonly EntityWith<Components, FilterModifier<C[number], Components>>[]
+    multiple<K extends ComponentsWithModifier<Components>[]>(
+        ...requirements: K
+    ): readonly EntityWith<Components, FilterModifier<K[number], Components>>[]
+
+    single<K extends ComponentsWithModifier<Components>[]>(
+        ...requirements: K
+    ): EntityWith<Components, FilterModifier<K[number], Components>>
 
     changing<K extends ComponentsWithModifier<Components>[]>(
-        ...components: K
+        ...requirements: K
     ): () => EntityChange<Components, FilterModifier<K[number], Components>>
+}
+
+export interface EntityStoreScoped<Components extends object> extends EntityStore<Components> {
+    clear(): void
 }
 
 class WeakList<T extends WeakKey> {
@@ -237,7 +251,7 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         id: number
         key: string
 
-        components: Record<string, unknown>
+        components: Record<string, any>
         archeType: EntityArcheType
 
         facade: Entity<any, Components>
@@ -425,8 +439,10 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         return entity.facade
     }
 
-    function remove(entity: Entity<any, Components>): void {
-        const internalEntity = entities.get(entity.id)
+    function remove(entity: number | Entity<any, Components>): void {
+        entity = typeof entity === "object" ? entity.id : entity
+
+        const internalEntity = entities.get(entity)
 
         if (internalEntity === undefined) {
             throw new Error("Entity not found")
@@ -554,3 +570,11 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         changing: changing as any,
     }
 }
+
+class B {}
+
+function t() {
+    return B
+}
+
+class A extends t() {}

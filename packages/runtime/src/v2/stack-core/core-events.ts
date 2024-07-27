@@ -3,8 +3,6 @@ export interface CoreInput {
     thrust: boolean
 }
 
-export interface OnUpdateCoreEvent {
-    onCoreUpdate(input: CoreInput): void
+export interface CoreEvents {
+    onUpdate(input: CoreInput): void
 }
-
-export type CoreEvents = OnUpdateCoreEvent

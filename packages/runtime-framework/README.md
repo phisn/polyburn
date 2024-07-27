@@ -1,10 +1,3 @@
-# Design Document
+# DD
 
-The runtime framework is meant to be an hierachical app framework for games. The target is deterministic, this influences the way the framework creates and disposes resources since the world has to be rebuild from scratch every reset.
-
-## Entities
-
-Access patterns:
-
--   Access to components on entities
--
+Our framework is a list of entities where each entity has a list components. There are no systems, there are no events. The entity store can be easily extended using plugins. If you want to have an onUpdate method, you can create a component and iterate over all entities with this component. If you want an onCollision, you will do the same.

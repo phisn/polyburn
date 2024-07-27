@@ -1,7 +1,7 @@
 import RAPIER from "@dimforge/rapier2d"
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
-import { EntityStore, System, SystemStack } from "runtime-framework"
+import { EntityStore, System } from "runtime-framework"
 import { EntityType } from "../../../../../proto/world"
 import { changeAnchor } from "../../../../model/world/change-anchor"
 import { entityRegistry } from "../../../../model/world/entity-registry"
@@ -17,12 +17,12 @@ export class RapierStepSystem implements System<CoreEvents> {
     private ray: RAPIER.Ray | undefined
     private rayDirection: RAPIER.Vector | undefined
 
-    constructor(entities: EntityStore<CoreComponents>, _systems: SystemStack<CoreEvents>) {
+    constructor(entities: EntityStore<CoreComponents>) {
         this.rocketEntity = entities.single(...RocketComponents)
         this.worldEntity = entities.single(...WorldComponents)
     }
 
-    onCoreUpdate(input: CoreInput) {
+    onUpdate(input: CoreInput) {
         this.rocketEntity.rocket.thrusting = input.thrust
 
         if (input.thrust === false) {

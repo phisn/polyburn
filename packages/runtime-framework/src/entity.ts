@@ -38,6 +38,10 @@ export interface EntityChange<Components extends object, C extends keyof Compone
     removed: EntityWith<Components, C>[]
 }
 
+type Listener<K extends ComponentsWithModifier<Components>[], Components extends object> = (
+    entity: EntityWith<Components, FilterModifier<K[number], Components>>,
+) => void
+
 export interface EntityStore<Components extends object> {
     create<K extends keyof Components>(components: Pick<Components, K>): EntityWith<Components, K>
 
@@ -45,12 +49,8 @@ export interface EntityStore<Components extends object> {
 
     listen<K extends ComponentsWithModifier<Components>[]>(
         requirements: [...K],
-        notifyAdded: (
-            entity: EntityWith<Components, FilterModifier<K[number], Components>>,
-        ) => void,
-        notifyRemoved: (
-            entity: EntityWith<Components, FilterModifier<K[number], Components>>,
-        ) => void,
+        notifyAdded: Listener<K, Components>,
+        notifyRemoved: Listener<K, Components>,
     ): () => void
 
     multiple<K extends ComponentsWithModifier<Components>[]>(
@@ -70,38 +70,28 @@ export interface EntityStoreScoped<Components extends object> extends EntityStor
     clear(): void
 }
 
-class WeakList<T extends WeakKey> {
-    private list: WeakRef<T>[] = []
+class WeakLookup<K, T extends WeakKey> {
+    private map = new Map<K, WeakRef<T>>()
     private inUse = false
 
-    push(value: T) {
-        this.list.push(new WeakRef(value))
+    set(key: K, value: any) {
+        this.map.set(key, new WeakRef(value))
     }
 
-    *values() {
-        if (this.inUse) {
-            throw new Error("WeakList is being used concurrently")
+    get(key: K) {
+        const value = this.map.get(key)
+
+        if (value === undefined) {
+            return undefined
         }
 
-        this.inUse = true
-        let dirty = false
+        const result = value.deref()
 
-        for (const item of this.list) {
-            const value = item.deref()
-
-            if (value === undefined) {
-                dirty = true
-                continue
-            }
-
-            yield value
+        if (result === undefined) {
+            this.map.delete(key)
         }
 
-        if (dirty) {
-            this.list = this.list.filter(x => x.deref() !== undefined)
-        }
-
-        this.inUse = false
+        return result
     }
 }
 
@@ -133,36 +123,18 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         return true
     }
 
-    function populateArcheTypeList(archeType: EntityArcheType, entityList: EntityList) {
-        archeType.multipleInstances.push(entityList)
+    function populateArcheTypeListener(archeType: EntityArcheType, listener: ListenerBatch) {
+        archeType.listenerBatches.push(listener)
 
-        for (const requirement of entityList.requirements) {
-            let componentToList = archeType.componentToLists.get(requirement)
+        for (const requirement of listener.requirements) {
+            let componentToListener = archeType.componentToListenerBatches.get(requirement)
 
-            if (componentToList === undefined) {
-                componentToList = []
-                archeType.componentToLists.set(requirement, componentToList)
+            if (componentToListener === undefined) {
+                componentToListener = []
+                archeType.componentToListenerBatches.set(requirement, componentToListener)
             }
 
-            componentToList.push(entityList)
-        }
-    }
-
-    function populateArcheTypeChangeListener(
-        archeType: EntityArcheType,
-        changeListener: ChangeListener,
-    ) {
-        archeType.changeListeners.push(changeListener)
-
-        for (const requirement of changeListener.requirements) {
-            let componentToChangeListener = archeType.componentToChangeListeners.get(requirement)
-
-            if (componentToChangeListener === undefined) {
-                componentToChangeListener = new WeakList()
-                archeType.componentToChangeListeners.set(requirement, componentToChangeListener)
-            }
-
-            componentToChangeListener.push(changeListener)
+            componentToListener.push(listener)
         }
     }
 
@@ -174,24 +146,13 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
                 components,
                 entities: new Map<number, EntityInternal>(),
 
-                componentToLists: new Map(),
-                componentToChangeListeners: new Map(),
-
-                multipleInstances: [],
-                changeListeners: new WeakList(),
+                componentToListenerBatches: new Map(),
+                listenerBatches: [],
             }
 
-            const lists = [...keyToMultipleInstance.values()].filter(x =>
-                requirementsSatisfyComponents(x.requirements, components),
-            )
-
-            for (const list of lists) {
-                populateArcheTypeList(archeType, list)
-            }
-
-            for (const changeListener of entityChangeListeners.values()) {
-                if (requirementsSatisfyComponents(changeListener.requirements, components)) {
-                    populateArcheTypeChangeListener(archeType, changeListener)
+            for (const [, listener] of listenerBatches) {
+                if (requirementsSatisfyComponents(listener.requirements, components)) {
+                    populateArcheTypeListener(archeType, listener)
                 }
             }
 
@@ -203,19 +164,11 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
 
     // signals that a property changed from existing to not existing or vice versa
     function entityPropertyChanged(entity: EntityInternal, from: string, to: string) {
-        const toRemove = entity.archeType.componentToLists.get(from)
+        const listenersToRemove = entity.archeType.componentToListenerBatches.get(from)
 
-        if (toRemove) {
-            for (const list of toRemove) {
-                list.remove(entity)
-            }
-        }
-
-        const notifyRemove = entity.archeType.componentToChangeListeners.get(from)
-
-        if (notifyRemove) {
-            for (const listener of notifyRemove.values()) {
-                listener.notifyRemoved(entity)
+        if (listenersToRemove) {
+            for (const listener of listenersToRemove) {
+                listener.notifyRemoved(entity.facade)
             }
         }
 
@@ -230,19 +183,11 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
 
         entity.archeType.entities.set(entity.id, entity)
 
-        const toAdd = entity.archeType.componentToLists.get(to)
+        const listenersToAdd = entity.archeType.componentToListenerBatches.get(to)
 
-        if (toAdd) {
-            for (const list of toAdd) {
-                list.push(entity)
-            }
-        }
-
-        const notifyAdd = entity.archeType.componentToChangeListeners.get(to)
-
-        if (notifyAdd) {
-            for (const listener of notifyAdd.values()) {
-                listener.notifyAdded(entity)
+        if (listenersToAdd) {
+            for (const listener of listenersToAdd) {
+                listener.notifyAdded(entity.facade)
             }
         }
     }
@@ -276,12 +221,12 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
             return this._requirements
         }
 
-        push(entity: EntityInternal) {
-            this._entities.push(entity.facade)
+        push(entity: Entity<any, Components>) {
+            this._entities.push(entity)
             this._entityToIndex.set(entity.id, this._entities.length - 1)
         }
 
-        remove(entity: EntityInternal) {
+        remove(entity: Entity<any, Components>) {
             const index = this._entityToIndex.get(entity.id)
 
             if (index === undefined) {
@@ -298,7 +243,7 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
             this._entityToIndex.delete(entity.id)
         }
 
-        has(entity: EntityInternal) {
+        has(entity: Entity<any, Components>) {
             return this._entityToIndex.has(entity.id)
         }
 
@@ -331,7 +276,7 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
             return this._added.requirements
         }
 
-        notifyAdded(entity: EntityInternal) {
+        notifyAdded(entity: Entity<any, Components>) {
             if (this._removed.has(entity)) {
                 this._removed.remove(entity)
             } else {
@@ -339,7 +284,7 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
             }
         }
 
-        notifyRemoved(entity: EntityInternal) {
+        notifyRemoved(entity: Entity<any, Components>) {
             if (this._added.has(entity)) {
                 this._added.remove(entity)
             } else {
@@ -355,25 +300,62 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         }
     }
 
+    class ListenerBatch {
+        private added: Map<symbol, Listener<ComponentsWithModifier<Components>[], Components>>
+        private removed: Map<symbol, Listener<ComponentsWithModifier<Components>[], Components>>
+
+        constructor(private _requirements: string[]) {
+            this.added = new Map()
+            this.removed = new Map()
+        }
+
+        get requirements(): readonly string[] {
+            return this._requirements
+        }
+
+        add(
+            notifyAdded: Listener<ComponentsWithModifier<Components>[], Components>,
+            notifyRemoved: Listener<ComponentsWithModifier<Components>[], Components>,
+        ): symbol {
+            const symbol = Symbol()
+
+            this.added.set(symbol, notifyAdded)
+            this.removed.set(symbol, notifyRemoved)
+
+            return symbol
+        }
+
+        remove(symbol: symbol) {
+            this.added.delete(symbol)
+            this.removed.delete(symbol)
+        }
+
+        notifyAdded(entity: Entity<any, Components>) {
+            for (const [, listener] of this.added) {
+                listener(entity)
+            }
+        }
+
+        notifyRemoved(entity: Entity<any, Components>) {
+            for (const [, listener] of this.removed) {
+                listener(entity)
+            }
+        }
+    }
+
     interface EntityArcheType {
         components: string[]
         entities: Map<number, EntityInternal>
 
-        componentToLists: Map<string, EntityList[]>
-        componentToChangeListeners: Map<string, WeakList<ChangeListener>>
-
-        multipleInstances: EntityList[]
-        changeListeners: WeakList<ChangeListener>
+        componentToListenerBatches: Map<string, ListenerBatch[]>
+        listenerBatches: ListenerBatch[]
     }
 
     let nextEntityId = 0
     const entities = new Map<number, EntityInternal>()
 
     const entityArcheTypes = new Map<string, EntityArcheType>()
-    const entityChangeListeners = new WeakList<ChangeListener>()
-
-    const keyToMultipleInstance = new Map<string, EntityList>()
-    const keyToSingle = new Map<string, any>()
+    const listenerBatches = new Map<string, ListenerBatch>()
 
     function create<K extends keyof Components>(base: unknown): EntityWith<Components, K> {
         const components = Object.getOwnPropertyNames(base)
@@ -425,12 +407,8 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
             } as any,
         }
 
-        for (const list of entity.archeType.multipleInstances) {
-            list.push(entity)
-        }
-
-        for (const changeListener of entity.archeType.changeListeners.values()) {
-            changeListener.notifyAdded(entity)
+        for (const listener of entity.archeType.listenerBatches) {
+            listener.notifyAdded(entity.facade)
         }
 
         entity.archeType.entities.set(entity.id, entity)
@@ -448,43 +426,89 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
             throw new Error("Entity not found")
         }
 
-        for (const list of internalEntity.archeType.multipleInstances) {
-            list.remove(internalEntity)
-        }
-
-        for (const changeListener of internalEntity.archeType.changeListeners.values()) {
-            changeListener.notifyRemoved(internalEntity)
+        for (const listener of internalEntity.archeType.listenerBatches) {
+            listener.notifyRemoved(internalEntity.facade)
         }
 
         internalEntity.archeType.entities.delete(internalEntity.id)
         entities.delete(internalEntity.id)
     }
 
-    function multiple<C extends ComponentsWithModifier<Components>[]>(
-        ...requirements: string[]
-    ): readonly EntityWith<Components, FilterModifier<C[number], Components>>[] {
+    function listen<K extends ComponentsWithModifier<Components>[]>(
+        requirements: string[],
+        notifyAdded: Listener<K, Components>,
+        notifyRemoved: Listener<K, Components>,
+    ): () => void {
         const key = componentsToKey(requirements)
-        const multipleInstance = keyToMultipleInstance.get(key)
+        const existing = listenerBatches.get(key)
 
-        if (multipleInstance) {
-            return multipleInstance.entities
+        if (existing) {
+            const symbol = existing.add(notifyAdded, notifyRemoved)
+            return () => void existing.remove(symbol)
         }
 
-        const newEntityList = new EntityList(requirements)
-        keyToMultipleInstance.set(key, newEntityList)
+        const newListener = new ListenerBatch(requirements)
+        listenerBatches.set(key, newListener)
+        const symbol = newListener.add(notifyAdded, notifyRemoved)
 
         for (const archeType of entityArcheTypes.values()) {
             if (requirementsSatisfyComponents(requirements, archeType.components)) {
                 for (const [, entity] of archeType.entities) {
-                    newEntityList.push(entity)
+                    newListener.notifyAdded(entity.facade)
                 }
 
-                populateArcheTypeList(archeType, newEntityList)
+                populateArcheTypeListener(archeType, newListener)
             }
         }
 
-        return newEntityList.entities
+        return () => void newListener.remove(symbol)
     }
+
+    const multiples = new WeakLookup<string, readonly Entity<any, Components>[]>()
+
+    function multiple<C extends ComponentsWithModifier<Components>[]>(
+        ...requirements: string[]
+    ): readonly EntityWith<Components, FilterModifier<C[number], Components>>[] {
+        const key = componentsToKey(requirements)
+        const existing = multiples.get(key)
+
+        if (existing) {
+            return existing
+        }
+
+        const entityList = new EntityList(requirements)
+        const entityListRef = new WeakRef(entityList)
+
+        const unlisten = listen(
+            requirements,
+            entity => {
+                const entityList = entityListRef.deref()
+
+                if (entityList === undefined) {
+                    unlisten()
+                    return
+                }
+
+                entityList.push(entity)
+            },
+            entity => {
+                const result = entityListRef.deref()
+
+                if (result === undefined) {
+                    unlisten()
+                    return
+                }
+
+                result.remove(entity)
+            },
+        )
+
+        multiples.set(key, entityList.entities)
+
+        return entityList.entities
+    }
+
+    const keyToSingle = new WeakLookup<string, any>()
 
     function single<C extends ComponentsWithModifier<Components>[]>(
         ...requirements: string[]
@@ -497,22 +521,22 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         }
 
         multiple<C>(...requirements)
-        const list = keyToMultipleInstance.get(key)!
+        const list = multiples.get(key)!
 
         function ensureSingleEntity() {
-            if (list.entities.length === 0) {
+            if (list.length === 0) {
                 throw new Error(
                     `Single entity with components "${requirements.join(", ")}" does not exist`,
                 )
             }
 
-            if (list.entities.length > 1) {
+            if (list.length > 1) {
                 throw new Error(
                     `Single entity with components "${requirements.join(", ")}" is not unique`,
                 )
             }
 
-            const [x] = list.entities
+            const [x] = list
             return x
         }
 
@@ -545,36 +569,40 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
     function changing<K extends ComponentsWithModifier<Components>[]>(
         ...requirements: string[]
     ): () => EntityChange<Components, FilterModifier<K[number], Components>> {
-        const changeListener: ChangeListener = new ChangeListener(requirements)
+        const changeListener = new ChangeListener(requirements)
 
-        for (const archeType of entityArcheTypes.values()) {
-            if (requirementsSatisfyComponents(requirements, archeType.components)) {
-                for (const [, entity] of archeType.entities) {
-                    changeListener.notifyAdded(entity)
+        const result = () => changeListener.pop()
+        const resultRef = new WeakRef(result)
+
+        const unlisten = listen(
+            requirements,
+            entity => {
+                if (resultRef.deref() === undefined) {
+                    unlisten()
+                    return
                 }
 
-                populateArcheTypeChangeListener(archeType, changeListener)
-            }
-        }
+                changeListener.notifyAdded(entity)
+            },
+            entity => {
+                if (resultRef.deref() === undefined) {
+                    unlisten()
+                    return
+                }
 
-        entityChangeListeners.push(changeListener)
+                changeListener.notifyRemoved(entity)
+            },
+        )
 
-        return () => changeListener.pop()
+        return result
     }
 
     return {
         create,
         remove,
+        listen: listen as any,
         multiple: multiple as any,
         single: single as any,
         changing: changing as any,
     }
 }
-
-class B {}
-
-function t() {
-    return B
-}
-
-class A extends t() {}

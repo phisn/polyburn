@@ -620,4 +620,319 @@ describe("EntityStore", () => {
         expect(changes22.added.length).toBe(0)
         expect(changes22.removed.length).toBe(1)
     })
+
+    it("should notify when entities are added that match the requirements", () => {
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position", "velocity"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        const entity1 = store.create({ position: { x: 0, y: 0 }, velocity: { dx: 1, dy: 1 } })
+        const _entity2 = store.create({ position: { x: 1, y: 1 } })
+        store.create({ health: { hp: 100 } })
+
+        expect(addedEntities.length).toBe(1)
+        expect(addedEntities[0]).toBe(entity1)
+        expect(removedEntities.length).toBe(0)
+
+        unlisten()
+    })
+
+    it("should notify when entities are removed that match the requirements", () => {
+        const entity1 = store.create({ position: { x: 0, y: 0 }, velocity: { dx: 1, dy: 1 } })
+        const _entity2 = store.create({ position: { x: 1, y: 1 }, velocity: { dx: 2, dy: 2 } })
+
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position", "velocity"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        store.remove(entity1)
+
+        expect(addedEntities.length).toBe(2)
+        expect(removedEntities.length).toBe(1)
+        expect(removedEntities[0]).toBe(entity1)
+
+        unlisten()
+    })
+
+    it("should notify when entities gain or lose components to match the requirements", () => {
+        const entity = store.create({ position: { x: 0, y: 0 } })
+
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position", "velocity"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        entity.set("velocity", { dx: 1, dy: 1 })
+
+        expect(addedEntities.length).toBe(1)
+        expect(addedEntities[0]).toBe(entity)
+
+        entity.delete("velocity")
+
+        expect(removedEntities.length).toBe(1)
+        expect(removedEntities[0]).toBe(entity)
+
+        unlisten()
+    })
+
+    it("should handle 'not' requirements correctly", () => {
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position", "not-velocity"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        const entity1 = store.create({ position: { x: 0, y: 0 } })
+        const _entity2 = store.create({ position: { x: 1, y: 1 }, velocity: { dx: 1, dy: 1 } })
+
+        expect(addedEntities.length).toBe(1)
+        expect(addedEntities[0]).toBe(entity1)
+
+        entity1.set("velocity", { dx: 2, dy: 2 })
+
+        expect(removedEntities.length).toBe(1)
+        expect(removedEntities[0]).toBe(entity1)
+
+        unlisten()
+    })
+
+    it("should stop notifying after unlisten is called", () => {
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        store.create({ position: { x: 0, y: 0 } })
+        expect(addedEntities.length).toBe(1)
+
+        unlisten()
+
+        store.create({ position: { x: 1, y: 1 } })
+        expect(addedEntities.length).toBe(1) // Should not have increased
+
+        const entity = store.create({ position: { x: 2, y: 2 } })
+        store.remove(entity)
+        expect(removedEntities.length).toBe(0) // Should not have increased
+    })
+
+    it("should handle multiple listeners on the same requirements", () => {
+        const added1: Entity<any, Components>[] = []
+        const added2: Entity<any, Components>[] = []
+        const removed1: Entity<any, Components>[] = []
+        const removed2: Entity<any, Components>[] = []
+
+        const unlisten1 = store.listen(
+            ["position"],
+            entity => added1.push(entity),
+            entity => removed1.push(entity),
+        )
+
+        const unlisten2 = store.listen(
+            ["position"],
+            entity => added2.push(entity),
+            entity => removed2.push(entity),
+        )
+
+        const entity = store.create({ position: { x: 0, y: 0 } })
+
+        expect(added1.length).toBe(1)
+        expect(added2.length).toBe(1)
+
+        store.remove(entity)
+
+        expect(removed1.length).toBe(1)
+        expect(removed2.length).toBe(1)
+
+        unlisten1()
+        unlisten2()
+    })
+
+    it("should notify for existing entities and new additions", () => {
+        const entity1 = store.create({ position: { x: 0, y: 0 }, velocity: { dx: 1, dy: 1 } })
+
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position", "velocity"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        expect(addedEntities.length).toBe(1) // Notified for existing entity
+        expect(addedEntities[0]).toBe(entity1)
+
+        const entity2 = store.create({ position: { x: 1, y: 1 }, velocity: { dx: 2, dy: 2 } })
+
+        expect(addedEntities.length).toBe(2)
+        expect(addedEntities[1]).toBe(entity2)
+
+        unlisten()
+    })
+
+    it("should notify when entities are removed that match the requirements", () => {
+        const entity1 = store.create({ position: { x: 0, y: 0 }, velocity: { dx: 1, dy: 1 } })
+        const _entity2 = store.create({ position: { x: 1, y: 1 }, velocity: { dx: 2, dy: 2 } })
+
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position", "velocity"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        addedEntities.length = 0 // Clear initial notifications
+
+        store.remove(entity1)
+
+        expect(addedEntities.length).toBe(0)
+        expect(removedEntities.length).toBe(1)
+        expect(removedEntities[0]).toBe(entity1)
+
+        unlisten()
+    })
+
+    it("should handle edge case of empty store", () => {
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position", "velocity"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        expect(addedEntities.length).toBe(0)
+        expect(removedEntities.length).toBe(0)
+
+        const entity = store.create({ position: { x: 0, y: 0 }, velocity: { dx: 1, dy: 1 } })
+
+        expect(addedEntities.length).toBe(1)
+        expect(addedEntities[0]).toBe(entity)
+
+        unlisten()
+    })
+
+    it("should handle entities that partially match requirements", () => {
+        store.create({ position: { x: 0, y: 0 } })
+
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position", "velocity"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        expect(addedEntities.length).toBe(0)
+
+        const entity = store.create({ position: { x: 1, y: 1 }, velocity: { dx: 1, dy: 1 } })
+
+        expect(addedEntities.length).toBe(1)
+        expect(addedEntities[0]).toBe(entity)
+
+        unlisten()
+    })
+
+    it("should handle component removal making entity match requirements", () => {
+        const entity = store.create({
+            position: { x: 0, y: 0 },
+            velocity: { dx: 1, dy: 1 },
+            health: { hp: 100 },
+        })
+
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position", "velocity", "not-health"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        expect(addedEntities.length).toBe(0)
+
+        entity.delete("health")
+
+        expect(addedEntities.length).toBe(1)
+        expect(addedEntities[0]).toBe(entity)
+
+        unlisten()
+    })
+
+    it("should handle component addition making entity no longer match requirements", () => {
+        const entity = store.create({ position: { x: 0, y: 0 }, velocity: { dx: 1, dy: 1 } })
+
+        const addedEntities: Entity<any, Components>[] = []
+        const removedEntities: Entity<any, Components>[] = []
+
+        const unlisten = store.listen(
+            ["position", "velocity", "not-health"],
+            entity => addedEntities.push(entity),
+            entity => removedEntities.push(entity),
+        )
+
+        expect(addedEntities.length).toBe(1)
+        addedEntities.length = 0 // Clear initial notification
+
+        entity.set("health", { hp: 100 })
+
+        expect(removedEntities.length).toBe(1)
+        expect(removedEntities[0]).toBe(entity)
+
+        unlisten()
+    })
+
+    it("should handle multiple listeners with different requirements", () => {
+        const entity = store.create({ position: { x: 0, y: 0 } })
+
+        const added1: Entity<any, Components>[] = []
+        const added2: Entity<any, Components>[] = []
+
+        const unlisten1 = store.listen(
+            ["position"],
+            entity => added1.push(entity),
+            () => {},
+        )
+        const unlisten2 = store.listen(
+            ["position", "velocity"],
+            entity => added2.push(entity),
+            () => {},
+        )
+
+        expect(added1.length).toBe(1)
+        expect(added2.length).toBe(0)
+
+        entity.set("velocity", { dx: 1, dy: 1 })
+
+        expect(added1.length).toBe(1)
+        expect(added2.length).toBe(1)
+
+        unlisten1()
+        unlisten2()
+    })
 })

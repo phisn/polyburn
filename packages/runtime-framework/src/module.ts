@@ -1,0 +1,384 @@
+export type Module<Type extends object = Record<string, never>> = Readonly<Type> & {
+    get id(): number
+}
+
+interface Listener<Behaviors extends object, K extends keyof Behaviors> {
+    notifyAdded(module: Module<Pick<Behaviors, K>>): void
+    notifyRemoved(module: Module<Pick<Behaviors, K>>): void
+}
+
+export interface ModuleStore<Behaviors extends object> {
+    register<K extends keyof Behaviors>(
+        behaviors: Pick<Behaviors, K>,
+        onDispose?: () => void,
+    ): Module<Pick<Behaviors, K>>
+
+    remove(id: number): void
+
+    listen<T extends (keyof Behaviors)[]>(
+        behaviors: [...T],
+        listener: Listener<Behaviors, T[number]>,
+    ): () => void
+}
+
+export interface ModuleLookup<Behaviors extends object> {
+    multiple<K extends (keyof Behaviors)[]>(
+        ...behaviors: K
+    ): readonly Module<Pick<Behaviors, K[number]>>[]
+
+    single<K extends (keyof Behaviors)[]>(behavior: K): () => Module<Pick<Behaviors, K[number]>>
+
+    changing<K extends (keyof Behaviors)[]>(
+        behavior: K,
+    ): () => {
+        added: readonly Module<Pick<Behaviors, K[number]>>[]
+        removed: readonly Module<Pick<Behaviors, K[number]>>[]
+    }
+}
+
+class ListenerTracker<Behaviors extends object> {
+    private listeners: Listener<Behaviors, keyof Behaviors>[] = []
+    private listenerToIndex = new Map<Listener<Behaviors, keyof Behaviors>, number>()
+
+    constructor(private _requirements: (keyof Behaviors)[]) {}
+
+    get requirements(): readonly (keyof Behaviors)[] {
+        return this._requirements
+    }
+
+    add(listener: Listener<Behaviors, keyof Behaviors>): void {
+        this.listenerToIndex.set(listener, this.listeners.length)
+        this.listeners.push(listener)
+    }
+
+    remove(listener: Listener<Behaviors, keyof Behaviors>): void {
+        const index = this.listenerToIndex.get(listener)
+
+        if (index === undefined) {
+            throw new Error("Listener not found")
+        }
+
+        this.listeners[index] = this.listeners[this.listeners.length - 1]
+        this.listeners.pop()
+    }
+
+    notifyAdded(module: Module<Pick<Behaviors, any>>): void {
+        for (const listener of this.listeners) {
+            listener.notifyAdded(module)
+        }
+    }
+
+    notifyRemoved(module: Module<Pick<Behaviors, any>>): void {
+        for (const listener of this.listeners) {
+            listener.notifyRemoved(module)
+        }
+    }
+}
+
+interface ModuleArcheType<Behaviors extends object> {
+    modules: Map<number, Module<Pick<Behaviors, any>>>
+    behaviors: (keyof Behaviors)[]
+    listenerTrackers: ListenerTracker<Behaviors>[]
+}
+
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+export class ModuleStore<Behaviors extends object> implements ModuleStore<Behaviors> {
+    private nextId = 0
+
+    private moduleToArchetype = new Map<number, ModuleArcheType<Behaviors>>()
+    private archeTypes = new Map<string, ModuleArcheType<Behaviors>>()
+    private modulesToOnDispose = new Map<number, () => void>()
+
+    register<T extends keyof Behaviors>(
+        behaviors: Pick<Behaviors, T>,
+        onDispose?: () => void,
+    ): Module<Pick<Behaviors, T>> {
+        const id = this.nextId++
+
+        const module: Module<Pick<Behaviors, T>> = {
+            ...behaviors,
+            id,
+        }
+
+        const archeType = this.emplaceArchetype(Object.keys(behaviors) as (keyof Behaviors)[])
+
+        if (onDispose) {
+            this.modulesToOnDispose.set(id, onDispose)
+        }
+
+        archeType.modules.set(id, module)
+        this.moduleToArchetype.set(id, archeType)
+
+        for (const listenerTracker of archeType.listenerTrackers) {
+            listenerTracker.notifyAdded(module)
+        }
+
+        return module
+    }
+
+    remove(id: number): void {
+        const module = this.moduleToArchetype.get(id)?.modules.get(id)
+
+        if (module === undefined) {
+            throw new Error(`Module with id ${id} not found`)
+        }
+
+        for (const listenerTracker of this.moduleToArchetype.get(id)!.listenerTrackers) {
+            listenerTracker.notifyRemoved(module)
+        }
+
+        module
+    }
+
+    private keyToListeners = new Map<string, ListenerTracker<Behaviors>>()
+
+    listen<T extends (keyof Behaviors)[]>(
+        behaviors: [...T],
+        listener: Listener<Behaviors, T[number]>,
+    ): () => void {
+        const key = keyFromModule<Behaviors>(behaviors)
+
+        let listeners = this.keyToListeners.get(key)
+
+        if (listeners === undefined) {
+            listeners = new ListenerTracker(behaviors)
+            this.keyToListeners.set(key, listeners)
+
+            for (const archeType of this.archeTypes.values()) {
+                if (this.satisfiesRequirements(archeType.behaviors, behaviors)) {
+                    archeType.listenerTrackers.push(listeners)
+
+                    for (const module of archeType.modules.values()) {
+                        listener.notifyAdded(module)
+                    }
+                }
+            }
+        }
+
+        listeners.add(listener)
+        return () => void listeners.remove(listener)
+    }
+
+    private emplaceArchetype(behaviors: (keyof Behaviors)[]) {
+        const key = keyFromModule(behaviors)
+        let archeType = this.archeTypes.get(key)
+
+        if (archeType === undefined) {
+            archeType = {
+                modules: new Map(),
+                behaviors,
+                listenerTrackers: [],
+            }
+
+            this.archeTypes.set(key, archeType)
+
+            for (const [, listeners] of this.keyToListeners) {
+                if (this.satisfiesRequirements(behaviors, listeners.requirements)) {
+                    archeType.listenerTrackers.push(listeners)
+                }
+            }
+        }
+
+        return archeType
+    }
+
+    private satisfiesRequirements(
+        behaviors: readonly (keyof Behaviors)[],
+        requirements: readonly (keyof Behaviors)[],
+    ) {
+        return requirements.every(x => behaviors.includes(x))
+    }
+}
+
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+export class ModuleLookup<Behaviors extends object> implements ModuleLookup<Behaviors> {
+    constructor(private store: ModuleStore<Behaviors>) {}
+
+    private cacheMultiple = new Map<string, readonly Module<Pick<Behaviors, any>>[]>()
+    private cacheSingle = new Map<string, () => Module<Pick<Behaviors, any>>>()
+
+    multiple<K extends (keyof Behaviors)[]>(
+        behaviors: [...K],
+    ): readonly Module<Pick<Behaviors, K[number]>>[] {
+        const key = keyFromModule<Behaviors>(behaviors)
+        const cached = this.cacheMultiple.get(key)
+
+        if (cached !== undefined) {
+            return cached
+        }
+
+        const multiple = new Multiple(behaviors as string[])
+
+        this.store.listen(behaviors, {
+            notifyAdded: module => {
+                multiple.push(module)
+            },
+            notifyRemoved: module => {
+                multiple.remove(module)
+            },
+        })
+
+        this.cacheMultiple.set(key, multiple.modules)
+        return multiple.modules
+    }
+
+    single<K extends (keyof Behaviors)[]>(behaviors: K): () => Module<Pick<Behaviors, K[number]>> {
+        const key = keyFromModule<Behaviors>(behaviors)
+        const cached = this.cacheSingle.get(key)
+
+        if (cached !== undefined) {
+            return cached
+        }
+
+        const multiple = this.multiple(behaviors)
+
+        const result = () => {
+            if (multiple.length === 0) {
+                throw new Error("No modules found")
+            }
+
+            if (multiple.length > 1) {
+                throw new Error("Multiple modules found")
+            }
+
+            return multiple[0]
+        }
+
+        this.cacheSingle.set(key, result)
+
+        return result
+    }
+
+    changing<K extends (keyof Behaviors)[]>(behaviors: K) {
+        const changeListener = new ChangeListener(behaviors as string[])
+
+        const result = () => changeListener.pop()
+        const resultRef = new WeakRef(result)
+
+        const unlisten = this.store.listen(behaviors, {
+            notifyAdded: entity => {
+                if (resultRef.deref() === undefined) {
+                    unlisten()
+                    return
+                }
+
+                changeListener.notifyAdded(entity)
+            },
+            notifyRemoved: entity => {
+                if (resultRef.deref() === undefined) {
+                    unlisten()
+                    return
+                }
+
+                changeListener.notifyRemoved(entity)
+            },
+        })
+
+        return () => changeListener.pop()
+    }
+}
+
+class Multiple {
+    private _modules: Module<any>[]
+    private _moduleToIndex: Map<number, number>
+    private _requirements: string[]
+
+    constructor(requirements: string[]) {
+        this._requirements = requirements
+        this._modules = []
+        this._moduleToIndex = new Map()
+    }
+
+    get modules(): readonly Module<any>[] {
+        return this._modules
+    }
+
+    get requirements(): readonly string[] {
+        return this._requirements
+    }
+
+    push(modules: Module<any>) {
+        this._modules.push(modules)
+        this._moduleToIndex.set(modules.id, this._modules.length - 1)
+    }
+
+    remove(modules: Module<any>) {
+        const index = this._moduleToIndex.get(modules.id)
+
+        if (index === undefined) {
+            throw new Error("Entity not found in list")
+        }
+
+        const last = this._modules.pop()!
+
+        if (index !== this._modules.length) {
+            this._modules[index] = last
+            this._moduleToIndex.set(last.id, index)
+        }
+
+        this._moduleToIndex.delete(modules.id)
+    }
+
+    has(modules: Module<any>) {
+        return this._moduleToIndex.has(modules.id)
+    }
+
+    popAll() {
+        const temp = this._modules
+        this._modules = []
+        this._moduleToIndex.clear()
+        return temp
+    }
+}
+
+class ChangeListener {
+    private _added: Multiple
+    private _removed: Multiple
+
+    constructor(requirements: string[]) {
+        this._added = new Multiple(requirements)
+        this._removed = new Multiple(requirements)
+    }
+
+    get added() {
+        return this._added.modules
+    }
+
+    get removed() {
+        return this._removed.modules
+    }
+
+    get requirements() {
+        return this._added.requirements
+    }
+
+    notifyAdded(entity: Module<any>) {
+        if (this._removed.has(entity)) {
+            this._removed.remove(entity)
+        } else {
+            this._added.push(entity)
+        }
+    }
+
+    notifyRemoved(entity: Module<any>) {
+        if (this._added.has(entity)) {
+            this._added.remove(entity)
+        } else {
+            this._removed.push(entity)
+        }
+    }
+
+    pop() {
+        return {
+            added: this._added.popAll(),
+            removed: this._removed.popAll(),
+        }
+    }
+}
+
+function keyFromModule<Behaviors extends object>(behaviors: readonly (keyof Behaviors)[]): string {
+    return behaviors
+        .map(x => x.toString())
+        .toSorted()
+        .join(",")
+}

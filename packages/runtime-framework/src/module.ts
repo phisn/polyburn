@@ -26,10 +26,10 @@ export interface ModuleLookup<Behaviors extends object> {
         ...behaviors: K
     ): readonly Module<Pick<Behaviors, K[number]>>[]
 
-    single<K extends (keyof Behaviors)[]>(behavior: K): () => Module<Pick<Behaviors, K[number]>>
+    single<K extends (keyof Behaviors)[]>(...behavior: K): () => Module<Pick<Behaviors, K[number]>>
 
     changing<K extends (keyof Behaviors)[]>(
-        behavior: K,
+        ...behavior: K
     ): () => {
         added: readonly Module<Pick<Behaviors, K[number]>>[]
         removed: readonly Module<Pick<Behaviors, K[number]>>[]
@@ -60,6 +60,9 @@ class ListenerTracker<Behaviors extends object> {
 
         this.listeners[index] = this.listeners[this.listeners.length - 1]
         this.listeners.pop()
+
+        this.listenerToIndex.delete(listener)
+        this.listenerToIndex.set(this.listeners[index], index)
     }
 
     notifyAdded(module: Module<Pick<Behaviors, any>>): void {
@@ -117,17 +120,21 @@ export class ModuleStore<Behaviors extends object> implements ModuleStore<Behavi
     }
 
     remove(id: number): void {
-        const module = this.moduleToArchetype.get(id)?.modules.get(id)
+        const archeType = this.moduleToArchetype.get(id)
+        const module = archeType?.modules.get(id)
 
-        if (module === undefined) {
+        if (archeType == undefined || module === undefined) {
             throw new Error(`Module with id ${id} not found`)
         }
 
-        for (const listenerTracker of this.moduleToArchetype.get(id)!.listenerTrackers) {
+        this.modulesToOnDispose.get(id)?.()
+        this.modulesToOnDispose.delete(id)
+
+        for (const listenerTracker of archeType.listenerTrackers) {
             listenerTracker.notifyRemoved(module)
         }
 
-        module
+        archeType.modules.delete(id)
     }
 
     private keyToListeners = new Map<string, ListenerTracker<Behaviors>>()
@@ -156,7 +163,7 @@ export class ModuleStore<Behaviors extends object> implements ModuleStore<Behavi
         }
 
         listeners.add(listener)
-        return () => void listeners.remove(listener)
+        return () => void listeners!.remove(listener)
     }
 
     private emplaceArchetype(behaviors: (keyof Behaviors)[]) {
@@ -170,6 +177,7 @@ export class ModuleStore<Behaviors extends object> implements ModuleStore<Behavi
                 listenerTrackers: [],
             }
 
+            console.log(`Emplacing archetype with behaviors ${key}`)
             this.archeTypes.set(key, archeType)
 
             for (const [, listeners] of this.keyToListeners) {
@@ -198,7 +206,7 @@ export class ModuleLookup<Behaviors extends object> implements ModuleLookup<Beha
     private cacheSingle = new Map<string, () => Module<Pick<Behaviors, any>>>()
 
     multiple<K extends (keyof Behaviors)[]>(
-        behaviors: [...K],
+        ...behaviors: K
     ): readonly Module<Pick<Behaviors, K[number]>>[] {
         const key = keyFromModule<Behaviors>(behaviors)
         const cached = this.cacheMultiple.get(key)
@@ -211,9 +219,11 @@ export class ModuleLookup<Behaviors extends object> implements ModuleLookup<Beha
 
         this.store.listen(behaviors, {
             notifyAdded: module => {
+                console.log(`Added module ${module.id} with behaviors ${key}`)
                 multiple.push(module)
             },
             notifyRemoved: module => {
+                console.log(`Removed module ${module.id} with behaviors ${key}`)
                 multiple.remove(module)
             },
         })
@@ -222,7 +232,9 @@ export class ModuleLookup<Behaviors extends object> implements ModuleLookup<Beha
         return multiple.modules
     }
 
-    single<K extends (keyof Behaviors)[]>(behaviors: K): () => Module<Pick<Behaviors, K[number]>> {
+    single<K extends (keyof Behaviors)[]>(
+        ...behaviors: K
+    ): () => Module<Pick<Behaviors, K[number]>> {
         const key = keyFromModule<Behaviors>(behaviors)
         const cached = this.cacheSingle.get(key)
 
@@ -230,15 +242,17 @@ export class ModuleLookup<Behaviors extends object> implements ModuleLookup<Beha
             return cached
         }
 
-        const multiple = this.multiple(behaviors)
+        const multiple = this.multiple<K>(...behaviors)
 
         const result = () => {
+            console.log(multiple)
+
             if (multiple.length === 0) {
-                throw new Error("No modules found")
+                throw new Error(`No modules found with behaviors ${key}`)
             }
 
             if (multiple.length > 1) {
-                throw new Error("Multiple modules found")
+                throw new Error(`Multiple modules found with behaviors ${key}`)
             }
 
             return multiple[0]
@@ -249,7 +263,7 @@ export class ModuleLookup<Behaviors extends object> implements ModuleLookup<Beha
         return result
     }
 
-    changing<K extends (keyof Behaviors)[]>(behaviors: K) {
+    changing<K extends (keyof Behaviors)[]>(...behaviors: K) {
         const changeListener = new ChangeListener(behaviors as string[])
 
         const result = () => changeListener.pop()
@@ -377,8 +391,7 @@ class ChangeListener {
 }
 
 function keyFromModule<Behaviors extends object>(behaviors: readonly (keyof Behaviors)[]): string {
-    return behaviors
-        .map(x => x.toString())
-        .toSorted()
-        .join(",")
+    const behaviorsStr = behaviors.map(x => x.toString())
+    behaviorsStr.sort()
+    return behaviorsStr.join(",")
 }

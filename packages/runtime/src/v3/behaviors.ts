@@ -1,3 +1,4 @@
+import { Point } from "../model/point"
 import { RuntimeDependencies } from "./dependencies"
 import { Collidable } from "./modules/module-colision"
 import { EntityRocket } from "./modules/module-rocket/module-rocket"
@@ -14,7 +15,13 @@ export type RuntimeBehaviors = {
     runtimeReset(): void
 
     onRuntimeTick(props: { input: RuntimeInput }): void
-    onDeath(): void
+
+    onRocketDeath(props: {
+        position: Point
+        rotation: number
+        contactPoint: Point
+        normal: Point
+    }): void
 
     collidable: Collidable
     entity: Entity

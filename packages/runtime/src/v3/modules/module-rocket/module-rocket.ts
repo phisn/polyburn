@@ -5,6 +5,7 @@ import { ModuleStore } from "runtime-framework/src/module"
 import { RocketConfig } from "../../../../proto/world"
 import { Point } from "../../../model/point"
 import { RuntimeBehaviors, RuntimeInput } from "../../behaviors"
+import { checkRocketDeath } from "./check-rocket-death"
 import { computeGroundRay } from "./compute-ground-ray"
 import { createRocketRigidbody } from "./create-rocket-rigidbody"
 
@@ -41,6 +42,14 @@ export function moduleRocket(store: ModuleStore<RuntimeBehaviors>, config: Modul
     return store.register(
         {
             onRuntimeTick({ input }) {
+                if (collisions > 0) {
+                    const numColliders = rigidbody.numColliders()
+
+                    for (let i = 0; i < numColliders; i++) {
+                        checkRocketDeath(store, rigidbody.collider(i))
+                    }
+                }
+
                 if (collisions === 0) {
                     rigidbody.setRotation(rotationWithoutInput + input.rotation, true)
                 }
@@ -50,6 +59,13 @@ export function moduleRocket(store: ModuleStore<RuntimeBehaviors>, config: Modul
                 }
 
                 previousInput = input
+            },
+            onRocketDeath() {
+                rigidbody.setTranslation(config.position, false)
+                rigidbody.setRotation(config.rotation, false)
+
+                rigidbody.setLinvel({ x: 0, y: 0 }, false)
+                rigidbody.setAngvel(0, true)
             },
             entity,
             collidable: {

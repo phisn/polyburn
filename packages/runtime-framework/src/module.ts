@@ -1,13 +1,17 @@
-export type Module<Type extends object = Record<string, never>> = Readonly<Type> & {
+type BehaviorType = object
+
+export type Module<Type extends BehaviorType = object> = Readonly<Type> & {
     get id(): number
 }
 
-interface Listener<Behaviors extends object, K extends keyof Behaviors> {
+interface Listener<Behaviors extends BehaviorType, K extends keyof Behaviors> {
     notifyAdded(module: Module<Pick<Behaviors, K>>): void
     notifyRemoved(module: Module<Pick<Behaviors, K>>): void
 }
 
-export interface ModuleStore<Behaviors extends object> {
+export interface BaseModuleStore<Behaviors extends BehaviorType> {
+    get<K extends (keyof Behaviors)[]>(id: number, ...assume: K): Module<Pick<Behaviors, K[number]>>
+
     register<K extends keyof Behaviors>(
         behaviors: Pick<Behaviors, K>,
         onDispose?: () => void,
@@ -21,7 +25,7 @@ export interface ModuleStore<Behaviors extends object> {
     ): () => void
 }
 
-export interface ModuleLookup<Behaviors extends object> {
+export interface ModuleLookup<Behaviors extends BehaviorType> {
     multiple<K extends (keyof Behaviors)[]>(
         ...behaviors: K
     ): readonly Module<Pick<Behaviors, K[number]>>[]
@@ -36,7 +40,10 @@ export interface ModuleLookup<Behaviors extends object> {
     }
 }
 
-class ListenerTracker<Behaviors extends object> {
+export type ModuleStore<Behaviors extends Record<string, object>> = BaseModuleStore<Behaviors> &
+    ModuleLookup<Behaviors>
+
+class ListenerTracker<Behaviors extends BehaviorType> {
     private listeners: Listener<Behaviors, keyof Behaviors>[] = []
     private listenerToIndex = new Map<Listener<Behaviors, keyof Behaviors>, number>()
 
@@ -78,19 +85,46 @@ class ListenerTracker<Behaviors extends object> {
     }
 }
 
-interface ModuleArcheType<Behaviors extends object> {
+interface ModuleArcheType<Behaviors extends BehaviorType> {
     modules: Map<number, Module<Pick<Behaviors, any>>>
     behaviors: (keyof Behaviors)[]
     listenerTrackers: ListenerTracker<Behaviors>[]
 }
 
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-export class ModuleStore<Behaviors extends object> implements ModuleStore<Behaviors> {
+export class BaseModuleStore<Behaviors extends BehaviorType> implements BaseModuleStore<Behaviors> {
     private nextId = 0
 
     private moduleToArchetype = new Map<number, ModuleArcheType<Behaviors>>()
     private archeTypes = new Map<string, ModuleArcheType<Behaviors>>()
     private modulesToOnDispose = new Map<number, () => void>()
+
+    get<K extends (keyof Behaviors)[]>(
+        id: number,
+        ...assume: K
+    ): Module<Pick<Behaviors, K[number]>> {
+        const archeType = this.moduleToArchetype.get(id)
+
+        if (archeType === undefined) {
+            throw new Error(`Module with id ${id} not found`)
+        }
+
+        for (const behavior of assume) {
+            if (!archeType.behaviors.includes(behavior)) {
+                throw new Error(
+                    `Module with id ${id} does not have behavior ${behavior.toString()}`,
+                )
+            }
+        }
+
+        const module = archeType?.modules.get(id)
+
+        if (archeType === undefined || module === undefined) {
+            throw new Error(`Module with id ${id} not found`)
+        }
+
+        return module as Module<Pick<Behaviors, K[number]>>
+    }
 
     register<T extends keyof Behaviors>(
         behaviors: Pick<Behaviors, T>,
@@ -123,7 +157,7 @@ export class ModuleStore<Behaviors extends object> implements ModuleStore<Behavi
         const archeType = this.moduleToArchetype.get(id)
         const module = archeType?.modules.get(id)
 
-        if (archeType == undefined || module === undefined) {
+        if (archeType === undefined || module === undefined) {
             throw new Error(`Module with id ${id} not found`)
         }
 
@@ -199,8 +233,8 @@ export class ModuleStore<Behaviors extends object> implements ModuleStore<Behavi
 }
 
 /* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
-export class ModuleLookup<Behaviors extends object> implements ModuleLookup<Behaviors> {
-    constructor(private store: ModuleStore<Behaviors>) {}
+export class ModuleLookup<Behaviors extends BehaviorType> implements ModuleLookup<Behaviors> {
+    constructor(private store: BaseModuleStore<Behaviors>) {}
 
     private cacheMultiple = new Map<string, readonly Module<Pick<Behaviors, any>>[]>()
     private cacheSingle = new Map<string, () => Module<Pick<Behaviors, any>>>()
@@ -349,6 +383,8 @@ class ChangeListener {
     private _added: Multiple
     private _removed: Multiple
 
+    private empty = { added: [], removed: [] }
+
     constructor(requirements: string[]) {
         this._added = new Multiple(requirements)
         this._removed = new Multiple(requirements)
@@ -383,6 +419,10 @@ class ChangeListener {
     }
 
     pop() {
+        if (this._added.modules.length === 0 && this._removed.modules.length === 0) {
+            return this.empty
+        }
+
         return {
             added: this._added.popAll(),
             removed: this._removed.popAll(),

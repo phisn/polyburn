@@ -19,20 +19,22 @@ export interface EntityRocket {
     type: "rocket"
     rigidbody: RAPIER.RigidBody
     thurst: boolean
+
+    ticksSinceLastDeath: number
 }
 
 export function moduleRocket(store: ModuleStore<RuntimeBehaviors>, config: ModuleRocketConfig) {
-    const dependencyModule = store.single("runtimeDependencies")
-    const rapier = dependencyModule().runtimeDependencies.rapier
-
-    const getWorld = store.single("world")
+    const rapier = store.single("runtimeDependencies")().runtimeDependencies.rapier
+    const world = store.single("world")().world
 
     const rigidbody = createRocketRigidbody(store, config.position, config.rotation)
 
-    const entity: EntityRocket = {
+    const rocket: EntityRocket = {
         type: "rocket",
         rigidbody,
         thurst: false,
+
+        ticksSinceLastDeath: 0,
     }
 
     let previousInput: RuntimeInput = { rotation: 0, thrust: false }
@@ -42,12 +44,17 @@ export function moduleRocket(store: ModuleStore<RuntimeBehaviors>, config: Modul
     return store.register(
         {
             onRuntimeTick({ input }) {
-                if (collisions > 0) {
-                    const numColliders = rigidbody.numColliders()
+                rocket.thurst = input.thrust
+                rocket.ticksSinceLastDeath++
 
-                    for (let i = 0; i < numColliders; i++) {
-                        checkRocketDeath(store, rigidbody.collider(i))
-                    }
+                if (collisions > 0) {
+                    checkRocketDeath({
+                        store,
+                        rocket,
+                        config: config.inner,
+                        rapierWorld: world.rapierWorld,
+                        rigidbody,
+                    })
                 }
 
                 if (collisions === 0) {
@@ -67,7 +74,7 @@ export function moduleRocket(store: ModuleStore<RuntimeBehaviors>, config: Modul
                 rigidbody.setLinvel({ x: 0, y: 0 }, false)
                 rigidbody.setAngvel(0, true)
             },
-            entity,
+            entity: rocket,
             collidable: {
                 rigidbodyId: rigidbody.handle,
                 onCollision({ otherCollider, started }) {
@@ -88,7 +95,7 @@ export function moduleRocket(store: ModuleStore<RuntimeBehaviors>, config: Modul
             },
         },
         function onDispose() {
-            getWorld().world.rapierWorld.removeRigidBody(rigidbody)
+            world.rapierWorld.removeRigidBody(rigidbody)
         },
     )
 
@@ -100,7 +107,7 @@ export function moduleRocket(store: ModuleStore<RuntimeBehaviors>, config: Modul
 
         const hit = computeGroundRay(
             rapier,
-            getWorld().world.rapierWorld,
+            world.rapierWorld,
             rigidbody,
             config.inner.thrustDistance,
         )
@@ -121,6 +128,6 @@ export function moduleRocket(store: ModuleStore<RuntimeBehaviors>, config: Modul
     }
 }
 
-function distance(p1: Point, p2: Point) {
+function _distance(p1: Point, p2: Point) {
     return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y))
 }

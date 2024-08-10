@@ -29,7 +29,7 @@ export function moduleWorld(store: ModuleStore<RuntimeBehaviors>) {
                 world.rapierWorld.step(world.rapierQueue)
                 world.age++
             },
-            onDeath() {
+            onRocketDeath() {
                 world.deaths++
             },
         },

@@ -17,13 +17,11 @@ export interface Collidable {
 
 export function moduleCollision(store: ModuleStore<RuntimeBehaviors>) {
     const collidableStore = new CollidableStore(store)
-    const getWorld = store.single("world")
+    const world = store.single("world")().world
 
     return store.register(
         {
             onRuntimeTick() {
-                const world = getWorld().world
-
                 world.rapierQueue.drainCollisionEvents((h1, h2, started) => {
                     const collider1 = world.rapierWorld.getCollider(h1)
                     const collider2 = world.rapierWorld.getCollider(h2)

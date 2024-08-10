@@ -1,21 +1,27 @@
 type BehaviorType = object
 
-export type Module<Type extends BehaviorType = object> = Readonly<Type> & {
+export type Module<
+    Type extends BehaviorType = object,
+    Behaviors extends BehaviorType = object,
+> = Readonly<Type & Partial<Behaviors>> & {
     get id(): number
 }
 
 interface Listener<Behaviors extends BehaviorType, K extends keyof Behaviors> {
-    notifyAdded(module: Module<Pick<Behaviors, K>>): void
-    notifyRemoved(module: Module<Pick<Behaviors, K>>): void
+    notifyAdded(module: Module<Pick<Behaviors, K>, Behaviors>): void
+    notifyRemoved(module: Module<Pick<Behaviors, K>, Behaviors>): void
 }
 
 export interface BaseModuleStore<Behaviors extends BehaviorType> {
-    get<K extends (keyof Behaviors)[]>(id: number, ...assume: K): Module<Pick<Behaviors, K[number]>>
+    get<K extends (keyof Behaviors)[]>(
+        id: number,
+        ...assume: K
+    ): Module<Pick<Behaviors, K[number]>, Behaviors>
 
     register<K extends keyof Behaviors>(
         behaviors: Pick<Behaviors, K>,
         onDispose?: () => void,
-    ): Module<Pick<Behaviors, K>>
+    ): Module<Pick<Behaviors, K>, Behaviors>
 
     remove(id: number): void
 
@@ -28,15 +34,17 @@ export interface BaseModuleStore<Behaviors extends BehaviorType> {
 export interface ModuleLookup<Behaviors extends BehaviorType> {
     multiple<K extends (keyof Behaviors)[]>(
         ...behaviors: K
-    ): readonly Module<Pick<Behaviors, K[number]>>[]
+    ): readonly Module<Pick<Behaviors, K[number]>, Behaviors>[]
 
-    single<K extends (keyof Behaviors)[]>(...behavior: K): () => Module<Pick<Behaviors, K[number]>>
+    single<K extends (keyof Behaviors)[]>(
+        ...behavior: K
+    ): () => Module<Pick<Behaviors, K[number]>, Behaviors>
 
     changing<K extends (keyof Behaviors)[]>(
         ...behavior: K
     ): () => {
-        added: readonly Module<Pick<Behaviors, K[number]>>[]
-        removed: readonly Module<Pick<Behaviors, K[number]>>[]
+        added: readonly Module<Pick<Behaviors, K[number]>, Behaviors>[]
+        removed: readonly Module<Pick<Behaviors, K[number]>, Behaviors>[]
     }
 }
 

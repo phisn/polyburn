@@ -15,11 +15,19 @@ export function moduleRuntimeNormal(store: ModuleStore<RuntimeBehaviors>) {
         }
     }
 
+    const getRocket = () => store.single("rocket")().rocket
+
     return store.register(
         {
             runtimeReset() {
                 onDispose()
                 modules = create(store)
+            },
+            onLevelCaptured() {
+                const rocket = getRocket()
+
+                rocket.spawnPoint = rocket.rigidbody.translation()
+                rocket.spawnRotation = rocket.rigidbody.rotation()
             },
         },
         onDispose,

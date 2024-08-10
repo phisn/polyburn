@@ -16,9 +16,11 @@ export interface ModuleRocketConfig {
 }
 
 export interface EntityRocket {
-    type: "rocket"
     rigidbody: RAPIER.RigidBody
     thurst: boolean
+
+    spawnPoint: Point
+    spawnRotation: number
 
     ticksSinceLastDeath: number
 }
@@ -30,9 +32,11 @@ export function moduleRocket(store: ModuleStore<RuntimeBehaviors>, config: Modul
     const rigidbody = createRocketRigidbody(store, config.position, config.rotation)
 
     const rocket: EntityRocket = {
-        type: "rocket",
         rigidbody,
         thurst: false,
+
+        spawnPoint: config.position,
+        spawnRotation: config.rotation,
 
         ticksSinceLastDeath: 0,
     }
@@ -68,13 +72,13 @@ export function moduleRocket(store: ModuleStore<RuntimeBehaviors>, config: Modul
                 previousInput = input
             },
             onRocketDeath() {
-                rigidbody.setTranslation(config.position, false)
-                rigidbody.setRotation(config.rotation, false)
+                rigidbody.setTranslation(rocket.spawnPoint, false)
+                rigidbody.setRotation(rocket.spawnRotation, false)
 
                 rigidbody.setLinvel({ x: 0, y: 0 }, false)
                 rigidbody.setAngvel(0, true)
             },
-            entity: rocket,
+            rocket,
             collidable: {
                 rigidbodyId: rigidbody.handle,
                 onCollision({ otherCollider, started }) {

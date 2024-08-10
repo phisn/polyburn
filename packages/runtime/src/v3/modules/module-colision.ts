@@ -3,10 +3,10 @@ import { Module, ModuleStore } from "runtime-framework/src/module"
 import { RuntimeBehaviors } from "../behaviors"
 
 export interface Collidable {
-    onCollision(props: {
+    onCollision?(props: {
         collider: RAPIER.Collider
 
-        other?: Module<Pick<RuntimeBehaviors, "collidable">>
+        other?: Module<Pick<RuntimeBehaviors, "collidable">, RuntimeBehaviors>
         otherCollider: RAPIER.Collider
 
         started: boolean
@@ -29,14 +29,14 @@ export function moduleCollision(store: ModuleStore<RuntimeBehaviors>) {
                     const entity1 = collidableStore.get(collider1.parent()?.handle)
                     const entity2 = collidableStore.get(collider2.parent()?.handle)
 
-                    entity1?.collidable?.onCollision({
+                    entity1?.collidable?.onCollision?.({
                         collider: collider1,
                         other: entity2,
                         otherCollider: collider2,
                         started,
                     })
 
-                    entity2?.collidable?.onCollision({
+                    entity2?.collidable?.onCollision?.({
                         collider: collider2,
                         other: entity1,
                         otherCollider: collider1,

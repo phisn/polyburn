@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vitest } from "vitest"
-import { ModuleLookup, ModuleStore } from "./module"
+import { BaseModuleStore, ModuleLookup } from "./module"
 
 interface Behaviors {
     name(): string
@@ -8,11 +8,11 @@ interface Behaviors {
     getNumber(): number
 }
 
-let store: ModuleStore<Behaviors>
+let store: BaseModuleStore<Behaviors>
 let lookup: ModuleLookup<Behaviors>
 
 beforeEach(() => {
-    store = new ModuleStore<Behaviors>()
+    store = new BaseModuleStore<Behaviors>()
     lookup = new ModuleLookup(store)
 })
 

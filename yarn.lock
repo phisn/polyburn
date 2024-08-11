@@ -2010,6 +2010,13 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.0.tgz#a5417ae8427873f1dd08b70b3574b453e67b5f7f"
   integrity sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==
 
+"@fast-check/vitest@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@fast-check/vitest/-/vitest-0.1.2.tgz#c02d9dca0a2f8d7501526283937f6f86f604d755"
+  integrity sha512-oaWBsg3XI8UBbjmfEtZhv36ars89ljH1/PRjzcmQsVQK5EqWZRZpIDwO2QrnIROh8LuLRXFYb67qGe+cPxW5zg==
+  dependencies:
+    fast-check "^3.0.0"
+
 "@fastify/busboy@^2.0.0":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@fastify/busboy/-/busboy-2.1.1.tgz#b9da6a878a371829a0502c9b6c1c143ef6663f4d"
@@ -6072,6 +6079,13 @@ falafel@^2.1.0:
   dependencies:
     acorn "^7.1.1"
     isarray "^2.0.1"
+
+fast-check@^3.0.0:
+  version "3.20.0"
+  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-3.20.0.tgz#287a3b6b9c45e8d9121c157b437b465bf27befa6"
+  integrity sha512-pZIjqLpOZgdSLecec4GKC3Zq5702MZ34upMKxojnNVSWA0K64V3pXOBT1Wdsrc3AphLtzRBbsi8bRWF4TUGmUg==
+  dependencies:
+    pure-rand "^6.1.0"
 
 fast-check@^3.13.1:
   version "3.18.0"

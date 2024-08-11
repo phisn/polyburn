@@ -13,6 +13,12 @@ export interface ModuleStore<Behaviors extends object> {
         onDispose?: () => void,
     ): Module<Pick<Behaviors, K>>
 
+    attach<K extends keyof Behaviors>(
+        to: number,
+        behaviors: Pick<Behaviors, K>,
+        onDispose?: () => void,
+    ): Module<Pick<Behaviors, K>>
+
     remove(id: number): void
 
     listen<T extends (keyof Behaviors)[]>(
@@ -119,6 +125,26 @@ export class ModuleStore<Behaviors extends object> implements ModuleStore<Behavi
         return module
     }
 
+    attach<K extends keyof Behaviors>(
+        to: number,
+        behaviors: Pick<Behaviors, K>,
+        onDispose?: (() => void) | undefined,
+    ): Module<Pick<Behaviors, K>> {
+        const y
+
+        archeType = this.moduleToArchetype.get(to)
+
+        if (archeType === undefined) {
+            throw new Error(`Module with id ${to} not found`)
+        }
+
+        const module = archeType.modules.get(to)
+
+        if (module === undefined) {
+            throw new Error(`Module with id ${to} not found`)
+        }
+    }
+
     remove(id: number): void {
         const archeType = this.moduleToArchetype.get(id)
         const module = archeType?.modules.get(id)
@@ -138,27 +164,44 @@ export class ModuleStore<Behaviors extends object> implements ModuleStore<Behavi
     }
 
     private keyToListeners = new Map<string, ListenerTracker<Behaviors>>()
+    private requirementsToArcheType = new Map<string, ModuleArcheType<Behaviors>[]>()
+    private requirements: [(keyof Behaviors)[], string][] = []
 
     listen<T extends (keyof Behaviors)[]>(
-        behaviors: [...T],
+        requirements: [...T],
         listener: Listener<Behaviors, T[number]>,
     ): () => void {
-        const key = keyFromModule<Behaviors>(behaviors)
+        const key = keyFromModule<Behaviors>(requirements)
+
+        let archeTypes = this.requirementsToArcheType.get(key)
+
+        if (archeTypes === undefined) {
+            archeTypes = []
+
+            for (const [key, archeType] of this.archeTypes) {
+                if (this.satisfiesRequirements(archeType.behaviors, requirements)) {
+                    archeTypes.push(archeType)
+                }
+            }
+
+            this.requirementsToArcheType.set(key, archeTypes)
+            this.requirements.push([requirements, key])
+        }
 
         let listeners = this.keyToListeners.get(key)
 
         if (listeners === undefined) {
-            listeners = new ListenerTracker(behaviors)
+            listeners = new ListenerTracker(requirements)
             this.keyToListeners.set(key, listeners)
 
-            for (const archeType of this.archeTypes.values()) {
-                if (this.satisfiesRequirements(archeType.behaviors, behaviors)) {
-                    archeType.listenerTrackers.push(listeners)
+            for (const archeType of archeTypes) {
+                archeType.listenerTrackers.push(listeners)
+            }
+        }
 
-                    for (const module of archeType.modules.values()) {
-                        listener.notifyAdded(module)
-                    }
-                }
+        for (const archeType of archeTypes) {
+            for (const module of archeType.modules.values()) {
+                listener.notifyAdded(module)
             }
         }
 
@@ -180,9 +223,15 @@ export class ModuleStore<Behaviors extends object> implements ModuleStore<Behavi
             console.log(`Emplacing archetype with behaviors ${key}`)
             this.archeTypes.set(key, archeType)
 
-            for (const [, listeners] of this.keyToListeners) {
-                if (this.satisfiesRequirements(behaviors, listeners.requirements)) {
-                    archeType.listenerTrackers.push(listeners)
+            for (const [requirement, key] of this.requirements) {
+                if (this.satisfiesRequirements(behaviors, requirement)) {
+                    this.requirementsToArcheType.get(key)!.push(archeType)
+
+                    const listeners = this.keyToListeners.get(key)
+
+                    if (listeners !== undefined) {
+                        archeType.listenerTrackers.push(listeners)
+                    }
                 }
             }
         }

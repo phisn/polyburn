@@ -8,6 +8,7 @@
         "lint": "eslint \"src/\""
     },
     "dependencies": {
+        "@fast-check/vitest": "^0.1.2",
         "typescript": "latest"
     },
     "devDependencies": {

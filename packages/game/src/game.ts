@@ -28,6 +28,8 @@ export class Game {
     private moduleShape: ModuleShape
     private moduleWorld: ModuleWorld
 
+    private started = false
+
     constructor(config: GameConfig, deps: GameDependencies) {
         this.store = new GameStore()
 
@@ -42,6 +44,14 @@ export class Game {
     }
 
     public onUpdate(input: GameInput) {
+        if (this.started === false) {
+            if (input.thrust === false) {
+                return
+            }
+
+            this.started = true
+        }
+
         this.moduleLevel.onUpdate(input)
         this.moduleRocket.onUpdate(input)
         this.moduleWorld.onUpdate(input)

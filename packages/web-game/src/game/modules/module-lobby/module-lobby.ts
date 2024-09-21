@@ -1,4 +1,3 @@
-import { EntityWith } from "runtime-framework"
 import { Frame, FramePacket } from "shared/src/lobby-api/frame-packet"
 import {
     UPDATE_POSITIONS_EVERY_MS,
@@ -7,6 +6,7 @@ import {
 } from "shared/src/lobby-api/lobby-api"
 import { UserOther } from "shared/src/lobby-api/user-other"
 import { Text } from "troika-three-text"
+import { EntityWith } from "../../../../../_runtime-framework/src"
 import { ExtendedComponents } from "../../runtime-extension/extended-components"
 import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 import { lerp, slerp } from "../module-scene/module-scene"

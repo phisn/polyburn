@@ -1,9 +1,9 @@
-import { EntityWith, MessageCollector } from "runtime-framework"
 import { EntityType } from "runtime/proto/world"
 import { RocketDeathMessage } from "runtime/src/core/rocket/rocket-death-message"
 import { changeAnchor } from "runtime/src/model/world/change-anchor"
 import { entityRegistry } from "runtime/src/model/world/entity-registry"
 import { Color } from "three"
+import { EntityWith, MessageCollector } from "../../../../../_runtime-framework/src"
 import { ExtendedComponents } from "../../runtime-extension/extended-components"
 import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
 import {

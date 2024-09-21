@@ -1,17 +1,14 @@
-import { WorldModel } from "runtime/proto/world"
-import { UserOther } from "../../../shared/src/lobby-api/user-other"
-import { ExtendedRuntime } from "./runtime-extension/new-extended-runtime"
+import { WorldConfig } from "game/proto/world"
+import { UserOther } from "../../../../shared/src/lobby-api/user-other"
 
 export interface ReplayModel {}
 
 export interface GameHooks {
-    onFinished: undefined | ((runtime: ExtendedRuntime) => void)
+    onUserJoined?: (username: UserOther) => void
+    onUserLeft?: (username: UserOther) => void
 
-    onUserJoined: undefined | ((username: UserOther) => void)
-    onUserLeft: undefined | ((username: UserOther) => void)
-
-    onConnected: undefined | ((userCount: number) => void)
-    onDisconnected: undefined | (() => void)
+    onConnected?: (userCount: number) => void
+    onDisconnected?: () => void
 }
 
 export interface LobbySettings {
@@ -24,7 +21,7 @@ export interface PlayGameSettings {
     instanceType: "play"
 
     worldname: string
-    world: WorldModel
+    world: WorldConfig
     gamemode: string
 
     // if user is provided the game will connect to the lobby
@@ -35,7 +32,7 @@ export interface ReplayGameSettings {
     instanceType: "replay"
 
     worldname: string
-    world: WorldModel
+    world: WorldConfig
     gamemode: string
 
     replay: ReplayModel

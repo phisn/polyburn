@@ -1,5 +1,5 @@
-import { EntityWith } from "runtime-framework"
 import * as THREE from "three"
+import { EntityWith } from "../../../../../../_runtime-framework/src"
 import { ExtendedComponents } from "../../../runtime-extension/extended-components"
 import { Svg } from "../svg"
 

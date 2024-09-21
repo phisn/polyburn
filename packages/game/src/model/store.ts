@@ -5,6 +5,8 @@ import { EventStore } from "../framework/event"
 import { ResourceStore } from "../framework/resource"
 import { LevelComponent, LevelEntity } from "../modules/module-level"
 import { RocketComponent, RocketEntity } from "../modules/module-rocket"
+import { ShapeComponent } from "../modules/module-shape"
+import { SummaryResource } from "../modules/module-world"
 import { Point } from "./utils"
 
 export class GameStore {
@@ -29,6 +31,7 @@ export interface ConfigsResource {
 export interface GameResources {
     config: ConfigsResource
     rapier: typeof RAPIER
+    summary: SummaryResource
     world: RAPIER.World
 }
 
@@ -36,6 +39,7 @@ export interface GameComponents {
     level: LevelComponent
     body: RAPIER.RigidBody
     rocket: RocketComponent
+    shape: ShapeComponent
 }
 
 export interface GameEvents {
@@ -58,4 +62,6 @@ export interface GameEvents {
 
     captureChanged(props: { rocket: RocketEntity; level: LevelEntity; started: boolean }): void
     captured(props: { rocket: RocketEntity; level: LevelEntity }): void
+
+    finished(): void
 }

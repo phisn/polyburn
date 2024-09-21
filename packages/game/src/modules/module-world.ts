@@ -2,6 +2,13 @@ import RAPIER from "@dimforge/rapier2d"
 import { EntityWith } from "../framework/entity"
 import { GameInput } from "../game"
 import { GameComponents, GameStore } from "../model/store"
+import { levelComponents } from "./module-level"
+
+export interface SummaryResource {
+    deaths: number
+    finished: boolean
+    ticks: number
+}
 
 export class ModuleWorld {
     private bodyToEntity: Map<number, EntityWith<GameComponents, "body">>
@@ -21,6 +28,25 @@ export class ModuleWorld {
                 this.bodyToEntity.delete(entity.get("body").handle)
             },
         )
+
+        this.store.events.listen({
+            captured: () => {
+                const finished = this.store.entities
+                    .multiple(...levelComponents)
+                    .every(l => l.get("level").completed)
+
+                if (finished) {
+                    const summary = this.store.resources.get("summary")
+                    summary.finished = true
+
+                    this.store.events.invoke.finished?.()
+                }
+            },
+            death: () => {
+                const summary = this.store.resources.get("summary")
+                summary.deaths += 1
+            },
+        })
     }
 
     onUpdate(_input: GameInput) {
@@ -44,6 +70,9 @@ export class ModuleWorld {
                 started,
             })
         })
+
+        const summary = this.store.resources.get("summary")
+        summary.ticks += 1
     }
 
     onReset() {
@@ -55,5 +84,11 @@ export class ModuleWorld {
 
         const rapier = this.store.resources.get("rapier")
         this.store.resources.set("world", new rapier.World(new rapier.Vector2(0, -20)))
+
+        this.store.resources.set("summary", {
+            deaths: 0,
+            finished: false,
+            ticks: 0,
+        })
     }
 }

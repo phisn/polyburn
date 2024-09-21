@@ -1,7 +1,7 @@
-import { EntityWith, MessageCollector } from "runtime-framework"
 import { LevelCapturedMessage } from "runtime/src/core/level-capture/level-captured-message"
 import { RuntimeComponents } from "runtime/src/core/runtime-components"
 import * as THREE from "three"
+import { EntityWith, MessageCollector } from "../../../../_runtime-framework/src"
 import { ExtendedComponents } from "../runtime-extension/extended-components"
 import { ExtendedRuntime } from "../runtime-extension/new-extended-runtime"
 

@@ -1,6 +1,6 @@
-import { EntityWith } from "runtime-framework"
 import { RuntimeComponents } from "runtime/src/core/runtime-components"
 import * as THREE from "three"
+import { EntityWith } from "../../../../../../_runtime-framework/src"
 import { AgentColors } from "../colors"
 
 /*

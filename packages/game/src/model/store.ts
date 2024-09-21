@@ -1,11 +1,10 @@
 import RAPIER from "@dimforge/rapier2d"
 import { LevelConfig, RocketConfig, ShapeConfig, WorldConfig } from "../../proto/world"
-import { EntityStore, newEntityStore } from "../framework/entity"
+import { EntityStore, EntityWith, newEntityStore } from "../framework/entity"
 import { EventStore } from "../framework/event"
 import { ResourceStore } from "../framework/resource"
-import { LevelComponent } from "../modules/module-level"
-import { RocketComponent } from "../modules/module-rocket"
-import { Point } from "./point"
+import { LevelComponent, LevelEntity } from "../modules/module-level"
+import { RocketComponent, RocketEntity } from "../modules/module-rocket"
 
 export class GameStore {
     public resources: ResourceStore<GameResources>
@@ -34,15 +33,20 @@ export interface GameResources {
 
 export interface GameComponents {
     level: LevelComponent
-    rigid: RAPIER.RigidBody
+    body: RAPIER.RigidBody
     rocket: RocketComponent
 }
 
 export interface GameEvents {
     collision(props: {
-        started: boolean
+        c1: RAPIER.Collider
+        c2: RAPIER.Collider
 
-        normal: Point
-        contact: Point
+        e1: EntityWith<GameComponents, "body">
+        e2: EntityWith<GameComponents, "body">
+
+        started: boolean
     }): void
+
+    captureChanged(props: { rocket: RocketEntity; level: LevelEntity; started: boolean }): void
 }

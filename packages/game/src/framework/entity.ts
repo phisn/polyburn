@@ -8,9 +8,9 @@ export interface Entity<Type, Components extends Type> {
         value: Components[K],
     ): Entity<Pick<Components, K> & Type, Components>
 
-    has<K extends keyof Components>(
-        component: K,
-    ): this is Entity<Pick<Components, K> & Type, Components>
+    has<K extends (keyof Components)[]>(
+        ...component: K
+    ): this is Entity<Pick<Components, K[number]> & Type, Components>
 
     delete<K extends keyof Components>(component: K): Entity<Omit<Type, K>, Components>
 }
@@ -54,6 +54,11 @@ export interface EntityStore<Components extends object> {
     ): () => void
 
     multiple<K extends ComponentsWithModifier<Components>[]>(
+        ...requirements: K
+    ): readonly EntityWith<Components, FilterModifier<K[number], Components>>[]
+
+    // use if you need to delete entities while iterating or want to remember the result
+    multipleCopy<K extends ComponentsWithModifier<Components>[]>(
         ...requirements: K
     ): readonly EntityWith<Components, FilterModifier<K[number], Components>>[]
 
@@ -389,8 +394,14 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
 
                     return entity.facade
                 },
-                has(component: string) {
-                    return component in entity.components
+                has(...components: string[]) {
+                    for (const component of components) {
+                        if (component in entity.components === false) {
+                            return false
+                        }
+                    }
+
+                    return true
                 },
                 delete(component: string) {
                     const result = delete entity.components[component]
@@ -508,6 +519,12 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         return entityList.entities
     }
 
+    function multipleCopy<C extends ComponentsWithModifier<Components>[]>(
+        ...requirements: string[]
+    ): readonly EntityWith<Components, FilterModifier<C[number], Components>>[] {
+        return [...multiple(...requirements)]
+    }
+
     const keyToSingle = new WeakLookup<string, any>()
 
     function single<C extends ComponentsWithModifier<Components>[]>(
@@ -583,6 +600,7 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         remove,
         listen: listen as any,
         multiple: multiple as any,
+        multipleCopy: multipleCopy as any,
         single: single as any,
         changing: changing as any,
     }

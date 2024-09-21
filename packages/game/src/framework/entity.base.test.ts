@@ -282,6 +282,19 @@ describe("EntityStore", () => {
         expect(i5.has("velocity") && i5.get("velocity")).toEqual(entity2.get("velocity"))
     })
 
+    it("should be able to remove entities in a loop", () => {
+        store.create({ position: { x: 0, y: 0 } })
+        store.create({ position: { x: 1, y: 1 } })
+        store.create({ position: { x: 2, y: 2 } })
+
+        for (const entity of store.multipleCopy("position")) {
+            store.remove(entity)
+        }
+
+        const retrieved = store.multiple("position")
+        expect(retrieved.length).toBe(0)
+    })
+
     it("should handle entity removal and addition within the same operation", () => {
         const entity1 = store.create({ position: { x: 0, y: 0 } })
         const _entity2 = store.create({ position: { x: 1, y: 1 } })

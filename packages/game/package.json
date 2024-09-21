@@ -10,13 +10,12 @@
         "lint": "eslint \"src/**/*.{tsx,ts}\""
     },
     "dependencies": {
-        "@dimforge/rapier2d": "^0.11.2",
+        "@dimforge/rapier2d": "^0.14.0",
         "@petamoriken/float16": "^3.8.3",
         "@stdlib/math": "^0.0.11",
         "lz-string": "^1.5.0",
         "mnemonist": "^0.39.5",
         "protobufjs": "^7.2.4",
-        "runtime-framework": "*",
         "ts-proto": "^1.156.6",
         "typescript": "latest"
     },

@@ -1,4 +1,4 @@
-import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
+import { WebGameStore } from "../../model/store"
 
 export class TouchVertical {
     private pointer?: {
@@ -15,24 +15,19 @@ export class TouchVertical {
 
     private touchEvents = ["touchstart", "touchend", "touchmove", "touchcancel"] as const
 
-    constructor(private runtime: ExtendedRuntime) {
+    constructor(private runtime: WebGameStore) {
         this.onTouchEvent = this.onTouchEvent.bind(this)
 
         for (const ptrEvent of this.touchEvents) {
-            runtime.factoryContext.renderer.domElement.addEventListener(
-                ptrEvent,
-                this.onTouchEvent,
-                { capture: true },
-            )
+            runtime.renderer.domElement.addEventListener(ptrEvent, this.onTouchEvent, {
+                capture: true,
+            })
         }
     }
 
     dispose() {
         for (const ptrEvent of this.touchEvents) {
-            this.runtime.factoryContext.renderer.domElement.removeEventListener(
-                ptrEvent,
-                this.onTouchEvent,
-            )
+            this.runtime.renderer.domElement.removeEventListener(ptrEvent, this.onTouchEvent)
         }
     }
 

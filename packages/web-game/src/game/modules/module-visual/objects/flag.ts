@@ -1,6 +1,5 @@
+import { LevelEntity } from "game/src/modules/module-level"
 import * as THREE from "three"
-import { EntityWith } from "../../../../../../_runtime-framework/src"
-import { ExtendedComponents } from "../../../runtime-extension/extended-components"
 import { Svg } from "../svg"
 
 const prototypeRed = new Svg(
@@ -17,8 +16,10 @@ export class Flag extends THREE.Object3D {
     private red: Svg
     private green: Svg
 
-    constructor(private levelEntity: EntityWith<ExtendedComponents, "level">) {
+    constructor(private level: LevelEntity) {
         super()
+
+        const levelComponent = level.get("level")
 
         this.red = prototypeRed.clone()
         this.green = prototypeGreen.clone()
@@ -29,25 +30,21 @@ export class Flag extends THREE.Object3D {
         this.green.visible = false
 
         const scale = (0.15 * 1) / 25.0
-        this.position.set(
-            levelEntity.components.level.flag.x,
-            levelEntity.components.level.flag.y,
-            0,
-        )
-        this.rotation.set(0, 0, levelEntity.components.level.flagRotation)
+        this.position.set(levelComponent.position.x, levelComponent.position.y, 0)
+        this.rotation.set(0, 0, levelComponent.rotation)
         this.scale.set(scale, -scale, 1.0)
     }
 
     onUpdate() {
-        const should =
-            this.levelEntity.components.level.captured ||
-            this.levelEntity.components.level.inCapture
+        const levelComponent = this.level.get("level")
 
-        if (this.isActive !== should) {
-            this.isActive = should
+        const shouldBeActive = levelComponent.capturing || levelComponent.completed
 
-            this.red.visible = !should
-            this.green.visible = should
+        if (this.isActive !== shouldBeActive) {
+            this.isActive = shouldBeActive
+
+            this.red.visible = !shouldBeActive
+            this.green.visible = shouldBeActive
         }
     }
 }

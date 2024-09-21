@@ -1,4 +1,4 @@
-import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
+import { WebGameStore } from "../../model/store"
 
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
@@ -14,24 +14,19 @@ export class Mouse {
 
     private ptrEvents = ["pointerdown", "pointerup", "pointermove", "pointercancel"] as const
 
-    constructor(private runtime: ExtendedRuntime) {
+    constructor(private runtime: WebGameStore) {
         this.onPointerEvent = this.onPointerEvent.bind(this)
 
         for (const ptrEvent of this.ptrEvents) {
-            runtime.factoryContext.renderer.domElement.addEventListener(
-                ptrEvent,
-                this.onPointerEvent,
-                { capture: true },
-            )
+            runtime.renderer.domElement.addEventListener(ptrEvent, this.onPointerEvent, {
+                capture: true,
+            })
         }
     }
 
     dispose() {
         for (const ptrEvent of this.ptrEvents) {
-            this.runtime.factoryContext.renderer.domElement.removeEventListener(
-                ptrEvent,
-                this.onPointerEvent,
-            )
+            this.runtime.renderer.domElement.removeEventListener(ptrEvent, this.onPointerEvent)
         }
     }
 

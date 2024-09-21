@@ -7,8 +7,8 @@ import { ModuleHookHandler } from "./modules/module-hook-handler"
 import { ModuleInput } from "./modules/module-input/module-input"
 import { ModuleLobby } from "./modules/module-lobby/module-lobby"
 import { ModuleParticles } from "./modules/module-particles/module-particles"
-import { ModuleScene } from "./modules/module-scene/module-scene"
 import { ModuleUI } from "./modules/module-ui/module-ui"
+import { ModuleVisual } from "./modules/module-visual/module-scene"
 
 export interface GameInterface {
     dispose(): void
@@ -18,7 +18,7 @@ export interface GameInterface {
     onUpdate(delta: number, overstep: number): void
 }
 
-export class Game implements GameInterface {
+export class WebGame implements GameInterface {
     store: WebGameStore
 
     replayCapture: ReplayCaptureService
@@ -26,10 +26,10 @@ export class Game implements GameInterface {
     moduleCamera: ModuleCamera
     moduleHooks: ModuleHookHandler
     moduleInput: ModuleInput
-    moduleParticles: ModuleParticles
-    moduleScene: ModuleScene
     moduleLobby?: ModuleLobby
-    modelUi: ModuleUI
+    moduleParticles: ModuleParticles
+    moduleUI: ModuleUI
+    moduleVisual: ModuleVisual
 
     constructor(settings: GameSettings) {
         const renderer = new WebGLRenderer({
@@ -48,8 +48,8 @@ export class Game implements GameInterface {
         this.moduleHooks = new ModuleHookHandler(this.store)
         this.moduleInput = new ModuleInput(this.store)
         this.moduleParticles = new ModuleParticles(this.store)
-        this.moduleScene = new ModuleScene(this.store)
-        this.modelUi = new ModuleUI(this.store)
+        this.moduleUI = new ModuleUI(this.store)
+        this.moduleVisual = new ModuleVisual(this.store)
 
         if (settings.instanceType === "play" && settings.lobby) {
             this.moduleLobby = new ModuleLobby(this.store)
@@ -78,7 +78,6 @@ export class Game implements GameInterface {
     }
 
     onFixedUpdate(last: boolean) {
-        this.moduleScene.onFixedUpdate(last)
         this.moduleInput.onFixedUpdate()
 
         const input = {
@@ -91,18 +90,19 @@ export class Game implements GameInterface {
 
         this.store.game.onUpdate(input)
 
-        this.moduleLobby?.onFixedUpdate()
-
         if (last) {
-            this.moduleCamera.onFixedUpdate()
+            this.store.interpolation.onLastFixedUpdate()
         }
 
-        this.modelUi.onFixedUpdate()
+        this.moduleLobby?.onFixedUpdate()
+        this.moduleUI.onFixedUpdate()
     }
 
     onUpdate(delta: number, overstep: number) {
+        this.store.interpolation.onUpdate(delta, overstep)
+
         this.moduleParticles.update(delta)
-        this.moduleScene.onUpdate(delta, overstep)
+        this.moduleVisual.onUpdate()
         this.moduleLobby?.onUpdate(overstep)
         this.moduleCamera.onUpdate(delta)
 
@@ -110,8 +110,7 @@ export class Game implements GameInterface {
 
         this.moduleCamera.updateViewport()
         this.store.renderer.render(this.store.scene, this.moduleCamera)
-
-        this.modelUi.onUpdate()
+        this.moduleUI.onUpdate()
     }
 
     domElement() {

@@ -1,4 +1,4 @@
-import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
+import { WebGameStore } from "../../model/store"
 import { Keyboard } from "./keyboard"
 import { Mouse } from "./mouse"
 import { Touch } from "./touch"
@@ -20,7 +20,7 @@ export class ModuleInput {
     // private precomputed: RuntimeSystemContext[]
     // private iter = -1
 
-    constructor(runtime: ExtendedRuntime) {
+    constructor(runtime: WebGameStore) {
         this.keyboard = new Keyboard()
         this.mouse = new Mouse(runtime)
         this.touch = new Touch(runtime)

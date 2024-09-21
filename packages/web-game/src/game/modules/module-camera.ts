@@ -1,9 +1,7 @@
-import { LevelCapturedMessage } from "runtime/src/core/level-capture/level-captured-message"
-import { RuntimeComponents } from "runtime/src/core/runtime-components"
+import { levelComponents, LevelEntity } from "game/src/modules/module-level"
+import { rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
 import * as THREE from "three"
-import { EntityWith, MessageCollector } from "../../../../_runtime-framework/src"
-import { ExtendedComponents } from "../runtime-extension/extended-components"
-import { ExtendedRuntime } from "../runtime-extension/new-extended-runtime"
+import { WebGameStore } from "../model/store"
 
 type TransitionAnimation =
     | undefined
@@ -31,7 +29,7 @@ export class ModuleCamera extends THREE.OrthographicCamera {
     private configAnimationSpeed: number
     private configZoom: number
 
-    private rocket: EntityWith<ExtendedComponents, "rocket" | "interpolation">
+    private getRocket: () => RocketEntity
 
     private cameraTargetSize: THREE.Vector2 = new THREE.Vector2()
     private levelConstraintPosition: THREE.Vector2 = new THREE.Vector2()
@@ -41,25 +39,22 @@ export class ModuleCamera extends THREE.OrthographicCamera {
     private transitionAnimation: TransitionAnimation = undefined
     private startAnimation: StartAnimation = undefined
 
-    private levelCapturedCollector: MessageCollector<LevelCapturedMessage>
-
-    constructor(private runtime: ExtendedRuntime) {
+    constructor(private store: WebGameStore) {
         super()
 
         this.position.z = 5
         this.configAnimationSpeed = 1.0 / 1000.0
         this.configZoom = 1920 * 0.04
 
-        const [rocket] = runtime.factoryContext.store.find("rocket", "rigidBody", "interpolation")
-        this.rocket = rocket
-        this.position.x = rocket.components.rigidBody.translation().x
-        this.position.y = rocket.components.rigidBody.translation().y
+        this.getRocket = store.game.store.entities.single(...rocketComponents)
+        const rocket = this.getRocket()
+        const body = rocket.get("body")
+        this.position.x = body.translation().x
+        this.position.y = body.translation().y
 
-        this.levelCapturedCollector = runtime.factoryContext.messageStore.collect("levelCaptured")
-
-        const firstLevel = runtime.factoryContext.store
-            .find("level")
-            .find(x => x.components.level.captured)
+        const firstLevel = store.game.store.entities
+            .multiple(...levelComponents)
+            .find(x => x.get("level").completed)
 
         if (!firstLevel) {
             throw new Error("No first level found")
@@ -72,10 +67,26 @@ export class ModuleCamera extends THREE.OrthographicCamera {
         }
 
         this.updateLevelConstraintFromLevel(firstLevel)
+
+        this.store.game.store.events.listen({
+            captured: ({ level }) => {
+                this.updateLevelConstraintFromLevel(level)
+
+                this.transitionAnimation = {
+                    progress: 0,
+                    startSize: this.size.clone(),
+                    targetPosition: new THREE.Vector2(),
+                    startPosition: this.position.clone(),
+                }
+
+                this.updateCameraSize()
+                this.updateCameraPosition()
+            },
+        })
     }
 
     onCanvasResize(width: number, height: number) {
-        this.runtime.factoryContext.renderer.setSize(width, height, false)
+        this.store.renderer.setSize(width, height, false)
 
         const max = Math.max(width, height)
 
@@ -84,24 +95,6 @@ export class ModuleCamera extends THREE.OrthographicCamera {
 
         this.updateCameraSize()
         this.updateCameraPosition()
-    }
-
-    onFixedUpdate() {
-        const lastCaptured = [...this.levelCapturedCollector].at(-1)
-
-        if (lastCaptured) {
-            this.updateLevelConstraintFromLevel(lastCaptured.level)
-
-            this.transitionAnimation = {
-                progress: 0,
-                startSize: this.size.clone(),
-                targetPosition: new THREE.Vector2(),
-                startPosition: this.position.clone(),
-            }
-
-            this.updateCameraSize()
-            this.updateCameraPosition()
-        }
     }
 
     onUpdate(delta: number) {
@@ -190,8 +183,8 @@ export class ModuleCamera extends THREE.OrthographicCamera {
     }
 
     updateViewport() {
-        const rendererWidth = this.runtime.factoryContext.renderer.domElement.clientWidth
-        const rendererHeight = this.runtime.factoryContext.renderer.domElement.clientHeight
+        const rendererWidth = this.store.renderer.domElement.clientWidth
+        const rendererHeight = this.store.renderer.domElement.clientHeight
 
         let viewportSizeX = this.size.x / this.cameraTargetSize.x
         let viewportSizeY = this.size.y / this.cameraTargetSize.y
@@ -204,7 +197,7 @@ export class ModuleCamera extends THREE.OrthographicCamera {
         const viewportX = 0.5 * rendererWidth * (1 - viewportSizeX)
         const viewportY = 0.5 * rendererHeight * (1 - viewportSizeY)
 
-        this.runtime.factoryContext.renderer.setViewport(
+        this.store.renderer.setViewport(
             viewportX,
             viewportY,
             viewportSizeX * rendererWidth,
@@ -236,10 +229,15 @@ export class ModuleCamera extends THREE.OrthographicCamera {
             }
         }
 
-        const rocketPositionInViewX =
-            this.rocket.components.interpolation.position.x - this.levelConstraintPosition.x
-        const rocketPositionInViewY =
-            this.rocket.components.interpolation.position.y - this.levelConstraintPosition.y
+        const rocket = this.getRocket()
+        const interpolation = this.store.interpolation.get(rocket.id)
+
+        if (interpolation === undefined) {
+            throw new Error("Rocket interpolation not found")
+        }
+
+        const rocketPositionInViewX = interpolation.x - this.levelConstraintPosition.x
+        const rocketPositionInViewY = interpolation.y - this.levelConstraintPosition.y
 
         const cameraPositionX =
             this.levelConstraintPosition.x +
@@ -258,15 +256,17 @@ export class ModuleCamera extends THREE.OrthographicCamera {
         }
     }
 
-    private updateLevelConstraintFromLevel(entity: EntityWith<RuntimeComponents, "level">) {
+    private updateLevelConstraintFromLevel(level: LevelEntity) {
+        const levelComponent = level.get("level")
+
         this.levelConstraintSize = new THREE.Vector2(
-            entity.components.level.camera.bottomRight.x - entity.components.level.camera.topLeft.x,
-            entity.components.level.camera.topLeft.y - entity.components.level.camera.bottomRight.y,
+            levelComponent.cameraRect.right - levelComponent.cameraRect.left,
+            levelComponent.cameraRect.top - levelComponent.cameraRect.bottom,
         )
 
         this.levelConstraintPosition = new THREE.Vector2(
-            entity.components.level.camera.topLeft.x,
-            entity.components.level.camera.bottomRight.y,
+            levelComponent.cameraRect.left,
+            levelComponent.cameraRect.bottom,
         )
     }
 

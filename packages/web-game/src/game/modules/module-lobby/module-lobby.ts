@@ -1,16 +1,16 @@
+import { rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
 import { Frame, FramePacket } from "shared/src/lobby-api/frame-packet"
 import {
+    messageFromServer,
     UPDATE_POSITIONS_EVERY_MS,
     UpdateFromClient,
-    messageFromServer,
 } from "shared/src/lobby-api/lobby-api"
 import { UserOther } from "shared/src/lobby-api/user-other"
+import { lerp } from "three/src/math/MathUtils"
 import { Text } from "troika-three-text"
-import { EntityWith } from "../../../../../_runtime-framework/src"
-import { ExtendedComponents } from "../../runtime-extension/extended-components"
-import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
-import { lerp, slerp } from "../module-scene/module-scene"
-import { Rocket } from "../module-scene/objects/rocket"
+import { slerp } from "../../model/interpolation"
+import { WebGameStore } from "../../model/store"
+import { Rocket } from "../module-visual/objects/rocket"
 
 export class OtherUserGhost {
     private packets: FramePacket[] = []
@@ -22,7 +22,7 @@ export class OtherUserGhost {
     private previousFrame: Frame | undefined
 
     constructor(
-        private runtime: ExtendedRuntime,
+        private store: WebGameStore,
         private user: UserOther,
     ) {
         this.mesh = new Rocket(0.2)
@@ -40,11 +40,11 @@ export class OtherUserGhost {
 
         this.mesh.add(text as any)
 
-        this.runtime.factoryContext.scene.add(this.mesh)
+        this.store.scene.add(this.mesh)
     }
 
     dispose() {
-        this.runtime.factoryContext.scene.remove(this.mesh)
+        this.store.scene.remove(this.mesh)
     }
 
     addPacket(packet: FramePacket) {
@@ -107,15 +107,15 @@ export class OtherUserGhost {
 export class OtherUserGhosts {
     private ghosts: Map<string, OtherUserGhost>
 
-    constructor(private runtime: ExtendedRuntime) {
+    constructor(private store: WebGameStore) {
         this.ghosts = new Map()
     }
 
     addPackets(packets: FramePacket[]) {
         for (const packet of packets) {
             if (
-                this.runtime.factoryContext.settings.instanceType === "play" &&
-                this.runtime.factoryContext.settings?.lobby?.username === packet.username
+                this.store.settings.instanceType === "play" &&
+                this.store.settings?.lobby?.username === packet.username
             ) {
                 continue
             }
@@ -132,8 +132,8 @@ export class OtherUserGhosts {
 
     addPlayer(user: UserOther) {
         if (
-            this.runtime.factoryContext.settings.instanceType === "play" &&
-            this.runtime.factoryContext.settings?.lobby?.username === user.username
+            this.store.settings.instanceType === "play" &&
+            this.store.settings?.lobby?.username === user.username
         ) {
             return
         }
@@ -142,13 +142,13 @@ export class OtherUserGhosts {
             return
         }
 
-        this.ghosts.set(user.username, new OtherUserGhost(this.runtime, user))
+        this.ghosts.set(user.username, new OtherUserGhost(this.store, user))
     }
 
     removePlayer(username: string) {
         if (
-            this.runtime.factoryContext.settings.instanceType === "play" &&
-            this.runtime.factoryContext.settings?.lobby?.username === username
+            this.store.settings.instanceType === "play" &&
+            this.store.settings?.lobby?.username === username
         ) {
             return
         }
@@ -157,7 +157,7 @@ export class OtherUserGhosts {
 
         if (ghost) {
             const user = ghost.getUser()
-            this.runtime.factoryContext.settings.hooks?.onUserLeft?.(user)
+            this.store.settings.hooks?.onUserLeft?.(user)
 
             ghost.dispose()
         }
@@ -181,48 +181,48 @@ export class OtherUserGhosts {
 }
 
 export class ModuleLobby {
-    private packet: FramePacket
-    private rocket: EntityWith<ExtendedComponents, "rocket" | "rigidBody">
-    private lastSend = 0
-    private ws: WebSocket | undefined
-    private disposed = false
-    private url: string
+    private getRocket: () => RocketEntity
 
+    private disposed = false
+    private lastSend = 0
     private lastSetup: number
+    private otherPlayers: OtherUserGhosts
+    private packet: FramePacket
+    private url: string
+    private ws: WebSocket | undefined
+
     private setupEveryMs = 1000 * 30
 
-    private otherPlayers: OtherUserGhosts
-
-    constructor(private runtime: ExtendedRuntime) {
-        if (runtime.factoryContext.settings.instanceType !== "play") {
+    constructor(private store: WebGameStore) {
+        if (store.settings.instanceType !== "play") {
             throw new Error("ModuleLobby can only be used in play mode")
         }
 
-        if (runtime.factoryContext.settings.lobby === undefined) {
+        if (store.settings.lobby === undefined) {
             throw new Error("ModuleLobby requires a user token")
         }
 
-        const lobbyId = `${runtime.factoryContext.settings.worldname}-${runtime.factoryContext.settings.gamemode}`
+        const lobbyId = `${store.settings.worldname}-${store.settings.gamemode}`
 
-        const url = new URL(`wss://${runtime.factoryContext.settings.lobby.host}/lobby`)
-        url.searchParams.set("authorization", runtime.factoryContext.settings.lobby.token)
+        const url = new URL(`wss://${store.settings.lobby.host}/lobby`)
+        url.searchParams.set("authorization", store.settings.lobby.token)
         url.searchParams.set("id", lobbyId)
 
         this.url = url.toString()
 
-        this.otherPlayers = new OtherUserGhosts(runtime)
+        this.otherPlayers = new OtherUserGhosts(store)
 
         this.lastSetup = Date.now()
 
         this.packet = {
-            username: runtime.factoryContext.settings.lobby.username,
+            username: store.settings.lobby.username,
             frames: [],
         }
 
-        this.rocket = runtime.factoryContext.store.find("rocket", "rigidBody")[0]
+        this.getRocket = store.game.store.entities.single(...rocketComponents)
         this.lastSend = Date.now()
 
-        const token = runtime.factoryContext.settings.lobby.token
+        const token = store.settings.lobby.token
         this.setup(token)
     }
 
@@ -238,12 +238,15 @@ export class ModuleLobby {
             return
         }
 
+        const rocket = this.getRocket()
+        const body = rocket.get("body")
+
         this.otherPlayers.onFixedUpdate()
 
         this.packet.frames.push({
-            x: this.rocket.components.rigidBody.translation().x,
-            y: this.rocket.components.rigidBody.translation().y,
-            rotation: this.rocket.components.rigidBody.rotation(),
+            x: body.translation().x,
+            y: body.translation().y,
+            rotation: body.rotation(),
         })
 
         const now = Date.now()
@@ -291,7 +294,7 @@ export class ModuleLobby {
                 case "update":
                     for (const user of data.usersConnected) {
                         this.otherPlayers.addPlayer(user)
-                        this.runtime.factoryContext.settings.hooks?.onUserJoined?.(user)
+                        this.store.settings.hooks?.onUserJoined?.(user)
                     }
 
                     this.otherPlayers.addPackets(data.framePackets)
@@ -307,7 +310,7 @@ export class ModuleLobby {
                         this.otherPlayers.addPlayer(user)
                     }
 
-                    this.runtime.factoryContext.settings.hooks?.onConnected?.(data.users.length)
+                    this.store.settings.hooks?.onConnected?.(data.users.length)
 
                     break
             }
@@ -320,7 +323,7 @@ export class ModuleLobby {
         this.ws.onclose = event => {
             console.warn("Lobby websocket closed with reason: ", event.reason, event.code)
 
-            this.runtime.factoryContext.settings.hooks?.onDisconnected?.()
+            this.store.settings.hooks?.onDisconnected?.()
 
             if (this.ws === previousWs) {
                 this.rerunSetup(token)

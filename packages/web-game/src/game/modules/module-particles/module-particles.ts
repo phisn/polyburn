@@ -1,14 +1,12 @@
+import { rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
 import { EntityType } from "runtime/proto/world"
-import { RocketDeathMessage } from "runtime/src/core/rocket/rocket-death-message"
 import { changeAnchor } from "runtime/src/model/world/change-anchor"
 import { entityRegistry } from "runtime/src/model/world/entity-registry"
 import { Color } from "three"
-import { EntityWith, MessageCollector } from "../../../../../_runtime-framework/src"
-import { ExtendedComponents } from "../../runtime-extension/extended-components"
-import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
+import { WebGameStore } from "../../model/store"
 import {
-    ParticleTemplate,
     downBias,
+    ParticleTemplate,
     randomBetween,
     randomBetweenDownBiased,
 } from "./particle-template"
@@ -66,68 +64,71 @@ const PARTICLE_TEMPLATE_DEATH: ParticleTemplate = () => ({
 
 export class ModuleParticles {
     private rocketTime = 0
-    private rocket: EntityWith<ExtendedComponents, "interpolation" | "rocket" | "rigidBody">
-
-    private rocketDeathCollector: MessageCollector<RocketDeathMessage>
+    private getRocket: () => RocketEntity
 
     private simulation: ParticleSimulation
 
-    constructor(private runtime: ExtendedRuntime) {
-        const shapes = runtime.factoryContext.store
-            .find("shape")
-            .map(x => x.components.shape.vertices.map(x => x.position))
+    constructor(private store: WebGameStore) {
+        const shapes = store.game.store.entities
+            .multiple("shape")
+            .map(x => x.get("shape").vertices.map(x => x.position))
 
-        this.simulation = new ParticleSimulation(runtime, shapes)
+        this.simulation = new ParticleSimulation(store, shapes)
+        this.getRocket = store.game.store.entities.single(...rocketComponents)
 
-        const [rocket] = runtime.factoryContext.store.find("rocket", "interpolation", "rigidBody")
-        this.rocket = rocket
+        store.game.store.events.listen({
+            death: ({ normal, contactPoint }) => {
+                for (let i = 0; i < 50; ++i) {
+                    const rotationFromNormal = Math.atan2(normal.y, normal.x)
 
-        this.rocketDeathCollector = runtime.factoryContext.messageStore.collect("rocketDeath")
+                    this.simulation.createParticle(
+                        PARTICLE_TEMPLATE_DEATH,
+                        contactPoint,
+                        rotationFromNormal + Math.PI / 2,
+                        { x: 0, y: 0 },
+                    )
+                }
+            },
+        })
     }
 
     update(delta: number) {
         this.simulation.onUpdate(delta)
 
-        if (this.rocket.components.rocket.thrusting) {
+        const rocket = this.getRocket()
+        const rocketComponent = rocket.get("rocket")
+
+        if (rocketComponent.thrust) {
             this.rocketTime += delta
+
+            const interpolation = this.store.interpolation.get(rocket.id)
+            const body = rocket.get("body")
+
+            if (interpolation === undefined) {
+                throw new Error("Rocket interpolation not found")
+            }
+
+            const spawnPosition = changeAnchor(
+                interpolation,
+                interpolation.rotation,
+                entityRegistry[EntityType.ROCKET],
+                { x: 0.5, y: 0.5 },
+                { x: 0.5, y: 0.3 },
+            )
 
             for (let i = 0; this.rocketTime >= 16 / 3; ++i) {
                 this.rocketTime -= 16 / 3
 
-                const spawnPosition = changeAnchor(
-                    this.rocket.components.interpolation.position,
-                    this.rocket.components.interpolation.rotation,
-                    entityRegistry[EntityType.ROCKET],
-                    { x: 0.5, y: 0.5 },
-                    { x: 0.5, y: 0.3 },
-                )
-
                 this.simulation.createParticle(
                     PARTICLE_TEMPLATE_THRUST,
                     spawnPosition,
-                    this.rocket.components.interpolation.rotation,
-                    this.rocket.components.rigidBody.linvel(),
+                    interpolation.rotation,
+                    body.linvel(),
                     i,
                 )
             }
         } else {
             this.rocketTime = 0
-        }
-
-        for (const message of this.rocketDeathCollector) {
-            for (let i = 0; i < 50; ++i) {
-                const normal = message.normal
-                const rotationFromNormal = Math.atan2(normal.y, normal.x)
-
-                // console.log("death", message.position, message.contactPoint)
-
-                this.simulation.createParticle(
-                    PARTICLE_TEMPLATE_DEATH,
-                    message.contactPoint,
-                    rotationFromNormal + Math.PI / 2,
-                    { x: 0, y: 0 },
-                )
-            }
         }
     }
 }

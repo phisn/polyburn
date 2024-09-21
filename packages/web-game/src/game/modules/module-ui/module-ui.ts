@@ -1,5 +1,5 @@
 import { OrthographicCamera, Scene } from "three"
-import { ExtendedRuntime } from "../../runtime-extension/new-extended-runtime"
+import { WebGameStore } from "../../model/store"
 import { Timer } from "./timer"
 
 export class ModuleUI {
@@ -8,7 +8,7 @@ export class ModuleUI {
 
     private timer: Timer
 
-    constructor(private runtime: ExtendedRuntime) {
+    constructor(private store: WebGameStore) {
         this.camera = new OrthographicCamera(-1, 1, 1, -1, -100, 100)
         this.scene = new Scene()
 
@@ -21,12 +21,12 @@ export class ModuleUI {
     }
 
     onUpdate() {
-        const width = this.runtime.factoryContext.renderer.domElement.clientWidth
-        const height = this.runtime.factoryContext.renderer.domElement.clientHeight
+        const width = this.store.renderer.domElement.clientWidth
+        const height = this.store.renderer.domElement.clientHeight
 
         const min = Math.min(width, height)
 
-        this.runtime.factoryContext.renderer.setViewport(width / 2 - min / 2, 0, min, min)
-        this.runtime.factoryContext.renderer.render(this.scene, this.camera)
+        this.store.renderer.setViewport(width / 2 - min / 2, 0, min, min)
+        this.store.renderer.render(this.scene, this.camera)
     }
 }

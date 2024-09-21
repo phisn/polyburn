@@ -5,6 +5,7 @@ import { EventStore } from "../framework/event"
 import { ResourceStore } from "../framework/resource"
 import { LevelComponent, LevelEntity } from "../modules/module-level"
 import { RocketComponent, RocketEntity } from "../modules/module-rocket"
+import { Point } from "./utils"
 
 export class GameStore {
     public resources: ResourceStore<GameResources>
@@ -42,10 +43,17 @@ export interface GameEvents {
         c1: RAPIER.Collider
         c2: RAPIER.Collider
 
-        e1: EntityWith<GameComponents, "body">
-        e2: EntityWith<GameComponents, "body">
+        e1?: EntityWith<GameComponents, "body">
+        e2?: EntityWith<GameComponents, "body">
 
         started: boolean
+    }): void
+
+    death(props: {
+        rocket: RocketEntity
+
+        contactPoint: Point
+        normal: Point
     }): void
 
     captureChanged(props: { rocket: RocketEntity; level: LevelEntity; started: boolean }): void

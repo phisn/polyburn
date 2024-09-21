@@ -1,3 +1,4 @@
+import RAPIER from "@dimforge/rapier2d"
 import { LevelConfig } from "../../proto/world"
 import { EntityWith } from "../framework/entity"
 import { GameInput } from "../game"
@@ -6,29 +7,37 @@ import { Point, Rect, Size, changeAnchor } from "../model/utils"
 import { RocketEntity, rocketComponents } from "./module-rocket"
 
 export interface LevelComponent {
-    config: LevelConfig
+    start: boolean
+
+    cameraRect: Rect
+    position: Point
+    rotation: number
 
     capturing: boolean
     completed: boolean
-
-    cameraRect: Rect
 }
 
 export const levelComponents = ["level", "body"] satisfies (keyof GameComponents)[]
 export type LevelEntity = EntityWith<GameComponents, (typeof levelComponents)[number]>
 
 export class ModuleLevel {
+    private getRocket: () => RocketEntity
+
     private progress?: number
     private progressLevel?: LevelEntity
 
+    private previousBorder?: RAPIER.Collider
+
     constructor(private store: GameStore) {
+        this.getRocket = store.entities.single(...rocketComponents)
+
         store.events.listen({
             collision: ({ e1, e2, started }) => {
-                if (e1.has(...levelComponents) && e2.has(...rocketComponents)) {
+                if (e1?.has(...levelComponents) && e2?.has(...rocketComponents)) {
                     this.handleCollision(e1, e2, started)
                 }
 
-                if (e1.has(...rocketComponents) && e2.has(...levelComponents)) {
+                if (e1?.has(...rocketComponents) && e2?.has(...levelComponents)) {
                     this.handleCollision(e2, e1, started)
                 }
             },
@@ -67,7 +76,9 @@ export class ModuleLevel {
         }
 
         const level = nearestLevel.get("level")
+        level.start = true
         level.completed = true
+        this.constructBorder(level)
     }
 
     onUpdate(_input: GameInput) {
@@ -75,23 +86,38 @@ export class ModuleLevel {
             this.progress -= 1
 
             if (this.progress <= 0) {
-                const captured = this.progressLevel
-                this.progressLevel = undefined
-
-                const world = this.store.resources.get("world")
-                const body = captured.get("body")
-                world.removeRigidBody(body)
-
-                const level = captured.get("level")
-                level.completed = true
-                level.capturing = false
-
-                this.store.events.invoke.captured?.({
-                    rocket: this.store.entities.single(...rocketComponents)(),
-                    level: captured,
-                })
+                this.handleFinish(this.progressLevel)
             }
         }
+    }
+
+    private handleFinish(level: LevelEntity) {
+        const rocketBody = this.getRocket().get("body")
+        const rocketVelocity = rocketBody.linvel()
+
+        if (
+            Math.abs(rocketVelocity.x) > ROCKET_SPEED_TOLERANCE ||
+            Math.abs(rocketVelocity.y) > ROCKET_SPEED_TOLERANCE
+        ) {
+            return
+        }
+
+        const captured = level
+        this.progressLevel = undefined
+
+        const world = this.store.resources.get("world")
+        const body = captured.get("body")
+        world.removeRigidBody(body)
+
+        const levelComponent = captured.get("level")
+        levelComponent.completed = true
+        levelComponent.capturing = false
+        this.constructBorder(levelComponent)
+
+        this.store.events.invoke.captured?.({
+            rocket: this.store.entities.single(...rocketComponents)(),
+            level: captured,
+        })
     }
 
     private handleCollision(level: LevelEntity, rocket: RocketEntity, started: boolean) {
@@ -114,14 +140,49 @@ export class ModuleLevel {
         })
     }
 
+    private constructBorder(levelComponent: LevelComponent) {
+        const rapier = this.store.resources.get("rapier")
+        const world = this.store.resources.get("world")
+
+        if (this.previousBorder) {
+            world.removeCollider(this.previousBorder, false)
+        }
+
+        const colliderDesc = rapier.ColliderDesc.polyline(
+            new Float32Array([
+                levelComponent.cameraRect.left,
+                levelComponent.cameraRect.top,
+
+                levelComponent.cameraRect.left,
+                levelComponent.cameraRect.bottom,
+
+                levelComponent.cameraRect.right,
+                levelComponent.cameraRect.bottom,
+
+                levelComponent.cameraRect.right,
+                levelComponent.cameraRect.top,
+
+                levelComponent.cameraRect.left,
+                levelComponent.cameraRect.top,
+            ]),
+        )
+
+        this.previousBorder = world.createCollider(colliderDesc)
+    }
+
     private constructLevel(levelConfig: LevelConfig) {
         const rapier = this.store.resources.get("rapier")
         const world = this.store.resources.get("world")
 
+        const position = {
+            x: levelConfig.positionX,
+            y: levelConfig.positionY,
+        }
+
         const body = world.createRigidBody(new rapier.RigidBodyDesc(rapier.RigidBodyType.Fixed))
 
         const captureBox = calculateCaptureBox(
-            { x: levelConfig.positionX, y: levelConfig.positionY },
+            position,
             levelConfig.rotation,
             levelConfig.captureAreaLeft,
             levelConfig.captureAreaRight,
@@ -138,10 +199,7 @@ export class ModuleLevel {
         const level = this.store.entities.create({
             body,
             level: {
-                config: levelConfig,
-
-                capturing: false,
-                completed: false,
+                start: false,
 
                 cameraRect: {
                     left: levelConfig.cameraTopLeftX,
@@ -149,6 +207,11 @@ export class ModuleLevel {
                     right: levelConfig.cameraBottomRightX,
                     bottom: levelConfig.cameraBottomRightY,
                 },
+                position,
+                rotation: levelConfig.rotation,
+
+                capturing: false,
+                completed: false,
             },
         })
 
@@ -156,6 +219,7 @@ export class ModuleLevel {
     }
 }
 
+const ROCKET_SPEED_TOLERANCE = 0.001
 const TICKS_TO_CAPTURE = 60
 const FLAG_CAPTURE_HEIGHT = 0.5
 

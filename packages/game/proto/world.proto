@@ -18,7 +18,7 @@ message RocketConfig {
     float position_y = 2;
     float rotation = 3;
 
-    RocketConfig default_config = 4;
+    RocketBehaviorConfig default_config = 4;
 }
 
 message LevelConfig {

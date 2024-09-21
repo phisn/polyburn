@@ -2,16 +2,13 @@ import RAPIER from "@dimforge/rapier2d"
 import { EntityWith } from "../framework/entity"
 import { GameInput } from "../game"
 import { GameComponents, GameStore } from "../model/store"
-import { RocketEntity, rocketComponents } from "./module-rocket"
 
 export class ModuleWorld {
     private bodyToEntity: Map<number, EntityWith<GameComponents, "body">>
-    private getRocket: () => RocketEntity
     private queue: RAPIER.EventQueue
 
     constructor(private store: GameStore) {
         this.bodyToEntity = new Map()
-        this.getRocket = store.entities.single(...rocketComponents)
         this.queue = new RAPIER.EventQueue(false)
 
         this.store.entities.listen(
@@ -33,35 +30,17 @@ export class ModuleWorld {
         this.queue.drainCollisionEvents((h1, h2, started) => {
             const c1 = world.getCollider(h1)
             const p1 = c1.parent()
-
-            if (!p1) {
-                return
-            }
-
-            const e1 = this.bodyToEntity.get(p1.handle)
-
-            if (!e1) {
-                return
-            }
+            const e1 = p1 && this.bodyToEntity.get(p1.handle)
 
             const c2 = world.getCollider(h2)
             const p2 = c2.parent()
-
-            if (!p2) {
-                return
-            }
-
-            const e2 = this.bodyToEntity.get(p2.handle)
-
-            if (!e2) {
-                return
-            }
+            const e2 = p2 && this.bodyToEntity.get(p2.handle)
 
             this.store.events.invoke.collision?.({
                 c1,
                 c2,
-                e1,
-                e2,
+                e1: e1 ?? undefined,
+                e2: e2 ?? undefined,
                 started,
             })
         })

@@ -1,12 +1,29 @@
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 
+export interface Point {
+    x: number
+    y: number
+}
+
+export interface Rect {
+    left: number
+    top: number
+    right: number
+    bottom: number
+}
+
+export interface Size {
+    width: number
+    height: number
+}
+
 export const changeAnchor = (
-    position: { x: number; y: number },
+    position: Point,
     rotation: number,
-    size: { width: number; height: number },
-    sourceAnchor: { x: number; y: number },
-    targetAnchor: { x: number; y: number },
+    size: Size,
+    sourceAnchor: Point,
+    targetAnchor: Point,
 ) => ({
     x:
         position.x +

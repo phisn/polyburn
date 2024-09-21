@@ -49,4 +49,5 @@ export interface GameEvents {
     }): void
 
     captureChanged(props: { rocket: RocketEntity; level: LevelEntity; started: boolean }): void
+    captured(props: { rocket: RocketEntity; level: LevelEntity }): void
 }

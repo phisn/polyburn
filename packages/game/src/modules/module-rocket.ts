@@ -1,7 +1,7 @@
 import { EntityWith } from "../framework/entity"
 import { GameInput } from "../game"
-import { changeAnchor } from "../model/change-anchor"
 import { GameComponents, GameStore } from "../model/store"
+import { Size, changeAnchor } from "../model/utils"
 
 export interface RocketComponent {
     thrust: boolean
@@ -87,7 +87,7 @@ const ROCKET_COLLIDERS = [
     [-0.9, -1.8, -0.894, -1.212, -0.24, -1.212],
 ]
 
-export const ROCKET_SIZE = {
+export const ROCKET_SIZE: Size = {
     width: 1.8,
     height: 3.6,
 }

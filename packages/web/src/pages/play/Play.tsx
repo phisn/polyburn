@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useAppStore } from "../../common/store/app-store"
 import { trpc } from "../../common/trpc/trpc"
+import { ArrowClockwise } from "../../components/common/svg/ArrowClockwise"
 import { FinishedPopup } from "./FinishedPopup"
 import { PlayStoreProvider } from "./PlayStoreProvider"
 import { usePlayStore } from "./play-store"
@@ -12,11 +13,28 @@ export function Play() {
     return (
         <ProvidePlayStoreFromParams>
             <>
+                <RefreshButton />
                 <FinishedPopup />
                 <GameCanvas />
                 <GameSettings />
             </>
         </ProvidePlayStoreFromParams>
+    )
+}
+
+function RefreshButton() {
+    const store = usePlayStore(x => x.game)
+
+    console.log(store)
+
+    function onReset() {
+        store.store.game.onReset()
+    }
+
+    return (
+        <div onClick={onReset} className="btn btn-square btn-ghost absolute left-0 top-0 z-10 m-4">
+            <ArrowClockwise width="32" height="32" />
+        </div>
     )
 }
 

@@ -75,31 +75,6 @@ export interface EntityStoreScoped<Components extends object> extends EntityStor
     clear(): void
 }
 
-class WeakLookup<K, T extends WeakKey> {
-    private map = new Map<K, WeakRef<T>>()
-    private inUse = false
-
-    set(key: K, value: any) {
-        this.map.set(key, new WeakRef(value))
-    }
-
-    get(key: K) {
-        const value = this.map.get(key)
-
-        if (value === undefined) {
-            return undefined
-        }
-
-        const result = value.deref()
-
-        if (result === undefined) {
-            this.map.delete(key)
-        }
-
-        return result
-    }
-}
-
 export function newEntityStore<Components extends object>(): EntityStore<Components> {
     function componentsToKey(components: string[]) {
         return components.sort().join(",")
@@ -484,7 +459,7 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         return () => void newListener.remove(symbol)
     }
 
-    const multiples = new WeakLookup<string, readonly Entity<any, Components>[]>()
+    const multiples = new Map<string, readonly Entity<any, Components>[]>()
 
     function multiple<C extends ComponentsWithModifier<Components>[]>(
         ...requirements: string[]
@@ -497,29 +472,14 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         }
 
         const entityList = new EntityList(requirements)
-        const entityListRef = new WeakRef(entityList)
 
-        const unlisten = listen(
+        listen(
             requirements,
             entity => {
-                const entityList = entityListRef.deref()
-
-                if (entityList === undefined) {
-                    unlisten()
-                    return
-                }
-
                 entityList.push(entity)
             },
             entity => {
-                const result = entityListRef.deref()
-
-                if (result === undefined) {
-                    unlisten()
-                    return
-                }
-
-                result.remove(entity)
+                entityList.remove(entity)
             },
         )
 
@@ -534,7 +494,7 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         return [...multiple(...requirements)]
     }
 
-    const keyToSingle = new WeakLookup<string, any>()
+    const keyToSingle = new Map<string, any>()
 
     function single<C extends ComponentsWithModifier<Components>[]>(
         ...requirements: string[]

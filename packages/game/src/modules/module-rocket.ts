@@ -53,7 +53,9 @@ export class ModuleRocket {
         })
     }
 
-    onUpdate({ thrust, rotation }: GameInput) {
+    onUpdate(input: GameInput) {
+        this.previousInput = input
+
         const rocket = this.getRocket()
 
         const rocketComponent = rocket.get("rocket")
@@ -61,17 +63,17 @@ export class ModuleRocket {
 
         if (this.firstInput) {
             this.firstInput = false
-            rocketComponent.rotationWithoutInput = -rotation
+            rocketComponent.rotationWithoutInput = -input.rotation
         }
 
         rocketComponent.framesSinceLastDeath++
-        rocketComponent.thrust = thrust
+        rocketComponent.thrust = input.thrust
 
         if (rocketComponent.collisionCount === 0) {
-            body.setRotation(rotation + rocketComponent.rotationWithoutInput, true)
+            body.setRotation(input.rotation + rocketComponent.rotationWithoutInput, true)
         }
 
-        if (thrust) {
+        if (input.thrust) {
             const rapier = this.store.resources.get("rapier")
             const world = this.store.resources.get("world")
 
@@ -191,9 +193,8 @@ export class ModuleRocket {
             rocketComponent.collisionCount--
         }
 
-        if (rocketComponent.collisionCount === 0 && this.previousInput) {
-            rocketComponent.rotationWithoutInput =
-                rocket.get("body").rotation() - this.previousInput.rotation
+        if (rocketComponent.collisionCount === 0) {
+            this.resetRotation(rocket)
         }
     }
 
@@ -293,6 +294,17 @@ export class ModuleRocket {
 
         body.setLinvel({ x: 0, y: 0 }, false)
         body.setAngvel(0, true)
+
+        this.resetRotation(rocket)
+    }
+
+    private resetRotation(rocket: RocketEntity) {
+        if (this.previousInput) {
+            const rocketComponent = rocket.get("rocket")
+
+            rocketComponent.rotationWithoutInput =
+                rocket.get("body").rotation() - this.previousInput.rotation
+        }
     }
 }
 

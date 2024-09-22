@@ -49,23 +49,24 @@ export class Game {
 
                 if (summary.flags === 0) {
                     this.reset = true
+                    this.started = false
                 }
             },
         })
     }
 
     public onUpdate(input: GameInput) {
+        if (this.reset) {
+            this.onReset()
+            this.reset = false
+        }
+
         if (this.started === false) {
             if (input.thrust === false) {
                 return
             }
 
             this.started = true
-        }
-
-        if (this.reset) {
-            this.onReset()
-            this.reset = false
         }
 
         this.moduleLevel.onUpdate(input)

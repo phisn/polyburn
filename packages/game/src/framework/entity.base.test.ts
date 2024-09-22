@@ -945,6 +945,20 @@ describe("EntityStore", () => {
         expect(added).toHaveBeenCalledTimes(1)
     })
 
+    it("should show new entity in single", () => {
+        store.create({ position: { x: 0, y: 0 } })
+        const single = store.single("position")
+
+        for (const retrieved of store.multipleCopy("position")) {
+            store.remove(retrieved)
+        }
+
+        const newEntity = store.create({ position: { x: 1, y: 1 } })
+        const retrieved = single()
+
+        expect(retrieved.id).toBe(newEntity.id)
+    })
+
     it("should handle multiple listeners with different requirements", () => {
         const entity = store.create({ position: { x: 0, y: 0 } })
 

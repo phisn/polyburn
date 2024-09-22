@@ -124,8 +124,8 @@ export const createPlayStore = (props: PlayStoreProps) => {
     const store = createStore<PlayState>()((set, _get) => ({
         ...props,
         status: { type: "running" },
-        game: null!,
-        gameLoop: null!,
+        game,
+        gameLoop,
 
         getCanvas: () => game.domElement(),
         reset: () => {},

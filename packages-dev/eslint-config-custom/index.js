@@ -21,6 +21,7 @@ module.exports = {
         project: true,
     },
     rules: {
+        "@typescript-eslint/ban-types": "off",
         "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/unbound-method": "off",
@@ -34,15 +35,15 @@ module.exports = {
         "@typescript-eslint/no-unused-vars": [
             "error",
             {
-                "args": "all",
-                "argsIgnorePattern": "^_",
-                "caughtErrors": "all",
-                "caughtErrorsIgnorePattern": "^_",
-                "destructuredArrayIgnorePattern": "^_",
-                "varsIgnorePattern": "^_",
-                "ignoreRestSiblings": true
-            }
-        ]
+                args: "all",
+                argsIgnorePattern: "^_",
+                caughtErrors: "all",
+                caughtErrorsIgnorePattern: "^_",
+                destructuredArrayIgnorePattern: "^_",
+                varsIgnorePattern: "^_",
+                ignoreRestSiblings: true,
+            },
+        ],
     },
     ignorePatterns: ["*.cjs", "vite.config.ts", "rollup.config.mjs"],
 }

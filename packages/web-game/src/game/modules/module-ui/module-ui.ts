@@ -12,7 +12,7 @@ export class ModuleUI {
         this.camera = new OrthographicCamera(-1, 1, 1, -1, -100, 100)
         this.scene = new Scene()
 
-        this.timer = new Timer()
+        this.timer = new Timer(this.store)
         this.scene.add(this.timer)
     }
 

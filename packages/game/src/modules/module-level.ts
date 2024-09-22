@@ -54,31 +54,19 @@ export class ModuleLevel {
 
         const config = this.store.resources.get("config")
 
-        let nearestLevel: LevelEntity | undefined
-        let nearestDistance = Infinity
+        const { level: firstLevelConfig } = config.levels
+            .map(level => ({
+                level,
+                distance: Math.sqrt(
+                    (level.positionX - config.rocket.positionX) ** 2 +
+                        (level.positionY - config.rocket.positionY) ** 2,
+                ),
+            }))
+            .reduce((a, b) => (a.distance < b.distance ? a : b))
 
         for (const levelConfig of config.levels) {
-            const level = this.constructLevel(levelConfig)
-
-            const distance = Math.sqrt(
-                (levelConfig.positionX - config.rocket.positionX) ** 2 +
-                    (levelConfig.positionY - config.rocket.positionY) ** 2,
-            )
-
-            if (distance < nearestDistance) {
-                nearestDistance = distance
-                nearestLevel = level
-            }
+            this.constructLevel(levelConfig, levelConfig === firstLevelConfig)
         }
-
-        if (nearestLevel === undefined) {
-            throw new Error("No levels")
-        }
-
-        const level = nearestLevel.get("level")
-        level.start = true
-        level.completed = true
-        this.constructBorder(level)
     }
 
     onUpdate(_input: GameInput) {
@@ -170,7 +158,7 @@ export class ModuleLevel {
         this.previousBorder = world.createCollider(colliderDesc)
     }
 
-    private constructLevel(levelConfig: LevelConfig) {
+    private constructLevel(levelConfig: LevelConfig, start: boolean) {
         const rapier = this.store.resources.get("rapier")
         const world = this.store.resources.get("world")
 
@@ -188,18 +176,20 @@ export class ModuleLevel {
             levelConfig.captureAreaRight,
         )
 
-        world.createCollider(
-            rapier.ColliderDesc.cuboid(captureBox.size.width, captureBox.size.height)
-                .setTranslation(captureBox.transformed.x, captureBox.transformed.y)
-                .setRotation(levelConfig.rotation)
-                .setSensor(true),
-            body,
-        )
+        if (start === false) {
+            world.createCollider(
+                rapier.ColliderDesc.cuboid(captureBox.size.width, captureBox.size.height)
+                    .setTranslation(captureBox.transformed.x, captureBox.transformed.y)
+                    .setRotation(levelConfig.rotation)
+                    .setSensor(true),
+                body,
+            )
+        }
 
         const level = this.store.entities.create({
             body,
             level: {
-                start: false,
+                start,
 
                 cameraRect: {
                     left: levelConfig.cameraTopLeftX,
@@ -211,11 +201,13 @@ export class ModuleLevel {
                 rotation: levelConfig.rotation,
 
                 capturing: false,
-                completed: false,
+                completed: start,
             },
         })
 
-        return level
+        if (start) {
+            this.constructBorder(level.get("level"))
+        }
     }
 }
 
@@ -223,7 +215,7 @@ const ROCKET_SPEED_TOLERANCE = 0.001
 const TICKS_TO_CAPTURE = 60
 const FLAG_CAPTURE_HEIGHT = 0.5
 
-const LEVEL_SIZE: Size = {
+export const LEVEL_SIZE: Size = {
     width: 1.65,
     height: 2.616,
 }

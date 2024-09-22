@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vitest } from "vitest"
 import { Entity, EntityStore, EntityWith, newEntityStore } from "./entity"
 
 interface Components {
@@ -928,6 +928,21 @@ describe("EntityStore", () => {
         expect(removedEntities[0]).toBe(entity)
 
         unlisten()
+    })
+
+    it("should call same listener with old entities", () => {
+        store.create({ position: { x: 0, y: 0 } })
+
+        store.listen(
+            ["position"],
+            () => {},
+            () => {},
+        )
+
+        const added = vitest.fn()
+        store.listen(["position"], added, () => {})
+
+        expect(added).toHaveBeenCalledTimes(1)
     })
 
     it("should handle multiple listeners with different requirements", () => {

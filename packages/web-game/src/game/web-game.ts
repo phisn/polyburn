@@ -8,7 +8,7 @@ import { ModuleInput } from "./modules/module-input/module-input"
 import { ModuleLobby } from "./modules/module-lobby/module-lobby"
 import { ModuleParticles } from "./modules/module-particles/module-particles"
 import { ModuleUI } from "./modules/module-ui/module-ui"
-import { ModuleVisual } from "./modules/module-visual/module-scene"
+import { ModuleVisual } from "./modules/module-visual/module-visual"
 
 export interface GameInterface {
     dispose(): void

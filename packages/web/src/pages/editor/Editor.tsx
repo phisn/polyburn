@@ -1,5 +1,5 @@
+import { EntityType } from "game/proto/world"
 import { useEffect, useMemo } from "react"
-import { EntityType } from "runtime/proto/world"
 import { isPointInsideEntity } from "./entities/is-point-inside-entity"
 import { entityGraphicRegistry } from "./graphics-assets/entity-graphic-registry"
 import { EntityGraphicType } from "./graphics-assets/entity-graphic-type"

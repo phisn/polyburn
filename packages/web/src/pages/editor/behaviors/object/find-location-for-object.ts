@@ -1,5 +1,4 @@
-import { Point } from "runtime/src/model/point"
-import { changeAnchor } from "runtime/src/model/world/change-anchor"
+import { changeAnchor, Point } from "game/src/model/utils"
 import { snapDistance } from "../../constants"
 import { ImmutableEntityWith } from "../../entities/entity"
 import { PipelineEvent } from "../../views/view-canvas/pipeline/pipeline-event"

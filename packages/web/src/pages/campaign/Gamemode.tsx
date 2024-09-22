@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { BrowserView, isMobile } from "react-device-detect"
 import { useNavigate } from "react-router-dom"
-import { ReplayStats } from "runtime/src/model/replay/replay-stats"
 import { GamemodeInfo } from "shared/src/worker-api/gamemode-info"
 import { WorldInfo } from "shared/src/worker-api/world-info"
 import { Ticks } from "../../components/common/Ticks"
@@ -62,7 +61,10 @@ export function Gamemode(props: { world: WorldInfo; gamemodeview: GamemodeInfo }
     )
 }
 
-function ReplayStatsDisplay(props: { stats: ReplayStats; onSelected: () => void }) {
+function ReplayStatsDisplay(props: {
+    stats: { deaths: number; ticks: number }
+    onSelected: () => void
+}) {
     return (
         <div
             // margin of one pixel to prevent the border shining through

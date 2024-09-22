@@ -1,14 +1,14 @@
 import { Object3D } from "three"
 import { Text } from "troika-three-text"
+import { WebGameStore } from "../../model/store"
 
 export class Timer extends Object3D {
-    private ticks = 0
     private text = new Text()
 
-    constructor() {
+    constructor(private store: WebGameStore) {
         super()
 
-        this.text.text = formatTicks(this.ticks)
+        this.text.text = formatTicks(0)
         this.text.fontSize = 0.1
         this.text.color = 0xffffff
         this.text.anchorX = "center"
@@ -26,8 +26,8 @@ export class Timer extends Object3D {
     }
 
     onFixedUpdate() {
-        this.ticks += 1
-        this.text.text = formatTicks(this.ticks)
+        const summary = this.store.game.store.resources.get("summary")
+        this.text.text = formatTicks(summary.ticks)
     }
 }
 

@@ -22,6 +22,7 @@ export const rocketComponents = ["rocket", "body"] satisfies (keyof GameComponen
 export type RocketEntity = EntityWith<GameComponents, (typeof rocketComponents)[number]>
 
 export class ModuleRocket {
+    private firstInput = true
     private getRocket: () => RocketEntity
     private previousInput?: GameInput
 
@@ -58,10 +59,16 @@ export class ModuleRocket {
         const rocketComponent = rocket.get("rocket")
         const body = rocket.get("body")
 
+        if (this.firstInput) {
+            this.firstInput = false
+            rocketComponent.rotationWithoutInput = -rotation
+        }
+
         rocketComponent.framesSinceLastDeath++
+        rocketComponent.thrust = thrust
 
         if (rocketComponent.collisionCount === 0) {
-            body.setRotation(rotation, true)
+            body.setRotation(rotation + rocketComponent.rotationWithoutInput, true)
         }
 
         if (thrust) {
@@ -103,6 +110,7 @@ export class ModuleRocket {
     }
 
     onReset() {
+        this.firstInput = true
         this.previousInput = undefined
 
         for (const rocket of this.store.entities.multipleCopy(...rocketComponents)) {

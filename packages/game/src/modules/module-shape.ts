@@ -21,7 +21,7 @@ export class ModuleShape {
             const vertices = bytesToVertices(rapier, shapeConfig.vertices)
             createShapeBody(rapier, world, vertices)
 
-            return this.store.entities.create({
+            this.store.entities.create({
                 shape: { vertices },
             })
         }

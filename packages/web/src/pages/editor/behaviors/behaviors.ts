@@ -1,4 +1,4 @@
-import { EntityType } from "runtime/proto/world"
+import { EntityType } from "game/proto/world"
 import { ObjectBehavior } from "./object/object-behavior"
 import { ObjectEventMove } from "./object/object-event-move"
 import { ObjectHighlight } from "./object/object-highlight"

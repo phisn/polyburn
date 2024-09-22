@@ -455,6 +455,15 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
 
         if (existing) {
             const symbol = existing.add(notifyAdded, notifyRemoved)
+
+            for (const archeType of entityArcheTypes.values()) {
+                if (requirementsSatisfyComponents(requirements, archeType.components)) {
+                    for (const [, entity] of archeType.entities) {
+                        notifyAdded(entity.facade)
+                    }
+                }
+            }
+
             return () => void existing.remove(symbol)
         }
 

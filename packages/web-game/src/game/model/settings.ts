@@ -4,6 +4,8 @@ import { UserOther } from "../../../../shared/src/lobby-api/user-other"
 export interface ReplayModel {}
 
 export interface GameHooks {
+    onFinished?: () => void
+
     onUserJoined?: (username: UserOther) => void
     onUserLeft?: (username: UserOther) => void
 

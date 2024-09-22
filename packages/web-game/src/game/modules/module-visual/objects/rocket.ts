@@ -1,5 +1,4 @@
-import { EntityType } from "runtime/proto/world"
-import { entityRegistry } from "runtime/src/model/world/entity-registry"
+import { ROCKET_SIZE } from "game/src/modules/module-rocket"
 import * as THREE from "three"
 import { Svg } from "../svg"
 
@@ -13,7 +12,7 @@ export class Rocket extends THREE.Object3D {
         )
 
         const scale = (0.15 * 1) / 25.0
-        const rocketEntry = entityRegistry[EntityType.ROCKET]
+        const rocketEntry = ROCKET_SIZE
 
         svg.scale.set(scale, scale, 1.0)
         svg.rotation.set(0, 0, Math.PI)

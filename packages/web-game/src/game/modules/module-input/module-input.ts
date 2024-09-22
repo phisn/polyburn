@@ -17,9 +17,6 @@ export class ModuleInput {
     private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
     private rotationSpeedIndex = 2
 
-    // private precomputed: RuntimeSystemContext[]
-    // private iter = -1
-
     constructor(runtime: WebGameStore) {
         this.keyboard = new Keyboard()
         this.mouse = new Mouse(runtime)
@@ -31,31 +28,6 @@ export class ModuleInput {
 
         this.onKeyboardDown = this.onKeyboardDown.bind(this)
         window.addEventListener("keydown", this.onKeyboardDown)
-
-        /*
-        this.precomputed = []
-        let rotation = 0
-
-        for (let i = 0; i < input.length; ++i) {
-            const thrust = input[i] >= 3
-            const previousRotation = rotation
-
-            if (input[i] === 1 || input[i] === 4) {
-                rotation += 0.1
-            } else if (input[i] === 2 || input[i] === 5) {
-                rotation -= 0.1
-            }
-
-            const limit = 4
-
-            for (let j = 0; j < limit; ++j) {
-                this.precomputed.push({
-                    rotation: previousRotation + ((rotation - previousRotation) * (j + 1)) / limit,
-                    thrust,
-                })
-            }
-        }
-        */
     }
 
     dispose() {
@@ -67,7 +39,6 @@ export class ModuleInput {
     }
 
     rotation() {
-        // return this.iter < this.precomputed.length ? this.precomputed[this.iter].rotation : 0
         return (
             this.mouse.rotation() +
             this.keyboard.rotation() +
@@ -77,7 +48,6 @@ export class ModuleInput {
     }
 
     thrust() {
-        // return this.iter < this.precomputed.length ? this.precomputed[this.iter].thrust : false
         return (
             this.mouse.thrust() ||
             this.keyboard.thrust() ||
@@ -90,9 +60,7 @@ export class ModuleInput {
         this.keyboard.onPreFixedUpdate(delta)
     }
 
-    onFixedUpdate() {
-        // ++this.iter
-    }
+    onFixedUpdate() {}
 
     onKeyboardDown(event: KeyboardEvent) {
         if (event.repeat) {

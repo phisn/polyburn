@@ -1,5 +1,5 @@
+import { Point } from "game/src/model/utils"
 import { MutableRefObject, createContext, useContext } from "react"
-import { Point } from "runtime/src/model/point"
 import { Vector3 } from "three"
 import { StoreApi, createStore, useStore } from "zustand"
 import { BehaviorEvent } from "../behaviors/behaviors"

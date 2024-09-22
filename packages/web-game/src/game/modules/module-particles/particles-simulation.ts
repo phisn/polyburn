@@ -1,5 +1,5 @@
+import { Point } from "game/src/model/utils"
 import { makeCCW, quickDecomp } from "poly-decomp-es"
-import { Point } from "runtime/src/model/point"
 import * as SAT from "sat"
 import * as THREE from "three"
 import { WebGameStore } from "../../model/store"

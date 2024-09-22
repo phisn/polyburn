@@ -1,4 +1,9 @@
 {
     "extends": "tsconfig/base.json",
-    "include": ["src", "proto"]
+    "include": [
+        "src",
+        "proto",
+        "../runtime/src/model/base64-to-bytes.ts",
+        "../runtime/src/model/bytes-to-base64.ts"
+    ]
 }

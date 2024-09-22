@@ -1,6 +1,7 @@
 import { EntityWith } from "game/src/framework/entity"
 import { GameComponents } from "game/src/model/store"
 import { levelComponents } from "game/src/modules/module-level"
+import { rocketComponents } from "game/src/modules/module-rocket"
 import * as THREE from "three"
 import { WebGameStore } from "../../model/store"
 import { MutatableShapeGeometry } from "./mutatable-shape-geometry"
@@ -48,7 +49,7 @@ export class ModuleVisual {
             },
         )
 
-        this.attachVisual(levelComponents, () => {
+        this.attachVisual(rocketComponents, () => {
             return new Rocket()
         })
     }

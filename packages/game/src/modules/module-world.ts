@@ -7,6 +7,7 @@ import { levelComponents } from "./module-level"
 export interface SummaryResource {
     deaths: number
     finished: boolean
+    flags: number
     ticks: number
 }
 
@@ -31,14 +32,15 @@ export class ModuleWorld {
 
         this.store.events.listen({
             captured: () => {
+                const summary = this.store.resources.get("summary")
+                summary.flags += 1
+
                 const finished = this.store.entities
                     .multiple(...levelComponents)
                     .every(l => l.get("level").completed)
 
                 if (finished) {
-                    const summary = this.store.resources.get("summary")
                     summary.finished = true
-
                     this.store.events.invoke.finished?.()
                 }
             },
@@ -88,6 +90,7 @@ export class ModuleWorld {
         this.store.resources.set("summary", {
             deaths: 0,
             finished: false,
+            flags: 0,
             ticks: 0,
         })
     }

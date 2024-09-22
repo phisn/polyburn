@@ -29,6 +29,7 @@ export class Game {
     private moduleWorld: ModuleWorld
 
     private started = false
+    private reset = false
 
     constructor(config: GameConfig, deps: GameDependencies) {
         this.store = new GameStore()
@@ -41,6 +42,16 @@ export class Game {
         this.moduleWorld = new ModuleWorld(this.store)
 
         this.onReset()
+
+        this.store.events.listen({
+            death: () => {
+                const summary = this.store.resources.get("summary")
+
+                if (summary.flags === 0) {
+                    this.reset = true
+                }
+            },
+        })
     }
 
     public onUpdate(input: GameInput) {
@@ -50,6 +61,11 @@ export class Game {
             }
 
             this.started = true
+        }
+
+        if (this.reset) {
+            this.onReset()
+            this.reset = false
         }
 
         this.moduleLevel.onUpdate(input)

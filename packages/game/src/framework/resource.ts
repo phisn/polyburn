@@ -6,7 +6,7 @@ export class ResourceStore<Resources extends object> {
             throw new Error(`Resource ${key.toString()} not loaded`)
         }
 
-        return this.resources[key]
+        return this.resources[key] as Resources[K]
     }
 
     getOr<K extends keyof Resources, T>(key: K, defaultValue: T): Resources[K] | T {

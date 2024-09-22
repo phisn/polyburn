@@ -1,6 +1,6 @@
 import { WebGameStore } from "../../model/store"
 
-const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+// const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
 export class Mouse {
     private wasPointerDown = false
@@ -53,6 +53,7 @@ export class Mouse {
                     this.startRotation -
                     (event.clientX - this.startPointerX) * 0.005 * this.rotationSpeed
             } else {
+                /*
                 if (
                     false &&
                     !isSafari &&
@@ -68,18 +69,21 @@ export class Mouse {
                         unadjustedMovement: true,
                     })
                 }
+                */
 
                 this.wasPointerDown = true
                 this.startPointerX = event.clientX
                 this.startRotation = this._rotation
             }
         } else {
+            /*
             if (this.wasPointerDown) {
                 if (false && !isSafari && document.exitPointerLock) {
                     document.exitPointerLock()
                     this.runtime.factoryContext.renderer.domElement.style.cursor = "auto"
                 }
             }
+            */
 
             this.wasPointerDown = false
         }

@@ -1,5 +1,5 @@
-import { EntityType } from "runtime/proto/world"
-import { Point } from "runtime/src/model/point"
+import { EntityType } from "game/proto/world"
+import { Point } from "game/src/model/utils"
 import { Behaviors } from "../../behaviors/behaviors"
 import { ObjectBehavior } from "../../behaviors/object/object-behavior"
 import { entityGraphicRegistry } from "../../graphics-assets/entity-graphic-registry"

@@ -1,4 +1,4 @@
-import { EntityType } from "runtime/proto/world"
+import { EntityType } from "game/proto/world"
 import { Behaviors } from "../../behaviors/behaviors"
 import { ObjectBehavior } from "../../behaviors/object/object-behavior"
 import { ShapeBehavior } from "../../behaviors/shape/shape-model"

@@ -2,10 +2,10 @@ import RAPIER from "@dimforge/rapier2d"
 import { TRPCError } from "@trpc/server"
 import { and, count, eq, lt, sql } from "drizzle-orm"
 import { DrizzleD1Database } from "drizzle-orm/d1"
+import { ReplayModel } from "game/proto/replay"
+import { WorldConfig } from "game/proto/world"
+import { validateReplay } from "game/src/model/replay/validate-replay"
 import { Buffer } from "node:buffer"
-import { ReplayModel } from "runtime/proto/replay"
-import { WorldModel } from "runtime/proto/world"
-import { validateReplay } from "runtime/src/model/replay/validate-replay"
 import { z } from "zod"
 import { worlds } from "../../domain/worlds"
 import { leaderboard } from "../../framework/db-schema"
@@ -120,7 +120,7 @@ function serverValidateReplay(worldname: string, gamemode: string, replayBuffer:
 
     try {
         const replayModel = ReplayModel.decode(replayBuffer)
-        const worldModel = WorldModel.decode(Buffer.from(world.model, "base64"))
+        const worldModel = WorldConfig.decode(Buffer.from(world.model, "base64"))
 
         const stats = validateReplay(RAPIER, replayModel, worldModel, gamemode)
 

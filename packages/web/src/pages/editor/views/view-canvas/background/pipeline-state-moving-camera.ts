@@ -1,4 +1,4 @@
-import { Point } from "runtime/src/model/point"
+import { Point } from "game/src/model/utils"
 
 export interface PipelineStateMovingCamera {
     type: "moving-camera"

@@ -1,4 +1,4 @@
-import { EntityType } from "runtime/proto/world"
+import { EntityType } from "game/proto/world"
 
 export interface ResolveEntityOrderProps {
     entityType?: EntityType

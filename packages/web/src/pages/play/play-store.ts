@@ -1,10 +1,9 @@
+import { ReplayModel } from "game/proto/replay"
+import { WorldConfig } from "game/proto/world"
 import { createContext, useContext } from "react"
-import { ReplayModel } from "runtime/proto/replay"
-import { WorldModel } from "runtime/proto/world"
-import { ReplayStats } from "runtime/src/model/replay/replay-stats"
-import { Game } from "web-game/src/game/game"
 import { GameLoop } from "web-game/src/game/game-loop"
-import { GameHooks } from "web-game/src/game/game-settings"
+import { GameHooks } from "web-game/src/game/model/settings"
+import { WebGame } from "web-game/src/game/web-game"
 import { createStore, useStore } from "zustand"
 import { useAppStore } from "../../common/store/app-store"
 import { isTRPCClientError, trpcNative } from "../../common/trpc/trpc-native"
@@ -17,7 +16,7 @@ export interface FinishedStatus {
     deaths: number
     ticks: number
 
-    personalBest?: ReplayStats & { rank: number }
+    personalBest?: { deaths: number; ticks: number; rank: number }
     rank?: number
 }
 
@@ -30,13 +29,13 @@ export type PlayStatus = FinishedStatus | RunningStatus
 export interface PlayStoreProps {
     worldname: string
     gamemode: string
-    model: WorldModel
+    world: WorldConfig
 }
 
 export interface PlayState extends PlayStoreProps {
     status: PlayStatus
 
-    game: Game
+    game: WebGame
     gameLoop: GameLoop
 
     getCanvas(): HTMLCanvasElement
@@ -53,11 +52,10 @@ export type PlayStore = ReturnType<typeof createPlayStore>
 export const createPlayStore = (props: PlayStoreProps) => {
     const hooks: GameHooks = {
         onFinished: () => {
-            const model = game.runtime.factoryContext.replayCapture.constructReplay()
-            const deaths = game.runtime.factoryContext.store.world.components.stats!.deaths
-            const ticks = game.runtime.factoryContext.store.world.components.stats!.ticks
+            const model = game.replayCapture.constructReplay()
+            const summary = game.store.game.store.resources.get("summary")
 
-            store.getState().uploadReplay(model, ticks, deaths)
+            store.getState().uploadReplay(model, summary.ticks, summary.deaths)
         },
 
         onUserJoined: _user => {
@@ -110,11 +108,11 @@ export const createPlayStore = (props: PlayStoreProps) => {
         }
     }
 
-    const game = new Game({
+    const game = new WebGame({
         instanceType: "play",
 
         worldname: props.worldname,
-        world: props.model,
+        world: props.world,
         gamemode: props.gamemode,
 
         hooks: hooks,

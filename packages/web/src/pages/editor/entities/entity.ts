@@ -1,10 +1,13 @@
 import { Immutable } from "immer"
-import { NarrowProperties } from "runtime-framework"
 import { EntityBehaviors } from "./entity-behaviors"
 
 interface BaseEntity {
     readonly id: number
 }
+
+export type NarrowProperties<Properties extends object, NarrowTo extends keyof Properties> = {
+    [K in NarrowTo]-?: Properties[K]
+} & Properties
 
 export type Entity<Behaviors extends object = EntityBehaviors> = BaseEntity & {
     [K in keyof Behaviors]: Behaviors[K]

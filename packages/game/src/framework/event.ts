@@ -24,7 +24,7 @@ export class EventStore<Events extends object> {
             }
 
             if (events[key]) {
-                this.listeners[key]?.push(events[key])
+                this.listeners[key]?.push(events[key] as Events[keyof Events])
             }
         }
 

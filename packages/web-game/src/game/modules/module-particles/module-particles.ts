@@ -1,7 +1,5 @@
-import { rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
-import { EntityType } from "runtime/proto/world"
-import { changeAnchor } from "runtime/src/model/world/change-anchor"
-import { entityRegistry } from "runtime/src/model/world/entity-registry"
+import { changeAnchor } from "game/src/model/utils"
+import { ROCKET_SIZE, rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
 import { Color } from "three"
 import { WebGameStore } from "../../model/store"
 import {
@@ -111,7 +109,7 @@ export class ModuleParticles {
             const spawnPosition = changeAnchor(
                 interpolation,
                 interpolation.rotation,
-                entityRegistry[EntityType.ROCKET],
+                ROCKET_SIZE,
                 { x: 0.5, y: 0.5 },
                 { x: 0.5, y: 0.3 },
             )

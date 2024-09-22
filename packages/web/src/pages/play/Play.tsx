@@ -1,7 +1,7 @@
+import { WorldConfig } from "game/proto/world"
+import { base64ToBytes } from "game/src/model/utils"
 import { useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { WorldModel } from "runtime/proto/world"
-import { base64ToBytes } from "runtime/src/model/base64-to-bytes"
 import { useAppStore } from "../../common/store/app-store"
 import { trpc } from "../../common/trpc/trpc"
 import { FinishedPopup } from "./FinishedPopup"
@@ -114,7 +114,7 @@ export function ProvidePlayStoreFromParams(props: { children: JSX.Element }) {
 }
 
 export function PlayParamterLoader(props: {
-    children: (props: { model: WorldModel; worldname: string; gamemode: string }) => JSX.Element
+    children: (props: { world: WorldConfig; worldname: string; gamemode: string }) => JSX.Element
 }) {
     const navigate = useNavigate()
     const params = useParams()
@@ -172,10 +172,10 @@ export function PlayParamterLoader(props: {
         return null
     }
 
-    const model = WorldModel.decode(base64ToBytes(worldView.model))
+    const world = WorldConfig.decode(base64ToBytes(worldView.model))
 
     return props.children({
-        model,
+        world,
         worldname: params.world,
         gamemode: params.gamemode,
     })

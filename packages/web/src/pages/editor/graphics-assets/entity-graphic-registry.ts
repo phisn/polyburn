@@ -1,5 +1,5 @@
-import { EntityType } from "runtime/proto/world"
-import { entityRegistry } from "runtime/src/model/world/entity-registry"
+import { LEVEL_SIZE } from "game/src/modules/module-level"
+import { ROCKET_SIZE } from "game/src/modules/module-rocket"
 import { baseZoomFactor } from "../constants"
 import { EntityGraphicType } from "./entity-graphic-type"
 
@@ -15,17 +15,17 @@ export const entityGraphicRegistry: {
     [EntityGraphicType.Rocket]: {
         scale: 0.15 * baseZoomFactor,
         src: "/static/rocket.svg",
-        size: entityRegistry[EntityType.ROCKET],
+        size: ROCKET_SIZE,
     },
     [EntityGraphicType.RedFlag]: {
         scale: 0.15 * baseZoomFactor,
         src: "/static/flag-red.svg",
-        size: entityRegistry[EntityType.LEVEL],
+        size: LEVEL_SIZE,
     },
     [EntityGraphicType.GreenFlag]: {
         scale: 0.15 * baseZoomFactor,
         src: "/static/flag-green.svg",
-        size: entityRegistry[EntityType.LEVEL],
+        size: LEVEL_SIZE,
     },
 }
 

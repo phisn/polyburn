@@ -1,6 +1,6 @@
 import { Svg } from "@react-three/drei"
+import { EntityType } from "game/proto/world"
 import { Suspense, useRef } from "react"
-import { EntityType } from "runtime/proto/world"
 import { Euler, MeshBasicMaterial, Object3D } from "three"
 import { entityGraphicRegistry } from "../../graphics-assets/entity-graphic-registry"
 import { EntityGraphicType } from "../../graphics-assets/entity-graphic-type"

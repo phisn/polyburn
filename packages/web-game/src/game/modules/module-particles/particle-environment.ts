@@ -1,4 +1,4 @@
-import { Point } from "runtime/src/model/point"
+import { Point } from "game/src/model/utils"
 import { Circle, Polygon } from "sat"
 
 export interface Environment {

@@ -3,7 +3,7 @@ import { GameComponents } from "game/src/model/store"
 import { levelComponents } from "game/src/modules/module-level"
 import { rocketComponents } from "game/src/modules/module-rocket"
 import * as THREE from "three"
-import { WebGameStore } from "../../model/store"
+import { GamePlayerStore } from "../../model/store"
 import { MutatableShapeGeometry } from "./mutatable-shape-geometry"
 import { Flag } from "./objects/flag"
 import { Rocket } from "./objects/rocket"
@@ -12,7 +12,7 @@ export class ModuleVisual {
     private flags: Map<number, Flag> = new Map()
     private objects: Map<number, THREE.Object3D>
 
-    constructor(private store: WebGameStore) {
+    constructor(private store: GamePlayerStore) {
         this.objects = new Map()
 
         this.attachVisual(["shape"], entity => {

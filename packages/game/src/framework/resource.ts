@@ -1,5 +1,9 @@
 export class ResourceStore<Resources extends object> {
-    private resources: Partial<Resources> = {}
+    private resources: Partial<Resources>
+
+    constructor(inital?: Partial<Resources>) {
+        this.resources = inital ?? {}
+    }
 
     get<K extends keyof Resources>(key: K): Resources[K] {
         if (!this.resources[key]) {

@@ -1,4 +1,4 @@
-import { WebGameStore } from "../../model/store"
+import { GamePlayerStore } from "../../model/store"
 
 export class Touch {
     private thrustPointerId?: number
@@ -16,7 +16,7 @@ export class Touch {
 
     private touchEvents = ["touchstart", "touchend", "touchmove", "touchcancel"] as const
 
-    constructor(private runtime: WebGameStore) {
+    constructor(private runtime: GamePlayerStore) {
         this.onTouchEvent = this.onTouchEvent.bind(this)
 
         for (const ptrEvent of this.touchEvents) {

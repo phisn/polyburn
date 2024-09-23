@@ -1,7 +1,7 @@
 import { levelComponents, LevelEntity } from "game/src/modules/module-level"
 import { rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
 import * as THREE from "three"
-import { WebGameStore } from "../model/store"
+import { GamePlayerStore } from "../model/store"
 
 type TransitionAnimation =
     | undefined
@@ -39,7 +39,7 @@ export class ModuleCamera extends THREE.OrthographicCamera {
     private transitionAnimation: TransitionAnimation = undefined
     private startAnimation: StartAnimation = undefined
 
-    constructor(private store: WebGameStore) {
+    constructor(private store: GamePlayerStore) {
         super()
 
         this.position.z = 5

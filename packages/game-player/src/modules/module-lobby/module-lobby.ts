@@ -9,7 +9,7 @@ import { UserOther } from "shared/src/lobby-api/user-other"
 import { lerp } from "three/src/math/MathUtils"
 import { Text } from "troika-three-text"
 import { slerp } from "../../model/interpolation"
-import { WebGameStore } from "../../model/store"
+import { GamePlayerStore } from "../../model/store"
 import { Rocket } from "../module-visual/objects/rocket"
 
 export class OtherUserGhost {
@@ -22,7 +22,7 @@ export class OtherUserGhost {
     private previousFrame: Frame | undefined
 
     constructor(
-        private store: WebGameStore,
+        private store: GamePlayerStore,
         private user: UserOther,
     ) {
         this.mesh = new Rocket(0.2)
@@ -107,7 +107,7 @@ export class OtherUserGhost {
 export class OtherUserGhosts {
     private ghosts: Map<string, OtherUserGhost>
 
-    constructor(private store: WebGameStore) {
+    constructor(private store: GamePlayerStore) {
         this.ghosts = new Map()
     }
 
@@ -193,7 +193,7 @@ export class ModuleLobby {
 
     private setupEveryMs = 1000 * 30
 
-    constructor(private store: WebGameStore) {
+    constructor(private store: GamePlayerStore) {
         if (store.settings.instanceType !== "play") {
             throw new Error("ModuleLobby can only be used in play mode")
         }

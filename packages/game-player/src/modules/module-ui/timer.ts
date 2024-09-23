@@ -1,11 +1,11 @@
 import { Object3D } from "three"
 import { Text } from "troika-three-text"
-import { WebGameStore } from "../../model/store"
+import { GamePlayerStore } from "../../model/store"
 
 export class Timer extends Object3D {
     private text = new Text()
 
-    constructor(private store: WebGameStore) {
+    constructor(private store: GamePlayerStore) {
         super()
 
         this.text.text = formatTicks(0)

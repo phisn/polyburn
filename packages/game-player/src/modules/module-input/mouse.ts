@@ -1,4 +1,4 @@
-import { WebGameStore } from "../../model/store"
+import { GamePlayerStore } from "../../model/store"
 
 // const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
@@ -14,7 +14,10 @@ export class Mouse {
 
     private ptrEvents = ["pointerdown", "pointerup", "pointermove", "pointercancel"] as const
 
-    constructor(private runtime: WebGameStore) {
+    public x = 0
+    public y = 0
+
+    constructor(private runtime: GamePlayerStore) {
         this.onPointerEvent = this.onPointerEvent.bind(this)
 
         for (const ptrEvent of this.ptrEvents) {
@@ -43,6 +46,9 @@ export class Mouse {
     }
 
     private onPointerEvent(event: PointerEvent) {
+        this.x = event.clientX
+        this.y = event.clientY
+
         if (event.pointerType !== "mouse") {
             return
         }

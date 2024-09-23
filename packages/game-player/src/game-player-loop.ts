@@ -1,4 +1,4 @@
-import { GameInterface } from "./web-game"
+import { GameInterface } from "./game-player"
 
 export class GameLoop {
     private animationFrame: number | undefined

@@ -1,5 +1,5 @@
 import { WorldConfig } from "game/proto/world"
-import { UserOther } from "../../../../shared/src/lobby-api/user-other"
+import { UserOther } from "shared/src/lobby-api/user-other"
 
 export interface ReplayModel {}
 

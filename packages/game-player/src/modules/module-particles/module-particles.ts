@@ -1,7 +1,7 @@
 import { changeAnchor } from "game/src/model/utils"
 import { ROCKET_SIZE, rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
 import { Color } from "three"
-import { WebGameStore } from "../../model/store"
+import { GamePlayerStore } from "../../model/store"
 import {
     downBias,
     ParticleTemplate,
@@ -66,7 +66,7 @@ export class ModuleParticles {
 
     private simulation: ParticleSimulation
 
-    constructor(private store: WebGameStore) {
+    constructor(private store: GamePlayerStore) {
         const shapes = store.game.store.entities
             .multiple("shape")
             .map(x => x.get("shape").vertices.map(x => x.position))

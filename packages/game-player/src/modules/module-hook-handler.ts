@@ -1,7 +1,7 @@
-import { WebGameStore } from "../model/store"
+import { GamePlayerStore } from "../model/store"
 
 export class ModuleHookHandler {
-    constructor(private store: WebGameStore) {
+    constructor(private store: GamePlayerStore) {
         store.game.store.events.listen({
             finished: () => {
                 store.settings.hooks?.onFinished?.()

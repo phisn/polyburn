@@ -2,7 +2,7 @@ import { Point } from "game/src/model/utils"
 import { makeCCW, quickDecomp } from "poly-decomp-es"
 import * as SAT from "sat"
 import * as THREE from "three"
-import { WebGameStore } from "../../model/store"
+import { GamePlayerStore } from "../../model/store"
 import { Environment, aabbFromCircle, newEnvironment } from "./particle-environment"
 import {
     ParticleTemplate,
@@ -34,7 +34,7 @@ export class ParticleSimulation {
     private instanceMatrix = new THREE.Matrix4()
     private maxInstances = 2048
 
-    constructor(store: WebGameStore, shapes: Point[][]) {
+    constructor(store: GamePlayerStore, shapes: Point[][]) {
         const geometry = new THREE.CircleGeometry(1, 32)
         const material = new THREE.MeshBasicMaterial({ color: 0xffffff })
 

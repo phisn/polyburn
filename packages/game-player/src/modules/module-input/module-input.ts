@@ -1,4 +1,4 @@
-import { WebGameStore } from "../../model/store"
+import { GamePlayerStore } from "../../model/store"
 import { Keyboard } from "./keyboard"
 import { Mouse } from "./mouse"
 import { Touch } from "./touch"
@@ -9,7 +9,7 @@ const CHARCODE_NINE = "9".charCodeAt(0)
 
 export class ModuleInput {
     private keyboard: Keyboard
-    private mouse: Mouse
+    mouse: Mouse
 
     private touch: Touch
     private touchVertical: TouchVertical
@@ -17,7 +17,7 @@ export class ModuleInput {
     private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
     private rotationSpeedIndex = 2
 
-    constructor(runtime: WebGameStore) {
+    constructor(runtime: GamePlayerStore) {
         this.keyboard = new Keyboard()
         this.mouse = new Mouse(runtime)
         this.touch = new Touch(runtime)

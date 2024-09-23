@@ -1,6 +1,6 @@
-import { WebGameStore } from "../../model/store"
+import { GamePlayerStore } from "../../model/store"
 
-export class TouchAlt {
+export class TouchVertical {
     private pointer?: {
         pointerId: number
 
@@ -15,7 +15,7 @@ export class TouchAlt {
 
     private touchEvents = ["touchstart", "touchend", "touchmove", "touchcancel"] as const
 
-    constructor(private runtime: WebGameStore) {
+    constructor(private runtime: GamePlayerStore) {
         this.onTouchEvent = this.onTouchEvent.bind(this)
 
         for (const ptrEvent of this.touchEvents) {
@@ -52,6 +52,10 @@ export class TouchAlt {
 
             switch (event.type) {
                 case "touchstart":
+                    if (window.innerWidth > window.innerHeight) {
+                        break
+                    }
+
                     if (this.pointer === undefined) {
                         this.pointer = {
                             pointerId: touch.identifier,
@@ -59,9 +63,7 @@ export class TouchAlt {
                             startRotation: this._rotation,
                         }
 
-                        if (touchPosition.y <= window.innerHeight * 0.75) {
-                            this._thrust = true
-                        }
+                        this._thrust = true
                     }
 
                     break
@@ -70,8 +72,6 @@ export class TouchAlt {
                         this._rotation =
                             this.pointer.startRotation -
                             (touchPosition.x - this.pointer.startPointerX) * 0.005
-
-                        this._thrust = touchPosition.y <= window.innerHeight * 0.75
                     }
 
                     break

@@ -3,5 +3,5 @@
     "compilerOptions": {
         "noEmit": true
     },
-    "include": ["src"]
+    "include": ["src", "types", "troika-three-text.d.ts", "troika-three-text.d.ts"]
 }

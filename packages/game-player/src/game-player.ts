@@ -1,7 +1,17 @@
 import { ReplayCaptureService } from "game/src/model/replay/replay-capture-service"
-import { Color, WebGLRenderer } from "three"
+import {
+    Color,
+    Mesh,
+    MeshBasicMaterial,
+    Object3D,
+    Shape,
+    ShapeGeometry,
+    Vector2,
+    Vector3,
+    WebGLRenderer,
+} from "three"
 import { GameSettings } from "./model/settings"
-import { WebGameStore } from "./model/store"
+import { GamePlayerStore } from "./model/store"
 import { ModuleCamera } from "./modules/module-camera"
 import { ModuleHookHandler } from "./modules/module-hook-handler"
 import { ModuleInput } from "./modules/module-input/module-input"
@@ -19,7 +29,7 @@ export interface GameInterface {
 }
 
 export class WebGame implements GameInterface {
-    store: WebGameStore
+    store: GamePlayerStore
 
     replayCapture: ReplayCaptureService
 
@@ -31,6 +41,8 @@ export class WebGame implements GameInterface {
     moduleUI: ModuleUI
     moduleVisual: ModuleVisual
 
+    private test: Object3D
+
     constructor(settings: GameSettings) {
         const renderer = new WebGLRenderer({
             antialias: true,
@@ -40,7 +52,7 @@ export class WebGame implements GameInterface {
         renderer.autoClear = false
         renderer.setClearColor(Color.NAMES["black"], 1)
 
-        this.store = new WebGameStore(settings, renderer)
+        this.store = new GamePlayerStore(settings, renderer)
 
         this.replayCapture = new ReplayCaptureService()
 
@@ -58,6 +70,22 @@ export class WebGame implements GameInterface {
         this.onCanvasResize = this.onCanvasResize.bind(this)
         const observer = new ResizeObserver(this.onCanvasResize)
         observer.observe(renderer.domElement)
+
+        // red rectangle
+        this.test = new Mesh(
+            new ShapeGeometry(
+                new Shape([
+                    new Vector2(-1, -1),
+                    new Vector2(1, -1),
+                    new Vector2(1, 1),
+                    new Vector2(-1, 1),
+                ]),
+            ),
+            new MeshBasicMaterial({ color: 0xff0000 }),
+        )
+        this.test.position.z = 1
+
+        this.store.scene.add(this.test)
     }
 
     dispose() {
@@ -99,6 +127,19 @@ export class WebGame implements GameInterface {
     }
 
     onUpdate(delta: number, overstep: number) {
+        const vec = new Vector3() // create once and reuse
+
+        vec.set(
+            (this.moduleInput.mouse.x / window.innerWidth) * 2 - 1,
+            -(this.moduleInput.mouse.y / window.innerHeight) * 2 + 1,
+            0.5,
+        )
+
+        vec.unproject(this.moduleCamera)
+
+        this.test.position.x = vec.x - 1
+        this.test.position.y = vec.y - 1
+
         this.store.interpolation.onUpdate(delta, overstep)
 
         this.moduleParticles.update(delta)

@@ -13,7 +13,7 @@ export interface LevelComponent {
     position: Point
     rotation: number
 
-    capturing: boolean
+    collidersCapturing: number
     completed: boolean
 }
 
@@ -102,7 +102,7 @@ export class ModuleLevel {
 
         const levelComponent = captured.get("level")
         levelComponent.completed = true
-        levelComponent.capturing = false
+        levelComponent.collidersCapturing = 0
         this.constructBorder(levelComponent)
 
         this.store.events.invoke.captured?.({
@@ -112,16 +112,22 @@ export class ModuleLevel {
     }
 
     private handleCollision(level: LevelEntity, rocket: RocketEntity, started: boolean) {
+        const levelComponent = level.get("level")
+
         if (started) {
-            this.progress = TICKS_TO_CAPTURE
-            this.progressLevel = level
+            if (levelComponent.collidersCapturing === 0) {
+                this.progress = TICKS_TO_CAPTURE
+                this.progressLevel = level
+            }
 
-            level.get("level").capturing = true
+            levelComponent.collidersCapturing++
         } else {
-            this.progress = undefined
-            this.progressLevel = undefined
+            levelComponent.collidersCapturing--
 
-            level.get("level").capturing = false
+            if (levelComponent.collidersCapturing === 0) {
+                this.progress = undefined
+                this.progressLevel = undefined
+            }
         }
 
         this.store.events.invoke.captureChanged?.({
@@ -203,7 +209,7 @@ export class ModuleLevel {
                 position,
                 rotation: levelConfig.rotation,
 
-                capturing: false,
+                collidersCapturing: 0,
                 completed: start,
             },
         })

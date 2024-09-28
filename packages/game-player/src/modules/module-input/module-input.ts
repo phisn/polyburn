@@ -1,81 +1,59 @@
+import { f16round } from "@petamoriken/float16"
+import { GameInput } from "game/src/game"
+import { ReplayFrame } from "game/src/model/replay/replay"
 import { GamePlayerStore } from "../../model/store"
-import { Keyboard } from "./keyboard"
-import { Mouse } from "./mouse"
-import { Touch } from "./touch"
-import { TouchVertical } from "./touch-vertical"
+import { Devices } from "./devices/devices"
 
-const CHARCODE_ONE = "1".charCodeAt(0)
-const CHARCODE_NINE = "9".charCodeAt(0)
+export interface InputCaptureResource {
+    currentInput: GameInput
+    frames: ReplayFrame[]
+}
 
 export class ModuleInput {
-    private keyboard: Keyboard
-    mouse: Mouse
+    private devices: Devices
+    private rotationaAccumulated: number
 
-    private touch: Touch
-    private touchVertical: TouchVertical
+    constructor(private store: GamePlayerStore) {
+        this.store.resources.set("inputCapture", {
+            currentInput: { rotation: 0, thrust: false },
+            frames: [],
+        })
 
-    private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
-    private rotationSpeedIndex = 2
-
-    constructor(runtime: GamePlayerStore) {
-        this.keyboard = new Keyboard()
-        this.mouse = new Mouse(runtime)
-        this.touch = new Touch(runtime)
-        this.touchVertical = new TouchVertical(runtime)
-
-        this.onContextMenu = this.onContextMenu.bind(this)
-        document.addEventListener("contextmenu", this.onContextMenu)
-
-        this.onKeyboardDown = this.onKeyboardDown.bind(this)
-        window.addEventListener("keydown", this.onKeyboardDown)
+        this.devices = new Devices(store)
+        this.rotationaAccumulated = 0
     }
 
-    dispose() {
-        this.keyboard.dispose()
-        this.mouse.dispose()
-
-        document.removeEventListener("contextmenu", this.onContextMenu)
-        window.removeEventListener("keydown", this.onKeyboardDown)
+    onDispose() {
+        this.devices.onDispose()
     }
 
-    rotation() {
-        return (
-            this.mouse.rotation() +
-            this.keyboard.rotation() +
-            this.touch.rotation() +
-            this.touchVertical.rotation()
-        )
+    onReset() {
+        this.rotationaAccumulated = 0
+
+        const inputCapture = this.store.resources.get("inputCapture")
+        inputCapture.currentInput = { rotation: 0, thrust: false }
+        inputCapture.frames = []
     }
 
-    thrust() {
-        return (
-            this.mouse.thrust() ||
-            this.keyboard.thrust() ||
-            this.touch.thrust() ||
-            this.touchVertical.thrust()
-        )
-    }
+    onFixedUpdate() {
+        this.devices.onFixedUpdate()
 
-    onPreFixedUpdate(delta: number) {
-        this.keyboard.onPreFixedUpdate(delta)
-    }
-
-    onFixedUpdate() {}
-
-    onKeyboardDown(event: KeyboardEvent) {
-        if (event.repeat) {
-            return
+        let changeRounded = f16round(this.devices.rotation() - this.rotationaAccumulated)
+        if (Math.abs(changeRounded) < MINIMAL_CHANGE_TO_CAPTURE) {
+            changeRounded = 0
         }
+        this.rotationaAccumulated += changeRounded
 
-        if (event.key.charCodeAt(0) >= CHARCODE_ONE && event.key.charCodeAt(0) <= CHARCODE_NINE) {
-            this.rotationSpeedIndex = event.key.charCodeAt(0) - CHARCODE_ONE
-
-            this.keyboard.setRotationSpeed(this.rotationSpeed[this.rotationSpeedIndex])
-            this.mouse.setRotationSpeed(this.rotationSpeed[this.rotationSpeedIndex])
+        const inputCapture = this.store.resources.get("inputCapture")
+        inputCapture.currentInput = {
+            thrust: this.devices.thrust(),
+            rotation: this.rotationaAccumulated,
         }
-    }
-
-    private onContextMenu(event: Event) {
-        event.preventDefault()
+        inputCapture.frames.push({
+            diff: changeRounded,
+            thrust: inputCapture.currentInput.thrust,
+        })
     }
 }
+
+const MINIMAL_CHANGE_TO_CAPTURE = 0.0001

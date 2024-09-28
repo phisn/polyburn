@@ -6,6 +6,11 @@ export interface Point {
     y: number
 }
 
+export interface Transform {
+    point: Point
+    rotation: number
+}
+
 export interface Rect {
     left: number
     top: number
@@ -34,6 +39,27 @@ export const changeAnchor = (
         sin(rotation) * (size.width * (targetAnchor.x - sourceAnchor.x)) +
         cos(rotation) * (size.height * (targetAnchor.y - sourceAnchor.y)),
 })
+
+export function lerpTransform(previous: Transform, next: Transform, t: number): Transform {
+    return {
+        point: {
+            x: lerp(previous.point.x, next.point.x, t),
+            y: lerp(previous.point.y, next.point.y, t),
+        },
+        rotation: slerp(previous.rotation, next.rotation, t),
+    }
+}
+
+export function lerp(previous: number, next: number, t: number) {
+    return (1 - t) * previous + t * next
+}
+
+export function slerp(previous: number, next: number, t: number) {
+    const difference = next - previous
+    const shortestAngle = (((difference % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI)) - Math.PI
+
+    return previous + shortestAngle * t
+}
 
 export function bytesToBase64(bytes: Uint8Array) {
     const binString = Array.from(bytes, x => String.fromCodePoint(x)).join("")

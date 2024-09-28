@@ -38,7 +38,7 @@ export class Flag extends THREE.Object3D {
     onUpdate() {
         const levelComponent = this.level.get("level")
 
-        const shouldBeActive = levelComponent.capturing || levelComponent.completed
+        const shouldBeActive = levelComponent.collidersCapturing > 0 || levelComponent.completed
 
         if (this.isActive !== shouldBeActive) {
             this.isActive = shouldBeActive

@@ -1,4 +1,4 @@
-import { GamePlayerStore } from "../../model/store"
+import { GamePlayerStore } from "../../../model/store"
 
 export class Touch {
     private thrustPointerId?: number
@@ -16,19 +16,23 @@ export class Touch {
 
     private touchEvents = ["touchstart", "touchend", "touchmove", "touchcancel"] as const
 
-    constructor(private runtime: GamePlayerStore) {
+    constructor(private store: GamePlayerStore) {
         this.onTouchEvent = this.onTouchEvent.bind(this)
 
+        const renderer = this.store.resources.get("renderer")
+
         for (const ptrEvent of this.touchEvents) {
-            runtime.renderer.domElement.addEventListener(ptrEvent, this.onTouchEvent, {
+            renderer.domElement.addEventListener(ptrEvent, this.onTouchEvent, {
                 capture: true,
             })
         }
     }
 
     dispose() {
+        const renderer = this.store.resources.get("renderer")
+
         for (const ptrEvent of this.touchEvents) {
-            this.runtime.renderer.domElement.removeEventListener(ptrEvent, this.onTouchEvent)
+            renderer.domElement.removeEventListener(ptrEvent, this.onTouchEvent)
         }
     }
 

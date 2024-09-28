@@ -25,14 +25,11 @@ export function Play() {
 function RefreshButton() {
     const store = usePlayStore(x => x.game)
 
-    console.log(store)
-
-    function onReset() {
-        store.store.game.onReset()
-    }
-
     return (
-        <div onClick={onReset} className="btn btn-square btn-ghost absolute left-0 top-0 z-10 m-4">
+        <div
+            onClick={() => store.onReset()}
+            className="btn btn-square btn-ghost absolute left-0 top-0 z-10 m-4"
+        >
             <ArrowClockwise width="32" height="32" />
         </div>
     )

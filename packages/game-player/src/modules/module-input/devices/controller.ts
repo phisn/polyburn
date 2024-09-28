@@ -36,8 +36,6 @@ export class Keyboard {
             return
         }
 
-        
-
         if (this.keyboardLeft || this.keyboardUpA) {
             this._rotation += delta * 0.001 * this.rotationSpeed
         }

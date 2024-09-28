@@ -8,12 +8,19 @@ import { MutatableShapeGeometry } from "./mutatable-shape-geometry"
 import { Flag } from "./objects/flag"
 import { Rocket } from "./objects/rocket"
 
+export interface VisualsResource {
+    objects: Map<number, THREE.Object3D>
+}
+
 export class ModuleVisual {
-    private flags: Map<number, Flag> = new Map()
-    private objects: Map<number, THREE.Object3D>
+    private flags: Map<number, Flag>
 
     constructor(private store: GamePlayerStore) {
-        this.objects = new Map()
+        store.resources.set("visuals", {
+            objects: new Map(),
+        })
+
+        this.flags = new Map()
 
         this.attachVisual(["shape"], entity => {
             const shapeGeometry = new MutatableShapeGeometry(
@@ -22,6 +29,7 @@ export class ModuleVisual {
                     color: vertex.color,
                 })),
             )
+
             const shapeMaterial = new THREE.MeshBasicMaterial({ vertexColors: true })
             const shapeMesh = new THREE.Mesh(shapeGeometry, shapeMaterial)
 
@@ -41,11 +49,7 @@ export class ModuleVisual {
                 return flag
             },
             entity => {
-                const flag = this.flags.get(entity.id)
-
-                if (flag) {
-                    this.flags.delete(entity.id)
-                }
+                this.flags.delete(entity.id)
             },
         )
 
@@ -65,16 +69,35 @@ export class ModuleVisual {
                 const object = construct(entity)
 
                 if (object) {
-                    this.objects.set(entity.id, object)
-                    this.store.scene.add(object)
+                    const scene = this.store.resources.get("scene")
+                    scene.add(object)
+
+                    const visuals = this.store.resources.get("visuals")
+                    visuals.objects.set(entity.id, object)
+
+                    if (entity.has("body")) {
+                        const body = entity.get("body")
+
+                        if (body.isDynamic()) {
+                            const interpolation = this.store.resources.get("interpolation")
+                            interpolation.register(object, () => ({
+                                point: {
+                                    x: body.translation().x,
+                                    y: body.translation().y,
+                                },
+                                rotation: body.rotation(),
+                            }))
+                        }
+                    }
                 }
             },
             entity => {
-                const object = this.objects.get(entity.id)
+                const visuals = this.store.resources.get("visuals")
+                const object = visuals.objects.get(entity.id)
 
                 if (object) {
-                    this.store.scene.remove(object)
-                    this.objects.delete(entity.id)
+                    const scene = this.store.resources.get("scene")
+                    scene.remove(object)
                 }
 
                 if (destruct) {
@@ -85,18 +108,8 @@ export class ModuleVisual {
     }
 
     onUpdate() {
-        for (const [, flag] of this.flags) {
+        for (const flag of this.flags.values()) {
             flag.onUpdate()
-        }
-
-        for (const [id, interpolation] of this.store.interpolation.interpolations()) {
-            const object = this.objects.get(id)
-
-            if (object) {
-                object.position.x = interpolation.x
-                object.position.y = interpolation.y
-                object.rotation.z = interpolation.rotation
-            }
         }
     }
 }

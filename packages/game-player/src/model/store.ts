@@ -3,14 +3,12 @@ import { EventStore } from "game/src/framework/event"
 import { ResourceStore } from "game/src/framework/resource"
 import { Game } from "game/src/game"
 import { Scene, WebGLRenderer } from "three"
-import { InterpolationStore } from "./interpolation"
+import { InputCaptureResource } from "../modules/module-input/module-input"
+import { InterpolationResource } from "../modules/module-interpolation"
+import { VisualsResource } from "../modules/module-visual/module-visual"
 import { GameSettings } from "./settings"
 
 export class GamePlayerStore {
-    public interpolation: InterpolationStore
-    public renderer: WebGLRenderer
-    public scene: Scene
-
     public events: EventStore<GamePlayerEvents>
     public game: Game
     public resources: ResourceStore<GamePlayerResources>
@@ -25,17 +23,15 @@ export class GamePlayerStore {
             renderer,
             scene: new Scene(),
         })
-
-        this.interpolation = new InterpolationStore(this.game)
-        this.scene = new Scene()
-        this.renderer = renderer
     }
 }
 
 export interface GamePlayerResources {
+    inputCapture: InputCaptureResource
+    interpolation: InterpolationResource
     renderer: WebGLRenderer
     scene: Scene
-    interpolation: InterpolationStore
+    visuals: VisualsResource
 }
 
 export interface GamePlayerEvents {}

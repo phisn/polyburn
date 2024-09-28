@@ -1,4 +1,7 @@
-import { GameInterface } from "./game-player"
+export interface GameLoopRunnable {
+    onFixedUpdate(last: boolean): void
+    onUpdate(delta: number, overstep: number): void
+}
 
 export class GameLoop {
     private animationFrame: number | undefined
@@ -7,7 +10,7 @@ export class GameLoop {
 
     private tickrate = 1000 / 60
 
-    constructor(private game: GameInterface) {
+    constructor(private runnable: GameLoopRunnable) {
         this.tick = this.tick.bind(this)
     }
 
@@ -22,10 +25,6 @@ export class GameLoop {
         }
     }
 
-    public getGame() {
-        return this.game
-    }
-
     private tick(time: DOMHighResTimeStamp) {
         this.animationFrame = requestAnimationFrame(this.tick)
 
@@ -37,13 +36,11 @@ export class GameLoop {
         this.loop_time += delta
         this.previous_time = time
 
-        this.game.onPreFixedUpdate(delta)
-
         while (this.loop_time > this.tickrate) {
             this.loop_time -= this.tickrate
-            this.game.onFixedUpdate(this.loop_time <= this.tickrate)
+            this.runnable.onFixedUpdate(this.loop_time <= this.tickrate)
         }
 
-        this.game.onUpdate(delta, this.loop_time / this.tickrate)
+        this.runnable.onUpdate(delta, this.loop_time / this.tickrate)
     }
 }

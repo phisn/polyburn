@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@dimforge/rapier2d": "^0.14",
+        "@petamoriken/float16": "^3.8.7",
         "eslint-config-custom": "*",
         "game": "*",
         "lil-gui": "^0.19.2",

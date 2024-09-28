@@ -99,16 +99,18 @@ export class ModuleParticles {
         if (rocketComponent.thrust) {
             this.rocketTime += delta
 
-            const interpolation = this.store.interpolation.get(rocket.id)
-            const body = rocket.get("body")
+            const rocketBody = rocket.get("body")
 
-            if (interpolation === undefined) {
-                throw new Error("Rocket interpolation not found")
+            const visuals = this.store.resources.get("visuals")
+            const rocketVisual = visuals.objects.get(rocket.id)
+
+            if (rocketVisual === undefined) {
+                return
             }
 
             const spawnPosition = changeAnchor(
-                interpolation,
-                interpolation.rotation,
+                rocketVisual.position,
+                rocketVisual.rotation.z,
                 ROCKET_SIZE,
                 { x: 0.5, y: 0.5 },
                 { x: 0.5, y: 0.3 },
@@ -120,8 +122,8 @@ export class ModuleParticles {
                 this.simulation.createParticle(
                     PARTICLE_TEMPLATE_THRUST,
                     spawnPosition,
-                    interpolation.rotation,
-                    body.linvel(),
+                    rocketVisual.rotation.z,
+                    rocketBody.linvel(),
                     i,
                 )
             }

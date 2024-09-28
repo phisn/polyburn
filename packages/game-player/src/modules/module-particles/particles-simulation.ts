@@ -41,7 +41,8 @@ export class ParticleSimulation {
         this.particleMesh = new THREE.InstancedMesh(geometry, material, this.maxInstances)
         this.particleMesh.frustumCulled = false
 
-        store.scene.add(this.particleMesh)
+        const scene = store.resources.get("scene")
+        scene.add(this.particleMesh)
 
         for (const shape of shapes) {
             const polygon = shape.map(p => [p.x, p.y] as [number, number])

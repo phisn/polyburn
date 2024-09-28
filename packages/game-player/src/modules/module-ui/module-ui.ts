@@ -21,12 +21,13 @@ export class ModuleUI {
     }
 
     onUpdate() {
-        const width = this.store.renderer.domElement.clientWidth
-        const height = this.store.renderer.domElement.clientHeight
+        const renderer = this.store.resources.get("renderer")
+        const width = renderer.domElement.clientWidth
+        const height = renderer.domElement.clientHeight
 
         const min = Math.min(width, height)
 
-        this.store.renderer.setViewport(width / 2 - min / 2, 0, min, min)
-        this.store.renderer.render(this.scene, this.camera)
+        renderer.setViewport(width / 2 - min / 2, 0, min, min)
+        renderer.render(this.scene, this.camera)
     }
 }

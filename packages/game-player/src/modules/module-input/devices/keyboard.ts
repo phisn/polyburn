@@ -21,7 +21,7 @@ export class Keyboard {
         window.addEventListener("keyup", this.onKeyUp)
     }
 
-    dispose() {
+    onDispose() {
         window.removeEventListener("keydown", this.onKeyDown)
         window.removeEventListener("keyup", this.onKeyUp)
     }
@@ -38,13 +38,13 @@ export class Keyboard {
         this.rotationSpeed = speed
     }
 
-    onPreFixedUpdate(delta: number) {
+    onFixedUpdate() {
         if (this.keyboardLeft || this.keyboardUpA) {
-            this._rotation += delta * 0.001 * this.rotationSpeed
+            this._rotation += 0.001 * 0.16 * this.rotationSpeed
         }
 
         if (this.keyboardRight || this.keyboardUpD) {
-            this._rotation -= delta * 0.001 * this.rotationSpeed
+            this._rotation -= 0.001 * 0.16 * this.rotationSpeed
         }
 
         this._thrust = this.keyboardUpArrow || this.keyboardUpW || this.keyboardUpSpace

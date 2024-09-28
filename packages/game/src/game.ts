@@ -80,6 +80,8 @@ export class Game {
         this.moduleLevel.onReset()
         this.moduleRocket.onReset()
         this.moduleShape.onReset()
+
+        this.started = false
     }
 
     private insertResources(config: GameConfig, deps: GameDependencies) {

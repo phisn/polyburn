@@ -47,26 +47,13 @@ export class ModuleCamera extends THREE.OrthographicCamera {
         this.configZoom = 1920 * 0.04
 
         this.getRocket = store.game.store.entities.single(...rocketComponents)
-        const rocket = this.getRocket()
-        const body = rocket.get("body")
-        this.position.x = body.translation().x
-        this.position.y = body.translation().y
-
-        const firstLevel = store.game.store.entities
-            .multiple(...levelComponents)
-            .find(x => x.get("level").completed)
-
-        if (!firstLevel) {
-            throw new Error("No first level found")
-        }
+        this.onReset()
 
         this.startAnimation = {
             progress: 0,
             startScale: 50,
             targetScale: 1,
         }
-
-        this.updateLevelConstraintFromLevel(firstLevel)
 
         this.store.game.store.events.listen({
             captured: ({ level }) => {
@@ -83,18 +70,30 @@ export class ModuleCamera extends THREE.OrthographicCamera {
                 this.updateCameraPosition()
             },
         })
+
+        const renderer = this.store.resources.get("renderer")
+
+        this.onCanvasResize = this.onCanvasResize.bind(this)
+        const observer = new ResizeObserver(this.onCanvasResize)
+        observer.observe(renderer.domElement)
     }
 
-    onCanvasResize(width: number, height: number) {
-        this.store.renderer.setSize(width, height, false)
+    onReset() {
+        const rocket = this.getRocket()
+        const body = rocket.get("body")
 
-        const max = Math.max(width, height)
+        this.position.x = body.translation().x
+        this.position.y = body.translation().y
 
-        this.cameraTargetSize.x = (this.configZoom * width) / max
-        this.cameraTargetSize.y = (this.configZoom * height) / max
+        const firstLevel = this.store.game.store.entities
+            .multiple(...levelComponents)
+            .find(x => x.get("level").completed)
 
-        this.updateCameraSize()
-        this.updateCameraPosition()
+        if (!firstLevel) {
+            throw new Error("No first level found")
+        }
+
+        this.updateLevelConstraintFromLevel(firstLevel)
     }
 
     onUpdate(delta: number) {
@@ -134,7 +133,6 @@ export class ModuleCamera extends THREE.OrthographicCamera {
             )
 
             this.updateProjectionMatrix()
-            this.updateViewport()
 
             if (this.transitionAnimation.progress === 1) {
                 this.transitionAnimation = undefined
@@ -157,6 +155,50 @@ export class ModuleCamera extends THREE.OrthographicCamera {
                 this.startAnimation = undefined
             }
         }
+
+        this.updateViewport()
+    }
+
+    private onCanvasResize() {
+        const renderer = this.store.resources.get("renderer")
+
+        const width = renderer.domElement.clientWidth
+        const height = renderer.domElement.clientHeight
+
+        renderer.setSize(width, height, false)
+
+        const max = Math.max(width, height)
+
+        this.cameraTargetSize.x = (this.configZoom * width) / max
+        this.cameraTargetSize.y = (this.configZoom * height) / max
+
+        this.updateCameraSize()
+        this.updateCameraPosition()
+    }
+
+    private updateViewport() {
+        const renderer = this.store.resources.get("renderer")
+
+        const rendererWidth = renderer.domElement.clientWidth
+        const rendererHeight = renderer.domElement.clientHeight
+
+        let viewportSizeX = this.size.x / this.cameraTargetSize.x
+        let viewportSizeY = this.size.y / this.cameraTargetSize.y
+
+        const maxViewportSize = Math.max(viewportSizeX, viewportSizeY)
+
+        viewportSizeX /= maxViewportSize
+        viewportSizeY /= maxViewportSize
+
+        const viewportX = 0.5 * rendererWidth * (1 - viewportSizeX)
+        const viewportY = 0.5 * rendererHeight * (1 - viewportSizeY)
+
+        renderer.setViewport(
+            viewportX,
+            viewportY,
+            viewportSizeX * rendererWidth,
+            viewportSizeY * rendererHeight,
+        )
     }
 
     private easeOutFast(x: number) {
@@ -180,29 +222,6 @@ export class ModuleCamera extends THREE.OrthographicCamera {
             this.updateProjectionMatrix()
             this.updateViewport()
         }
-    }
-
-    updateViewport() {
-        const rendererWidth = this.store.renderer.domElement.clientWidth
-        const rendererHeight = this.store.renderer.domElement.clientHeight
-
-        let viewportSizeX = this.size.x / this.cameraTargetSize.x
-        let viewportSizeY = this.size.y / this.cameraTargetSize.y
-
-        const maxViewportSize = Math.max(viewportSizeX, viewportSizeY)
-
-        viewportSizeX /= maxViewportSize
-        viewportSizeY /= maxViewportSize
-
-        const viewportX = 0.5 * rendererWidth * (1 - viewportSizeX)
-        const viewportY = 0.5 * rendererHeight * (1 - viewportSizeY)
-
-        this.store.renderer.setViewport(
-            viewportX,
-            viewportY,
-            viewportSizeX * rendererWidth,
-            viewportSizeY * rendererHeight,
-        )
     }
 
     private updateCameraPosition() {
@@ -229,15 +248,16 @@ export class ModuleCamera extends THREE.OrthographicCamera {
             }
         }
 
+        const visuals = this.store.resources.get("visuals")
         const rocket = this.getRocket()
-        const interpolation = this.store.interpolation.get(rocket.id)
+        const rocketVisual = visuals.objects.get(rocket.id)
 
-        if (interpolation === undefined) {
-            throw new Error("Rocket interpolation not found")
+        if (rocketVisual === undefined) {
+            throw new Error("Rocket visual not found")
         }
 
-        const rocketPositionInViewX = interpolation.x - this.levelConstraintPosition.x
-        const rocketPositionInViewY = interpolation.y - this.levelConstraintPosition.y
+        const rocketPositionInViewX = rocketVisual.position.x - this.levelConstraintPosition.x
+        const rocketPositionInViewY = rocketVisual.position.y - this.levelConstraintPosition.y
 
         const cameraPositionX =
             this.levelConstraintPosition.x +

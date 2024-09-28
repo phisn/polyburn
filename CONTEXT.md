@@ -2,7 +2,6 @@
 
 ## Now
 
--   I renamed web-game to game-player. Have to fix everything upon that.
 -   We wanted to extract reset functionality into game-web. Game should stay more pure. Especially since we have the bug that camera does not reset on reset call. For this also take a look if player in web should actually have such deep access. ALl sketchy.
 
 ## Next

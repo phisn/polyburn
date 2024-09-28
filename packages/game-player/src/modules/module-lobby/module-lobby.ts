@@ -1,3 +1,4 @@
+import { slerp } from "game/src/model/utils"
 import { rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
 import { Frame, FramePacket } from "shared/src/lobby-api/frame-packet"
 import {
@@ -8,7 +9,6 @@ import {
 import { UserOther } from "shared/src/lobby-api/user-other"
 import { lerp } from "three/src/math/MathUtils"
 import { Text } from "troika-three-text"
-import { slerp } from "../../model/interpolation"
 import { GamePlayerStore } from "../../model/store"
 import { Rocket } from "../module-visual/objects/rocket"
 
@@ -40,11 +40,13 @@ export class OtherUserGhost {
 
         this.mesh.add(text as any)
 
-        this.store.scene.add(this.mesh)
+        const scene = this.store.resources.get("scene")
+        scene.add(this.mesh)
     }
 
     dispose() {
-        this.store.scene.remove(this.mesh)
+        const scene = this.store.resources.get("scene")
+        scene.remove(this.mesh)
     }
 
     addPacket(packet: FramePacket) {
@@ -226,7 +228,7 @@ export class ModuleLobby {
         this.setup(token)
     }
 
-    dispose() {
+    onDispose() {
         this.ws?.close()
         this.disposed = true
 

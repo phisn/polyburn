@@ -1,4 +1,4 @@
-import { GamePlayerStore } from "../../model/store"
+import { GamePlayerStore } from "../../../model/store"
 
 // const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
@@ -17,19 +17,23 @@ export class Mouse {
     public x = 0
     public y = 0
 
-    constructor(private runtime: GamePlayerStore) {
+    constructor(private store: GamePlayerStore) {
         this.onPointerEvent = this.onPointerEvent.bind(this)
 
+        const renderer = this.store.resources.get("renderer")
+
         for (const ptrEvent of this.ptrEvents) {
-            runtime.renderer.domElement.addEventListener(ptrEvent, this.onPointerEvent, {
+            renderer.domElement.addEventListener(ptrEvent, this.onPointerEvent, {
                 capture: true,
             })
         }
     }
 
-    dispose() {
+    onDispose() {
+        const renderer = this.store.resources.get("renderer")
+
         for (const ptrEvent of this.ptrEvents) {
-            this.runtime.renderer.domElement.removeEventListener(ptrEvent, this.onPointerEvent)
+            renderer.domElement.removeEventListener(ptrEvent, this.onPointerEvent)
         }
     }
 

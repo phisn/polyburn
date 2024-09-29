@@ -4,7 +4,8 @@ import { and, count, eq, lt, sql } from "drizzle-orm"
 import { DrizzleD1Database } from "drizzle-orm/d1"
 import { ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
-import { validateReplay } from "game/src/model/replay/validate-replay"
+import { Game } from "game/src/game"
+import { replayApplyTo } from "game/src/model/replay"
 import { Buffer } from "node:buffer"
 import { z } from "zod"
 import { worlds } from "../../domain/worlds"
@@ -32,11 +33,11 @@ export const validateReplayProcedure = publicProcedure
         }
 
         const replayBuffer = Buffer.from(input.replayModelBase64, "base64")
-        const replayStats = serverValidateReplay(input.worldname, input.gamemode, replayBuffer)
+        const replaySummary = serverValidateReplay(input.worldname, input.gamemode, replayBuffer)
 
         const [[bestReplayEntry], [replayRank]] = await db.batch([
             personalBestQuery(db, user.id, input.worldname, input.gamemode),
-            rankForTicksQuery(db, replayStats.ticks, input.worldname, input.gamemode),
+            rankForTicksQuery(db, replaySummary.ticks, input.worldname, input.gamemode),
         ])
 
         let personalBest = undefined
@@ -56,12 +57,12 @@ export const validateReplayProcedure = publicProcedure
             }
         }
 
-        if (personalBest === undefined || replayStats.ticks <= personalBest.ticks) {
+        if (personalBest === undefined || replaySummary.ticks <= personalBest.ticks) {
             const update = {
                 userId: user.id,
 
-                deaths: replayStats.deaths,
-                ticks: replayStats.ticks,
+                deaths: replaySummary.deaths,
+                ticks: replaySummary.ticks,
 
                 model: replayBuffer,
             }
@@ -92,11 +93,11 @@ export const validateReplayProcedure = publicProcedure
             }
 
             console.log(
-                `replay is better, existing ${personalBest?.ticks}, new ${replayStats.ticks}`,
+                `replay is better, existing ${personalBest?.ticks}, new ${replaySummary.ticks}`,
             )
         } else {
             console.log(
-                `replay is worse, existing ${bestReplayEntry?.ticks}, new ${replayStats.ticks}`,
+                `replay is worse, existing ${bestReplayEntry?.ticks}, new ${replaySummary.ticks}`,
             )
         }
 
@@ -107,9 +108,9 @@ export const validateReplayProcedure = publicProcedure
     })
 
 function serverValidateReplay(worldname: string, gamemode: string, replayBuffer: Buffer) {
-    const world = worlds.find(world => world.id.name === worldname)
+    const worldEntry = worlds.find(world => world.id.name === worldname)
 
-    if (!world) {
+    if (!worldEntry) {
         console.log("world not found: " + worldname)
 
         throw new TRPCError({
@@ -120,11 +121,20 @@ function serverValidateReplay(worldname: string, gamemode: string, replayBuffer:
 
     try {
         const replayModel = ReplayModel.decode(replayBuffer)
-        const worldModel = WorldConfig.decode(Buffer.from(world.model, "base64"))
+        const worldConfig = WorldConfig.decode(Buffer.from(worldEntry.model, "base64"))
 
-        const stats = validateReplay(RAPIER, replayModel, worldModel, gamemode)
+        const gameSummary = replayApplyTo(
+            new Game(
+                {
+                    world: worldConfig,
+                    gamemode,
+                },
+                { rapier: RAPIER },
+            ),
+            replayModel,
+        ).resources.get("summary")
 
-        if (!stats) {
+        if (!gameSummary) {
             console.log("replay is invalid")
 
             throw new TRPCError({
@@ -133,7 +143,7 @@ function serverValidateReplay(worldname: string, gamemode: string, replayBuffer:
             })
         }
 
-        return stats
+        return gameSummary
     } catch (e) {
         console.log(e)
         throw new TRPCError({

@@ -31,7 +31,7 @@ export function World(props: { world?: WorldInfo; onSelected: () => void }) {
     const isLocked = props.world?.type === "locked"
 
     return (
-        <div className="@container aspect-[7/4] w-full max-w-[28rem]">
+        <div className="@container relative aspect-[7/4] w-full max-w-[28rem]">
             <ButtonOverlay />
             <Overlay world={props.world} locked={isLocked} />
 

@@ -1,16 +1,20 @@
+import { GameConfig } from "game/src/game"
 import { Color, WebGLRenderer } from "three"
 import { GameLoopRunnable } from "./game-player-loop"
-import { GameSettings } from "./model/settings"
 import { GamePlayerStore } from "./model/store"
 import { ModuleCamera } from "./modules/module-camera"
 import { ModuleInput } from "./modules/module-input/module-input"
 import { ModuleInterpolation } from "./modules/module-interpolation"
-import { ModuleLobby } from "./modules/module-lobby/module-lobby"
+import { LobbyConfigResource, ModuleLobby } from "./modules/module-lobby/module-lobby"
 import { ModuleParticles } from "./modules/module-particles/module-particles"
 import { ModuleUI } from "./modules/module-ui/module-ui"
 import { ModuleVisual } from "./modules/module-visual/module-visual"
 
-export class WebGame implements GameLoopRunnable {
+export interface GamePlayerConfig extends GameConfig {
+    worldname: string
+}
+
+export class GamePlayer implements GameLoopRunnable {
     public store: GamePlayerStore
 
     private moduleCamera: ModuleCamera
@@ -21,27 +25,24 @@ export class WebGame implements GameLoopRunnable {
     private moduleUI: ModuleUI
     private moduleVisual: ModuleVisual
 
-    constructor(settings: GameSettings) {
+    constructor(config: GamePlayerConfig, lobbyConfig: LobbyConfigResource) {
         const renderer = new WebGLRenderer({
             antialias: true,
             alpha: true,
         })
-
         renderer.autoClear = false
         renderer.setClearColor(Color.NAMES["black"], 1)
 
-        this.store = new GamePlayerStore(settings, renderer)
+        this.store = new GamePlayerStore(config, renderer)
+        this.store.resources.set("lobbyConfig", lobbyConfig)
 
         this.moduleCamera = new ModuleCamera(this.store)
         this.moduleInput = new ModuleInput(this.store)
         this.moduleInterpolation = new ModuleInterpolation(this.store)
+        this.moduleLobby = new ModuleLobby(this.store)
         this.moduleParticles = new ModuleParticles(this.store)
         this.moduleUI = new ModuleUI(this.store)
         this.moduleVisual = new ModuleVisual(this.store)
-
-        if (settings.instanceType === "play" && settings.lobby) {
-            this.moduleLobby = new ModuleLobby(this.store)
-        }
     }
 
     onDispose() {

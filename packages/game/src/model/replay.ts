@@ -1,7 +1,57 @@
-import { getFloat16, setFloat16 } from "@petamoriken/float16"
+import { f16round, getFloat16, setFloat16 } from "@petamoriken/float16"
+import { ReplayModel } from "../../proto/replay"
+import { Game, GameInput } from "../game"
 
-export interface ReplayFrame {
-    diff: number
+export function replayApplyTo(game: Game, replay: ReplayModel) {
+    const replayFrames = replayFramesFromBytes(replay.frames)
+
+    let accumulator = 0
+
+    for (const frame of replayFrames) {
+        accumulator += frame.diff
+
+        const input = {
+            rotation: accumulator,
+            thrust: frame.thrust,
+        }
+
+        game.onUpdate(input)
+    }
+
+    return game.store
+}
+
+export class GameInputCompressor {
+    private accumulated: number
+
+    constructor() {
+        this.accumulated = 0
+    }
+
+    reset() {
+        this.accumulated = 0
+    }
+
+    compress(input: GameInput): GameInputCompressed {
+        let changeRounded = f16round(input.rotation - this.accumulated)
+        if (Math.abs(changeRounded) < GameInputCompressor.MINIMAL_CHANGE_TO_CAPTURE) {
+            changeRounded = 0
+        }
+
+        this.accumulated += changeRounded
+        input.rotation = this.accumulated
+
+        return {
+            rotationDelta: changeRounded,
+            thrust: input.thrust,
+        }
+    }
+
+    static MINIMAL_CHANGE_TO_CAPTURE = 0.0001
+}
+
+export interface GameInputCompressed {
+    rotationDelta: number
     thrust: boolean
 }
 
@@ -10,15 +60,9 @@ interface Packet {
     size: number
 }
 
-export function replayFramesToBytes(replayFrames: ReplayFrame[]) {
-    const packets = [...packDiffs(replayFrames), ...packThrusts(replayFrames)]
+export function replayFramesToBytes(replayFrames: GameInputCompressed[]) {
+    const packets = [...packRotations(replayFrames), ...packThrusts(replayFrames)]
     const packetsSize = packets.reduce((acc, packet) => acc + packet.size, 0)
-
-    const diffssize = packDiffs(replayFrames).reduce((acc, packet) => acc + packet.size, 0)
-    const thrustssize = packThrusts(replayFrames).reduce((acc, packet) => acc + packet.size, 0)
-
-    console.log("diffs", diffssize)
-    console.log("thrusts", thrustssize)
 
     const u8 = new Uint8Array(packetsSize)
     const view = new DataView(u8.buffer)
@@ -37,7 +81,7 @@ export function replayFramesFromBytes(bytes: Uint8Array) {
         bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
     )
 
-    const [diffs, offset] = unpackDiffs(view, 0)
+    const [diffs, offset] = unpackRotations(view, 0)
     const thrusts = unpackThrusts(view, offset)
 
     if (diffs.length !== thrusts.length) {
@@ -50,7 +94,7 @@ export function replayFramesFromBytes(bytes: Uint8Array) {
     }))
 }
 
-function packDiffs(frames: ReplayFrame[]): Packet[] {
+function packRotations(frames: GameInputCompressed[]): Packet[] {
     enum packDiffType {
         Zero = 0,
         NonZero = 1,
@@ -72,7 +116,7 @@ function packDiffs(frames: ReplayFrame[]): Packet[] {
 
     for (const item of frames) {
         const previous = packed.at(-1)
-        const itemType = item.diff === 0 ? packDiffType.Zero : packDiffType.NonZero
+        const itemType = item.rotationDelta === 0 ? packDiffType.Zero : packDiffType.NonZero
 
         if (
             itemType === packDiffType.Zero &&
@@ -90,7 +134,7 @@ function packDiffs(frames: ReplayFrame[]): Packet[] {
             } else {
                 packed.push({
                     type: packDiffType.NonZero,
-                    value: item.diff,
+                    value: item.rotationDelta,
                 })
             }
         }
@@ -137,7 +181,7 @@ function packDiffs(frames: ReplayFrame[]): Packet[] {
     ]
 }
 
-function unpackDiffs(view: DataView, offset: number) {
+function unpackRotations(view: DataView, offset: number) {
     const length = view.getUint32(offset, true)
     const diffs: number[] = []
 
@@ -164,7 +208,7 @@ function unpackDiffs(view: DataView, offset: number) {
     return [diffs, offset] as const
 }
 
-function packThrusts([first, ...remaining]: ReplayFrame[]): Packet[] {
+function packThrusts([first, ...remaining]: GameInputCompressed[]): Packet[] {
     interface packThrust {
         thrust: boolean
         count: number

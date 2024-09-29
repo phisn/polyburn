@@ -1,17 +1,16 @@
-import { f16round } from "@petamoriken/float16"
 import { GameInput } from "game/src/game"
-import { ReplayFrame } from "game/src/model/replay/replay"
+import { GameInputCompressed, GameInputCompressor } from "game/src/model/replay"
 import { GamePlayerStore } from "../../model/store"
 import { Devices } from "./devices/devices"
 
 export interface InputCaptureResource {
     currentInput: GameInput
-    frames: ReplayFrame[]
+    frames: GameInputCompressed[]
 }
 
 export class ModuleInput {
     private devices: Devices
-    private rotationaAccumulated: number
+    private compressor: GameInputCompressor
 
     constructor(private store: GamePlayerStore) {
         this.store.resources.set("inputCapture", {
@@ -20,7 +19,7 @@ export class ModuleInput {
         })
 
         this.devices = new Devices(store)
-        this.rotationaAccumulated = 0
+        this.compressor = new GameInputCompressor()
     }
 
     onDispose() {
@@ -28,7 +27,7 @@ export class ModuleInput {
     }
 
     onReset() {
-        this.rotationaAccumulated = 0
+        this.compressor.reset()
 
         const inputCapture = this.store.resources.get("inputCapture")
         inputCapture.currentInput = { rotation: 0, thrust: false }
@@ -38,22 +37,13 @@ export class ModuleInput {
     onFixedUpdate() {
         this.devices.onFixedUpdate()
 
-        let changeRounded = f16round(this.devices.rotation() - this.rotationaAccumulated)
-        if (Math.abs(changeRounded) < MINIMAL_CHANGE_TO_CAPTURE) {
-            changeRounded = 0
+        const input = {
+            rotation: this.devices.rotation(),
+            thrust: this.devices.thrust(),
         }
-        this.rotationaAccumulated += changeRounded
 
         const inputCapture = this.store.resources.get("inputCapture")
-        inputCapture.currentInput = {
-            thrust: this.devices.thrust(),
-            rotation: this.rotationaAccumulated,
-        }
-        inputCapture.frames.push({
-            diff: changeRounded,
-            thrust: inputCapture.currentInput.thrust,
-        })
+        inputCapture.frames.push(this.compressor.compress(input))
+        inputCapture.currentInput = input
     }
 }
-
-const MINIMAL_CHANGE_TO_CAPTURE = 0.0001

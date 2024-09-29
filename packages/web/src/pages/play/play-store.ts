@@ -1,9 +1,7 @@
-import { WebGame } from "game-web/src/game-player"
+import { GamePlayer } from "game-web/src/game-player"
 import { GameLoop } from "game-web/src/game-player-loop"
-import { GameHooks } from "game-web/src/model/settings"
 import { ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
-import { replayFramesToBytes } from "game/src/model/replay/replay"
 import { createContext, useContext } from "react"
 import { createStore, useStore } from "zustand"
 import { useAppStore } from "../../common/store/app-store"
@@ -36,7 +34,7 @@ export interface PlayStoreProps {
 export interface PlayState extends PlayStoreProps {
     status: PlayStatus
 
-    game: WebGame
+    game: GamePlayer
     gameLoop: GameLoop
 
     getCanvas(): HTMLCanvasElement
@@ -51,55 +49,15 @@ export interface PlayState extends PlayStoreProps {
 export type PlayStore = ReturnType<typeof createPlayStore>
 
 export const createPlayStore = (props: PlayStoreProps) => {
-    const hooks: GameHooks = {
-        onFinished: () => {
-            const model = ReplayModel.create({
-                frames: replayFramesToBytes(game.store.resources.get("inputCapture").frames),
-            })
+    /*
+        const model = ReplayModel.create({
+            frames: replayFramesToBytes(game.store.resources.get("inputCapture").frames),
+        })
 
-            const summary = game.store.game.store.resources.get("summary")
+        const summary = game.store.game.store.resources.get("summary")
 
-            store.getState().uploadReplay(model, summary.ticks, summary.deaths)
-        },
-
-        onUserJoined: _user => {
-            /*
-            const appState = useAppStore.getState()
-            appState.newAlert({
-                type: "info",
-                message: `${user.username} joined the game`,
-            })
-            */
-        },
-        onUserLeft: _username => {
-            /*
-            const appState = useAppStore.getState()
-            appState.newAlert({
-                type: "info",
-                message: `${username} left the game`,
-            })
-            */
-        },
-
-        onConnected: _userCount => {
-            /*
-            const appState = useAppStore.getState()
-            appState.newAlert({
-                type: "info",
-                message: `Connected to server with ${userCount} other users`,
-            })
-            */
-        },
-        onDisconnected: () => {
-            /*
-            const appState = useAppStore.getState()
-            appState.newAlert({
-                type: "warning",
-                message: "Disconnected from server",
-            })
-            */
-        },
-    }
+        store.getState().uploadReplay(model, summary.ticks, summary.deaths)
+    */
 
     const state = useAppStore.getState()
     let lobby
@@ -112,14 +70,13 @@ export const createPlayStore = (props: PlayStoreProps) => {
         }
     }
 
-    const game = new WebGame({
+    const game = new GamePlayer({
         instanceType: "play",
 
         worldname: props.worldname,
         world: props.world,
         gamemode: props.gamemode,
 
-        hooks: hooks,
         lobby: lobby,
     })
 

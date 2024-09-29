@@ -3,10 +3,10 @@ import { eq } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/d1"
 import { randomUUID } from "node:crypto"
 import {
-    InitializeFromServer,
-    UpdateFromClient,
-    UpdateFromServer,
-    updateFromClient,
+    ClientUpdateMessage,
+    InitializeMessage,
+    ServerUpdateMessage,
+    clientUpdateMessage,
 } from "shared/src/lobby-api/lobby-api"
 import { UserOther } from "shared/src/lobby-api/user-other"
 import { Env } from "../worker/env"
@@ -42,7 +42,7 @@ class SingleLobby {
         this.userLeft = []
 
         this.interval = setInterval(() => {
-            const message: UpdateFromServer = {
+            const message: ServerUpdateMessage = {
                 type: "update",
                 framePackets: this.frameTracker.retrievePackets(),
                 usersConnected: this.usersJoined,
@@ -68,7 +68,7 @@ class SingleLobby {
         this.currentlyPlaying.set(connectedUser.user.username, connectedUser)
         this.usersJoined.push(connectedUser.user)
 
-        const initializeMessage: InitializeFromServer = {
+        const initializeMessage: InitializeMessage = {
             type: "initialize",
             users: [...this.currentlyPlaying.values()].map(({ user }) => user),
         }
@@ -95,7 +95,7 @@ class SingleLobby {
         )
     }
 
-    onClientUpdate(message: UpdateFromClient, context: WebsocketClientContext) {
+    onClientUpdate(message: ClientUpdateMessage, context: WebsocketClientContext) {
         const success = this.frameTracker.trackPacket({
             frames: message.frames,
             username: context.username,
@@ -178,7 +178,7 @@ export class DurableObjectLobby extends DurableObject {
 
             server.addEventListener("message", event => {
                 try {
-                    const message = updateFromClient.safeParse(JSON.parse(event.data))
+                    const message = clientUpdateMessage.safeParse(JSON.parse(event.data))
 
                     if (message.success === false) {
                         server.close(1008, "Invalid message")

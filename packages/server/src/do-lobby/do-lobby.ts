@@ -2,13 +2,9 @@ import { DurableObject } from "cloudflare:workers"
 import { eq } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/d1"
 import { randomUUID } from "node:crypto"
-import {
-    ClientUpdateMessage,
-    InitializeMessage,
-    ServerUpdateMessage,
-    clientUpdateMessage,
-} from "shared/src/lobby-api/lobby-api"
-import { UserOther } from "shared/src/lobby-api/user-other"
+import { ClientUpdateMessage, clientUpdateMessage } from "shared/src/lobby-api/message-client"
+import { InitializeMessage, ServerUpdateMessage } from "shared/src/lobby-api/message-server"
+import { OtherUser } from "shared/src/lobby-api/other-user"
 import { Env } from "../worker/env"
 import { users } from "../worker/framework/db-schema"
 import { userFromAuthorizationHeader as userFromRequest } from "../worker/framework/helper/user-from-authorization-header"
@@ -22,7 +18,7 @@ interface WebsocketClientContext {
 }
 
 interface ConnectedUser {
-    user: UserOther
+    user: OtherUser
     connection: WebSocket
 }
 
@@ -30,8 +26,8 @@ class SingleLobby {
     private frameTracker: UserFrameTracker
     private currentlyPlaying: Map<string, ConnectedUser> = new Map()
 
-    private usersJoined: UserOther[]
-    private userLeft: UserOther[]
+    private usersJoined: OtherUser[]
+    private userLeft: OtherUser[]
 
     private interval: ReturnType<typeof setInterval>
 

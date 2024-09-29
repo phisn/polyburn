@@ -25,7 +25,7 @@ export class GamePlayer implements GameLoopRunnable {
     private moduleUI: ModuleUI
     private moduleVisual: ModuleVisual
 
-    constructor(config: GamePlayerConfig, lobbyConfig: LobbyConfigResource) {
+    constructor(config: GamePlayerConfig, lobbyConfig?: LobbyConfigResource) {
         const renderer = new WebGLRenderer({
             antialias: true,
             alpha: true,
@@ -34,15 +34,18 @@ export class GamePlayer implements GameLoopRunnable {
         renderer.setClearColor(Color.NAMES["black"], 1)
 
         this.store = new GamePlayerStore(config, renderer)
-        this.store.resources.set("lobbyConfig", lobbyConfig)
 
         this.moduleCamera = new ModuleCamera(this.store)
         this.moduleInput = new ModuleInput(this.store)
         this.moduleInterpolation = new ModuleInterpolation(this.store)
-        this.moduleLobby = new ModuleLobby(this.store)
         this.moduleParticles = new ModuleParticles(this.store)
         this.moduleUI = new ModuleUI(this.store)
         this.moduleVisual = new ModuleVisual(this.store)
+
+        if (lobbyConfig) {
+            this.store.resources.set("lobbyConfig", lobbyConfig)
+            this.moduleLobby = new ModuleLobby(this.store)
+        }
     }
 
     onDispose() {
@@ -74,7 +77,6 @@ export class GamePlayer implements GameLoopRunnable {
         this.moduleInterpolation.onUpdate(overstep)
 
         this.moduleCamera.onUpdate(delta)
-        this.moduleLobby?.onUpdate(overstep)
         this.moduleParticles.update(delta)
         this.moduleVisual.onUpdate()
 

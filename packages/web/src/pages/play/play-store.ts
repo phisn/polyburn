@@ -1,5 +1,6 @@
 import { GamePlayer } from "game-web/src/game-player"
 import { GameLoop } from "game-web/src/game-player-loop"
+import { LobbyConfigResource } from "game-web/src/modules/module-lobby/module-lobby"
 import { ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
 import { createContext, useContext } from "react"
@@ -49,36 +50,25 @@ export interface PlayState extends PlayStoreProps {
 export type PlayStore = ReturnType<typeof createPlayStore>
 
 export const createPlayStore = (props: PlayStoreProps) => {
-    /*
-        const model = ReplayModel.create({
-            frames: replayFramesToBytes(game.store.resources.get("inputCapture").frames),
-        })
-
-        const summary = game.store.game.store.resources.get("summary")
-
-        store.getState().uploadReplay(model, summary.ticks, summary.deaths)
-    */
-
     const state = useAppStore.getState()
-    let lobby
 
+    let lobbyConfig: LobbyConfigResource | undefined = undefined
     if (state.jwt && state.user) {
-        lobby = {
-            host: new URL(import.meta.env.VITE_SERVER_URL).host,
+        lobbyConfig = {
+            lobbyWsUrl: new URL(import.meta.env.VITE_SERVER_URL).host,
             username: state.user.username,
             token: state.jwt,
         }
     }
 
-    const game = new GamePlayer({
-        instanceType: "play",
-
-        worldname: props.worldname,
-        world: props.world,
-        gamemode: props.gamemode,
-
-        lobby: lobby,
-    })
+    const game = new GamePlayer(
+        {
+            worldname: props.worldname,
+            world: props.world,
+            gamemode: props.gamemode,
+        },
+        lobbyConfig,
+    )
 
     const gameLoop = new GameLoop(game)
 

@@ -77,10 +77,6 @@ export class ModuleLobby {
         }
     }
 
-    onUpdate(overstep: number) {
-        this.otherUserRegistry.onUpdate(overstep)
-    }
-
     private startWebsocket() {
         this.ws?.close()
         this.ws = new WebSocket(this.wsUrl)
@@ -130,6 +126,7 @@ export class ModuleLobby {
 
             this.store.events.invoke.lobbyDisconnected?.()
             if (this.ws === previousWs) {
+                this.failureCounter++
                 this.restartWebsocket()
             }
         }
@@ -138,6 +135,7 @@ export class ModuleLobby {
             console.error("Lobby websocket failure: ", error)
 
             if (this.ws === previousWs) {
+                this.failureCounter++
                 this.restartWebsocket()
             }
         }
@@ -149,15 +147,6 @@ export class ModuleLobby {
         this.ws?.close()
         this.ws = undefined
 
-        const now = Date.now()
-
-        if (now - this.lastSetup > this.baseFailureTimeout) {
-            this.startWebsocket()
-        } else {
-            setTimeout(
-                () => void this.restartWebsocket(),
-                this.baseFailureTimeout - (now - this.lastSetup),
-            )
-        }
+        setTimeout(() => this.startWebsocket(), this.baseFailureTimeout)
     }
 }

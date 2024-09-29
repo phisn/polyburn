@@ -21,7 +21,7 @@ export class OtherUserRegistry {
             const ghost = this.ghosts.get(packet.username)
 
             if (ghost) {
-                ghost.addPacket(packet)
+                ghost.loadPacket(packet)
             }
         }
     }
@@ -59,15 +59,9 @@ export class OtherUserRegistry {
         return true
     }
 
-    onFixedUpdate(last: Boolean) {
+    onFixedUpdate() {
         for (const ghost of this.ghosts.values()) {
-            ghost.onFixedUpdate(last)
-        }
-    }
-
-    onUpdate(overstep: number) {
-        for (const ghost of this.ghosts.values()) {
-            ghost.onUpdate(overstep)
+            ghost.onFixedUpdate()
         }
     }
 }

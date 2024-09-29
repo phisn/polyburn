@@ -1,28 +1,30 @@
-import { slerp } from "game/src/model/utils"
 import { Frame, FramePacket } from "shared/src/lobby-api/frame-packet"
 import { OtherUser } from "shared/src/lobby-api/other-user"
-import { lerp } from "three/src/math/MathUtils"
+import { Object3D } from "three"
 import { Text } from "troika-three-text"
 import { GamePlayerStore } from "../../model/store"
 import { Rocket } from "../module-visual/objects/rocket"
 
 export class OtherUserGhost {
+    private currentFrame: Frame
+    private mesh: Object3D
     private packets: FramePacket[] = []
-    private packetIterator = 0
-
-    private mesh: Rocket
-
-    private currentFrame: Frame | undefined
-    private previousFrame: Frame | undefined
+    private packetIterator: number
+    private resetInterpolation: () => void
 
     constructor(
         private store: GamePlayerStore,
         private otherUser: OtherUser,
     ) {
         this.mesh = new Rocket(0.2)
+        this.currentFrame = {
+            x: Infinity,
+            y: Infinity,
+            rotation: Infinity,
+        }
+        this.packetIterator = 0
 
         const text = new Text()
-
         text.text = otherUser.username
         text.fontSize = 0.8
         text.color = "white"
@@ -31,11 +33,21 @@ export class OtherUserGhost {
         text.textAlign = "center"
         text.anchorX = "center"
         text.anchorY = "bottom"
-
         this.mesh.add(text as any)
 
+        const interpolation = this.store.resources.get("interpolation")
         const scene = this.store.resources.get("scene")
+
         scene.add(this.mesh)
+
+        const registration = interpolation.register(this.mesh, () => ({
+            point: {
+                x: this.currentFrame.x,
+                y: this.currentFrame.y,
+            },
+            rotation: this.currentFrame.rotation,
+        }))
+        this.resetInterpolation = registration.reset
     }
 
     dispose() {
@@ -43,11 +55,11 @@ export class OtherUserGhost {
         scene.remove(this.mesh)
     }
 
-    addPacket(packet: FramePacket) {
+    loadPacket(packet: FramePacket) {
         this.packets.push(packet)
     }
 
-    onFixedUpdate(last: Boolean) {
+    onFixedUpdate() {
         // each packet consists of multiple positions. we always
         // work through the first packet and then remove it
 
@@ -69,30 +81,16 @@ export class OtherUserGhost {
             return
         }
 
-        this.previousFrame = this.currentFrame
         this.currentFrame = this.packets[0].frames[this.packetIterator]
 
         const dx = this.currentFrame.x - this.mesh.position.x
         const dy = this.currentFrame.y - this.mesh.position.y
 
         if (dx * dx + dy * dy > 4) {
-            this.previousFrame = this.currentFrame
+            this.resetInterpolation()
         }
 
         this.packetIterator++
-    }
-
-    onUpdate(overstep: number) {
-        if (!this.previousFrame || !this.currentFrame) {
-            return
-        }
-
-        const x = lerp(this.previousFrame.x, this.currentFrame.x, overstep)
-        const y = lerp(this.previousFrame.y, this.currentFrame.y, overstep)
-        const rotation = slerp(this.previousFrame.rotation, this.currentFrame.rotation, overstep)
-
-        this.mesh.position.set(x, y, 0)
-        this.mesh.rotation.z = rotation
     }
 
     getOtherUser() {

@@ -21,8 +21,8 @@ export const options = {
                 const appState = useAppStore.getState()
                 const headers: any = {}
 
-                if (appState.jwt) {
-                    headers["Authorization"] = appState.jwt
+                if (appState.currentUserJwt) {
+                    headers["Authorization"] = appState.currentUserJwt
                 }
 
                 return headers

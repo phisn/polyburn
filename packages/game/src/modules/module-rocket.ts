@@ -266,6 +266,8 @@ export class ModuleRocket {
                 ? contact.solverContactPoint(0)
                 : contact.solverContactPoint(0)
 
+            this.respawn(rocket)
+
             this.store.events.invoke.death?.({
                 rocket,
 
@@ -275,8 +277,6 @@ export class ModuleRocket {
                 },
                 normal: otherNormalNormalized,
             })
-
-            this.respawn(rocket)
         }
     }
 

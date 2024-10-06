@@ -7,12 +7,10 @@ export interface InterpolationResource {
 }
 
 interface InterpolationRegistration {
+    getTransform: () => Transform
     object: Object3D
-
     source: Transform
     target: Transform
-
-    getTransform: () => Transform
 }
 
 export class ModuleInterpolation {
@@ -89,103 +87,3 @@ export class ModuleInterpolation {
         }
     }
 }
-
-/*
-export class InterpolationStore {
-    private mapping: Map<number, MappingEntry> = new Map()
-
-    constructor(game: Game) {
-        game.store.entities.listen(
-            ["body"],
-            entity => {
-                const body = entity.get("body")
-
-                if (body.isFixed() === false) {
-                    this.mapping.set(entity.id, {
-                        interpolation: {
-                            x: body.translation().x,
-                            y: body.translation().y,
-                            rotation: body.rotation(),
-                        },
-                        entity,
-
-                        previousX: body.translation().x,
-                        previousY: body.translation().y,
-                        previousRotation: body.rotation(),
-                    })
-                }
-            },
-            entity => {
-                this.mapping.delete(entity.id)
-            },
-        )
-    }
-
-    get(id: number): Interpolation | undefined {
-        return this.mapping.get(id)?.interpolation
-    }
-
-    *interpolations() {
-        for (const [id, { interpolation }] of this.mapping) {
-            yield [id, interpolation] as const
-        }
-    }
-
-    reset(id: number) {
-        const entry = this.mapping.get(id)
-
-        if (entry === undefined) {
-            return
-        }
-
-        const { entity, interpolation } = entry
-
-        interpolation.x = entity.get("body").translation().x
-        interpolation.y = entity.get("body").translation().y
-        interpolation.rotation = entity.get("body").rotation()
-
-        entry.previousX = interpolation.x
-        entry.previousY = interpolation.y
-        entry.previousRotation = interpolation.rotation
-    }
-
-    onUpdate(_delta: number, overstep: number) {
-        for (const entry of this.mapping.values()) {
-            const { entity, interpolation } = entry
-
-            const translation = entity.get("body").translation()
-            const rotation = entity.get("body").rotation()
-
-            interpolation.x = lerp(entry.previousX, translation.x, overstep)
-            interpolation.y = lerp(entry.previousY, translation.y, overstep)
-            interpolation.rotation = slerp(entry.previousRotation, rotation, overstep)
-
-            entry.previousX = interpolation.x
-            entry.previousY = interpolation.y
-            entry.previousRotation = interpolation.rotation
-        }
-    }
-
-    onFixedUpdate(last: boolean) {
-        if (last === false) {
-            return
-        }
-
-        for (const entry of this.mapping.values()) {
-            const { entity, interpolation } = entry
-
-            const translation = entity.get("body").translation()
-            const rotation = entity.get("body").rotation()
-
-            interpolation.x = translation.x
-            interpolation.y = translation.y
-            interpolation.rotation = rotation
-
-            entry.previousX = translation.x
-            entry.previousY = translation.y
-            entry.previousRotation = rotation
-        }
-    }
-}
-
-*/

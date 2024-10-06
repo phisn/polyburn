@@ -102,15 +102,15 @@ export class ModuleParticles {
             const rocketBody = rocket.get("body")
 
             const visuals = this.store.resources.get("visuals")
-            const rocketVisual = visuals.objects.get(rocket.id)
+            const rocketVisual = visuals.mapping.get(rocket.id)
 
             if (rocketVisual === undefined) {
                 return
             }
 
             const spawnPosition = changeAnchor(
-                rocketVisual.position,
-                rocketVisual.rotation.z,
+                rocketVisual.object.position,
+                rocketVisual.object.rotation.z,
                 ROCKET_SIZE,
                 { x: 0.5, y: 0.5 },
                 { x: 0.5, y: 0.3 },
@@ -122,7 +122,7 @@ export class ModuleParticles {
                 this.simulation.createParticle(
                     PARTICLE_TEMPLATE_THRUST,
                     spawnPosition,
-                    rocketVisual.rotation.z,
+                    rocketVisual.object.rotation.z,
                     rocketBody.linvel(),
                     i,
                 )

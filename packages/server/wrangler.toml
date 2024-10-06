@@ -1,28 +1,23 @@
-name = "polyburn-worker"
+name = "server"
 main = "src/index.ts"
-
-compatibility_date = "2024-03-04"
+compatibility_date = "2024-10-02"
 compatibility_flags = [ "nodejs_compat" ]
 
-tail_consumers = [{service = "polyburn-worker-tail"}]
+# [vars]
+# MY_VAR = "my-variable"
 
-[dev]
-port = 3002
+# [[kv_namespaces]]
+# binding = "MY_KV_NAMESPACE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-[vars]
-CLIENT_URL = "https://new.rocketgame.app,https://rust-game.rocket-game.pages.dev,https://polyburn.com"
-API_URL = "https://api.polyburn.com"
+# [[r2_buckets]]
+# binding = "MY_BUCKET"
+# bucket_name = "my-bucket"
 
-[[d1_databases]]
-migrations_dir = "drizzle"
-binding = "DB"
-database_name = "polyburn"
-database_id = "432d6db4-6e41-4a3f-98bc-9d98bd3f115d"
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "my-database"
+# database_id = ""
 
-[[durable_objects.bindings]]
-name = "LOBBY_DO"
-class_name = "DurableObjectLobby"
-
-[[migrations]]
-tag = "v1"
-new_classes = ["DurableObjectLobby"]
+# [ai]
+# binding = "AI"

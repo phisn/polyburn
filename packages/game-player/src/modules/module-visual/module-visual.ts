@@ -9,15 +9,20 @@ import { Flag } from "./objects/flag"
 import { Rocket } from "./objects/rocket"
 
 export interface VisualsResource {
-    objects: Map<number, THREE.Object3D>
+    mapping: Map<number, Visuals>
 }
 
-export class ModuleVisual {
+export interface Visuals {
+    object: THREE.Object3D
+    resetInterpolation?: () => void
+}
+
+export class _ModuleVisual {
     private flags: Map<number, Flag>
 
     constructor(private store: GamePlayerStore) {
         store.resources.set("visuals", {
-            objects: new Map(),
+            mapping: new Map(),
         })
 
         this.flags = new Map()
@@ -54,7 +59,21 @@ export class ModuleVisual {
         )
 
         this.attachVisual(rocketComponents, () => {
-            return new Rocket()
+            const rocket = new Rocket()
+            return rocket
+        })
+
+        this.store.game.store.events.listen({
+            death: ({ rocket }) => {
+                const visuals = this.store.resources.get("visuals")
+                const rocketVisual = visuals.mapping.get(rocket.id)
+
+                if (rocketVisual === undefined) {
+                    return
+                }
+
+                rocketVisual.resetInterpolation?.()
+            },
         })
     }
 
@@ -72,32 +91,39 @@ export class ModuleVisual {
                     const scene = this.store.resources.get("scene")
                     scene.add(object)
 
-                    const visuals = this.store.resources.get("visuals")
-                    visuals.objects.set(entity.id, object)
+                    let resetInterpolation: undefined | (() => void)
 
                     if (entity.has("body")) {
                         const body = entity.get("body")
 
                         if (body.isDynamic()) {
                             const interpolation = this.store.resources.get("interpolation")
-                            interpolation.register(object, () => ({
+                            const { reset } = interpolation.register(object, () => ({
                                 point: {
                                     x: body.translation().x,
                                     y: body.translation().y,
                                 },
                                 rotation: body.rotation(),
                             }))
+
+                            resetInterpolation = reset
                         }
                     }
+
+                    const visuals = this.store.resources.get("visuals")
+                    visuals.mapping.set(entity.id, {
+                        object,
+                        resetInterpolation,
+                    })
                 }
             },
             entity => {
                 const visuals = this.store.resources.get("visuals")
-                const object = visuals.objects.get(entity.id)
+                const visual = visuals.mapping.get(entity.id)
 
-                if (object) {
+                if (visual) {
                     const scene = this.store.resources.get("scene")
-                    scene.remove(object)
+                    scene.remove(visual.object)
                 }
 
                 if (destruct) {

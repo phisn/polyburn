@@ -1,10 +1,10 @@
 import { z } from "zod"
-import { Frame } from "./frame-packet"
+import { updateFrameDTO } from "./update-packet"
 
 export const clientUpdateMessage = z
     .object({
         type: z.literal("update"),
-        frames: z.array(Frame),
+        frames: z.array(updateFrameDTO),
     })
     .strict()
 export type ClientUpdateMessage = z.infer<typeof clientUpdateMessage>

@@ -1,4 +1,3 @@
-import { Frame, FramePacket } from "shared/src/lobby-api/frame-packet"
 import { OtherUser } from "shared/src/lobby-api/other-user"
 import { Object3D } from "three"
 import { Text } from "troika-three-text"

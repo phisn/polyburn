@@ -9,7 +9,7 @@ export function ModalRenameAccount(props: { open: boolean; onFinished: () => voi
 
     const [loading, setLoading] = useState(false)
 
-    const user = useAppStore(x => x.user)
+    const user = useAppStore(x => x.currentUser)
     const newAlert = useAppStore(x => x.newAlert)
     const updateUser = useAppStore(x => x.updateUser)
 

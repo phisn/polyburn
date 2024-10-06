@@ -6,7 +6,7 @@ import { LayoutWithMenu } from "../components/layout/LayoutWithMenu"
 import { NotFound } from "./NotFound"
 import { Campaign } from "./campaign/Campaign"
 import { Editor } from "./editor/Editor"
-import { Play } from "./play/Play"
+import { Play } from "./player/Play"
 import { Slot } from "./slot/Slot"
 
 export function App() {

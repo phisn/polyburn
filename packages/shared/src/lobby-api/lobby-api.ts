@@ -1,3 +1,5 @@
+import { z } from "zod"
+
 // limit of amount of positions to be received from the client
 export const UPDATE_POSITIONS_EVERY_MS = 250
 export const UPDATE_POSITIONS_COUNT = Math.floor(60 * (UPDATE_POSITIONS_EVERY_MS / 1000))
@@ -10,3 +12,9 @@ export function parseLobbyId(lobbyId: string) {
     const [worldname, gamemode] = lobbyId.split("-")
     return { worldname, gamemode }
 }
+
+export const lobbyUserDTO = z.object({
+    username: z.string(),
+})
+
+export type LobbyUserDTO = z.infer<typeof lobbyUserDTO>

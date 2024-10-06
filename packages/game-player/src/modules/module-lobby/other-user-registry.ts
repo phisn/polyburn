@@ -1,4 +1,3 @@
-import { FramePacket } from "shared/src/lobby-api/frame-packet"
 import { OtherUser } from "shared/src/lobby-api/other-user"
 import { GamePlayerStore } from "../../model/store"
 import { OtherUserGhost } from "./other-user-ghost"

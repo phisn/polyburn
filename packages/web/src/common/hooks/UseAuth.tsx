@@ -17,7 +17,11 @@ export interface AuthApi {
 }
 
 export function useAuth(): [AuthState, AuthApi] {
-    const [me, jwt, hasHydrated] = useAppStore(state => [state.user, state.jwt, state.hydrated])
+    const [me, jwt, hasHydrated] = useAppStore(state => [
+        state.currentUser,
+        state.currentUserJwt,
+        state.hydrated,
+    ])
     const [loading, setLoading] = useState(false)
 
     const googleLogin = useGoogleLogin({

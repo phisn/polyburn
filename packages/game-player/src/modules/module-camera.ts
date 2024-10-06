@@ -250,14 +250,16 @@ export class ModuleCamera extends THREE.OrthographicCamera {
 
         const visuals = this.store.resources.get("visuals")
         const rocket = this.getRocket()
-        const rocketVisual = visuals.objects.get(rocket.id)
+        const rocketVisual = visuals.mapping.get(rocket.id)
 
         if (rocketVisual === undefined) {
             throw new Error("Rocket visual not found")
         }
 
-        const rocketPositionInViewX = rocketVisual.position.x - this.levelConstraintPosition.x
-        const rocketPositionInViewY = rocketVisual.position.y - this.levelConstraintPosition.y
+        const rocketPositionInViewX =
+            rocketVisual.object.position.x - this.levelConstraintPosition.x
+        const rocketPositionInViewY =
+            rocketVisual.object.position.y - this.levelConstraintPosition.y
 
         const cameraPositionX =
             this.levelConstraintPosition.x +

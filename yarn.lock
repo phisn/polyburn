@@ -3602,10 +3602,15 @@
   resolved "https://registry.npmjs.org/@trpc/server/-/server-10.45.2.tgz"
   integrity sha512-wOrSThNNE4HUnuhJG6PfDRp4L2009KDVxsd+2VYH8ro6o/7/jwYZ8Uu5j+VaW+mOmc8EHerHzGcdbGNQSAUPgg==
 
-"@tsndr/cloudflare-worker-jwt@^2.0.1", "@tsndr/cloudflare-worker-jwt@^2.5.3":
+"@tsndr/cloudflare-worker-jwt@^2.0.1":
   version "2.5.3"
   resolved "https://registry.npmjs.org/@tsndr/cloudflare-worker-jwt/-/cloudflare-worker-jwt-2.5.3.tgz"
   integrity sha512-zbdvjRG86y/ObiBgTJrzBC39t2FcaeGwB6AV7VO4LvHKJNyZvLYRbKT68eaoJhnJldyHhs7yZ69neRVdUd9knA==
+
+"@tsndr/cloudflare-worker-jwt@^2.5.3":
+  version "2.5.4"
+  resolved "https://registry.yarnpkg.com/@tsndr/cloudflare-worker-jwt/-/cloudflare-worker-jwt-2.5.4.tgz#40f1775476d4d3c5f15e6b41d968fb2e1e0ab6c1"
+  integrity sha512-f9lU8CL9NrsA3f8+Hanlgjl8Ten+WRAaV3DbmbReQGdH5rCRJeDSzpVaMjV6ifZP5hl8gvEumc18KqtT6xtX4A==
 
 "@turf/area@^6.4.0":
   version "6.5.0"
@@ -10032,14 +10037,14 @@ youch@^3.2.2:
     mustache "^4.2.0"
     stacktracey "^2.1.8"
 
-zod@^3.20.2, zod@^3.20.6, zod@^3.22.2:
+zod@^3.20.2, zod@^3.20.6:
   version "3.23.6"
   resolved "https://registry.npmjs.org/zod/-/zod-3.23.6.tgz"
   integrity sha512-RTHJlZhsRbuA8Hmp/iNL7jnfc4nZishjsanDAfEY1QpDQZCahUp3xDzl+zfweE9BklxMUcgBgS1b7Lvie/ZVwA==
 
-zod@^3.23.8:
+zod@^3.22.2, zod@^3.23.8:
   version "3.23.8"
-  resolved "https://registry.npmjs.org/zod/-/zod-3.23.8.tgz"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.23.8.tgz#e37b957b5d52079769fb8097099b592f0ef4067d"
   integrity sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==
 
 zustand@^3.7.1:

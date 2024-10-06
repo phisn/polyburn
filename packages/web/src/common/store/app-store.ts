@@ -1,14 +1,71 @@
-import { create } from "zustand"
-import { StateStorage, createJSONStorage, persist } from "zustand/middleware"
+import { create, StateCreator } from "zustand"
+import { createJSONStorage, persist, StateStorage } from "zustand/middleware"
 import { db } from "./db"
-import { AuthSlice, authHydrateStorageSideEffect, authSlice } from "./slice-auth"
-import { PopupSlice, popupSlice } from "./slice-popup"
+import { AuthSlice, authSlice } from "./slices/slice-auth"
+import { pendingReplaysSlice, PendingReplaysSlice } from "./slices/slice-pending-replays"
+import { PopupSlice, popupSlice } from "./slices/slice-popup"
 
-export interface AppStore extends AuthSlice, PopupSlice {
+export type AppStore = AuthSlice & HydrateSlice & PendingReplaysSlice & PopupSlice
+
+export const useAppStore = create<AppStore>()(
+    persist(
+        (...args) => ({
+            ...authSlice(...args),
+            ...hydrateSlice(...args),
+            ...pendingReplaysSlice(...args),
+            ...popupSlice(...args),
+        }),
+        {
+            name: "rocket-game",
+            version: 2,
+            storage: createJSONStorage(() => storage),
+
+            partialize: state => ({
+                jwt: state.currentUserJwt,
+                pendingReplays: state.pendingReplays,
+            }),
+            onRehydrateStorage: () => async (state, error) => {
+                if (!state) {
+                    console.error("Failed to rehydrate storage", error)
+                    return
+                }
+
+                if (state.currentUserJwt) {
+                    try {
+                        /*
+                        const me = await trpcNative.user.me.query()
+                        state.setCurrentUser(me)
+
+                        console.log("Hydrated user", me)
+                        */
+                    } catch (e) {
+                        state.logout()
+                        console.error("Failed to retrieve user", e)
+
+                        state.newAlert({
+                            type: "warning",
+                            message: "Failed to retrieve stored user. Please login again.",
+                        })
+                    }
+                }
+
+                state.setHydrated()
+            },
+        },
+    ),
+)
+
+interface HydrateSlice {
     hydrated: boolean
-    setHydrated: () => void
-    hasHydrated: () => boolean
+    setHydrated(): void
 }
+
+const hydrateSlice: StateCreator<HydrateSlice> = set => ({
+    hydrated: false,
+    setHydrated: () => {
+        set({ hydrated: true })
+    },
+})
 
 const storage: StateStorage = {
     getItem: async key => {
@@ -22,37 +79,3 @@ const storage: StateStorage = {
         await db.zustand.delete(key)
     },
 }
-
-export const useAppStore = create<AppStore>()(
-    persist(
-        (set, get, ...a) => ({
-            hydrated: false,
-            setHydrated: () => {
-                set({ hydrated: true })
-            },
-            hasHydrated: () => {
-                return get().hydrated
-            },
-            ...authSlice(set, get, ...a),
-            ...popupSlice(set, get, ...a),
-        }),
-        {
-            name: "rocket-game",
-            version: 2,
-            storage: createJSONStorage(() => storage),
-
-            partialize: state => ({
-                jwt: state.jwt,
-            }),
-            onRehydrateStorage: () => async state => {
-                if (!state) {
-                    return
-                }
-
-                await authHydrateStorageSideEffect(state)
-
-                state.setHydrated()
-            },
-        },
-    ),
-)

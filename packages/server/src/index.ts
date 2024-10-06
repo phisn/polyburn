@@ -1,12 +1,32 @@
-import { fetch } from "./worker/fetch"
+import { swaggerUI } from "@hono/swagger-ui"
+import { drizzle } from "drizzle-orm/d1"
+import { Hono } from "hono"
+import { compress } from "hono/compress"
+import { cors } from "hono/cors"
+import { timing } from "hono/timing"
+import { Environment } from "./env"
+import { routeUser } from "./features/user/user"
+import { middlewareAuth } from "./features/user/user-middleware"
+import { routeWorld } from "./features/world/world-index"
 
-// initialize rapier wasm special for cloudflare workers
-import * as imports from "@dimforge/rapier2d/rapier_wasm2d_bg"
-import _wasm from "../../../node_modules/@dimforge/rapier2d/rapier_wasm2d_bg.wasm"
-imports.__setWasm(new WebAssembly.Instance(_wasm, { "./rapier_wasm2d_bg.js": imports }).exports)
+const app = new Hono<Environment>()
+    .use(timing())
+    .use((c, next) => {
+        const corsMiddleware = cors({
+            origin: c.env.ENV_JWT_SECRET,
+        })
 
-export default {
-    fetch: fetch,
-}
+        return corsMiddleware(c, next)
+    })
+    .use(compress())
+    .use((c, next) => {
+        c.set("db", drizzle(c.env.DB))
+        return next()
+    })
+    .use(middlewareAuth)
+    .use(swaggerUI({ url: "/docs" }))
+    .route("/user", routeUser)
+    .route("/world", routeWorld)
 
-export * from "./do-lobby/do-lobby"
+export type AppType = typeof app
+export default app

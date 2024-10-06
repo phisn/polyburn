@@ -1,0 +1,28 @@
+name = "polyburn-worker"
+main = "src/index.ts"
+
+compatibility_date = "2024-03-04"
+compatibility_flags = [ "nodejs_compat" ]
+
+tail_consumers = [{service = "polyburn-worker-tail"}]
+
+[dev]
+port = 3002
+
+[vars]
+CLIENT_URL = "https://new.rocketgame.app,https://rust-game.rocket-game.pages.dev,https://polyburn.com"
+API_URL = "https://api.polyburn.com"
+
+[[d1_databases]]
+migrations_dir = "drizzle"
+binding = "DB"
+database_name = "polyburn"
+database_id = "432d6db4-6e41-4a3f-98bc-9d98bd3f115d"
+
+[[durable_objects.bindings]]
+name = "LOBBY_DO"
+class_name = "DurableObjectLobby"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["DurableObjectLobby"]

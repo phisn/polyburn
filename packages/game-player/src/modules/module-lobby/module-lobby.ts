@@ -1,8 +1,8 @@
 import { rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
-import { FramePacket } from "shared/src/lobby-api/frame-packet"
 import { lobbyId, UPDATE_POSITIONS_EVERY_MS } from "shared/src/lobby-api/lobby-api"
 import { ClientUpdateMessage } from "shared/src/lobby-api/message-client"
 import { serverMessage } from "shared/src/lobby-api/message-server"
+import { UpdatePacketDTO } from "shared/src/lobby-api/update-packet"
 import { GamePlayerStore } from "../../model/store"
 import { OtherUserRegistry } from "./other-user-registry"
 
@@ -15,7 +15,7 @@ export interface LobbyConfigResource {
 export class ModuleLobby {
     private getRocket: () => RocketEntity
 
-    private currentPacket: FramePacket
+    private currentPacket: UpdatePacketDTO
     private timeSinceUpdate: number
     private otherUserRegistry: OtherUserRegistry
     private ws: WebSocket | undefined

@@ -20,7 +20,7 @@ function AuthButtonRaw(props: {
 
 export function NavbarAuthButton() {
     const [authState, authApi] = useAuth()
-    const user = useAppStore(x => x.user)
+    const user = useAppStore(x => x.currentUser)
 
     switch (authState) {
         case AuthState.Unauthenticated:

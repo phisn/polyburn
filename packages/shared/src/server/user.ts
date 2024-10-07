@@ -1,7 +1,7 @@
 import { z } from "zod"
 
-export const currentUserDTO = z.object({
+export const userDTO = z.object({
     username: z.string(),
 })
 
-export type CurrentUserDTO = z.infer<typeof currentUserDTO>
+export type UserDTO = z.infer<typeof userDTO>

@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
-import { CurrentUserDTO } from "shared/src/server/user"
+import { UserDTO } from "shared/src/server/user"
 import { z } from "zod"
 
 export const users = sqliteTable("users", {
@@ -13,7 +13,7 @@ export const users = sqliteTable("users", {
 
 export type User = typeof users.$inferSelect
 
-export const currentUserDTO = (user: User): CurrentUserDTO => ({
+export const userDTO = (user: User): UserDTO => ({
     username: user.username,
 })
 

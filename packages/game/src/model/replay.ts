@@ -1,24 +1,22 @@
 import { f16round, getFloat16, setFloat16 } from "@petamoriken/float16"
 import { ReplayModel } from "../../proto/replay"
-import { Game, GameInput } from "../game"
+import { GameInput } from "../game"
 
-export function replayApplyTo(game: Game, replay: ReplayModel) {
-    const replayFrames = replayFramesFromBytes(replay.frames)
+export function applyReplay(replay: ReplayModel, onUpdate: (input: GameInput) => void) {
+    const replayInputDiff = decodeInputCompressed(replay.frames)
 
     let accumulator = 0
 
-    for (const frame of replayFrames) {
-        accumulator += frame.diff
+    for (const frame of replayInputDiff) {
+        accumulator += frame.rotationDelta
 
         const input = {
             rotation: accumulator,
             thrust: frame.thrust,
         }
 
-        game.onUpdate(input)
+        onUpdate(input)
     }
-
-    return game.store
 }
 
 export class GameInputCompressor {
@@ -55,13 +53,17 @@ export interface GameInputCompressed {
     thrust: boolean
 }
 
-interface Packet {
-    write: (view: DataView, offset: number) => number
+export interface Packet {
+    write: (view: DataView, offset: number) => void
     size: number
 }
 
-export function replayFramesToBytes(replayFrames: GameInputCompressed[]) {
-    const packets = [...packRotations(replayFrames), ...packThrusts(replayFrames)]
+export function encodeInputCompressed(replayFrames: GameInputCompressed[]) {
+    const packets = [
+        ...packRotations(replayFrames),
+        ...packThrusts(replayFrames.map(x => x.thrust)),
+    ]
+
     const packetsSize = packets.reduce((acc, packet) => acc + packet.size, 0)
 
     const u8 = new Uint8Array(packetsSize)
@@ -70,28 +72,35 @@ export function replayFramesToBytes(replayFrames: GameInputCompressed[]) {
     let offset = 0
 
     for (const packet of packets) {
-        offset += packet.write(view, offset)
+        packet.write(view, offset)
+        offset += packet.size
     }
 
     return u8
 }
 
-export function replayFramesFromBytes(bytes: Uint8Array) {
+export function decodeInputCompressed(bytes: Uint8Array): GameInputCompressed[] {
     const view = new DataView(
         bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
     )
 
-    const [diffs, offset] = unpackRotations(view, 0)
-    const thrusts = unpackThrusts(view, offset)
+    const [rotationDeltas, offset] = unpackRotations(view, 0)
+    const [thrusts, _] = unpackThrusts(view, offset)
 
-    if (diffs.length !== thrusts.length) {
+    if (rotationDeltas.length !== thrusts.length) {
         throw new Error("diffs and thrusts length mismatch")
     }
 
-    return diffs.map((diff, i) => ({
-        diff,
-        thrust: thrusts[i],
-    }))
+    const gameInputs: GameInputCompressed[] = []
+
+    for (let i = 0; i < rotationDeltas.length; ++i) {
+        gameInputs.push({
+            rotationDelta: rotationDeltas[i],
+            thrust: thrusts[i],
+        })
+    }
+
+    return gameInputs
 }
 
 function packRotations(frames: GameInputCompressed[]): Packet[] {
@@ -140,23 +149,10 @@ function packRotations(frames: GameInputCompressed[]): Packet[] {
         }
     }
 
-    const zerocount = packed.filter(ct => ct.type === packDiffType.Zero).length
-    const nonzerocount = packed.filter(ct => ct.type === packDiffType.NonZero).length
-    const uniquenonzerocount = new Set(
-        packed
-            .filter((ct): ct is packDiffNonZero => ct.type === packDiffType.NonZero)
-            .map(ct => ct.value),
-    ).size
-
-    console.log("zerocount", zerocount)
-    console.log("nonzerocount", nonzerocount)
-    console.log("uniquenonzerocount", uniquenonzerocount)
-
     return [
         {
             write: (view, offset) => {
                 view.setUint32(offset, packed.length, true)
-                return 4
             },
             size: 4,
         },
@@ -167,11 +163,11 @@ function packRotations(frames: GameInputCompressed[]): Packet[] {
                         case packDiffType.Zero: {
                             view.setUint16(offset, 0)
                             view.setUint8(offset + 2, ct.count)
-                            return 3
+                            return
                         }
                         case packDiffType.NonZero: {
                             setFloat16(view, offset, ct.value, true)
-                            return 2
+                            return
                         }
                     }
                 },
@@ -183,32 +179,32 @@ function packRotations(frames: GameInputCompressed[]): Packet[] {
 
 function unpackRotations(view: DataView, offset: number) {
     const length = view.getUint32(offset, true)
-    const diffs: number[] = []
+    const rotationDeltas: number[] = []
 
     offset += 4
 
     for (let i = 0; i < length; i++) {
-        const diff = getFloat16(view, offset, true)
+        const rotationDelta = getFloat16(view, offset, true)
 
-        if (diff === 0) {
+        if (rotationDelta === 0) {
             const count = view.getUint8(offset + 2)
 
             for (let j = 0; j < count; j++) {
-                diffs.push(0)
+                rotationDeltas.push(0)
             }
 
             offset += 3
         } else {
-            diffs.push(diff)
+            rotationDeltas.push(rotationDelta)
 
             offset += 2
         }
     }
 
-    return [diffs, offset] as const
+    return [rotationDeltas, offset] as const
 }
 
-function packThrusts([first, ...remaining]: GameInputCompressed[]): Packet[] {
+export function packThrusts([first, ...remaining]: boolean[]): Packet[] {
     interface packThrust {
         thrust: boolean
         count: number
@@ -216,7 +212,7 @@ function packThrusts([first, ...remaining]: GameInputCompressed[]): Packet[] {
 
     const packed: packThrust[] = [
         {
-            thrust: first.thrust,
+            thrust: first,
             count: 1,
         },
     ]
@@ -224,11 +220,11 @@ function packThrusts([first, ...remaining]: GameInputCompressed[]): Packet[] {
     for (const item of remaining) {
         const previous = packed.at(-1)!
 
-        if (previous.thrust === item.thrust && previous.count < 255) {
+        if (previous.thrust === item && previous.count < 255) {
             previous.count++
         } else {
             packed.push({
-                thrust: item.thrust,
+                thrust: item,
                 count: 1,
             })
         }
@@ -238,7 +234,6 @@ function packThrusts([first, ...remaining]: GameInputCompressed[]): Packet[] {
         {
             write: (view, offset) => {
                 view.setUint32(offset, packed.length, true)
-                return 4
             },
             size: 4,
         },
@@ -247,7 +242,6 @@ function packThrusts([first, ...remaining]: GameInputCompressed[]): Packet[] {
                 write: (view, offset) => {
                     view.setUint8(offset, ct.thrust ? 1 : 0)
                     view.setUint8(offset + 1, ct.count)
-                    return 2
                 },
                 size: 2,
             }),
@@ -255,7 +249,7 @@ function packThrusts([first, ...remaining]: GameInputCompressed[]): Packet[] {
     ]
 }
 
-function unpackThrusts(view: DataView, offset: number) {
+export function unpackThrusts(view: DataView, offset: number): [boolean[], number] {
     const length = view.getUint32(offset, true)
     const thrusts: boolean[] = []
 
@@ -272,5 +266,5 @@ function unpackThrusts(view: DataView, offset: number) {
         offset += 2
     }
 
-    return thrusts
+    return [thrusts, offset]
 }

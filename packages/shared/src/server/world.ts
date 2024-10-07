@@ -17,12 +17,3 @@ export interface GamemodeDTO {
     name: string
     replaySummary?: ReplaySummaryDTO
 }
-
-export interface LeaderboardDTO {
-    entries: LeaderboardEntryDTO[]
-}
-
-export interface LeaderboardEntryDTO {
-    leaderboardId: number
-    replaySummary: ReplaySummaryDTO
-}

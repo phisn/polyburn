@@ -21,4 +21,6 @@ export class UserService {
         const [user] = await this.db.select().from(users).where(eq(users.id, userId))
         return user
     }
+
+    async incrementClock(user: User) {}
 }

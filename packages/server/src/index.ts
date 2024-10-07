@@ -7,7 +7,7 @@ import { timing } from "hono/timing"
 import { Environment } from "./env"
 import { routeUser } from "./features/user/user"
 import { middlewareAuth } from "./features/user/user-middleware"
-import { routeWorld } from "./features/world/world-index"
+import { routeWorld } from "./features/world/world"
 
 const app = new Hono<Environment>()
     .use(timing())

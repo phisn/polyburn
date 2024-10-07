@@ -6,9 +6,31 @@ import { HTTPException } from "hono/http-exception"
 import { OAuth2Client } from "oslo/oauth2"
 import { z } from "zod"
 import { Environment } from "../../env"
-import { currentUserDTO, JwtToken, users } from "./user-model"
+import { JwtToken, userDTO, users } from "./user-model"
+import { UserService } from "./user-service"
 
 export const routeUser = new Hono<Environment>()
+    .get(
+        "/me",
+        zValidator(
+            "query",
+            z.object({
+                clock: z.number(),
+            }),
+        ),
+        async c => {
+            const userService = new UserService(c)
+            const user = await userService.getAuthenticated()
+
+            if (user === undefined) {
+                return c.status(401)
+            }
+
+            return c.json({
+                user: userDTO(user),
+            })
+        },
+    )
     .post(
         "/signin",
         zValidator(
@@ -130,7 +152,7 @@ export const routeUser = new Hono<Environment>()
             }
 
             return c.json({
-                currentUser: currentUserDTO({
+                currentUser: userDTO({
                     ...response,
                     ...user,
                 }),

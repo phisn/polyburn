@@ -6,23 +6,17 @@ import { Environment } from "../../env"
 import { worlds } from "./world-model"
 
 export const routeWorld = new Hono<Environment>().get(
-    "/world",
+    "/",
     zValidator(
         "query",
         z.object({
-            worldnames: z.array(z.string()),
+            timestamp: z.number().optional(),
         }),
     ),
     async c => {
-        const db = c.get("db")
         const query = c.req.valid("query")
-        const user = c.get("db")
 
-        const queryWorlds = worlds.filter(world => query.worldnames.includes(world.id.name))
-
-        let replays
-
-        const resultWorlds = queryWorlds.map(
+        const resultWorlds = worlds.map(
             (world): WorldDTO => ({
                 gamemodes: world.gamemodes.map(
                     (gamemode): GamemodeDTO => ({
@@ -31,7 +25,7 @@ export const routeWorld = new Hono<Environment>().get(
                 ),
                 id: world.id,
                 image: "",
-                model: world.model,
+                model: world.configBase64,
             }),
         )
 

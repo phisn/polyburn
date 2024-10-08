@@ -15,6 +15,7 @@ import { UserService } from "../user/user-service"
 import { worlds } from "../world/world-model"
 import {
     ReplaySummary,
+    decodeReplayFrames,
     encodeReplayFrames,
     replaySummaryColumns,
     replaySummaryDTO,
@@ -36,7 +37,7 @@ export const routeReplay = new Hono<Environment>()
 
             const result = await db
                 .select({
-                    frames: replays.id,
+                    frames: replays.binaryFrames,
                 })
                 .from(replays)
                 .innerJoin(users, eq(users.id, replays.userId))
@@ -49,7 +50,7 @@ export const routeReplay = new Hono<Environment>()
             }
 
             return c.json({
-                frames: replay.frames,
+                frames: decodeReplayFrames(replay.frames),
             })
         },
     )

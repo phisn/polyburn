@@ -10,27 +10,18 @@ import { JwtToken, userDTO, users } from "./user-model"
 import { UserService } from "./user-service"
 
 export const routeUser = new Hono<Environment>()
-    .get(
-        "/me",
-        zValidator(
-            "query",
-            z.object({
-                clock: z.number(),
-            }),
-        ),
-        async c => {
-            const userService = new UserService(c)
-            const user = await userService.getAuthenticated()
+    .get("/me", async c => {
+        const userService = new UserService(c)
+        const user = await userService.getAuthenticated()
 
-            if (user === undefined) {
-                return c.status(401)
-            }
+        if (user === undefined) {
+            return c.body(null, 401)
+        }
 
-            return c.json({
-                user: userDTO(user),
-            })
-        },
-    )
+        return c.json({
+            user: userDTO(user),
+        })
+    })
     .post(
         "/signin",
         zValidator(
@@ -123,7 +114,7 @@ export const routeUser = new Hono<Environment>()
             const jwtToken = c.get("jwtToken")
 
             if (jwtToken?.type !== "signup") {
-                return c.status(401)
+                return c.body(null, 401)
             }
 
             const db = c.get("db")

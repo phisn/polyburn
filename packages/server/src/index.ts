@@ -1,7 +1,5 @@
-import { swaggerUI } from "@hono/swagger-ui"
 import { drizzle } from "drizzle-orm/d1"
 import { Hono } from "hono"
-import { compress } from "hono/compress"
 import { cors } from "hono/cors"
 import { timing } from "hono/timing"
 import { Environment } from "./env"
@@ -18,13 +16,11 @@ const app = new Hono<Environment>()
 
         return corsMiddleware(c, next)
     })
-    .use(compress())
     .use((c, next) => {
         c.set("db", drizzle(c.env.DB))
         return next()
     })
     .use(middlewareAuth)
-    .use(swaggerUI({ url: "/docs" }))
     .route("/user", routeUser)
     .route("/world", routeWorld)
 

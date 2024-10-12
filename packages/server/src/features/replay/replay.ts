@@ -46,7 +46,7 @@ export const routeReplay = new Hono<Environment>()
             const [replay] = result
 
             if (replay === undefined) {
-                return c.status(404)
+                return c.body(null, 404)
             }
 
             return c.json({
@@ -122,13 +122,13 @@ export const routeReplay = new Hono<Environment>()
             const user = await userService.getAuthenticated()
 
             if (user === undefined) {
-                return c.status(401)
+                return c.body(null, 401)
             }
 
             const result = validateReplay(json.gamemode, json.model, json.worldname)
 
             if (result === undefined) {
-                return c.status(400)
+                return c.body(null, 400)
             }
 
             const [replayInsert] = await db

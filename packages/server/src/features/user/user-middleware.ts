@@ -15,19 +15,19 @@ export const middlewareAuth: MiddlewareHandler<Environment> = async (c, next) =>
     const verified = await verify(authorization, c.env.ENV_JWT_SECRET)
 
     if (verified === false) {
-        return c.status(401)
+        return c.body(null, 401)
     }
 
     const token = decode<JwtToken>(authorization)
 
     if (token.payload === undefined) {
-        return c.status(401)
+        return c.body(null, 401)
     }
 
     const WEEK_IN_MS = 1000 * 60 * 60 * 24 * 7
 
     if (token.payload.iat < Date.now() - WEEK_IN_MS) {
-        return c.status(401)
+        return c.body(null, 401)
     }
 
     if (token.payload.type === "login") {

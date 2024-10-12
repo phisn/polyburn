@@ -2,8 +2,14 @@
     "extends": "tsconfig/base.json",
     "compilerOptions": {
         "noEmit": true,
-        "types": ["@cloudflare/workers-types", "node"],
-        "noUncheckedIndexedAccess": true
+        "types": [
+            "@cloudflare/workers-types",
+            "node"
+        ],
     },
-    "include": ["src", "tools", "drizzle.config.ts"]
+    "include": [
+        "src",
+        "tools",
+        "drizzle.config.ts"
+    ]
 }

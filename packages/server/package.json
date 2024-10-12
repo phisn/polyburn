@@ -1,16 +1,21 @@
 {
     "name": "server",
+    "version": "0.0.0",
     "scripts": {
+        "postinstall": "wrangler d1 migrations apply polyburn --local && node ./tools/postprocess-rapier2d.mjs",
+        "generate": "drizzle-kit generate:sqlite",
         "dev": "wrangler dev",
         "deploy": "wrangler deploy --minify"
     },
     "dependencies": {
+        "@dimforge/rapier2d": "^0.14.0",
         "@hono/swagger-ui": "^0.4.1",
         "@hono/zod-validator": "^0.3.0",
         "@tsndr/cloudflare-worker-jwt": "^2.5.4",
+        "drizzle-orm": "^0.34.1",
+        "game": "*",
         "hono": "^4.6.3",
         "shared": "*",
-        "game": "*",
         "zod": "^3.23.8"
     },
     "devDependencies": {

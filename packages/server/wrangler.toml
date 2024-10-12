@@ -3,21 +3,23 @@ main = "src/index.ts"
 compatibility_date = "2024-10-02"
 compatibility_flags = [ "nodejs_compat" ]
 
-# [vars]
-# MY_VAR = "my-variable"
+tail_consumers = [{service = "polyburn-worker-tail"}]
 
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+[dev]
+port = 8080
+local_protocol = "http"
 
-# [[r2_buckets]]
-# binding = "MY_BUCKET"
-# bucket_name = "my-bucket"
+[vars]
+ENV_JWT_SECRET = "my_secret_password"
+ENV_URL_CLIENT = "http://localhost:3000/,http://localhost:8080/"
+ENV_URL_API = "http://localhost:8080/"
 
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "my-database"
-# database_id = ""
+[[d1_databases]]
+migrations_dir = "drizzle"
+binding = "DB"
+database_name = "polyburn"
+database_id = "432d6db4-6e41-4a3f-98bc-9d98bd3f115d"
 
-# [ai]
-# binding = "AI"
+[[migrations]]
+tag = "v1"
+new_classes = ["DurableObjectLobby"]

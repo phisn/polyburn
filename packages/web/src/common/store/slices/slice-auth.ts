@@ -1,13 +1,13 @@
-import { CurrentUserDTO } from "shared/src/worker-api/user"
+import { UserDTO } from "shared/src/server/user"
 import { StateCreator } from "zustand"
 import { AppStore } from "../app-store"
 
 export interface AuthSlice {
-    currentUser?: CurrentUserDTO
+    currentUser?: UserDTO
     currentUserJwt?: string
 
     logout(): void
-    setCurrentUser(user: CurrentUserDTO): void
+    setCurrentUser(user: UserDTO): void
     setCurrentUserJwt(jwt: string): void
 }
 

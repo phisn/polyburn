@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { WorldInfoUnlocked } from "../../../../shared/src/worker-api/world-info"
 import { GamemodeModal } from "./GamemodeModal"
 import { WorldSelection } from "./WorldSelection"
 

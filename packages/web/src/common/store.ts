@@ -1,17 +1,21 @@
-import { StateCreator } from "zustand"
-import { AlertProps } from "../../../components/layout/alerts/alert-props"
-import { ModalProps } from "../../../components/modals/modal-props"
+import { UserDTO } from "shared/src/server/user"
+import { create } from "zustand"
+import { AlertProps } from "../components/layout/alerts/alert-props"
+import { ModalProps } from "../components/modals/modal-props"
 
-export interface PopupSlice {
+export interface Store {
     alerts: AlertProps[]
     newAlert: (alert: AlertProps, time?: number) => void
 
     modals: ModalProps[]
     newModal: (modal: ModalProps) => void
     removeModal: () => void
+
+    currentUser?: UserDTO
+    setCurrentUser(user?: UserDTO): void
 }
 
-export const popupSlice: StateCreator<PopupSlice> = set => ({
+export const useStore = create<Store>(set => ({
     alerts: [],
     newAlert: (alert: AlertProps, time?: number) => {
         setTimeout(() => {
@@ -36,4 +40,6 @@ export const popupSlice: StateCreator<PopupSlice> = set => ({
             modals: state.modals.slice(0, state.modals.length - 1),
         }))
     },
-})
+    currentUser: undefined,
+    setCurrentUser: (user?: UserDTO) => set({ currentUser: user }),
+}))

@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm"
 import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
 import { OAuth2Client } from "oslo/oauth2"
+import { UserDTO } from "shared/src/server/user"
 import { z } from "zod"
 import { Environment } from "../../env"
 import { JwtToken, userDTO, users } from "./user-model"
@@ -15,11 +16,13 @@ export const routeUser = new Hono<Environment>()
         const user = await userService.getAuthenticated()
 
         if (user === undefined) {
-            return c.body(null, 401)
+            throw new HTTPException(401)
         }
 
+        const result: UserDTO = userDTO(user)
+
         return c.json({
-            user: userDTO(user),
+            user: result,
         })
     })
     .post(

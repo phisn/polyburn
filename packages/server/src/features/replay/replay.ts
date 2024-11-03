@@ -7,7 +7,8 @@ import { Game } from "game/src/game"
 import { applyReplay } from "game/src/model/replay"
 import { rocketComponents } from "game/src/modules/module-rocket"
 import { Hono } from "hono"
-import { ReplayFrameDTO } from "shared/src/server/replay"
+import { HTTPException } from "hono/http-exception"
+import { ReplayDTO, ReplayFrameDTO } from "shared/src/server/replay"
 import { z } from "zod"
 import { Environment } from "../../env"
 import { users } from "../user/user-model"
@@ -37,6 +38,7 @@ export const routeReplay = new Hono<Environment>()
 
             const result = await db
                 .select({
+                    ...replaySummaryColumns,
                     frames: replays.binaryFrames,
                 })
                 .from(replays)
@@ -46,12 +48,15 @@ export const routeReplay = new Hono<Environment>()
             const [replay] = result
 
             if (replay === undefined) {
-                return c.body(null, 404)
+                throw new HTTPException(404)
             }
 
-            return c.json({
+            const replayDTO: ReplayDTO = {
+                ...replaySummaryDTO(replay),
                 frames: decodeReplayFrames(replay.frames),
-            })
+            }
+
+            return c.json(replayDTO)
         },
     )
     .get(
@@ -122,13 +127,13 @@ export const routeReplay = new Hono<Environment>()
             const user = await userService.getAuthenticated()
 
             if (user === undefined) {
-                return c.body(null, 401)
+                throw new HTTPException(401)
             }
 
             const result = validateReplay(json.gamemode, json.model, json.worldname)
 
             if (result === undefined) {
-                return c.body(null, 400)
+                throw new HTTPException(400)
             }
 
             const [replayInsert] = await db

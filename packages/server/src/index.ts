@@ -3,6 +3,7 @@ import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { timing } from "hono/timing"
 import { Environment } from "./env"
+import { routeReplay } from "./features/replay/replay"
 import { routeUser } from "./features/user/user"
 import { middlewareAuth } from "./features/user/user-middleware"
 import { routeWorld } from "./features/world/world"
@@ -21,6 +22,7 @@ const app = new Hono<Environment>()
         return next()
     })
     .use(middlewareAuth)
+    .route("/replay", routeReplay)
     .route("/user", routeUser)
     .route("/world", routeWorld)
 

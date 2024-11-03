@@ -1,12 +1,7 @@
 import { ReplaySummaryDTO } from "./replay"
 
-export interface WorldIdentifier {
-    name: string
-    version: number
-}
-
 export interface WorldDTO {
-    id: WorldIdentifier
+    worldname: string
     image: string
 
     gamemodes?: GamemodeDTO[]

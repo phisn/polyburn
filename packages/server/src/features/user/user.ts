@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator"
-import jwt from "@tsndr/cloudflare-worker-jwt"
+import jwt, { decode, verify } from "@tsndr/cloudflare-worker-jwt"
 import { eq } from "drizzle-orm"
 import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
@@ -7,7 +7,7 @@ import { OAuth2Client } from "oslo/oauth2"
 import { UserDTO } from "shared/src/server/user"
 import { z } from "zod"
 import { Environment } from "../../env"
-import { JwtToken, userDTO, users } from "./user-model"
+import { JwtToken, SignupToken, signupToken, userDTO, users } from "./user-model"
 import { UserService } from "./user-service"
 
 export const routeUser = new Hono<Environment>()
@@ -80,10 +80,10 @@ export const routeUser = new Hono<Environment>()
 
             if (user === undefined) {
                 return c.json({
-                    token: await jwt.sign<JwtToken>(
+                    token: await jwt.sign<SignupToken>(
                         {
-                            iat: Date.now(),
                             type: "signup",
+                            iat: Date.now(),
                             email: userInfo.data.email,
                         },
                         c.env.ENV_JWT_SECRET,
@@ -94,8 +94,8 @@ export const routeUser = new Hono<Environment>()
                 return c.json({
                     token: await jwt.sign<JwtToken>(
                         {
+                            type: "signin",
                             iat: Date.now(),
-                            type: "login",
                             userId: user.id,
                         },
                         c.env.ENV_JWT_SECRET,
@@ -110,21 +110,28 @@ export const routeUser = new Hono<Environment>()
         zValidator(
             "json",
             z.object({
+                code: z.string(),
                 username: z.string(),
             }),
         ),
         async c => {
-            const jwtToken = c.get("jwtToken")
-
-            if (jwtToken?.type !== "signup") {
-                return c.body(null, 401)
-            }
-
             const db = c.get("db")
             const json = c.req.valid("json")
 
+            const verified = await verify(json.code, c.env.ENV_JWT_SECRET)
+
+            if (verified === false) {
+                throw new HTTPException(401)
+            }
+
+            const token = signupToken.safeParse(decode(json.code))
+
+            if (token.success === false) {
+                throw new HTTPException(401)
+            }
+
             const user = {
-                email: jwtToken.email,
+                email: token.data.email,
                 username: json.username,
             } as const
 
@@ -145,11 +152,18 @@ export const routeUser = new Hono<Environment>()
                 )
             }
 
-            return c.json({
-                currentUser: userDTO({
-                    ...response,
-                    ...user,
-                }),
-            })
+            return c.json(
+                {
+                    token: await jwt.sign<JwtToken>(
+                        {
+                            type: "signin",
+                            iat: Date.now(),
+                            userId: response.id,
+                        },
+                        c.env.ENV_JWT_SECRET,
+                    ),
+                },
+                200,
+            )
         },
     )

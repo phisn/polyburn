@@ -82,12 +82,8 @@ class AuthService {
         return "jwt" in this.state ? this.state.jwt : undefined
     }
 
-    isAuthenticated() {
-        return this.state.type === "authenticated"
-    }
-
-    isOffline() {
-        return this.state.type === "offline"
+    getState() {
+        return this.state.type
     }
 
     logout() {
@@ -100,9 +96,18 @@ class AuthService {
         useStore.getState().setCurrentUser()
     }
 
-    login() {}
+    async login(jwt: string) {
+        if (this.state.type !== "unauthenticated") {
+            throw new Error("Tried to login in invalid state")
+        }
 
-    signin() {}
+        this.state = {
+            type: "fetching",
+            jwt,
+        }
+
+        await this.fetchUserInfo()
+    }
 
     private async fetchUserInfo() {
         if (this.state.type !== "fetching") {

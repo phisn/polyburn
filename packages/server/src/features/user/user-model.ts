@@ -17,17 +17,18 @@ export const userDTO = (user: User): UserDTO => ({
     username: user.username,
 })
 
-export const jwtToken = z.union([
-    z.object({
-        iat: z.number(),
-        type: z.literal("login"),
-        userId: z.number(),
-    }),
-    z.object({
-        iat: z.number(),
-        type: z.literal("signup"),
-        email: z.string(),
-    }),
-])
+export const jwtToken = z.object({
+    type: z.literal("signin"),
+    iat: z.number(),
+    userId: z.number(),
+})
 
 export type JwtToken = z.infer<typeof jwtToken>
+
+export const signupToken = z.object({
+    type: z.literal("signup"),
+    iat: z.number(),
+    email: z.string(),
+})
+
+export type SignupToken = z.infer<typeof signupToken>

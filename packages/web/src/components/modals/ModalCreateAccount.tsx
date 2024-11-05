@@ -1,7 +1,8 @@
 import { Dialog } from "@headlessui/react"
 import { useRef, useState } from "react"
-import { useAppStore } from "../../common/store/app-store"
-import { trpcNative } from "../../common/trpc/trpc-native"
+import { authService } from "../../common/services/auth-service"
+import { rpc } from "../../common/services/rpc"
+import { useStore } from "../../common/store"
 import { Modal } from "./Modal"
 
 export function ModalCreateAccount(props: {
@@ -13,9 +14,7 @@ export function ModalCreateAccount(props: {
 
     const [loading, setLoading] = useState(false)
 
-    const newAlert = useAppStore(x => x.newAlert)
-    const updateJwt = useAppStore(x => x.updateJwt)
-    const updateUser = useAppStore(x => x.updateUser)
+    const newAlert = useStore(x => x.newAlert)
 
     async function onCreate() {
         try {
@@ -25,24 +24,38 @@ export function ModalCreateAccount(props: {
 
             setLoading(true)
 
-            const result = await trpcNative.user.create.mutate({
-                username: usernameRef.current!.value,
-                tokenForCreation: props.creationJwt,
+            const response = await rpc.user.signup.$post({
+                json: {
+                    code: props.creationJwt,
+                    username: usernameRef.current!.value,
+                },
             })
 
             setLoading(false)
 
-            if (result.message === "username-taken") {
+            if (response.status === 400) {
+                const responseJson = await response.json()
+
+                if (responseJson.reason === "username-taken") {
+                    newAlert({
+                        message: "Username is already taken",
+                        type: "warning",
+                    })
+
+                    return
+                }
+
                 newAlert({
-                    message: "Username is already taken",
+                    message: `Failed to create user (${response.status})`,
                     type: "warning",
                 })
 
+                props.onCancel()
                 return
             }
 
-            updateJwt(result.jwt)
-            updateUser(await trpcNative.user.me.query())
+            const responseJson = await response.json()
+            await authService.login(responseJson.token)
 
             props.onCreated()
         } catch (error) {

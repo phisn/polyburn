@@ -2,45 +2,52 @@ import { useGoogleLogin } from "@react-oauth/google"
 import { useMemo, useState } from "react"
 import { ModalCreateAccount } from "../../components/modals/ModalCreateAccount"
 import { ModalRenameAccount } from "../../components/modals/ModalRenameAccount"
-import { useAppStore } from "../store/app-store"
-import { trpcNative } from "../trpc/trpc-native"
-
-export enum AuthState {
-    Unauthenticated = "unauthenticated",
-    Authenticated = "authenticated",
-    Pending = "pending",
-}
+import { authService } from "../services/auth-service"
+import { rpc } from "../services/rpc"
+import { useStore } from "../store"
 
 export interface AuthApi {
     login: () => void
     rename: () => void
 }
 
-export function useAuth(): [AuthState, AuthApi] {
-    const [me, jwt, hasHydrated] = useAppStore(state => [
-        state.currentUser,
-        state.currentUserJwt,
-        state.hydrated,
-    ])
+export function useAuth(): AuthApi {
     const [loading, setLoading] = useState(false)
 
     const googleLogin = useGoogleLogin({
         onSuccess: async ({ code }) => {
             try {
-                const response = await trpcNative.user.getToken.query({ code })
+                const response = await rpc.user.signin.$post({
+                    json: {
+                        code,
+                    },
+                })
 
-                if (response.type === "prompt-create") {
-                    useAppStore.getState().newModal({
+                if (!response.ok) {
+                    console.error("Failed to signin", response)
+
+                    useStore.getState().newAlert({
+                        type: "error",
+                        message: `Failed to signin (${response.status})`,
+                    })
+
+                    setLoading(false)
+                }
+
+                const responseJson = await response.json()
+
+                if (responseJson.type === "prompt-create") {
+                    useStore.getState().newModal({
                         modal: function CreateModal() {
                             return (
                                 <ModalCreateAccount
-                                    creationJwt={response.tokenForCreation}
+                                    creationJwt={responseJson.token}
                                     onCancel={() => {
-                                        useAppStore.getState().removeModal()
+                                        useStore.getState().removeModal()
                                         setLoading(false)
                                     }}
                                     onCreated={() => {
-                                        useAppStore.getState().removeModal()
+                                        useStore.getState().removeModal()
                                         setLoading(false)
                                     }}
                                 />
@@ -48,11 +55,7 @@ export function useAuth(): [AuthState, AuthApi] {
                         },
                     })
                 } else {
-                    useAppStore.getState().updateJwt(response.token)
-
-                    const me = await trpcNative.user.me.query()
-                    useAppStore.getState().updateUser(me)
-
+                    authService.login(responseJson.token)
                     setLoading(false)
                 }
             } catch (error) {
@@ -71,20 +74,20 @@ export function useAuth(): [AuthState, AuthApi] {
         flow: "auth-code",
     })
 
-    const api = useMemo(
+    return useMemo(
         () => ({
             login() {
                 setLoading(true)
                 googleLogin()
             },
             rename() {
-                useAppStore.getState().newModal({
+                useStore.getState().newModal({
                     modal: function RenameModal() {
                         return (
                             <ModalRenameAccount
                                 open={true}
                                 onFinished={() => {
-                                    useAppStore.getState().removeModal()
+                                    useStore.getState().removeModal()
                                     setLoading(false)
                                 }}
                             />
@@ -97,14 +100,4 @@ export function useAuth(): [AuthState, AuthApi] {
         }),
         [googleLogin],
     )
-
-    if ((jwt && !me) || loading || hasHydrated === false) {
-        return [AuthState.Pending, api]
-    }
-
-    if (me) {
-        return [AuthState.Authenticated, api]
-    }
-
-    return [AuthState.Unauthenticated, api]
 }

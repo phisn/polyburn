@@ -34,6 +34,7 @@ export interface ReplaySummary {
     rank: number
     ticks: number
     username: string
+    worldname: string
 }
 
 export const replayRank = sql<number>`
@@ -49,15 +50,18 @@ export const replaySummaryColumns = {
     rank: replayRank,
     ticks: replays.ticks,
     username: users.username,
+    worldname: replays.worldname,
 }
 
 export function replaySummaryDTO(replay: ReplaySummary): ReplaySummaryDTO {
     return {
         id: replay.id,
         deaths: replay.deaths,
+        gamemode: replay.gamemode,
         rank: replay.rank,
         ticks: replay.ticks,
         username: replay.username,
+        worldname: replay.worldname,
     }
 }
 

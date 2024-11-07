@@ -60,10 +60,21 @@ export const routeReplay = new Hono<Environment>()
         },
     )
     .get(
+        "/sync",
+        zValidator(
+            "query",
+            z.object({
+                timestamp: z.string(),
+            }),
+        ),
+        async c => {},
+    )
+    .get(
         "/world",
         zValidator(
             "query",
             z.object({
+                gamemode: z.string(),
                 worldname: z.string(),
             }),
         ),
@@ -77,7 +88,12 @@ export const routeReplay = new Hono<Environment>()
                 })
                 .from(replays)
                 .innerJoin(users, eq(users.id, replays.userId))
-                .where(eq(replays.worldname, query.worldname))
+                .where(
+                    and(
+                        eq(replays.gamemode, query.gamemode),
+                        eq(replays.worldname, query.worldname),
+                    ),
+                )
                 .limit(25)
 
             return c.json({
@@ -196,14 +212,16 @@ export const routeReplay = new Hono<Environment>()
     )
 
 function validateReplay(gamemode: string, replayModelBase64: string, worldname: string) {
-    const world = worlds.find(x => x.id.name === worldname)
+    const world = worlds.find(x => x.worldname === worldname)
 
     if (world === undefined) {
         return undefined
     }
 
     try {
-        const worldConfig = WorldConfig.decode(Buffer.from(world.configBase64, "base64"))
+        const worldConfig = WorldConfig.decode(
+            new Uint8Array(Buffer.from(world.configBase64, "base64")),
+        )
 
         const game = new Game(
             {
@@ -215,7 +233,9 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
             },
         )
 
-        const replayModel = ReplayModel.decode(Buffer.from(replayModelBase64, "base64"))
+        const replayModel = ReplayModel.decode(
+            new Uint8Array(Buffer.from(replayModelBase64, "base64")),
+        )
         const replayFrames: ReplayFrameDTO[] = []
 
         const getRocket = game.store.entities.single(...rocketComponents)

@@ -1,20 +1,17 @@
-import { useMemo } from "react"
-import {
-    WorldInfo,
-    WorldInfoUnlocked,
-    isWorldUnlocked,
-} from "../../../../shared/src/worker-api/world-info"
-import { trpc } from "../../common/trpc/trpc"
+import { useEffect, useMemo, useState } from "react"
+import { WorldDTO } from "shared/src/server/world"
+import { worldService } from "../../common/services/world-service"
 import { DraggableList } from "../../components/common/DraggableList"
 import { World } from "./World"
 
-export function WorldSelection(props: { onSelected: (world: WorldInfoUnlocked) => void }) {
-    const { data: worldnames } = trpc.world.list.useQuery()
+export function WorldSelection(props: { onSelected: (world: WorldDTO) => void }) {
+    const [worlds, setWorlds] = useState<WorldDTO[]>()
 
-    const { data: worlds } = trpc.world.get.useQuery(
-        { names: worldnames! },
-        { enabled: Boolean(worldnames) },
-    )
+    useEffect(() => {
+        worldService.list().then(worlds => {
+            setWorlds(worlds)
+        })
+    }, [])
 
     if (!worlds) {
         return <SelectInRow worlds={[undefined, undefined, undefined, undefined]} />
@@ -28,8 +25,8 @@ export function WorldSelection(props: { onSelected: (world: WorldInfoUnlocked) =
 }
 
 function SelectInRow(props: {
-    onSelected?: (world: WorldInfoUnlocked) => void
-    worlds: (WorldInfo | undefined)[]
+    onSelected?: (world: WorldDTO) => void
+    worlds: (WorldDTO | undefined)[]
 }) {
     const pairsOfTwo = useMemo(() => {
         const pairs = []
@@ -53,19 +50,19 @@ function SelectInRow(props: {
 }
 
 export function WorldPair(props: {
-    world0: WorldInfo | undefined
-    world1: WorldInfo | undefined
-    onSelected?: (world: WorldInfoUnlocked) => void
+    world0: WorldDTO | undefined
+    world1: WorldDTO | undefined
+    onSelected?: (world: WorldDTO) => void
 }) {
     return (
         <div className="xs:flex-row flex flex-col justify-center gap-4 p-2">
             <World
                 world={props.world0}
-                onSelected={() => isWorldUnlocked(props.world0) && props.onSelected?.(props.world0)}
+                onSelected={() => props.world0 && props.onSelected?.(props.world0)}
             />
             <World
                 world={props.world1}
-                onSelected={() => isWorldUnlocked(props.world1) && props.onSelected?.(props.world1)}
+                onSelected={() => props.world1 && props.onSelected?.(props.world1)}
             />
         </div>
     )

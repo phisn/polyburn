@@ -4,7 +4,7 @@ export interface WorldDTO {
     worldname: string
     image: string
 
-    gamemodes?: GamemodeDTO[]
+    gamemodes: GamemodeDTO[]
     model?: string
 }
 

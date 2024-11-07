@@ -1,9 +1,9 @@
 import { Transition } from "@headlessui/react"
 import { BrowserView, isMobile } from "react-device-detect"
-import { WorldInfo } from "../../../../shared/src/worker-api/world-info"
+import { WorldDTO } from "shared/src/server/world"
 import { LockedSvg } from "../../components/common/svg/Locked"
 
-export function World(props: { world?: WorldInfo; onSelected: () => void }) {
+export function World(props: { world?: WorldDTO; onSelected: () => void }) {
     //    return <div className="m-2 h-[18rem] w-[28rem] bg-white"></div>
     function ButtonOverlay() {
         return (
@@ -16,7 +16,7 @@ export function World(props: { world?: WorldInfo; onSelected: () => void }) {
 
     // TODO: remove and do actual serverside stored background
     function bgPath() {
-        switch (props.world?.id.name) {
+        switch (props.world?.worldname) {
             case "Red 1":
                 return "/static/bg-1.png"
             case "Red 2":
@@ -28,7 +28,7 @@ export function World(props: { world?: WorldInfo; onSelected: () => void }) {
         }
     }
 
-    const isLocked = props.world?.type === "locked"
+    const isLocked = props.world?.model === undefined
 
     return (
         <div className="@container relative aspect-[7/4] w-full max-w-[28rem]">
@@ -84,7 +84,7 @@ function LockedOverlay() {
     )
 }
 
-export function Overlay(props: { world?: WorldInfo; locked?: boolean }) {
+export function Overlay(props: { world?: WorldDTO; locked?: boolean }) {
     function Title(props: { children: React.ReactNode }) {
         return (
             <div className="shadow-base-200 border-base-300 flex h-fit min-h-10 min-w-40 max-w-[16rem] items-center justify-center rounded-xl border-2 bg-white px-8 py-2 text-center text-xl text-black lg:min-h-14 lg:rounded-2xl lg:py-3">
@@ -102,7 +102,7 @@ export function Overlay(props: { world?: WorldInfo; locked?: boolean }) {
     }
 
     function TitleInNormal() {
-        return <Title>{props.world?.id.name}</Title>
+        return <Title>{props.world?.worldname}</Title>
     }
 
     function TitleInUndefined() {

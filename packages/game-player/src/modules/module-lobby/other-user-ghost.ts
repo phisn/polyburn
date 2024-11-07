@@ -1,19 +1,20 @@
-import { OtherUser } from "shared/src/lobby-api/other-user"
+import { LobbyUserDTO } from "shared/src/lobby-api/lobby-api"
+import { UpdateFrameDTO, UpdatePacketDTO } from "shared/src/lobby-api/update-packet"
 import { Object3D } from "three"
 import { Text } from "troika-three-text"
 import { GamePlayerStore } from "../../model/store"
 import { Rocket } from "../module-visual/objects/rocket"
 
 export class OtherUserGhost {
-    private currentFrame: Frame
+    private currentFrame: UpdateFrameDTO
     private mesh: Object3D
-    private packets: FramePacket[] = []
+    private packets: UpdatePacketDTO[] = []
     private packetIterator: number
     private resetInterpolation: () => void
 
     constructor(
         private store: GamePlayerStore,
-        private otherUser: OtherUser,
+        private otherUser: LobbyUserDTO,
     ) {
         this.mesh = new Rocket(0.2)
         this.currentFrame = {
@@ -54,7 +55,7 @@ export class OtherUserGhost {
         scene.remove(this.mesh)
     }
 
-    loadPacket(packet: FramePacket) {
+    loadPacket(packet: UpdatePacketDTO) {
         this.packets.push(packet)
     }
 

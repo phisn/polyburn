@@ -1,7 +1,6 @@
-import { useAppStore } from "../../common/store/app-store"
+import { useGlobalStore } from "../../common/store"
 
 export function Modals() {
-    const modals = useAppStore(state => state.modals)
-
+    const modals = useGlobalStore(state => state.modals)
     return modals.map((x, i) => <x.modal key={i} />)
 }

@@ -1,4 +1,5 @@
-import { OtherUser } from "shared/src/lobby-api/other-user"
+import { LobbyUserDTO } from "shared/src/lobby-api/lobby-api"
+import { UpdatePacketDTO } from "shared/src/lobby-api/update-packet"
 import { GamePlayerStore } from "../../model/store"
 import { OtherUserGhost } from "./other-user-ghost"
 
@@ -9,7 +10,7 @@ export class OtherUserRegistry {
         this.ghosts = new Map()
     }
 
-    loadPackets(packets: FramePacket[]) {
+    loadPackets(packets: UpdatePacketDTO[]) {
         const lobbyConfig = this.store.resources.get("lobbyConfig")
 
         for (const packet of packets) {
@@ -25,7 +26,7 @@ export class OtherUserRegistry {
         }
     }
 
-    addUser(user: OtherUser) {
+    addUser(user: LobbyUserDTO) {
         const lobbyConfig = this.store.resources.get("lobbyConfig")
 
         if (user.username === lobbyConfig.username) {

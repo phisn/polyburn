@@ -1,8 +1,7 @@
 import { useState } from "react"
 import { BrowserView, isMobile } from "react-device-detect"
 import { useNavigate } from "react-router-dom"
-import { GamemodeInfo } from "shared/src/worker-api/gamemode-info"
-import { WorldInfo } from "shared/src/worker-api/world-info"
+import { GamemodeDTO, WorldDTO } from "shared/src/server/world"
 import { Ticks } from "../../components/common/Ticks"
 import { LockedSvg } from "../../components/common/svg/Locked"
 import { TrophySvg } from "../../components/common/svg/Trophy"
@@ -10,19 +9,19 @@ import { LeaderboardModal } from "./leaderboard/LeaderboardModal"
 
 const todoLockedFeature = false
 
-export function Gamemode(props: { world: WorldInfo; gamemodeview: GamemodeInfo }) {
+export function Gamemode(props: { world: WorldDTO; gamemode: GamemodeDTO }) {
     const [open, setOpen] = useState(false)
     const navigate = useNavigate()
 
     function onGamemodeSelected() {
-        navigate(`/play/${props.world.id.name}/${props.gamemodeview.name}`)
+        navigate(`/play/${props.world.worldname}/${props.gamemode.name}`)
     }
 
     return (
         <>
             <div
                 className={`relative mx-auto h-fit w-full rounded-2xl ${
-                    props.gamemodeview.replayStats && "pb-6"
+                    props.gamemode.replaySummary && "pb-6"
                 }`}
                 onClick={e => e.stopPropagation()}
             >
@@ -31,7 +30,7 @@ export function Gamemode(props: { world: WorldInfo; gamemodeview: GamemodeInfo }
                         className="join-item hover:bg-base-100 w-full rounded-[0.9rem] px-6 text-left outline-none transition active:bg-slate-600"
                         onClick={() => void onGamemodeSelected()}
                     >
-                        {props.gamemodeview.name}
+                        {props.gamemode.name}
                     </button>
                     <button
                         className="join-item hover:bg-base-100 rounded-[0.9rem] px-6 transition active:bg-slate-600"
@@ -42,9 +41,9 @@ export function Gamemode(props: { world: WorldInfo; gamemodeview: GamemodeInfo }
                 </div>
 
                 {todoLockedFeature && <LockedOverlay />}
-                {props.gamemodeview.replayStats && (
+                {props.gamemode.replaySummary && (
                     <ReplayStatsDisplay
-                        stats={props.gamemodeview.replayStats}
+                        stats={props.gamemode.replaySummary}
                         onSelected={() => {}}
                     />
                 )}
@@ -55,7 +54,7 @@ export function Gamemode(props: { world: WorldInfo; gamemodeview: GamemodeInfo }
                     setOpen(false)
                 }}
                 world={props.world}
-                gamemode={props.gamemodeview}
+                gamemode={props.gamemode}
             />
         </>
     )

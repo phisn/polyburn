@@ -249,6 +249,7 @@ function lobbyConfig(): LobbyConfigResource | undefined {
 
     let url
 
+    // eslint-disable-next-line
     if (import.meta.env.DEV) {
         url = `ws://${import.meta.env.VITE_SERVER_URL}`
     } else {

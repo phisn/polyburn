@@ -1,12 +1,11 @@
-import { GamemodeInfo } from "shared/src/worker-api/gamemode-info"
-import { WorldInfo } from "shared/src/worker-api/world-info"
+import { GamemodeDTO, WorldDTO } from "shared/src/server/world"
 import { Modal, ModalPanel } from "../../../components/modals/Modal"
 import { Leaderboard } from "./Leaderboard"
 
 export function LeaderboardModal(props: {
     open: boolean
-    world: WorldInfo
-    gamemode: GamemodeInfo
+    world: WorldDTO
+    gamemode: GamemodeDTO
     closeDialog: () => void
 }) {
     return (

@@ -1,18 +1,21 @@
-import { GamemodeInfo } from "shared/src/worker-api/gamemode-info"
-import { WorldInfo } from "shared/src/worker-api/world-info"
-import { trpc } from "../../../common/trpc/trpc"
+import { useEffect, useState } from "react"
+import { GamemodeDTO, WorldDTO } from "shared/src/server/world"
+import { ExReplaySummaryDTO, replayService } from "../../../common/services/replay-service"
 import { DraggableList } from "../../../components/common/DraggableList"
 import { LeaderboardEntry } from "./LeaderboardEntry"
 
 export function Leaderboard(props: {
-    world: WorldInfo
-    gamemode: GamemodeInfo
+    world: WorldDTO
+    gamemode: GamemodeDTO
     closeDialog: () => void
 }) {
-    const { data: replays } = trpc.replay.list.useQuery({
-        world: props.world.id.name,
-        gamemode: props.gamemode.name,
-    })
+    const [replays, setReplays] = useState<ExReplaySummaryDTO[]>()
+
+    useEffect(() => {
+        replayService
+            .list(props.world.worldname, props.gamemode.name)
+            .then(replays => setReplays(replays))
+    }, [props.world.worldname, props.gamemode.name])
 
     if (replays === undefined) {
         return (
@@ -23,20 +26,6 @@ export function Leaderboard(props: {
             </LeaderboardContainer>
         )
     }
-
-    /*
-    replays.entries[0].deaths = 0
-
-    for (let i = replays.entries.length; i < 50; ++i) {
-        replays.entries.push({
-            leaderboardId: i,
-            place: i + 1,
-            username: "Anonymous",
-            ticks: replays.entries[i - 1].ticks + Math.round(Math.random() * 1000),
-            deaths: replays.entries[i - 1].deaths + Math.round(Math.random() * 5),
-        })
-    }
-    */
 
     if (replays.entries.length === 0) {
         return (
@@ -59,7 +48,7 @@ export function Leaderboard(props: {
                     props.closeDialog()
                 }}
             >
-                {index => <LeaderboardEntry entry={replays.entries[index]} key={index} />}
+                {index => <LeaderboardEntry replaySummary={replays[index]} key={index} />}
             </DraggableList>
         </LeaderboardContainer>
     )

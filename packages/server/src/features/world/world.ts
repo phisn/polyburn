@@ -23,9 +23,9 @@ export const routeWorld = new Hono<Environment>().get(
                         name: gamemode,
                     }),
                 ),
-                id: world.id,
                 image: "",
                 model: world.configBase64,
+                worldname: world.worldname,
             }),
         )
 

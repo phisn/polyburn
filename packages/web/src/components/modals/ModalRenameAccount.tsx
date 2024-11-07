@@ -1,7 +1,7 @@
 import { Dialog } from "@headlessui/react"
 import { useEffect, useRef, useState } from "react"
-import { useAppStore } from "../../common/store/app-store"
-import { trpcNative } from "../../common/trpc/trpc-native"
+import { authService } from "../../common/services/auth-service"
+import { useGlobalStore } from "../../common/store"
 import { Modal } from "./Modal"
 
 export function ModalRenameAccount(props: { open: boolean; onFinished: () => void }) {
@@ -9,9 +9,8 @@ export function ModalRenameAccount(props: { open: boolean; onFinished: () => voi
 
     const [loading, setLoading] = useState(false)
 
-    const user = useAppStore(x => x.currentUser)
-    const newAlert = useAppStore(x => x.newAlert)
-    const updateUser = useAppStore(x => x.updateUser)
+    const user = useGlobalStore(x => x.currentUser)
+    const newAlert = useGlobalStore(x => x.newAlert)
 
     useEffect(() => {
         if (user === undefined) {
@@ -25,13 +24,11 @@ export function ModalRenameAccount(props: { open: boolean; onFinished: () => voi
         try {
             setLoading(true)
 
-            const result = await trpcNative.user.rename.mutate({
-                username: usernameRef.current!.value,
-            })
+            const result = await authService.rename(usernameRef.current!.value)
 
             setLoading(false)
 
-            if (result.message === "username-taken") {
+            if (result === "username-taken") {
                 newAlert({
                     message: "Username is already taken",
                     type: "warning",
@@ -39,8 +36,6 @@ export function ModalRenameAccount(props: { open: boolean; onFinished: () => voi
 
                 return
             }
-
-            updateUser(await trpcNative.user.me.query())
 
             props.onFinished()
         } catch (error) {

@@ -167,3 +167,52 @@ export const routeUser = new Hono<Environment>()
             )
         },
     )
+    .post(
+        "/rename",
+        zValidator(
+            "json",
+            z.object({
+                username: z.string(),
+            }),
+        ),
+        async c => {
+            const db = c.get("db")
+            const json = c.req.valid("json")
+            const userId = c.get("userId")
+
+            if (userId === undefined) {
+                throw new HTTPException(401)
+            }
+
+            const [exists] = await db
+                .select({
+                    userId: users.id,
+                })
+                .from(users)
+                .where(eq(users.username, json.username))
+                .limit(1)
+
+            if (exists) {
+                if (exists.userId === userId) {
+                    return c.json({
+                        type: "sucess" as const,
+                    })
+                }
+
+                return c.json({
+                    type: "username-taken" as const,
+                })
+            }
+
+            await db
+                .update(users)
+                .set({
+                    username: json.username,
+                })
+                .where(eq(users.id, userId))
+
+            return c.json({
+                type: "sucess" as const,
+            })
+        },
+    )

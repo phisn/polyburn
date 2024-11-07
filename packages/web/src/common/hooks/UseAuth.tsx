@@ -12,7 +12,7 @@ export interface AuthApi {
 }
 
 export function useAuth(): AuthApi {
-    const [loading, setLoading] = useState(false)
+    const [_loading, setLoading] = useState(false)
 
     const googleLogin = useGoogleLogin({
         onSuccess: async ({ code }) => {

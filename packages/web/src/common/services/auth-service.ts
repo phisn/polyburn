@@ -40,6 +40,7 @@ type AuthServiceState =
 
 class AuthService {
     private state: AuthServiceState
+    private subscribers: (() => void)[] = []
 
     constructor() {
         const authObjectStr = localStorage.getItem("auth")
@@ -107,6 +108,34 @@ class AuthService {
         }
 
         await this.fetchUserInfo()
+    }
+
+    async rename(username: string) {
+        if (this.state.type !== "authenticated") {
+            throw new Error("Expected to be authenticated when renaming")
+        }
+
+        const response = await rpc.user.rename.$post({
+            json: {
+                username,
+            },
+        })
+
+        if (response.ok === false) {
+            console.error(response)
+            throw new Error("Failed to rename user")
+        }
+
+        const responseJson = await response.json()
+
+        return responseJson.type
+    }
+
+    subscribeAuthState(subscriber: () => void): () => void {
+        this.subscribers.push(subscriber)
+        return () => {
+            this.subscribers.splice(this.subscribers.indexOf(subscriber), 1)
+        }
     }
 
     private async fetchUserInfo() {

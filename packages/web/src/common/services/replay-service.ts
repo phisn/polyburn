@@ -80,11 +80,10 @@ export class ReplayService {
         return replay
     }
 
-    async list(worldname: string): Promise<ExReplaySummaryDTO[]> {
+    async list(worldname: string, gamemode: string): Promise<ExReplaySummaryDTO[]> {
         if (useAuthStore.getState().currentUser === undefined) {
             const replays = await db.replaySummaries
-                .where("worldname")
-                .equals(worldname)
+                .where({ gamemode, worldname })
                 .limit(25)
                 .toArray()
 
@@ -102,6 +101,7 @@ export class ReplayService {
 
         const response = await rpc.replay.world.$get({
             query: {
+                gamemode,
                 worldname,
             },
         })

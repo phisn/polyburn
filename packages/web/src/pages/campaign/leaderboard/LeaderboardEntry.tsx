@@ -1,4 +1,4 @@
-import { WorldLeaderboardEntry } from "shared/src/worker-api/world-leaderboard"
+import { ExReplaySummaryDTO } from "../../../common/services/replay-service"
 import { Ticks } from "../../../components/common/Ticks"
 import { Clock } from "../../../components/common/svg/Clock"
 import { PlayCircle } from "../../../components/common/svg/PlayCircle"
@@ -7,7 +7,7 @@ import { Star } from "../../../components/common/svg/Star"
 import { Sword } from "../../../components/common/svg/Sword"
 import { SwordFilled } from "../../../components/common/svg/SwordFilled"
 
-export function LeaderboardEntry(props: { entry: WorldLeaderboardEntry }) {
+export function LeaderboardEntry(props: { replaySummary: ExReplaySummaryDTO }) {
     const placeColorings: Record<number, any> = {
         1: {
             place: "text-xl text-yellow-500",
@@ -29,27 +29,33 @@ export function LeaderboardEntry(props: { entry: WorldLeaderboardEntry }) {
         },
     }
 
-    const placeColoring = placeColorings[props.entry.place ?? 0]
+    const placeColoring = placeColorings[props.replaySummary.rank ?? 0]
 
     return (
         <>
             <div className={"flex h-[4.5rem] w-full items-center " + placeColoring?.root}>
                 <div className={"flex w-24 justify-center " + placeColoring?.place}>
-                    <div>{props.entry?.place}</div>
+                    <div>{props.replaySummary?.rank}</div>
                 </div>
                 <div>
-                    <div className="text-lg">{props.entry.username}</div>
+                    <div className="text-lg">{props.replaySummary.username}</div>
                     <LeaderboardEntryStats
-                        entry={props.entry}
+                        replaySummary={props.replaySummary}
                         iconClassName={placeColoring?.icon}
                         textClassName={placeColoring?.statsText}
                     />
                 </div>
                 <div className="flex w-full justify-end space-x-1 pr-4">
-                    <button className="btn btn-ghost btn-square">
+                    <button
+                        className="btn btn-ghost btn-square"
+                        disabled={!props.replaySummary.replayAvailable}
+                    >
                         <PlayCircle width="24" height="24" className={placeColoring?.icon} />
                     </button>
-                    <button className="btn btn-ghost btn-square">
+                    <button
+                        className="btn btn-ghost btn-square"
+                        disabled={!props.replaySummary.replayAvailable}
+                    >
                         {placeColoring?.icon ? (
                             <SwordFilled width="24" height="24" className={placeColoring?.icon} />
                         ) : (
@@ -63,7 +69,7 @@ export function LeaderboardEntry(props: { entry: WorldLeaderboardEntry }) {
 }
 
 function LeaderboardEntryStats(props: {
-    entry: WorldLeaderboardEntry
+    replaySummary: ExReplaySummaryDTO
     iconClassName?: string
     textClassName?: string
 }) {
@@ -71,18 +77,18 @@ function LeaderboardEntryStats(props: {
         <div className="flex text-sm text-gray-400">
             <div className="flex w-24 items-center space-x-1">
                 <Clock width="12" height="12" className={props.iconClassName} />
-                <Ticks value={props.entry.ticks} className={props.textClassName} />
+                <Ticks value={props.replaySummary.ticks} className={props.textClassName} />
             </div>
-            {props.entry.deaths === 0 && (
+            {props.replaySummary.deaths === 0 && (
                 <div className="flex items-center space-x-1">
                     <Star width="12" height="12" className={props.iconClassName} />
                 </div>
             )}
 
-            {props.entry.deaths > 0 && (
+            {props.replaySummary.deaths > 0 && (
                 <div className="flex items-center space-x-1">
                     <Skull width="12" height="12" className={props.iconClassName} />
-                    <div className={props.textClassName}>{props.entry.deaths}</div>
+                    <div className={props.textClassName}>{props.replaySummary.deaths}</div>
                 </div>
             )}
         </div>

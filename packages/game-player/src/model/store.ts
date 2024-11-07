@@ -2,7 +2,7 @@ import * as RAPIER from "@dimforge/rapier2d"
 import { EventStore } from "game/src/framework/event"
 import { ResourceStore } from "game/src/framework/resource"
 import { Game, GameConfig } from "game/src/game"
-import { OtherUser } from "shared/src/lobby-api/other-user"
+import { LobbyUserDTO } from "shared/src/lobby-api/lobby-api"
 import { Scene, WebGLRenderer } from "three"
 import { GamePlayerConfig } from "../game-player"
 import { InputCaptureResource } from "../modules/module-input/module-input"
@@ -36,8 +36,8 @@ export interface GamePlayerResources {
 }
 
 export interface GamePlayerEvents {
-    lobbyConnected(otherUsers: OtherUser[]): void
+    lobbyConnected(otherUsers: LobbyUserDTO[]): void
     lobbyDisconnected(): void
-    lobbyJoin(otherUser: OtherUser): void
-    lobbyLeave(otherUser: OtherUser): void
+    lobbyJoin(otherUser: LobbyUserDTO): void
+    lobbyLeave(otherUser: LobbyUserDTO): void
 }

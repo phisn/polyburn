@@ -1,5 +1,5 @@
-import { AuthState, useAuth } from "../../../common/hooks/UseAuth"
-import { useAppStore } from "../../../common/store/app-store"
+import { useAuth } from "../../../common/hooks/UseAuth"
+import { authService } from "../../../common/services/auth-service"
 import { BoxArrowInRight } from "../../common/svg/BoxArrowInRight"
 import { Person } from "../../common/svg/Person"
 
@@ -19,10 +19,10 @@ function AuthButtonRaw(props: {
 }
 
 export function NavbarAuthButton() {
-    const [authState, authApi] = useAuth()
+    const authApi = useAuth()
     const user = useAppStore(x => x.currentUser)
 
-    switch (authState) {
+    switch (authService.getState()) {
         case AuthState.Unauthenticated:
             return (
                 <AuthButtonRaw onClick={() => authApi.login()}>

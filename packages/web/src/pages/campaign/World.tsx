@@ -29,6 +29,7 @@ export function World(props: { world?: WorldDTO; onSelected: () => void }) {
     }
 
     const isLocked = props.world?.model === undefined
+    console.log(isLocked)
 
     return (
         <div className="@container relative aspect-[7/4] w-full max-w-[28rem]">

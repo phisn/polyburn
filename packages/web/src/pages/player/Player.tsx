@@ -31,8 +31,6 @@ export function GameCanvas(props: { store: PlayerStoreRunning }) {
     const canvas = props.store.gamePlayer.store.resources.get("renderer").domElement
 
     useEffect(() => {
-        console.log("Setting up new canvas")
-
         const root = document.getElementById("canvas-root")
 
         if (!root) {

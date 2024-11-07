@@ -3,16 +3,16 @@ import { ReplayModel } from "../../proto/replay"
 import { GameInput } from "../game"
 
 export function applyReplay(replay: ReplayModel, onUpdate: (input: GameInput) => void) {
-    const replayInputDiff = decodeInputCompressed(replay.frames)
+    const replayDeltaInputs = decodeInputCompressed(replay.deltaInputs)
 
     let accumulator = 0
 
-    for (const frame of replayInputDiff) {
-        accumulator += frame.rotationDelta
+    for (const replayDeltaInput of replayDeltaInputs) {
+        accumulator += replayDeltaInput.rotationDelta
 
         const input = {
             rotation: accumulator,
-            thrust: frame.thrust,
+            thrust: replayDeltaInput.thrust,
         }
 
         onUpdate(input)

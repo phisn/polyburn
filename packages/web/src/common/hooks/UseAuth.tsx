@@ -4,7 +4,7 @@ import { ModalCreateAccount } from "../../components/modals/ModalCreateAccount"
 import { ModalRenameAccount } from "../../components/modals/ModalRenameAccount"
 import { authService } from "../services/auth-service"
 import { rpc } from "../services/rpc"
-import { useStore } from "../store"
+import { useGlobalStore } from "../store"
 
 export interface AuthApi {
     login: () => void
@@ -26,7 +26,7 @@ export function useAuth(): AuthApi {
                 if (!response.ok) {
                     console.error("Failed to signin", response)
 
-                    useStore.getState().newAlert({
+                    useGlobalStore.getState().newAlert({
                         type: "error",
                         message: `Failed to signin (${response.status})`,
                     })
@@ -37,17 +37,17 @@ export function useAuth(): AuthApi {
                 const responseJson = await response.json()
 
                 if (responseJson.type === "prompt-create") {
-                    useStore.getState().newModal({
+                    useGlobalStore.getState().newModal({
                         modal: function CreateModal() {
                             return (
                                 <ModalCreateAccount
                                     creationJwt={responseJson.token}
                                     onCancel={() => {
-                                        useStore.getState().removeModal()
+                                        useGlobalStore.getState().removeModal()
                                         setLoading(false)
                                     }}
                                     onCreated={() => {
-                                        useStore.getState().removeModal()
+                                        useGlobalStore.getState().removeModal()
                                         setLoading(false)
                                     }}
                                 />
@@ -81,13 +81,13 @@ export function useAuth(): AuthApi {
                 googleLogin()
             },
             rename() {
-                useStore.getState().newModal({
+                useGlobalStore.getState().newModal({
                     modal: function RenameModal() {
                         return (
                             <ModalRenameAccount
                                 open={true}
                                 onFinished={() => {
-                                    useStore.getState().removeModal()
+                                    useGlobalStore.getState().removeModal()
                                     setLoading(false)
                                 }}
                             />

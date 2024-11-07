@@ -3,17 +3,21 @@ import { GameLoop } from "game-web/src/game-player-loop"
 import { GamePlayerStore } from "game-web/src/model/store"
 import { LobbyConfigResource } from "game-web/src/modules/module-lobby/module-lobby"
 import { ReplayModel } from "game/proto/replay"
-import { replayFramesToBytes } from "game/src/model/replay"
-import { ReactNode, createContext, useContext, useEffect, useState } from "react"
+import { WorldConfig } from "game/proto/world"
+import { encodeInputCompressed } from "game/src/model/replay"
+import { base64ToBytes } from "game/src/model/utils"
+import { useCallback, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { ReplaySummaryDTO } from "shared/src/worker-api/replay"
-import { useAppStore } from "../../common/store/app-store"
-import { trpcNative } from "../../common/trpc/trpc-native"
+import { ReplaySummaryDTO } from "shared/src/server/replay"
+import { authService } from "../../common/services/auth-service"
+import { replayService } from "../../common/services/replay-service"
+import { worldService } from "../../common/services/world-service"
+import { useGlobalStore } from "../../common/store"
 
 export interface PlayerStoreError {
     status: "error"
 
-    error: Error
+    error?: Error
     message: string
 }
 
@@ -21,6 +25,7 @@ export interface PlayerStoreFinished {
     status: "finished"
 
     gamePlayerStore: GamePlayerStore
+    replayHash: string
     replayModel: ReplayModel
     uploadStatus: "uploading" | "uploaded" | "unauthenticated" | "error"
 
@@ -38,20 +43,71 @@ export interface PlayerStoreRunning {
     gamePlayerStore: GamePlayerStore
 }
 
-type PlayerStore = PlayerStoreError | PlayerStoreFinished | PlayerStoreLoading | PlayerStoreRunning
+export type PlayerStore =
+    | PlayerStoreError
+    | PlayerStoreFinished
+    | PlayerStoreLoading
+    | PlayerStoreRunning
 
-export function usePlayerStore(): PlayerStore {
-    const state = useContext(playStoreContext)
-
-    if (!state) {
-        throw new Error("usePlayerStore must be used within a ProvidePlayerStore")
-    }
-
-    return state
-}
-
-export async function ProvidePlayerStore(props: { children: ReactNode }) {
+export function usePlayerStore() {
     const [store, setStore] = useState<PlayerStore>({ status: "loading" })
+    const user = useGlobalStore(x => x.currentUser)
+
+    const upload = useCallback(async () => {
+        if (store.status !== "finished") {
+            throw new Error(`Tried to upload during "${store.status}" state`)
+        }
+
+        try {
+            const response = await replayService.upload(store.replayHash)
+
+            const replaySummary =
+                response?.type === "improvement" ? response.replaySummary : undefined
+
+            setStore({
+                status: "finished",
+
+                gamePlayerStore: store.gamePlayerStore,
+                replayHash: store.replayHash,
+                replayModel: store.replayModel,
+                uploadStatus: "uploaded",
+
+                replaySummary,
+                bestReplaySummary: response?.bestSummary,
+            })
+        } catch (e) {
+            useGlobalStore.getState().newAlert({
+                type: "error",
+                message: "Failed to upload replay",
+            })
+
+            console.error("Failed to upload replay", e)
+
+            setStore({
+                status: "finished",
+
+                gamePlayerStore: store.gamePlayerStore,
+                replayHash: store.replayHash,
+                replayModel: store.replayModel,
+                uploadStatus: "error",
+            })
+        }
+    }, [store])
+
+    useEffect(() => {
+        if (user && store.status === "finished" && store.uploadStatus === "unauthenticated") {
+            setStore({
+                status: "finished",
+
+                gamePlayerStore: store.gamePlayerStore,
+                replayHash: store.replayHash,
+                replayModel: store.replayModel,
+                uploadStatus: "uploading",
+            })
+
+            upload()
+        }
+    }, [user, store, upload])
 
     useGamePlayer(
         (gamePlayer, gameLoop) => {
@@ -64,19 +120,42 @@ export async function ProvidePlayerStore(props: { children: ReactNode }) {
             })
 
             gamePlayer.store.game.store.events.listen({
-                finished: () => {
+                finished: async () => {
                     const replayModel = ReplayModel.create({
-                        frames: replayFramesToBytes(
-                            gamePlayer.store.resources.get("inputCapture").frames,
+                        deltaInputs: encodeInputCompressed(
+                            gamePlayer.store.resources.get("inputCapture").inputs,
                         ),
                     })
 
-                    setStore({
-                        status: "finished",
+                    const config = gamePlayer.store.resources.get("config")
 
-                        gamePlayerStore: gamePlayer.store,
+                    const replayHash = await replayService.commit(
+                        config.worldname,
+                        config.gamemode,
                         replayModel,
-                    })
+                    )
+
+                    if (authService.getState() === "authenticated") {
+                        setStore({
+                            status: "finished",
+
+                            gamePlayerStore: gamePlayer.store,
+                            replayHash,
+                            replayModel,
+                            uploadStatus: "uploading",
+                        })
+
+                        upload()
+                    } else {
+                        setStore({
+                            status: "finished",
+
+                            gamePlayerStore: gamePlayer.store,
+                            replayHash,
+                            replayModel,
+                            uploadStatus: "unauthenticated",
+                        })
+                    }
                 },
             })
         },
@@ -89,14 +168,12 @@ export async function ProvidePlayerStore(props: { children: ReactNode }) {
             }),
     )
 
-    return <playStoreContext.Provider value={store}>{props.children}</playStoreContext.Provider>
+    return store
 }
-
-const playStoreContext = createContext<PlayerStore | undefined>(undefined)
 
 function useGamePlayer(
     onCreated: (gamePlayer: GamePlayer, gameLoop: GameLoop) => void,
-    onError: (message: string, error: Error) => void,
+    onError: (message: string, error?: Error) => void,
 ) {
     const [gamePair, setGamePair] = useState<[GamePlayer, GameLoop] | undefined>(undefined)
 
@@ -112,13 +189,25 @@ function useGamePlayer(
         const worldname = params.worldname
         const gamemode = params.gamemode
 
-        trpcNative.world.get
-            .query({ names: [params.worldname] })
+        worldService
+            .get(params.worldname)
             .catch(error => {
-                onError("World not found or server unreachable", error)
+                onError("Server failure or unreachable", error)
                 throw error
             })
-            .then(([world]) => {
+            .then(worldDTO => {
+                if (worldDTO === undefined) {
+                    onError("World not found")
+                    return
+                }
+
+                if (worldDTO.model === undefined) {
+                    onError("World not unlocked")
+                    return
+                }
+
+                const world = WorldConfig.decode(base64ToBytes(worldDTO.model))
+
                 const gamePlayer = new GamePlayer(
                     {
                         gamemode,
@@ -156,7 +245,7 @@ function useGamePlayer(
 }
 
 function lobbyConfig(): LobbyConfigResource | undefined {
-    const state = useAppStore.getState()
+    const state = useGlobalStore.getState()
 
     let url
 
@@ -166,11 +255,13 @@ function lobbyConfig(): LobbyConfigResource | undefined {
         url = `wss://${import.meta.env.VITE_SERVER_URL}`
     }
 
-    if (state.currentUserJwt && state.currentUser) {
+    const token = authService.getJwt()
+
+    if (token && state.currentUser) {
         return {
             lobbyWsUrl: new URL(url).host,
             username: state.currentUser.username,
-            token: state.currentUserJwt,
+            token,
         }
     }
 }

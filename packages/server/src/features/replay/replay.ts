@@ -1,6 +1,6 @@
 import * as RAPIER from "@dimforge/rapier2d"
 import { zValidator } from "@hono/zod-validator"
-import { eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 import { ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
 import { Game } from "game/src/game"
@@ -136,11 +136,40 @@ export const routeReplay = new Hono<Environment>()
                 throw new HTTPException(400)
             }
 
+            const [best] = await db
+                .select(replaySummaryColumns)
+                .from(replays)
+                .where(
+                    and(
+                        eq(replays.userId, user.id),
+                        eq(replays.worldname, json.worldname),
+                        eq(replays.gamemode, json.gamemode),
+                    ),
+                )
+                .orderBy(replays.ticks, replays.deaths)
+                .limit(1)
+
+            if (best) {
+                const worseTime = best.ticks < result.summary.ticks
+                const worseDeaths =
+                    best.ticks === result.summary.ticks && best.deaths < result.summary.ticks
+
+                if (worseTime || worseDeaths) {
+                    return c.json({
+                        type: "no-improvement" as const,
+
+                        bestSummary: replaySummaryDTO(best),
+                    })
+                }
+            }
+
+            const binaryModel = Buffer.from(json.model, "base64")
+
             const [replayInsert] = await db
                 .insert(replays)
                 .values({
                     binaryFrames: encodeReplayFrames(result.replayFrames),
-                    binaryModel: Buffer.from(json.model, "base64"),
+                    binaryModel,
                     deaths: result.summary.deaths,
                     gamemode: json.gamemode,
                     ticks: result.summary.ticks,
@@ -158,7 +187,10 @@ export const routeReplay = new Hono<Environment>()
                 .innerJoin(users, eq(users.id, user.id))
 
             return c.json({
+                type: "improvement" as const,
+
                 replaySummary: replaySummaryDTO(replay),
+                bestSummary: replaySummaryDTO(best),
             })
         },
     )

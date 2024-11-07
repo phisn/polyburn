@@ -1,39 +1,12 @@
 import { Transition } from "@headlessui/react"
-import { forwardRef, useContext, useEffect } from "react"
+import { forwardRef } from "react"
 import { useNavigate } from "react-router-dom"
-import { useStore } from "zustand"
-import { useAppStore } from "../../common/store/app-store"
 import { AuthButton } from "../../components/AuthButton"
 import { BackArrowSvg } from "../../components/common/svg/BackArrow"
-import { FinishedStatus, playStoreContext } from "./play-store"
+import { PlayerStore, PlayerStoreFinished } from "./PlayerStore"
 
-export function FinishedPopup() {
-    const playStore = useContext(playStoreContext)
-
-    if (!playStore) {
-        throw new Error("playStore is undefined")
-    }
-
-    const status = useStore(playStore, x => x.status)
-    const user = useAppStore(x => x.currentUser)
-
+export function FinishedPopup(props: { store: PlayerStore }) {
     const navigate = useNavigate()
-
-    useEffect(() => {
-        const playState = playStore.getState()
-
-        if (
-            playState.status.type === "finished" &&
-            playState.status.uploadingStatus === "unauthenticated" &&
-            user
-        ) {
-            playState.uploadReplay(
-                playState.status.model,
-                playState.status.ticks,
-                playState.status.deaths,
-            )
-        }
-    }, [user, playStore])
 
     function onClickCompleted() {
         if (window.history.length > 1) {
@@ -45,7 +18,7 @@ export function FinishedPopup() {
 
     return (
         <Transition
-            show={status.type === "finished"}
+            show={props.store.status === "finished"}
             enter="duration-200 transform ease-out"
             enterFrom="opacity-0 scale-95"
             enterTo="opacity-100 scale-100"
@@ -56,30 +29,33 @@ export function FinishedPopup() {
 
                     <div className="h-56 w-full">
                         <FinishedInfoContainer
-                            status={status as FinishedStatus}
+                            store={props.store as PlayerStoreFinished}
                             onClick={onClickCompleted}
                         />
                     </div>
 
-                    {status.type === "finished" && status.uploadingStatus === "unauthenticated" && (
-                        <AuthButton className="btn btn-primary m-2 w-full">
-                            Login to save your time
-                        </AuthButton>
-                    )}
+                    {props.store.status === "finished" &&
+                        props.store.uploadStatus === "unauthenticated" && (
+                            <AuthButton className="btn btn-primary m-2 w-full">
+                                Login to upload your time
+                            </AuthButton>
+                        )}
                 </div>
             </CenterOnScreen>
         </Transition>
     )
 }
 
-export function FinishedInfoContainer(props: { status: FinishedStatus; onClick(): void }) {
+export function FinishedInfoContainer(props: { store: PlayerStoreFinished; onClick(): void }) {
+    const summary = props.store.gamePlayerStore.game.store.resources.get("summary")
+
     return (
         <InfoContainer
             className="hover:bg-base-100 active:bg-base-200 relative flex items-center justify-center transition hover:cursor-pointer"
             onClick={props.onClick}
         >
             <Transition
-                show={props.status.uploadingStatus !== "uploading"}
+                show={props.store.uploadStatus !== "uploading"}
                 enter="ease-out duration-200 translate transform"
                 enterFrom="opacity-0 translate-y-2"
                 enterTo="opacity-100 translate-y-0"
@@ -87,10 +63,10 @@ export function FinishedInfoContainer(props: { status: FinishedStatus; onClick()
                 <div className="absolute">
                     <div className="flex flex-col items-center">
                         <ReplayStats
-                            ticks={props.status.ticks}
-                            deaths={props.status.deaths}
-                            rank={props.status.replaySummary}
-                            personalBestRank={props.status.bestReplaySummary}
+                            ticks={summary.ticks}
+                            deaths={summary.deaths}
+                            rank={props.store.replaySummary?.rank}
+                            personalBestRank={props.store.bestReplaySummary}
                         />
 
                         <div className="flex items-center self-center">
@@ -101,14 +77,14 @@ export function FinishedInfoContainer(props: { status: FinishedStatus; onClick()
             </Transition>
 
             <Transition
-                show={props.status.uploadingStatus === "uploading"}
+                show={props.store.uploadStatus === "uploading"}
                 enter="ease-out duration-200 translate transform absolute"
                 enterFrom="opacity-0 translate-y-2"
                 enterTo="opacity-100 translate-y-0"
             >
                 <div className="relative inset-0 flex flex-col items-center justify-center space-y-8">
                     <div className="loading loading-lg" />
-                    <div className="">Validating replay ...</div>
+                    <div className="">Uploading replay ...</div>
                 </div>
             </Transition>
         </InfoContainer>

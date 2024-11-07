@@ -6,7 +6,7 @@ import { LayoutWithMenu } from "../components/layout/LayoutWithMenu"
 import { NotFound } from "./NotFound"
 import { Campaign } from "./campaign/Campaign"
 import { Editor } from "./editor/Editor"
-import { Play } from "./player/Play"
+import { Player } from "./player/Play"
 import { Slot } from "./slot/Slot"
 
 export function App() {
@@ -21,7 +21,7 @@ export function App() {
                     </Route>
                     <Route path="/" element={<Layout />}>
                         <Route path="/" element={<Navigate to="/campaign" replace />} />
-                        <Route path="/play/:world/:gamemode" element={<Play />} />
+                        <Route path="/play/:world/:gamemode" element={<Player />} />
                         <Route path="/slot" element={<Slot />} />
                         <Route path="*" element={<NotFound />} />
                     </Route>

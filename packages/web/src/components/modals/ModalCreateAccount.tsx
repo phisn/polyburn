@@ -2,7 +2,7 @@ import { Dialog } from "@headlessui/react"
 import { useRef, useState } from "react"
 import { authService } from "../../common/services/auth-service"
 import { rpc } from "../../common/services/rpc"
-import { useStore } from "../../common/store"
+import { useGlobalStore } from "../../common/store"
 import { Modal } from "./Modal"
 
 export function ModalCreateAccount(props: {
@@ -14,7 +14,7 @@ export function ModalCreateAccount(props: {
 
     const [loading, setLoading] = useState(false)
 
-    const newAlert = useStore(x => x.newAlert)
+    const newAlert = useGlobalStore(x => x.newAlert)
 
     async function onCreate() {
         try {

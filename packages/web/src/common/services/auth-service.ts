@@ -1,5 +1,5 @@
 import { UserDTO } from "shared/src/server/user"
-import { useStore } from "../store"
+import { useGlobalStore } from "../store"
 import { replayService } from "./replay-service"
 import { rpc } from "./rpc"
 import { worldService } from "./world-service"
@@ -63,7 +63,7 @@ class AuthService {
                     userDTO: authObject.userDTO,
                 }
 
-                useStore.getState().setCurrentUser(this.state.userDTO)
+                useGlobalStore.getState().setCurrentUser(this.state.userDTO)
             }
         } else {
             this.state = {
@@ -93,7 +93,7 @@ class AuthService {
             type: "unauthenticated",
         }
 
-        useStore.getState().setCurrentUser()
+        useGlobalStore.getState().setCurrentUser()
     }
 
     async login(jwt: string) {
@@ -137,7 +137,7 @@ class AuthService {
             } satisfies LocalStorageAuthObject),
         )
 
-        useStore.getState().setCurrentUser(responseJson.user)
+        useGlobalStore.getState().setCurrentUser(responseJson.user)
 
         await Promise.all([replayService.sync(), worldService.sync()])
     }

@@ -38,6 +38,10 @@ export class WorldService {
             replayAvailable: true,
         }))
     }
+
+    async get(worldname: string) {
+        return await db.worlds.where({ worldname }).first()
+    }
 }
 
 export const worldService = new WorldService()

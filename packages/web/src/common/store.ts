@@ -3,7 +3,7 @@ import { create } from "zustand"
 import { AlertProps } from "../components/layout/alerts/alert-props"
 import { ModalProps } from "../components/modals/modal-props"
 
-export interface Store {
+export interface GlobalStore {
     alerts: AlertProps[]
     newAlert: (alert: AlertProps, time?: number) => void
 
@@ -15,7 +15,7 @@ export interface Store {
     setCurrentUser(user?: UserDTO): void
 }
 
-export const useStore = create<Store>(set => ({
+export const useGlobalStore = create<GlobalStore>(set => ({
     alerts: [],
     newAlert: (alert: AlertProps, time?: number) => {
         setTimeout(() => {

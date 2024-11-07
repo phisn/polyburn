@@ -5,7 +5,7 @@ import { Devices } from "./devices/devices"
 
 export interface InputCaptureResource {
     currentInput: GameInput
-    frames: GameInputCompressed[]
+    inputs: GameInputCompressed[]
 }
 
 export class ModuleInput {
@@ -15,7 +15,7 @@ export class ModuleInput {
     constructor(private store: GamePlayerStore) {
         this.store.resources.set("inputCapture", {
             currentInput: { rotation: 0, thrust: false },
-            frames: [],
+            inputs: [],
         })
 
         this.devices = new Devices(store)
@@ -31,7 +31,7 @@ export class ModuleInput {
 
         const inputCapture = this.store.resources.get("inputCapture")
         inputCapture.currentInput = { rotation: 0, thrust: false }
-        inputCapture.frames = []
+        inputCapture.inputs = []
     }
 
     onFixedUpdate() {
@@ -43,7 +43,7 @@ export class ModuleInput {
         }
 
         const inputCapture = this.store.resources.get("inputCapture")
-        inputCapture.frames.push(this.compressor.compress(input))
+        inputCapture.inputs.push(this.compressor.compress(input))
         inputCapture.currentInput = input
     }
 }

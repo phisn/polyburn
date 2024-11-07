@@ -1,14 +1,27 @@
 import Dexie from "dexie"
+import { ReplayModel } from "game/proto/replay"
+import { bytesToBase64 } from "game/src/model/utils"
 import { ReplayDTO, ReplaySummaryDTO } from "shared/src/server/replay"
 import { useAuthStore } from "../store/auth-store"
+import { authService } from "./auth-service"
 import { rpc } from "./rpc"
 
+interface PendingReplay {
+    hash: string
+
+    worldname: string
+    gamemode: string
+    model: Uint8Array
+}
+
 const db = new Dexie("polyburn-cache-replays") as Dexie & {
+    pendingReplays: Dexie.Table<PendingReplay>
     replays: Dexie.Table<ReplayDTO>
     replaySummaries: Dexie.Table<ReplaySummaryDTO>
 }
 
 db.version(1).stores({
+    pendingReplays: "hash",
     replays: "id, gamemode, username, worldname",
     replaySummaries: "id, gamemode, username, worldname",
 })
@@ -20,7 +33,52 @@ export interface ExReplaySummaryDTO extends ReplaySummaryDTO {
 export class ReplayService {
     constructor() {}
 
-    async sync() {}
+    async commit(worldname: string, gamemode: string, replayModel: ReplayModel): Promise<string> {
+        const model = ReplayModel.encode(replayModel).finish()
+        const hashBuffer = await crypto.subtle.digest("SHA-512", model)
+        const hash = bytesToBase64(new Uint8Array(hashBuffer))
+
+        await db.pendingReplays.put(
+            {
+                hash,
+
+                worldname,
+                gamemode,
+                model,
+            },
+            hash,
+        )
+
+        return hash
+    }
+
+    async get(id: string): Promise<ReplayDTO> {
+        if (useAuthStore.getState().currentUser === undefined) {
+            const replay = await db.replays.get(id)
+
+            if (replay === undefined) {
+                throw new Error("Replay not found")
+            }
+
+            return replay
+        }
+
+        const response = await rpc.replay.$get({
+            query: {
+                replayId: id,
+            },
+        })
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch replay")
+        }
+
+        const replay = await response.json()
+
+        db.replays.put(replay)
+
+        return replay
+    }
 
     async list(worldname: string): Promise<ExReplaySummaryDTO[]> {
         if (useAuthStore.getState().currentUser === undefined) {
@@ -64,32 +122,42 @@ export class ReplayService {
         }))
     }
 
-    async get(id: string): Promise<ReplayDTO> {
-        if (useAuthStore.getState().currentUser === undefined) {
-            const replay = await db.replays.get(id)
-
-            if (replay === undefined) {
-                throw new Error("Replay not found")
-            }
-
-            return replay
+    async sync() {
+        if (authService.getState() !== "authenticated") {
+            return
         }
 
-        const response = await rpc.replay.$get({
-            query: {
-                replayId: id,
+        for (const pendingReplay of await db.pendingReplays.toArray()) {
+            try {
+                await this.upload(pendingReplay.hash)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }
+
+    async upload(replayHash: string) {
+        const pendingReplay = await db.pendingReplays.get(replayHash)
+
+        if (pendingReplay === undefined) {
+            return
+        }
+
+        const response = await rpc.replay.$post({
+            json: {
+                worldname: pendingReplay.worldname,
+                gamemode: pendingReplay.gamemode,
+                model: bytesToBase64(pendingReplay.model),
             },
         })
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch replay")
+        if (response.ok === false) {
+            throw new Error("Failed to upload replay")
         }
 
-        const replay = await response.json()
+        db.pendingReplays.delete(replayHash)
 
-        db.replays.put(replay)
-
-        return replay
+        return await response.json()
     }
 }
 

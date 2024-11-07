@@ -7,7 +7,7 @@ import { GamePlayerStore } from "../../model/store"
 import { OtherUserRegistry } from "./other-user-registry"
 
 export interface LobbyConfigResource {
-    lobbyWsUrl: string
+    lobbyWsUrl: URL
     token: string
     username: string
 }
@@ -147,6 +147,6 @@ export class ModuleLobby {
         this.ws?.close()
         this.ws = undefined
 
-        setTimeout(() => this.startWebsocket(), this.baseFailureTimeout)
+        setTimeout(() => this.startWebsocket(), this.baseFailureTimeout * 2 ** this.failureCounter)
     }
 }

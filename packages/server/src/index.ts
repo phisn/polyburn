@@ -11,11 +11,19 @@ import { routeWorld } from "./features/world/world"
 const app = new Hono<Environment>()
     .use(timing())
     .use((c, next) => {
-        const corsMiddleware = cors({
-            origin: c.env.ENV_JWT_SECRET,
-        })
+        const origins = c.env.ENV_URL_CLIENT.split(",")
+        const origin = c.req.header("Origin")
 
-        return corsMiddleware(c, next)
+        if (origin && origins.includes(origin)) {
+            const corsMiddleware = cors({
+                credentials: true,
+                origin,
+            })
+
+            return corsMiddleware(c, next)
+        } else {
+            return next()
+        }
     })
     .use((c, next) => {
         c.set("db", drizzle(c.env.DB))

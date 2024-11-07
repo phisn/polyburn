@@ -55,7 +55,9 @@ class AuthService {
                     jwt: authObject.jwt,
                 }
 
-                this.fetchUserInfo()
+                setTimeout(() => {
+                    this.fetchUserInfo()
+                })
             } else {
                 this.state = {
                     type: "offline",
@@ -128,6 +130,8 @@ class AuthService {
 
         const responseJson = await response.json()
 
+        await this.fetchUserInfo()
+
         return responseJson.type
     }
 
@@ -139,7 +143,7 @@ class AuthService {
     }
 
     private async fetchUserInfo() {
-        if (this.state.type !== "fetching") {
+        if (this.state.type === "unauthenticated") {
             throw new Error("No JWT found")
         }
 

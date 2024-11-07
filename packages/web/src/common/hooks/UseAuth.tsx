@@ -36,7 +36,7 @@ export function useAuth(): AuthApi {
 
                 const responseJson = await response.json()
 
-                if (responseJson.type === "prompt-create") {
+                if (responseJson.type === "create") {
                     useGlobalStore.getState().newModal({
                         modal: function CreateModal() {
                             return (

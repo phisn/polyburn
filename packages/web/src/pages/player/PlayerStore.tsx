@@ -1,12 +1,11 @@
 import { GamePlayer } from "game-web/src/game-player"
 import { GameLoop } from "game-web/src/game-player-loop"
-import { GamePlayerStore } from "game-web/src/model/store"
 import { LobbyConfigResource } from "game-web/src/modules/module-lobby/module-lobby"
 import { ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
 import { encodeInputCompressed } from "game/src/model/replay"
 import { base64ToBytes } from "game/src/model/utils"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ReplaySummaryDTO } from "shared/src/server/replay"
 import { authService } from "../../common/services/auth-service"
@@ -24,7 +23,7 @@ export interface PlayerStoreError {
 export interface PlayerStoreFinished {
     status: "finished"
 
-    gamePlayerStore: GamePlayerStore
+    gamePlayer: GamePlayer
     replayHash: string
     replayModel: ReplayModel
     uploadStatus: "uploading" | "uploaded" | "unauthenticated" | "error"
@@ -40,7 +39,7 @@ export interface PlayerStoreLoading {
 export interface PlayerStoreRunning {
     status: "running"
 
-    gamePlayerStore: GamePlayerStore
+    gamePlayer: GamePlayer
 }
 
 export type PlayerStore =
@@ -67,7 +66,7 @@ export function usePlayerStore() {
             setStore({
                 status: "finished",
 
-                gamePlayerStore: store.gamePlayerStore,
+                gamePlayer: store.gamePlayer,
                 replayHash: store.replayHash,
                 replayModel: store.replayModel,
                 uploadStatus: "uploaded",
@@ -86,7 +85,7 @@ export function usePlayerStore() {
             setStore({
                 status: "finished",
 
-                gamePlayerStore: store.gamePlayerStore,
+                gamePlayer: store.gamePlayer,
                 replayHash: store.replayHash,
                 replayModel: store.replayModel,
                 uploadStatus: "error",
@@ -99,7 +98,7 @@ export function usePlayerStore() {
             setStore({
                 status: "finished",
 
-                gamePlayerStore: store.gamePlayerStore,
+                gamePlayer: store.gamePlayer,
                 replayHash: store.replayHash,
                 replayModel: store.replayModel,
                 uploadStatus: "uploading",
@@ -116,7 +115,7 @@ export function usePlayerStore() {
             setStore({
                 status: "running",
 
-                gamePlayerStore: gamePlayer.store,
+                gamePlayer: gamePlayer,
             })
 
             gamePlayer.store.game.store.events.listen({
@@ -139,7 +138,7 @@ export function usePlayerStore() {
                         setStore({
                             status: "finished",
 
-                            gamePlayerStore: gamePlayer.store,
+                            gamePlayer,
                             replayHash,
                             replayModel,
                             uploadStatus: "uploading",
@@ -150,7 +149,7 @@ export function usePlayerStore() {
                         setStore({
                             status: "finished",
 
-                            gamePlayerStore: gamePlayer.store,
+                            gamePlayer,
                             replayHash,
                             replayModel,
                             uploadStatus: "unauthenticated",
@@ -180,8 +179,22 @@ function useGamePlayer(
     const navigate = useNavigate()
     const params = useParams()
 
+    const onCreatedRef = useRef(onCreated)
+    const onErrorRef = useRef(onError)
+
     useEffect(() => {
+        onCreatedRef.current = onCreated
+    }, [onCreated])
+
+    useEffect(() => {
+        onErrorRef.current = onError
+    }, [onError])
+
+    useEffect(() => {
+        console.log("hello")
+
         if (params.worldname === undefined || params.gamemode === undefined) {
+            console.error(params)
             navigate("/")
             return
         }
@@ -189,26 +202,28 @@ function useGamePlayer(
         const worldname = params.worldname
         const gamemode = params.gamemode
 
+        let gamePlayer: GamePlayer
+
         worldService
             .get(params.worldname)
             .catch(error => {
-                onError("Server failure or unreachable", error)
+                onErrorRef.current("Server failure or unreachable", error)
                 throw error
             })
             .then(worldDTO => {
                 if (worldDTO === undefined) {
-                    onError("World not found")
+                    onErrorRef.current("World not found")
                     return
                 }
 
                 if (worldDTO.model === undefined) {
-                    onError("World not unlocked")
+                    onErrorRef.current("World not unlocked")
                     return
                 }
 
                 const world = WorldConfig.decode(base64ToBytes(worldDTO.model))
 
-                const gamePlayer = new GamePlayer(
+                gamePlayer = new GamePlayer(
                     {
                         gamemode,
                         world,
@@ -220,25 +235,23 @@ function useGamePlayer(
                 setGamePair([gamePlayer, new GameLoop(gamePlayer)])
             })
             .catch(error => {
-                onError("Failed to create game player", error)
+                onErrorRef.current("Failed to create game player", error)
                 throw error
             })
 
         return () => {
-            const [gamePlayer] = gamePair ?? []
-
             if (gamePlayer) {
                 gamePlayer.onDispose()
             }
         }
-    }, [gamePair, params.worldname, params.gamemode, navigate, onError])
+    }, [params, navigate])
 
     useEffect(() => {
         if (gamePair === undefined) {
             return
         }
 
-        onCreated(...gamePair)
+        onCreatedRef.current(...gamePair)
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [gamePair])
@@ -256,11 +269,13 @@ function lobbyConfig(): LobbyConfigResource | undefined {
         url = `wss://${import.meta.env.VITE_SERVER_URL}`
     }
 
+    console.log(url)
+
     const token = authService.getJwt()
 
     if (token && state.currentUser) {
         return {
-            lobbyWsUrl: new URL(url).host,
+            lobbyWsUrl: new URL(url),
             username: state.currentUser.username,
             token,
         }

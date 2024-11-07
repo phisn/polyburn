@@ -1,7 +1,7 @@
 import * as RAPIER from "@dimforge/rapier2d"
 import { EventStore } from "game/src/framework/event"
 import { ResourceStore } from "game/src/framework/resource"
-import { Game, GameConfig } from "game/src/game"
+import { Game } from "game/src/game"
 import { LobbyUserDTO } from "shared/src/lobby-api/lobby-api"
 import { Scene, WebGLRenderer } from "three"
 import { GamePlayerConfig } from "../game-player"
@@ -15,13 +15,15 @@ export class GamePlayerStore {
     public game: Game
     public resources: ResourceStore<GamePlayerResources>
 
-    constructor(config: GameConfig, renderer: WebGLRenderer) {
+    constructor(config: GamePlayerConfig, renderer: WebGLRenderer) {
         this.events = new EventStore()
         this.game = new Game(config, { rapier: RAPIER })
         this.resources = new ResourceStore({
             renderer,
             scene: new Scene(),
         })
+
+        this.resources.set("config", config)
     }
 }
 

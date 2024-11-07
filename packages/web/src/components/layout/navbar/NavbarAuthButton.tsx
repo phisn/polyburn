@@ -1,5 +1,6 @@
+import { useAuthState } from "../../../common/hooks/use-auth-state"
 import { useAuth } from "../../../common/hooks/UseAuth"
-import { authService } from "../../../common/services/auth-service"
+import { useGlobalStore } from "../../../common/store"
 import { BoxArrowInRight } from "../../common/svg/BoxArrowInRight"
 import { Person } from "../../common/svg/Person"
 
@@ -20,24 +21,25 @@ function AuthButtonRaw(props: {
 
 export function NavbarAuthButton() {
     const authApi = useAuth()
-    const user = useAppStore(x => x.currentUser)
+    const authState = useAuthState()
+    const user = useGlobalStore(x => x.currentUser)
 
-    switch (authService.getState()) {
-        case AuthState.Unauthenticated:
+    switch (authState) {
+        case "unauthenticated":
             return (
                 <AuthButtonRaw onClick={() => authApi.login()}>
                     <BoxArrowInRight width="32" height="32" className="pr-2" />
                 </AuthButtonRaw>
             )
 
-        case AuthState.Pending:
+        case "fetching":
             return (
                 <AuthButtonRaw className="btn-disabled">
                     <div className="loading loading-sm" />
                 </AuthButtonRaw>
             )
 
-        case AuthState.Authenticated:
+        case "authenticated":
             return (
                 <div className="flex items-center space-x-4">
                     <div className="font-outfit xs:flex hidden text-lg">{user?.username}</div>

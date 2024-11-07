@@ -6,13 +6,13 @@ compatibility_flags = [ "nodejs_compat" ]
 tail_consumers = [{service = "polyburn-worker-tail"}]
 
 [dev]
-port = 8080
+port = 3002
 local_protocol = "http"
 
 [vars]
 ENV_JWT_SECRET = "my_secret_password"
-ENV_URL_CLIENT = "http://localhost:3000/,http://localhost:8080/"
-ENV_URL_API = "http://localhost:8080/"
+ENV_URL_CLIENT = "http://localhost:3000,http://localhost:3002"
+ENV_URL_API = "http://localhost:3002"
 
 [[d1_databases]]
 migrations_dir = "drizzle"

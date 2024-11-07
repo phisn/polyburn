@@ -88,7 +88,7 @@ export const routeUser = new Hono<Environment>()
                         },
                         c.env.ENV_JWT_SECRET,
                     ),
-                    type: "create",
+                    type: "create" as const,
                 })
             } else {
                 return c.json({
@@ -100,7 +100,7 @@ export const routeUser = new Hono<Environment>()
                         },
                         c.env.ENV_JWT_SECRET,
                     ),
-                    type: "login",
+                    type: "login" as const,
                 })
             }
         },
@@ -121,12 +121,14 @@ export const routeUser = new Hono<Environment>()
             const verified = await verify(json.code, c.env.ENV_JWT_SECRET)
 
             if (verified === false) {
+                console.warn("Failed to verify")
                 throw new HTTPException(401)
             }
 
-            const token = signupToken.safeParse(decode(json.code))
+            const token = signupToken.safeParse(decode(json.code).payload)
 
             if (token.success === false) {
+                console.warn("Failed to parse token", token.error, decode(json.code).payload)
                 throw new HTTPException(401)
             }
 

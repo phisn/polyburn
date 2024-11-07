@@ -19,7 +19,7 @@ export function Player() {
 function RefreshButton(props: { store: PlayerStoreRunning }) {
     return (
         <div
-            onClick={() => props.store.gamePlayerStore.game.onReset()}
+            onClick={() => props.store.gamePlayer.onReset()}
             className="btn btn-square btn-ghost absolute left-0 top-0 z-10 m-4"
         >
             <ArrowClockwise width="32" height="32" />
@@ -28,7 +28,7 @@ function RefreshButton(props: { store: PlayerStoreRunning }) {
 }
 
 export function GameCanvas(props: { store: PlayerStoreRunning }) {
-    const canvas = props.store.gamePlayerStore.resources.get("renderer").domElement
+    const canvas = props.store.gamePlayer.store.resources.get("renderer").domElement
 
     useEffect(() => {
         console.log("Setting up new canvas")

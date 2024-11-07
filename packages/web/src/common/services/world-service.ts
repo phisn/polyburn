@@ -1,6 +1,6 @@
 import Dexie from "dexie"
 import { WorldDTO } from "shared/src/server/world"
-import { useAuthStore } from "../store/auth-store"
+import { authService } from "./auth-service"
 import { rpc } from "./rpc"
 
 const db = new Dexie("polyburn-cache-worlds") as Dexie & {
@@ -17,7 +17,7 @@ export class WorldService {
     async sync() {}
 
     async list(): Promise<WorldDTO[]> {
-        if (useAuthStore.getState().currentUser === undefined) {
+        if (authService.getState() === "offline") {
             return db.worlds.limit(25).toArray()
         }
 

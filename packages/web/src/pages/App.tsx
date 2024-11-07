@@ -19,7 +19,7 @@ export function App() {
                 </Route>
                 <Route path="/" element={<Layout />}>
                     <Route path="/" element={<Navigate to="/campaign" replace />} />
-                    <Route path="/play/:world/:gamemode" element={<Player />} />
+                    <Route path="/play/:worldname/:gamemode" element={<Player />} />
                     <Route path="/slot" element={<Slot />} />
                     <Route path="*" element={<NotFound />} />
                 </Route>

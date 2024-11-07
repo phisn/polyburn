@@ -43,6 +43,7 @@ export class GamePlayer implements GameLoopRunnable {
         this.moduleVisual = new ModuleVisual(this.store)
 
         if (lobbyConfig) {
+            console.log(lobbyConfig)
             this.store.resources.set("lobbyConfig", lobbyConfig)
             this.moduleLobby = new ModuleLobby(this.store)
         }

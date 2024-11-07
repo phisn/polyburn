@@ -19,7 +19,7 @@ export const middlewareAuth: MiddlewareHandler<Environment> = async (c, next) =>
         throw new HTTPException(401)
     }
 
-    const token = jwtToken.safeParse(decode(authorization))
+    const token = jwtToken.safeParse(decode(authorization).payload)
 
     if (token.success === false) {
         throw new HTTPException(401)

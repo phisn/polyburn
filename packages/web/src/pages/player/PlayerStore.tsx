@@ -52,11 +52,7 @@ export function usePlayerStore() {
     const [store, setStore] = useState<PlayerStore>({ status: "loading" })
     const user = useGlobalStore(x => x.currentUser)
 
-    const upload = useCallback(async () => {
-        if (store.status !== "finished") {
-            throw new Error(`Tried to upload during "${store.status}" state`)
-        }
-
+    const upload = useCallback(async (store: PlayerStoreFinished) => {
         try {
             const response = await replayService.upload(store.replayHash)
 
@@ -91,20 +87,21 @@ export function usePlayerStore() {
                 uploadStatus: "error",
             })
         }
-    }, [store])
+    }, [])
 
     useEffect(() => {
         if (user && store.status === "finished" && store.uploadStatus === "unauthenticated") {
-            setStore({
+            const newStore: PlayerStoreFinished = {
                 status: "finished",
 
                 gamePlayer: store.gamePlayer,
                 replayHash: store.replayHash,
                 replayModel: store.replayModel,
                 uploadStatus: "uploading",
-            })
+            }
 
-            upload()
+            setStore(newStore)
+            upload(newStore)
         }
     }, [user, store, upload])
 
@@ -134,27 +131,14 @@ export function usePlayerStore() {
                         replayModel,
                     )
 
-                    if (authService.getState() === "authenticated") {
-                        setStore({
-                            status: "finished",
+                    setStore({
+                        status: "finished",
 
-                            gamePlayer,
-                            replayHash,
-                            replayModel,
-                            uploadStatus: "uploading",
-                        })
-
-                        upload()
-                    } else {
-                        setStore({
-                            status: "finished",
-
-                            gamePlayer,
-                            replayHash,
-                            replayModel,
-                            uploadStatus: "unauthenticated",
-                        })
-                    }
+                        gamePlayer,
+                        replayHash,
+                        replayModel,
+                        uploadStatus: "unauthenticated",
+                    })
                 },
             })
         },

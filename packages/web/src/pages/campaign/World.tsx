@@ -28,8 +28,7 @@ export function World(props: { world?: WorldDTO; onSelected: () => void }) {
         }
     }
 
-    const isLocked = props.world?.model === undefined
-    console.log(isLocked)
+    const isLocked = props.world && props.world?.model === undefined
 
     return (
         <div className="@container relative aspect-[7/4] w-full max-w-[28rem]">
@@ -97,7 +96,7 @@ export function Overlay(props: { world?: WorldDTO; locked?: boolean }) {
     function TitleInLocked() {
         return (
             <Title>
-                <LockedSvg width="24" height="24" />
+                <LockedSvg width="24" height="24" className="h-7" />
             </Title>
         )
     }
@@ -109,7 +108,7 @@ export function Overlay(props: { world?: WorldDTO; locked?: boolean }) {
     function TitleInUndefined() {
         return (
             <Title>
-                <div className="loading loading-sm" />
+                <div className="loading loading-sm h-7" />
             </Title>
         )
     }

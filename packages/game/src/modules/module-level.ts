@@ -87,11 +87,8 @@ export class ModuleLevel {
             Math.abs(rocketVelocity.x) > ROCKET_SPEED_TOLERANCE ||
             Math.abs(rocketVelocity.y) > ROCKET_SPEED_TOLERANCE
         ) {
-            console.log("Rocket is moving too fast to capture the flag")
             return
         }
-
-        console.log("Captured flag")
 
         const captured = level
         this.progressLevel = undefined

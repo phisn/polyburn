@@ -12,12 +12,12 @@ export const replays = sqliteTable(
             .primaryKey()
             .$defaultFn(() => randomUUID()),
 
-        binaryModel: blob("model", { mode: "buffer" }).notNull(),
+        binaryModel: blob("frames", { mode: "buffer" }).notNull(),
         binaryFrames: blob("model", { mode: "buffer" }).notNull(),
         deaths: integer("deaths").notNull(),
         gamemode: text("gamemode").notNull(),
         ticks: integer("ticks").notNull(),
-        worldname: text("world").notNull(),
+        worldname: text("worldname").notNull(),
 
         userId: integer("userId").notNull(),
     },

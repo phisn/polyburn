@@ -44,6 +44,7 @@ export const routeReplay = new Hono<Environment>()
                 .from(replays)
                 .innerJoin(users, eq(users.id, replays.userId))
                 .where(eq(replays.id, query.replayId))
+                .groupBy(users.id)
 
             const [replay] = result
 
@@ -83,9 +84,7 @@ export const routeReplay = new Hono<Environment>()
             const query = c.req.valid("query")
 
             const result: ReplaySummary[] = await db
-                .select({
-                    ...replaySummaryColumns,
-                })
+                .select(replaySummaryColumns)
                 .from(replays)
                 .innerJoin(users, eq(users.id, replays.userId))
                 .where(
@@ -155,6 +154,7 @@ export const routeReplay = new Hono<Environment>()
             const [best] = await db
                 .select(replaySummaryColumns)
                 .from(replays)
+                .innerJoin(users, eq(users.id, replays.userId))
                 .where(
                     and(
                         eq(replays.userId, user.id),
@@ -181,16 +181,25 @@ export const routeReplay = new Hono<Environment>()
 
             const binaryModel = Buffer.from(json.model, "base64")
 
+            const update = {
+                binaryFrames: encodeReplayFrames(result.replayFrames),
+                binaryModel,
+                deaths: result.summary.deaths,
+                gamemode: json.gamemode,
+                ticks: result.summary.ticks,
+                userId: user.id,
+                worldname: json.worldname,
+            } as const
+
             const [replayInsert] = await db
                 .insert(replays)
                 .values({
-                    binaryFrames: encodeReplayFrames(result.replayFrames),
-                    binaryModel,
-                    deaths: result.summary.deaths,
-                    gamemode: json.gamemode,
-                    ticks: result.summary.ticks,
-                    userId: user.id,
-                    worldname: json.worldname,
+                    id: best?.id,
+                    ...update,
+                })
+                .onConflictDoUpdate({
+                    target: replays.id,
+                    set: { ...update },
                 })
                 .returning({
                     id: replays.id,
@@ -220,7 +229,7 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
 
     try {
         const worldConfig = WorldConfig.decode(
-            new Uint8Array(Buffer.from(world.configBase64, "base64")),
+            new Uint8Array(Buffer.from(world.configBase64 ?? "", "base64")),
         )
 
         const game = new Game(

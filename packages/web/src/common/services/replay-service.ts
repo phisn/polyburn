@@ -2,7 +2,7 @@ import Dexie from "dexie"
 import { ReplayModel } from "game/proto/replay"
 import { bytesToBase64 } from "game/src/model/utils"
 import { ReplayDTO, ReplaySummaryDTO } from "shared/src/server/replay"
-import { useAuthStore } from "../store/auth-store"
+import { useGlobalStore } from "../store"
 import { authService } from "./auth-service"
 import { rpc } from "./rpc"
 
@@ -22,8 +22,8 @@ const db = new Dexie("polyburn-cache-replays") as Dexie & {
 
 db.version(1).stores({
     pendingReplays: "hash",
-    replays: "id, gamemode, username, worldname",
-    replaySummaries: "id, gamemode, username, worldname",
+    replays: "id, username, gamemode, worldname",
+    replaySummaries: "id, username, gamemode, worldname",
 })
 
 export interface ExReplaySummaryDTO extends ReplaySummaryDTO {
@@ -53,7 +53,7 @@ export class ReplayService {
     }
 
     async get(id: string): Promise<ReplayDTO> {
-        if (useAuthStore.getState().currentUser === undefined) {
+        if (useGlobalStore.getState().currentUser === undefined) {
             const replay = await db.replays.get(id)
 
             if (replay === undefined) {
@@ -81,7 +81,7 @@ export class ReplayService {
     }
 
     async list(worldname: string, gamemode: string): Promise<ExReplaySummaryDTO[]> {
-        if (useAuthStore.getState().currentUser === undefined) {
+        if (useGlobalStore.getState().currentUser === undefined) {
             const replays = await db.replaySummaries
                 .where({ gamemode, worldname })
                 .limit(25)

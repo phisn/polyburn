@@ -95,6 +95,7 @@ class AuthService {
         this.state = {
             type: "unauthenticated",
         }
+        this.notifySubscribers()
 
         useGlobalStore.getState().setCurrentUser()
     }
@@ -108,6 +109,7 @@ class AuthService {
             type: "fetching",
             jwt,
         }
+        this.notifySubscribers()
 
         await this.fetchUserInfo()
     }
@@ -161,6 +163,7 @@ class AuthService {
             jwt: this.state.jwt,
             userDTO: responseJson.user,
         }
+        this.notifySubscribers()
 
         localStorage.setItem(
             "auth",
@@ -170,9 +173,16 @@ class AuthService {
             } satisfies LocalStorageAuthObject),
         )
 
+        console.log("set current user ", responseJson.user)
         useGlobalStore.getState().setCurrentUser(responseJson.user)
 
         await Promise.all([replayService.sync(), worldService.sync()])
+    }
+
+    private notifySubscribers() {
+        for (const subscriber of this.subscribers) {
+            subscriber()
+        }
     }
 }
 

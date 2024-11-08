@@ -12,9 +12,9 @@ export function Leaderboard(props: {
     const [replays, setReplays] = useState<ExReplaySummaryDTO[]>()
 
     useEffect(() => {
-        replayService
-            .list(props.world.worldname, props.gamemode.name)
-            .then(replays => setReplays(replays))
+        replayService.list(props.world.worldname, props.gamemode.name).then(replays => {
+            setReplays(replays)
+        })
     }, [props.world.worldname, props.gamemode.name])
 
     if (replays === undefined) {
@@ -27,7 +27,7 @@ export function Leaderboard(props: {
         )
     }
 
-    if (replays.entries.length === 0) {
+    if (replays.length === 0) {
         return (
             <LeaderboardContainer className="overflow-hidden">
                 <div className="flex w-full justify-center p-8">
@@ -42,7 +42,7 @@ export function Leaderboard(props: {
     return (
         <LeaderboardContainer>
             <DraggableList
-                length={replays.entries.length}
+                length={replays.length}
                 className="overflow-hidden rounded-xl"
                 onSwipeHorizontal={() => {
                     props.closeDialog()

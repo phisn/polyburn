@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "scripts": {
         "postinstall": "wrangler d1 migrations apply polyburn --local && node ./tools/postprocess-rapier2d.mjs",
-        "generate": "drizzle-kit generate:sqlite",
+        "generate": "drizzle-kit generate",
         "dev": "wrangler dev",
         "deploy": "wrangler deploy --minify"
     },
@@ -12,7 +12,7 @@
         "@hono/swagger-ui": "^0.4.1",
         "@hono/zod-validator": "^0.3.0",
         "@tsndr/cloudflare-worker-jwt": "^2.5.4",
-        "drizzle-orm": "^0.34.1",
+        "drizzle-orm": "^0.36.1",
         "game": "*",
         "hono": "^4.6.3",
         "oslo": "^1.2.1",
@@ -21,6 +21,7 @@
     },
     "devDependencies": {
         "@cloudflare/workers-types": "^4.20240925.0",
+        "drizzle-kit": "^0.28.0",
         "wrangler": "^3.79.0"
     }
 }

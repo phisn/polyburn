@@ -16,6 +16,12 @@ export function FinishedPopup(props: { store: PlayerStore }) {
         }
     }
 
+    console.log(
+        props.store.status,
+        "dd",
+        props.store.status === "finished" ? props.store.uploadStatus : "<none>",
+    )
+
     return (
         <Transition
             show={props.store.status === "finished"}
@@ -36,9 +42,10 @@ export function FinishedPopup(props: { store: PlayerStore }) {
 
                     {props.store.status === "finished" &&
                         props.store.uploadStatus === "unauthenticated" && (
-                            <AuthButton className="btn btn-primary m-2 w-full">
-                                Login to upload your time
-                            </AuthButton>
+                            <AuthButton
+                                unauthenticated={"Login to upload your time"}
+                                className="btn btn-primary m-2 w-full"
+                            />
                         )}
                 </div>
             </CenterOnScreen>

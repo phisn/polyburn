@@ -46,22 +46,28 @@ export function LeaderboardEntry(props: { replaySummary: ExReplaySummaryDTO }) {
                     />
                 </div>
                 <div className="flex w-full justify-end space-x-1 pr-4">
-                    <button
-                        className="btn btn-ghost btn-square"
-                        disabled={!props.replaySummary.replayAvailable}
-                    >
-                        <PlayCircle width="24" height="24" className={placeColoring?.icon} />
-                    </button>
-                    <button
-                        className="btn btn-ghost btn-square"
-                        disabled={!props.replaySummary.replayAvailable}
-                    >
-                        {placeColoring?.icon ? (
-                            <SwordFilled width="24" height="24" className={placeColoring?.icon} />
-                        ) : (
-                            <Sword width="24" height="24" className={placeColoring?.icon} />
-                        )}
-                    </button>
+                    {props.replaySummary.replayAvailable && (
+                        <>
+                            <button className="btn btn-ghost btn-square">
+                                <PlayCircle
+                                    width="24"
+                                    height="24"
+                                    className={placeColoring?.icon}
+                                />
+                            </button>
+                            <button className="btn btn-ghost btn-square">
+                                {placeColoring?.icon ? (
+                                    <SwordFilled
+                                        width="24"
+                                        height="24"
+                                        className={placeColoring?.icon}
+                                    />
+                                ) : (
+                                    <Sword width="24" height="24" className={placeColoring?.icon} />
+                                )}
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
         </>

@@ -117,28 +117,39 @@ export function usePlayerStore() {
 
             gamePlayer.store.game.store.events.listen({
                 finished: async () => {
-                    const replayModel = ReplayModel.create({
-                        deltaInputs: encodeInputCompressed(
-                            gamePlayer.store.resources.get("inputCapture").inputs,
-                        ),
-                    })
+                    try {
+                        console.log("a")
+                        const replayModel = ReplayModel.create({
+                            deltaInputs: encodeInputCompressed(
+                                gamePlayer.store.resources.get("inputCapture").inputs,
+                            ),
+                        })
+                        console.log("b")
 
-                    const config = gamePlayer.store.resources.get("config")
+                        const config = gamePlayer.store.resources.get("config")
 
-                    const replayHash = await replayService.commit(
-                        config.worldname,
-                        config.gamemode,
-                        replayModel,
-                    )
+                        console.log("c")
 
-                    setStore({
-                        status: "finished",
+                        const replayHash = await replayService.commit(
+                            config.worldname,
+                            config.gamemode,
+                            replayModel,
+                        )
 
-                        gamePlayer,
-                        replayHash,
-                        replayModel,
-                        uploadStatus: "unauthenticated",
-                    })
+                        console.log("d")
+
+                        setStore({
+                            status: "finished",
+
+                            gamePlayer,
+                            replayHash,
+                            replayModel,
+                            uploadStatus: "unauthenticated",
+                        })
+                        console.log("e")
+                    } catch (e) {
+                        console.error(e)
+                    }
                 },
             })
         },

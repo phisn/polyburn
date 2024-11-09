@@ -76,7 +76,26 @@ class AuthService {
 
         window.addEventListener("online", () => {
             if (this.state.type === "offline") {
+                this.state = {
+                    type: "fetching",
+
+                    jwt: this.state.jwt,
+                }
+
                 this.fetchUserInfo()
+            }
+        })
+
+        window.addEventListener("offline", () => {
+            if (this.state.type === "authenticated") {
+                this.state = {
+                    type: "offline",
+
+                    jwt: this.state.jwt,
+                    userDTO: this.state.userDTO,
+                }
+
+                this.notifySubscribers()
             }
         })
     }

@@ -31,95 +31,113 @@ export interface ExReplaySummaryDTO extends ReplaySummaryDTO {
 }
 
 export class ReplayService {
-    constructor() {}
+    // sometimes for whatever reason storage might not work. this is okay for map & replay caching
+    // but should never prevent a player to upload a replay. therefore we save if inmemory if writing
+    // to disk fails
+    private pendingReplaysBackup: Map<string, PendingReplay>
+
+    constructor() {
+        this.pendingReplaysBackup = new Map()
+    }
 
     async commit(worldname: string, gamemode: string, replayModel: ReplayModel): Promise<string> {
         const model = ReplayModel.encode(replayModel).finish()
         const hashBuffer = await crypto.subtle.digest("SHA-512", model)
         const hash = bytesToBase64(new Uint8Array(hashBuffer))
 
-        await db.pendingReplays.put(
-            {
-                hash,
-
-                worldname,
-                gamemode,
-                model,
-            },
+        const replay: PendingReplay = {
             hash,
-        )
+
+            worldname,
+            gamemode,
+            model,
+        }
+
+        try {
+            await db.pendingReplays.put(replay, hash)
+        } catch (e) {
+            useGlobalStore.getState().newAlert({
+                type: "error",
+                message: "Failed to write replay to disk, saved in memory",
+            })
+
+            console.error(e)
+
+            this.pendingReplaysBackup.set(hash, replay)
+        }
 
         return hash
     }
 
     async get(id: string): Promise<ReplayDTO> {
-        if (useGlobalStore.getState().currentUser === undefined) {
-            const replay = await db.replays.get(id)
+        try {
+            const response = await rpc.replay.$get({
+                query: {
+                    replayId: id,
+                },
+            })
 
-            if (replay === undefined) {
-                throw new Error("Replay not found")
+            if (!response.ok) {
+                throw new Error("Failed to fetch replay")
             }
 
+            const replay = await response.json()
+
+            db.replays.put(replay)
+
             return replay
+        } catch (e) {
+            console.error(e)
         }
 
-        const response = await rpc.replay.$get({
-            query: {
-                replayId: id,
-            },
-        })
+        const replay = await db.replays.get(id)
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch replay")
+        if (replay === undefined) {
+            throw new Error("Replay not found")
         }
-
-        const replay = await response.json()
-
-        db.replays.put(replay)
 
         return replay
     }
 
     async list(worldname: string, gamemode: string): Promise<ExReplaySummaryDTO[]> {
-        if (useGlobalStore.getState().currentUser === undefined) {
-            const replays = await db.replaySummaries
-                .where({ gamemode, worldname })
-                .limit(25)
-                .toArray()
+        try {
+            const response = await rpc.replay.world.$get({
+                query: {
+                    gamemode,
+                    worldname,
+                },
+            })
 
-            return Promise.all(
-                replays.map(async x => ({
-                    ...x,
-                    replayAvailable: await db.replays
-                        .where("id")
-                        .equals(x.id)
-                        .count()
-                        .then(x => x > 0),
-                })),
-            )
+            if (!response.ok) {
+                throw new Error("Failed to fetch replays")
+            }
+
+            const responseJson = await response.json()
+
+            for (const summary of responseJson.replays) {
+                db.replaySummaries.put(summary)
+            }
+
+            return responseJson.replays.map(x => ({
+                ...x,
+                replayAvailable: true,
+            }))
+        } catch (e) {
+            console.error(e)
         }
 
-        const response = await rpc.replay.world.$get({
-            query: {
-                gamemode,
-                worldname,
-            },
-        })
+        const replays = await db.replaySummaries.where({ gamemode, worldname }).limit(25).toArray()
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch replays")
-        }
-
-        const responseJson = await response.json()
-
-        for (const summary of responseJson.replays) {
-            db.replaySummaries.put(summary)
-        }
-
-        return responseJson.replays.map(x => ({
-            ...x,
-            replayAvailable: true,
-        }))
+        return Promise.all(
+            replays.map(async x => ({
+                ...x,
+                replayAvailable: await db.replays
+                    .where("id")
+                    .equals(x.id)
+                    .count()
+                    .then(x => x > 0),
+            })),
+        )
     }
 
     async sync() {
@@ -127,7 +145,12 @@ export class ReplayService {
             return
         }
 
-        for (const pendingReplay of await db.pendingReplays.toArray()) {
+        const toProcess = [
+            ...(await db.pendingReplays.toArray()),
+            ...this.pendingReplaysBackup.values(),
+        ]
+
+        for (const pendingReplay of toProcess) {
             try {
                 await this.upload(pendingReplay.hash)
             } catch (e) {
@@ -137,9 +160,14 @@ export class ReplayService {
     }
 
     async upload(replayHash: string) {
-        const pendingReplay = await db.pendingReplays.get(replayHash)
+        let pendingReplay: PendingReplay | undefined = this.pendingReplaysBackup.get(replayHash)
 
         if (pendingReplay === undefined) {
+            pendingReplay = await db.pendingReplays.get(replayHash)
+        }
+
+        if (pendingReplay === undefined) {
+            console.warn("Tried to upload non-existing replay", replayHash)
             return
         }
 

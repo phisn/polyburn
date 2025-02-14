@@ -39,7 +39,7 @@ export interface ReplaySummary {
 
 export const replayRank = sql<number>`
     ROW_NUMBER() OVER (
-        PARTITION BY ${replays.worldname}, ${replays.gamemode} 
+        PARTITION BY ${replays.worldname.name}, ${replays.gamemode.name} 
         ORDER BY ${replays.ticks} ASC
     )`
 

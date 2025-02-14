@@ -151,19 +151,21 @@ export const routeReplay = new Hono<Environment>()
                 throw new HTTPException(400)
             }
 
-            const [best] = await db
-                .select(replaySummaryColumns)
-                .from(replays)
-                .innerJoin(users, eq(users.id, replays.userId))
-                .where(
-                    and(
-                        eq(replays.userId, user.id),
-                        eq(replays.worldname, json.worldname),
-                        eq(replays.gamemode, json.gamemode),
-                    ),
-                )
-                .orderBy(replays.ticks, replays.deaths)
-                .limit(1)
+            const best = (
+                await db
+                    .select(replaySummaryColumns)
+                    .from(replays)
+                    .innerJoin(users, eq(users.id, replays.userId))
+                    .where(
+                        and(
+                            eq(replays.userId, user.id),
+                            eq(replays.worldname, json.worldname),
+                            eq(replays.gamemode, json.gamemode),
+                        ),
+                    )
+                    .orderBy(replays.ticks, replays.deaths)
+                    .limit(1)
+            ).at(0)
 
             if (best) {
                 const worseTime = best.ticks < result.summary.ticks
@@ -215,7 +217,7 @@ export const routeReplay = new Hono<Environment>()
                 type: "improvement" as const,
 
                 replaySummary: replaySummaryDTO(replay),
-                bestSummary: replaySummaryDTO(best),
+                bestSummary: best && replaySummaryDTO(best),
             })
         },
     )

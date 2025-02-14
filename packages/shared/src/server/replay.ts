@@ -7,7 +7,7 @@ export interface ReplayDTO extends ReplaySummaryDTO {
 export interface ReplayFrameDTO {
     position: Point
     rotation: number
-    thurst: boolean
+    thrust: boolean
 }
 
 export interface ReplaySummaryDTO {

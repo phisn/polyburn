@@ -70,7 +70,7 @@ export function encodeReplayFrames(replayFrames: ReplayFrameDTO[]): Buffer {
         ...packFloats(replayFrames.map(x => x.position.x)),
         ...packFloats(replayFrames.map(x => x.position.y)),
         ...packFloats(replayFrames.map(x => x.rotation)),
-        ...packThrusts(replayFrames.map(x => x.thurst)),
+        ...packThrusts(replayFrames.map(x => x.thrust)),
     ]
 
     const packetsSize = packets.reduce((acc, x) => acc + x.size, 0)
@@ -105,7 +105,7 @@ export function decodeReplayFrames(buffer: Buffer): ReplayFrameDTO[] {
                 y: y[i],
             },
             rotation: rotation[i],
-            thurst: thrust[i],
+            thrust: thrust[i],
         })
     }
 

@@ -257,7 +257,7 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
             replayFrames.push({
                 position: rocket.get("body").translation(),
                 rotation: rocket.get("body").rotation(),
-                thurst: input.thrust,
+                thrust: input.thrust,
             })
 
             game.onUpdate(input)

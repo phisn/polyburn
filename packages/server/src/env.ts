@@ -9,6 +9,10 @@ export type Bindings = {
     ENV_JWT_SECRET: string
     ENV_URL_API: string
     ENV_URL_CLIENT: string
+
+    R1_INPUTS: R2Bucket
+    R1_MAPS: R2Bucket
+    R1_REPLAYS: R2Bucket
 }
 
 export type Variables = {

@@ -12,8 +12,8 @@ export const replays = sqliteTable(
             .primaryKey()
             .$defaultFn(() => randomUUID()),
 
-        binaryModel: blob("frames", { mode: "buffer" }).notNull(),
-        binaryFrames: blob("model", { mode: "buffer" }).notNull(),
+        modelUrl: blob("frames", { mode: "buffer" }).notNull(),
+        framesUrl: blob("model", { mode: "buffer" }).notNull(),
         deaths: integer("deaths").notNull(),
         gamemode: text("gamemode").notNull(),
         ticks: integer("ticks").notNull(),

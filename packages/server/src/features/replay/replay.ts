@@ -131,6 +131,7 @@ export const routeReplay = new Hono<Environment>()
             "json",
             z.object({
                 gamemode: z.string(),
+                input: z.string(),
                 model: z.string(),
                 worldname: z.string(),
             }),
@@ -150,6 +151,8 @@ export const routeReplay = new Hono<Environment>()
             if (result === undefined) {
                 throw new HTTPException(400)
             }
+
+            const inputBuffer = Buffer.from(json.input, "base64")
 
             const best = (
                 await db
@@ -181,11 +184,27 @@ export const routeReplay = new Hono<Environment>()
                 }
             }
 
-            const binaryModel = Buffer.from(json.model, "base64")
+            const frameInputBuffer = Buffer.from(json.model, "base64")
+            const replayBuffer = encodeReplayFrames(result.replayFrames)
+
+            const frameInputObject = await c.env.R1_INPUTS.put(
+                `frame-input-${user.id},${json.gamemode},${json.worldname}`,
+                inputBuffer,
+            )
+
+            const inputObject = await c.env.R1_INPUTS.put(
+                `input-${user.id},${json.gamemode},${json.worldname}`,
+                inputBuffer,
+            )
+
+            const replayObject = await c.env.R1_REPLAYS.put(
+                `${user.id},${json.gamemode},${json.worldname}`,
+                replayBuffer,
+            )
 
             const update = {
                 binaryFrames: encodeReplayFrames(result.replayFrames),
-                binaryModel,
+                binaryModel: frameInputBuffer,
                 deaths: result.summary.deaths,
                 gamemode: json.gamemode,
                 ticks: result.summary.ticks,

@@ -16,7 +16,6 @@ import { UserService } from "../user/user-service"
 import { worlds } from "../world/world-model"
 import {
     ReplaySummary,
-    decodeReplayFrames,
     encodeReplayFrames,
     replaySummaryColumns,
     replaySummaryDTO,
@@ -39,7 +38,7 @@ export const routeReplay = new Hono<Environment>()
             const result = await db
                 .select({
                     ...replaySummaryColumns,
-                    frames: replays.binaryFrames,
+                    replayKey: replays.replayKey,
                 })
                 .from(replays)
                 .innerJoin(users, eq(users.id, replays.userId))
@@ -53,8 +52,7 @@ export const routeReplay = new Hono<Environment>()
             }
 
             const replayDTO: ReplayDTO = {
-                ...replaySummaryDTO(replay),
-                frames: decodeReplayFrames(replay.frames),
+                ...replaySummaryDTO(replay, c.env.ENV_URL_REPLAYS),
             }
 
             return c.json(replayDTO)
@@ -96,7 +94,7 @@ export const routeReplay = new Hono<Environment>()
                 .limit(25)
 
             return c.json({
-                replays: result.map(replaySummaryDTO),
+                replays: result.map(x => replaySummaryDTO(x, c.env.ENV_URL_REPLAYS)),
             })
         },
     )
@@ -121,7 +119,7 @@ export const routeReplay = new Hono<Environment>()
                 .where(eq(users.username, query.username))
 
             return c.json({
-                replays: result.map(replaySummaryDTO),
+                replays: result.map(x => replaySummaryDTO(x, c.env.ENV_URL_REPLAYS)),
             })
         },
     )
@@ -179,32 +177,47 @@ export const routeReplay = new Hono<Environment>()
                     return c.json({
                         type: "no-improvement" as const,
 
-                        bestSummary: replaySummaryDTO(best),
+                        bestSummary: replaySummaryDTO(best, c.env.ENV_URL_REPLAYS),
                     })
                 }
             }
 
-            const frameInputBuffer = Buffer.from(json.model, "base64")
+            const inputModelBuffer = Buffer.from(json.model, "base64")
             const replayBuffer = encodeReplayFrames(result.replayFrames)
 
-            const frameInputObject = await c.env.R1_INPUTS.put(
-                `frame-input-${user.id},${json.gamemode},${json.worldname}`,
-                inputBuffer,
+            const customMetadata: Record<string, string> = {
+                userId: "" + user.id,
+                gamemode: json.gamemode,
+                worldname: json.worldname,
+            }
+
+            const inputModelObject = await c.env.R2_INPUTS.put(
+                crypto.randomUUID(),
+                inputModelBuffer,
+                {
+                    customMetadata: {
+                        ...customMetadata,
+                        type: "model",
+                    },
+                },
             )
 
-            const inputObject = await c.env.R1_INPUTS.put(
-                `input-${user.id},${json.gamemode},${json.worldname}`,
-                inputBuffer,
-            )
+            const inputObject = await c.env.R2_INPUTS.put(crypto.randomUUID(), inputBuffer, {
+                customMetadata: {
+                    ...customMetadata,
+                    type: "real",
+                },
+            })
 
-            const replayObject = await c.env.R1_REPLAYS.put(
-                `${user.id},${json.gamemode},${json.worldname}`,
-                replayBuffer,
-            )
+            const replayObject = await c.env.R2_REPLAYS.put(crypto.randomUUID(), replayBuffer, {
+                customMetadata,
+            })
 
             const update = {
-                binaryFrames: encodeReplayFrames(result.replayFrames),
-                binaryModel: frameInputBuffer,
+                replayKey: replayObject.key,
+                inputKey: inputObject.key,
+                inputsModelKey: inputModelObject.key,
+
                 deaths: result.summary.deaths,
                 gamemode: json.gamemode,
                 ticks: result.summary.ticks,
@@ -235,8 +248,8 @@ export const routeReplay = new Hono<Environment>()
             return c.json({
                 type: "improvement" as const,
 
-                replaySummary: replaySummaryDTO(replay),
-                bestSummary: best && replaySummaryDTO(best),
+                replaySummary: replaySummaryDTO(replay, c.env.ENV_URL_REPLAYS),
+                bestSummary: best && replaySummaryDTO(best, c.env.ENV_URL_REPLAYS),
             })
         },
     )

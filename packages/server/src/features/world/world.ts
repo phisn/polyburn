@@ -47,7 +47,7 @@ export const routeWorld = new Hono<Environment>().get(
 
                     return {
                         name: gamemode,
-                        replaySummary: replay && replaySummaryDTO(replay),
+                        replaySummary: replay && replaySummaryDTO(replay, c.env.ENV_URL_REPLAYS),
                     }
                 }),
                 image: "",

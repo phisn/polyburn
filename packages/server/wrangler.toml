@@ -13,6 +13,7 @@ local_protocol = "http"
 ENV_JWT_SECRET = "my_secret_password"
 ENV_URL_CLIENT = "http://localhost:3000,http://localhost:3002"
 ENV_URL_API = "http://localhost:3002"
+ENV_URL_REPLAYS = "https://replays.polyburn.com"
 
 [[d1_databases]]
 migrations_dir = "drizzle"

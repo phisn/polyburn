@@ -6,9 +6,9 @@ CREATE TABLE `logs` (
 --> statement-breakpoint
 CREATE TABLE `replays` (
 	`id` text PRIMARY KEY NOT NULL,
-	`replay` text NOT NULL,
-	`inputs` text,
-	`input-model` text,
+	`replay-key` text NOT NULL,
+	`input-key` text,
+	`input-model-key` text,
 	`deaths` integer NOT NULL,
 	`gamemode` text NOT NULL,
 	`ticks` integer NOT NULL,

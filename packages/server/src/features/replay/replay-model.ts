@@ -12,9 +12,9 @@ export const replays = sqliteTable(
             .primaryKey()
             .$defaultFn(() => randomUUID()),
 
-        replayUrl: text("replay").notNull(),
-        inputsUrl: text("inputs"),
-        inputsModelUrl: text("input-model"),
+        replayKey: text("replay-key").notNull(),
+        inputKey: text("input-key"),
+        inputModelKey: text("input-model-key"),
 
         deaths: integer("deaths").notNull(),
         gamemode: text("gamemode").notNull(),
@@ -31,6 +31,9 @@ export const replays = sqliteTable(
 
 export interface ReplaySummary {
     id: string
+
+    replayKey: string
+
     deaths: number
     gamemode: string
     rank: number
@@ -47,6 +50,7 @@ export const replayRank = sql<number>`
 
 export const replaySummaryColumns = {
     id: replays.id,
+    replayKey: replays.replayKey,
     deaths: replays.deaths,
     gamemode: replays.gamemode,
     rank: replayRank,
@@ -55,9 +59,10 @@ export const replaySummaryColumns = {
     worldname: replays.worldname,
 }
 
-export function replaySummaryDTO(replay: ReplaySummary): ReplaySummaryDTO {
+export function replaySummaryDTO(replay: ReplaySummary, replayUrl: string): ReplaySummaryDTO {
     return {
         id: replay.id,
+        replayUrl: `${replayUrl}/${replay.replayKey}`,
         deaths: replay.deaths,
         gamemode: replay.gamemode,
         rank: replay.rank,

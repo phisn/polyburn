@@ -1,13 +1,18 @@
+import { ReplayInputTouch, SingleReplayInput } from "game/proto/replay"
+import { Point } from "game/src/model/utils"
 import { GamePlayerStore } from "../../../model/store"
 
 export class Touch {
+    private inputChanged: boolean = false
     private thrustPointerId?: number
-
     private rotatePointer?: {
         pointerId: number
         startPointerX: number
         startRotation: number
     }
+
+    private currentRotatePointer: Point | undefined
+    private currentThrustPointer: Point | undefined
 
     private _rotationSpeed = 1.0
 
@@ -44,11 +49,36 @@ export class Touch {
         return this._thrust
     }
 
+    singleReplayInput() {
+        return SingleReplayInput.create({
+            input: {
+                $case: "touch",
+                touch: ReplayInputTouch.create({
+                    rotationX: this.currentRotatePointer?.x,
+                    rotationY: this.currentRotatePointer?.y,
+                    thrustX: this.currentThrustPointer?.x,
+                    thrustY: this.currentThrustPointer?.y,
+                }),
+            },
+        })
+    }
+
+    pullInputChanged() {
+        if (this.inputChanged) {
+            this.inputChanged = false
+            return true
+        }
+
+        return false
+    }
+
     setRotationSpeed(speed: number) {
         this._rotationSpeed = speed
     }
 
     private onTouchEvent(event: TouchEvent) {
+        this.inputChanged = true
+
         for (const touch of event.changedTouches) {
             const touchPosition = {
                 x: touch.clientX,
@@ -69,7 +99,13 @@ export class Touch {
 
                     if (touchPosition.x > window.innerWidth / 2) {
                         if (this.thrustPointerId === undefined) {
-                            ;(this.thrustPointerId = touch.identifier), (this._thrust = true)
+                            this.thrustPointerId = touch.identifier
+                            this._thrust = true
+
+                            this.currentThrustPointer = {
+                                x: touchPosition.x,
+                                y: touchPosition.y,
+                            }
 
                             console.log("thrust start")
                         }
@@ -80,15 +116,30 @@ export class Touch {
                                 startPointerX: touchPosition.x,
                                 startRotation: this._rotation,
                             }
+
+                            this.currentRotatePointer = {
+                                x: touchPosition.x,
+                                y: touchPosition.y,
+                            }
                         }
                     }
 
                     break
                 case "touchmove":
-                    if (this.rotatePointer && this.rotatePointer.pointerId === touch.identifier) {
+                    if (this.rotatePointer && touch.identifier === this.rotatePointer.pointerId) {
                         this._rotation =
                             this.rotatePointer.startRotation -
                             (touchPosition.x - this.rotatePointer.startPointerX) * 0.005
+
+                        this.currentRotatePointer = {
+                            x: touchPosition.x,
+                            y: touchPosition.y,
+                        }
+                    } else if (touch.identifier === this.thrustPointerId) {
+                        this.currentThrustPointer = {
+                            x: touchPosition.x,
+                            y: touchPosition.y,
+                        }
                     }
 
                     break
@@ -103,12 +154,12 @@ export class Touch {
                     if (this.thrustPointerId === touch.identifier) {
                         this._thrust = false
                         this.thrustPointerId = undefined
-
-                        console.log("thrust stop")
+                        this.currentThrustPointer = undefined
                     }
 
                     if (this.rotatePointer && this.rotatePointer.pointerId === touch.identifier) {
                         this.rotatePointer = undefined
+                        this.currentRotatePointer = undefined
                     }
 
                     break

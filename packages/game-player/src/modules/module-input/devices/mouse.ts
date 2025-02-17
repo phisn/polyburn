@@ -1,13 +1,15 @@
+import { ReplayInputMouse, SingleReplayInput } from "game/proto/replay"
 import { GamePlayerStore } from "../../../model/store"
 
 // const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
 export class Mouse {
-    private wasPointerDown = false
+    private inputChanged = false
+    private rotationSpeed = 1.0
+
     private startPointerX = 0
     private startRotation = 0
-
-    private rotationSpeed = 1.0
+    private wasPointerDown = false
 
     private _rotation = 0
     private _thrust = false
@@ -45,6 +47,29 @@ export class Mouse {
         return this._thrust
     }
 
+    singleReplayInput() {
+        return SingleReplayInput.create({
+            input: {
+                $case: "mouse",
+                mouse: ReplayInputMouse.create({
+                    down: this.wasPointerDown,
+                    x: this.x,
+                    y: this.y,
+                    thrust: this._thrust,
+                }),
+            },
+        })
+    }
+
+    pullInputChanged() {
+        if (this.inputChanged) {
+            this.inputChanged = false
+            return true
+        }
+
+        return false
+    }
+
     setRotationSpeed(speed: number) {
         this.rotationSpeed = speed
     }
@@ -56,6 +81,8 @@ export class Mouse {
         if (event.pointerType !== "mouse") {
             return
         }
+
+        this.inputChanged = true
 
         if ((event.buttons & 1) === 1) {
             if (this.wasPointerDown) {

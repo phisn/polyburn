@@ -7,12 +7,14 @@ import { TouchVertical } from "./touch-vertical"
 const CHARCODE_ONE = "1".charCodeAt(0)
 const CHARCODE_NINE = "9".charCodeAt(0)
 
+type Device = "keyboard" | "mouse" | "touch"
+
 export class Devices {
     private deviceKeyboard: Keyboard
     private deviceMouse: Mouse
     private deviceTouch: Touch
     private deviceTouchVertical: TouchVertical
-
+    private lastDevice: Device | undefined
     private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
     private rotationSpeedIndex = 2
 
@@ -66,5 +68,30 @@ export class Devices {
             this.deviceTouch.thrust() ||
             this.deviceTouchVertical.thrust()
         )
+    }
+
+    singelReplayInput() {
+        if (this.deviceKeyboard.pullInputChanged()) {
+            this.lastDevice = "keyboard"
+        }
+
+        if (this.deviceMouse.pullInputChanged()) {
+            this.lastDevice = "mouse"
+        }
+
+        if (this.deviceTouch.pullInputChanged()) {
+            this.lastDevice = "touch"
+        }
+
+        switch (this.lastDevice) {
+            case "keyboard":
+                return this.deviceKeyboard.singleReplayInput()
+            case "mouse":
+                return this.deviceMouse.singleReplayInput()
+            case "touch":
+                return this.deviceTouch.singleReplayInput()
+            case undefined:
+                return undefined
+        }
     }
 }

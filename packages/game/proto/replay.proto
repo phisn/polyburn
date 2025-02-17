@@ -3,3 +3,36 @@ syntax = "proto3";
 message ReplayModel {
     bytes deltaInputs = 1;
 }
+
+message ReplayInputMouse {
+    bool down = 1;
+    uint32 x = 2;
+    uint32 y = 3;
+    bool thrust = 4; 
+}
+
+message ReplayInputKeyboard {
+    bool l = 1;
+    bool r = 2;
+    bool thrust = 3;
+}
+
+message ReplayInputTouch {
+    optional uint32 rotation_x = 1;
+    optional uint32 rotation_y = 2;
+
+    optional uint32 thrust_x = 3;
+    optional uint32 thrust_y = 4;
+}
+
+message SingleReplayInput {
+    oneof input {
+        ReplayInputKeyboard keyboard = 1;
+        ReplayInputMouse mouse = 2;
+        ReplayInputTouch touch = 3;
+    }
+}
+
+message ReplayInput {
+    repeated SingleReplayInput inputs = 1;
+}

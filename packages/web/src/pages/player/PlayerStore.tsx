@@ -118,25 +118,21 @@ export function usePlayerStore() {
             gamePlayer.store.game.store.events.listen({
                 finished: async () => {
                     try {
-                        console.log("a")
+                        const inputCapture = gamePlayer.store.resources.get("inputCapture")
+
                         const replayModel = ReplayModel.create({
-                            deltaInputs: encodeInputCompressed(
-                                gamePlayer.store.resources.get("inputCapture").inputs,
-                            ),
+                            deltaInputs: encodeInputCompressed(inputCapture.modelInputs),
                         })
-                        console.log("b")
 
                         const config = gamePlayer.store.resources.get("config")
-
-                        console.log("c")
 
                         const replayHash = await replayService.commit(
                             config.worldname,
                             config.gamemode,
-                            replayModel,
-                        )
 
-                        console.log("d")
+                            replayModel,
+                            inputCapture.input,
+                        )
 
                         setStore({
                             status: "finished",
@@ -146,7 +142,6 @@ export function usePlayerStore() {
                             replayModel,
                             uploadStatus: "unauthenticated",
                         })
-                        console.log("e")
                     } catch (e) {
                         console.error(e)
                     }

@@ -1,14 +1,16 @@
+import { ReplayInputKeyboard, SingleReplayInput } from "game/proto/replay"
+
 export class Keyboard {
+    private inputChanged = false
+    private rotationSpeed = 1.0
+
     private keyboardLeft = false
     private keyboardRight = false
     private keyboardUpA = false
     private keyboardUpD = false
-
     private keyboardUpArrow = false
     private keyboardUpW = false
     private keyboardUpSpace = false
-
-    private rotationSpeed = 1.0
 
     private _rotation = 0
     private _thrust = false
@@ -32,6 +34,28 @@ export class Keyboard {
 
     thrust() {
         return this._thrust
+    }
+
+    singleReplayInput() {
+        return SingleReplayInput.create({
+            input: {
+                $case: "keyboard",
+                keyboard: ReplayInputKeyboard.create({
+                    l: this.keyboardLeft || this.keyboardUpA,
+                    r: this.keyboardRight || this.keyboardUpD,
+                    thrust: this._thrust,
+                }),
+            },
+        })
+    }
+
+    pullInputChanged() {
+        if (this.inputChanged) {
+            this.inputChanged = false
+            return true
+        }
+
+        return false
     }
 
     setRotationSpeed(speed: number) {
@@ -73,7 +97,11 @@ export class Keyboard {
             case " ":
                 this.keyboardUpSpace = true
                 break
+            default:
+                return
         }
+
+        this.inputChanged = true
     }
 
     private onKeyUp(event: KeyboardEvent) {
@@ -99,6 +127,10 @@ export class Keyboard {
             case " ":
                 this.keyboardUpSpace = false
                 break
+            default:
+                return
         }
+
+        this.inputChanged = true
     }
 }

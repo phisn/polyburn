@@ -1,8 +1,6 @@
 import { Point } from "game/src/model/utils"
 
-export interface ReplayDTO extends ReplaySummaryDTO {
-    frames: ReplayFrameDTO[]
-}
+export interface ReplayDTO extends ReplaySummaryDTO {}
 
 export interface ReplayFrameDTO {
     position: Point
@@ -12,6 +10,7 @@ export interface ReplayFrameDTO {
 
 export interface ReplaySummaryDTO {
     deaths: number
+    replayUrl: string
     gamemode: string
     id: string
     ticks: number

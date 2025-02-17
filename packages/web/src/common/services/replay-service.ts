@@ -1,5 +1,5 @@
 import Dexie from "dexie"
-import { ReplayModel } from "game/proto/replay"
+import { ReplayInput, ReplayModel } from "game/proto/replay"
 import { bytesToBase64 } from "game/src/model/utils"
 import { ReplayDTO, ReplaySummaryDTO } from "shared/src/server/replay"
 import { useGlobalStore } from "../store"
@@ -11,6 +11,8 @@ interface PendingReplay {
 
     worldname: string
     gamemode: string
+
+    input: Uint8Array
     model: Uint8Array
 }
 
@@ -40,8 +42,15 @@ export class ReplayService {
         this.pendingReplaysBackup = new Map()
     }
 
-    async commit(worldname: string, gamemode: string, replayModel: ReplayModel): Promise<string> {
+    async commit(
+        worldname: string,
+        gamemode: string,
+        replayModel: ReplayModel,
+        replayInput: ReplayInput,
+    ): Promise<string> {
+        const input = ReplayInput.encode(replayInput).finish()
         const model = ReplayModel.encode(replayModel).finish()
+
         const hashBuffer = await crypto.subtle.digest("SHA-512", model)
         const hash = bytesToBase64(new Uint8Array(hashBuffer))
 
@@ -50,6 +59,8 @@ export class ReplayService {
 
             worldname,
             gamemode,
+
+            input,
             model,
         }
 
@@ -175,6 +186,8 @@ export class ReplayService {
             json: {
                 worldname: pendingReplay.worldname,
                 gamemode: pendingReplay.gamemode,
+
+                input: bytesToBase64(pendingReplay.input),
                 model: bytesToBase64(pendingReplay.model),
             },
         })

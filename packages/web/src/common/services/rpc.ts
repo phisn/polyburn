@@ -2,7 +2,7 @@ import { hc } from "hono/client"
 import type { AppType } from "server/src/index"
 import { authService } from "./auth-service"
 
-export const rpc = hc<AppType>(import.meta.env.VITE_SERVER_URL, {
+export const rpc = hc<AppType>(import.meta.env.VITE_URL_SERVER, {
     fetch: async (input: any, init: any) => {
         const response = await fetch(input, {
             ...init,

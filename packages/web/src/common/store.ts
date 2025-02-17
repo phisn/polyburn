@@ -40,6 +40,7 @@ export const useGlobalStore = create<GlobalStore>(set => ({
             modals: state.modals.slice(0, state.modals.length - 1),
         }))
     },
+
     currentUser: undefined,
     setCurrentUser: (user?: UserDTO) => set({ currentUser: user }),
 }))

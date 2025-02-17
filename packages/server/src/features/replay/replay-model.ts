@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm"
-import { blob, index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core"
 import { Packet, packThrusts, unpackThrusts } from "game/src/model/replay"
 import { randomUUID } from "node:crypto"
 import { ReplayFrameDTO, ReplaySummaryDTO } from "shared/src/server/replay"
@@ -12,8 +12,10 @@ export const replays = sqliteTable(
             .primaryKey()
             .$defaultFn(() => randomUUID()),
 
-        modelUrl: blob("frames", { mode: "buffer" }).notNull(),
-        framesUrl: blob("model", { mode: "buffer" }).notNull(),
+        replayUrl: text("replay").notNull(),
+        inputsUrl: text("inputs"),
+        inputsModelUrl: text("input-model"),
+
         deaths: integer("deaths").notNull(),
         gamemode: text("gamemode").notNull(),
         ticks: integer("ticks").notNull(),

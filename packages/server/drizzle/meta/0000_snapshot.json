@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "2b1ca0fb-96c9-4f04-b403-711f2efe082a",
+  "id": "04972659-cd9a-4aae-95de-b418b9acde74",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "logs": {
@@ -45,18 +45,25 @@
           "notNull": true,
           "autoincrement": false
         },
-        "frames": {
-          "name": "frames",
-          "type": "blob",
+        "replay": {
+          "name": "replay",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "model": {
-          "name": "model",
-          "type": "blob",
+        "inputs": {
+          "name": "inputs",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "input-model": {
+          "name": "input-model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "deaths": {

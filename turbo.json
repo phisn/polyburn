@@ -4,9 +4,10 @@
     "globalEnv": [
         "CLIENT_PORT",
         "CLIENT_URL",
-        "SERVER_PORT",
         "VITE_AUTH_GOOGLE_CLIENT_ID",
-        "VITE_SERVER_URL"
+        "VITE_URL_MAPS",
+        "VITE_URL_REPLAYS",
+        "VITE_URL_SERVER"
     ],
     "pipeline": {
         "proto": {

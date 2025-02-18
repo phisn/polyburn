@@ -159,9 +159,15 @@ export class ModuleRocket {
             world.createCollider(collider, body)
         })
 
+        let behavior = DEFAULT_BEHAVIOR_CONFIG
+
+        if (this.store.resources.get("config").gameConfig.gamemode.toLowerCase() === "hard") {
+            behavior = HARD_BEHAVIOR_CONFIG
+        }
+
         this.store.entities.create({
             rocket: {
-                behaviorConfig: rocketConfig.defaultConfig ?? DEFAULT_BEHAVIOR_CONFIG,
+                behaviorConfig: rocketConfig.defaultConfig ?? behavior,
                 collisionCount: 0,
                 framesSinceLastDeath: 0,
                 rotationWithoutInput: rocketConfig.rotation,
@@ -327,6 +333,13 @@ const DEFAULT_BEHAVIOR_CONFIG: RocketBehaviorConfig = {
     thrustValue: 7.3,
     thrustGroundMultiplier: 1.3,
     explosionAngle: 0.3,
+}
+
+export const HARD_BEHAVIOR_CONFIG: RocketBehaviorConfig = {
+    thrustDistance: 1.0,
+    thrustValue: 6.5, // 7.3,
+    thrustGroundMultiplier: 1.3,
+    explosionAngle: 1,
 }
 
 export const ROCKET_SIZE: Size = {

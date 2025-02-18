@@ -17,7 +17,7 @@ export interface Visuals {
     resetInterpolation?: () => void
 }
 
-export class _ModuleVisual {
+export class ModuleVisual {
     private flags: Map<number, Flag>
 
     constructor(private store: GamePlayerStore) {
@@ -98,6 +98,7 @@ export class _ModuleVisual {
 
                         if (body.isDynamic()) {
                             const interpolation = this.store.resources.get("interpolation")
+
                             const { reset } = interpolation.register(object, () => ({
                                 point: {
                                     x: body.translation().x,

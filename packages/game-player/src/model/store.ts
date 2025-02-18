@@ -8,6 +8,7 @@ import { GamePlayerConfig } from "../game-player"
 import { InputCaptureResource } from "../modules/module-input/module-input"
 import { InterpolationResource } from "../modules/module-interpolation"
 import { LobbyConfigResource } from "../modules/module-lobby/module-lobby"
+import { ReplayResource } from "../modules/module-replay"
 import { VisualsResource } from "../modules/module-visual/module-visual"
 
 export class GamePlayerStore {
@@ -33,6 +34,7 @@ export interface GamePlayerResources {
     interpolation: InterpolationResource
     lobbyConfig: LobbyConfigResource
     renderer: WebGLRenderer
+    replay: ReplayResource
     scene: Scene
     visuals: VisualsResource
 }

@@ -94,7 +94,7 @@ export class Game {
         const shapes = groups.flatMap(group => group.shapes)
 
         this.store.resources.set("config", {
-            world: config.world,
+            gameConfig: config,
             levels,
             rocket: rockets[0],
             shapes,

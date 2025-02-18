@@ -8,7 +8,7 @@ import { ModuleInterpolation } from "./modules/module-interpolation"
 import { LobbyConfigResource, ModuleLobby } from "./modules/module-lobby/module-lobby"
 import { ModuleParticles } from "./modules/module-particles/module-particles"
 import { ModuleUI } from "./modules/module-ui/module-ui"
-import { _ModuleVisual as ModuleVisual } from "./modules/module-visual/module-visual"
+import { ModuleVisual } from "./modules/module-visual/module-visual"
 
 export interface GamePlayerConfig extends GameConfig {
     worldname: string

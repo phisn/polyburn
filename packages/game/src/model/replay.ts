@@ -1,6 +1,93 @@
 import { f16round, getFloat16, setFloat16 } from "@petamoriken/float16"
 import { ReplayModel } from "../../proto/replay"
 import { GameInput } from "../game"
+import { Point } from "./utils"
+
+export interface ReplayFrame {
+    position: Point
+    rotation: number
+    thrust: boolean
+}
+
+export function encodeReplayFrames(replayFrames: ReplayFrame[]): Buffer {
+    const packets = [
+        ...packFloats(replayFrames.map(x => x.position.x)),
+        ...packFloats(replayFrames.map(x => x.position.y)),
+        ...packFloats(replayFrames.map(x => x.rotation)),
+        ...packThrusts(replayFrames.map(x => x.thrust)),
+    ]
+
+    const packetsSize = packets.reduce((acc, x) => acc + x.size, 0)
+
+    const buffer = Buffer.alloc(packetsSize)
+    const view = new DataView(buffer.buffer)
+
+    let offset = 0
+
+    for (const packet of packets) {
+        packet.write(view, offset)
+        offset += packet.size
+    }
+
+    return buffer
+}
+
+export function decodeReplayFrames(buffer: Buffer): ReplayFrame[] {
+    const view = new DataView(buffer.buffer)
+
+    const [x, offset0] = unpackFloats(view, 0)
+    const [y, offset1] = unpackFloats(view, offset0)
+    const [rotation, offset2] = unpackFloats(view, offset1)
+    const [thrust, _] = unpackThrusts(view, offset2)
+
+    const frames: ReplayFrame[] = []
+
+    for (let i = 0; i < x.length; ++i) {
+        frames.push({
+            position: {
+                x: x[i],
+                y: y[i],
+            },
+            rotation: rotation[i],
+            thrust: thrust[i],
+        })
+    }
+
+    return frames
+}
+
+function packFloats(floats: number[]): Packet[] {
+    return [
+        {
+            write: (view, offset) => {
+                view.setUint32(offset, floats.length, true)
+            },
+            size: 4,
+        },
+        {
+            write: (view, offset) => {
+                for (let i = 0; i < floats.length; i++) {
+                    view.setFloat32(offset + i * 4, floats[i])
+                }
+            },
+            size: floats.length * 4,
+        },
+    ]
+}
+
+function unpackFloats(view: DataView, offset: number): [number[], number] {
+    const size = view.getUint32(offset)
+    const result: number[] = []
+
+    offset += 4
+
+    for (let i = 0; i < size; ++i) {
+        result.push(view.getFloat32(offset))
+        offset += 4
+    }
+
+    return [result, offset]
+}
 
 export function applyReplay(replay: ReplayModel, onUpdate: (input: GameInput) => void) {
     const replayDeltaInputs = decodeInputCompressed(replay.deltaInputs)

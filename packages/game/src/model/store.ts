@@ -1,8 +1,9 @@
 import RAPIER from "@dimforge/rapier2d"
-import { LevelConfig, RocketConfig, ShapeConfig, WorldConfig } from "../../proto/world"
+import { LevelConfig, RocketConfig, ShapeConfig } from "../../proto/world"
 import { EntityStore, EntityWith, newEntityStore } from "../framework/entity"
 import { EventStore } from "../framework/event"
 import { ResourceStore } from "../framework/resource"
+import { GameConfig } from "../game"
 import { LevelComponent, LevelEntity } from "../modules/module-level"
 import { RocketComponent, RocketEntity } from "../modules/module-rocket"
 import { ShapeComponent } from "../modules/module-shape"
@@ -22,10 +23,10 @@ export class GameStore {
 }
 
 export interface ConfigsResource {
+    gameConfig: GameConfig
     levels: LevelConfig[]
     rocket: RocketConfig
     shapes: ShapeConfig[]
-    world: WorldConfig
 }
 
 export interface GameResources {

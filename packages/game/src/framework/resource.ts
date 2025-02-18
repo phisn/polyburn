@@ -6,22 +6,26 @@ export class ResourceStore<Resources extends object> {
     }
 
     get<K extends keyof Resources>(key: K): Resources[K] {
-        if (!this.resources[key]) {
+        const resource = this.resources[key]
+
+        if (!resource) {
             throw new Error(`Resource ${key.toString()} not loaded`)
         }
 
-        return this.resources[key] as Resources[K]
+        return resource as Resources[K]
     }
 
     getOr<K extends keyof Resources, T>(key: K, defaultValue: T): Resources[K] | T {
-        if (!this.resources[key]) {
+        const resource = this.resources[key]
+
+        if (!resource) {
             return defaultValue
         }
 
-        return this.resources[key] as Resources[K]
+        return resource as Resources[K]
     }
 
-    set<K extends keyof Resources>(key: K, value: Resources[K]) {
+    set<K extends keyof Resources>(key: K, value?: Resources[K]) {
         this.resources[key] = value
     }
 }

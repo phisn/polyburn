@@ -210,14 +210,14 @@ export const routeReplay = new Hono<Environment>()
             const update = {
                 replayKey: replayObject.key,
                 inputKey: inputObject.key,
-                inputsModelKey: inputModelObject.key,
+                inputModelKey: inputModelObject.key,
 
                 deaths: result.summary.deaths,
                 gamemode: json.gamemode,
                 ticks: result.summary.ticks,
                 userId: user.id,
                 worldname: json.worldname,
-            } as const
+            } satisfies typeof replays.$inferInsert
 
             const [replayInsert] = await db
                 .insert(replays)

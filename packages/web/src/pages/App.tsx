@@ -6,6 +6,7 @@ import { NotFound } from "./NotFound"
 import { Campaign } from "./campaign/Campaign"
 import { Editor } from "./editor/Editor"
 import { Player } from "./player/Player"
+import { Replayer } from "./replayer/Replayer"
 import { Slot } from "./slot/Slot"
 
 export function App() {
@@ -20,6 +21,7 @@ export function App() {
                 <Route path="/" element={<Layout />}>
                     <Route path="/" element={<Navigate to="/campaign" replace />} />
                     <Route path="/play/:worldname/:gamemode" element={<Player />} />
+                    <Route path="/replay/:replayId" element={<Replayer />} />
                     <Route path="/slot" element={<Slot />} />
                     <Route path="*" element={<NotFound />} />
                 </Route>

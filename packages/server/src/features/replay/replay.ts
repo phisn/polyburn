@@ -1,11 +1,10 @@
 import * as RAPIER from "@dimforge/rapier2d"
 import { zValidator } from "@hono/zod-validator"
 import { and, eq } from "drizzle-orm"
-import { ReplayModel } from "game/proto/replay"
+import { ReplayInputModel, ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
 import { Game } from "game/src/game"
-import { applyReplay, encodeReplayFrames, ReplayFrame } from "game/src/model/replay"
-import { rocketComponents } from "game/src/modules/module-rocket"
+import { bytesToBase64 } from "game/src/model/utils"
 import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
 import { ReplayDTO } from "shared/src/server/replay"
@@ -124,7 +123,6 @@ export const routeReplay = new Hono<Environment>()
             z.object({
                 gamemode: z.string(),
                 input: z.string(),
-                model: z.string(),
                 worldname: z.string(),
             }),
         ),
@@ -138,7 +136,7 @@ export const routeReplay = new Hono<Environment>()
                 throw new HTTPException(401)
             }
 
-            const result = validateReplay(json.gamemode, json.model, json.worldname)
+            const result = validateReplay(json.gamemode, json.input, json.worldname)
 
             if (result === undefined) {
                 throw new HTTPException(400)
@@ -176,8 +174,7 @@ export const routeReplay = new Hono<Environment>()
                 }
             }
 
-            const inputModelBuffer = Buffer.from(json.model, "base64")
-            const replayBuffer = encodeReplayFrames(result.replayFrames)
+            const replayBuffer = ReplayModel.encode(result.replay).finish()
 
             const customMetadata: Record<string, string> = {
                 userId: "" + user.id,
@@ -185,22 +182,8 @@ export const routeReplay = new Hono<Environment>()
                 worldname: json.worldname,
             }
 
-            const inputModelObject = await c.env.R2_INPUTS.put(
-                crypto.randomUUID(),
-                inputModelBuffer,
-                {
-                    customMetadata: {
-                        ...customMetadata,
-                        type: "model",
-                    },
-                },
-            )
-
             const inputObject = await c.env.R2_INPUTS.put(crypto.randomUUID(), inputBuffer, {
-                customMetadata: {
-                    ...customMetadata,
-                    type: "real",
-                },
+                customMetadata,
             })
 
             const replayObject = await c.env.R2_REPLAYS.put(crypto.randomUUID(), replayBuffer, {
@@ -210,7 +193,6 @@ export const routeReplay = new Hono<Environment>()
             const update = {
                 replayKey: replayObject.key,
                 inputKey: inputObject.key,
-                inputModelKey: inputModelObject.key,
 
                 deaths: result.summary.deaths,
                 gamemode: json.gamemode,
@@ -247,6 +229,29 @@ export const routeReplay = new Hono<Environment>()
             })
         },
     )
+    .get(
+        "/frames/:replayId",
+        zValidator(
+            "param",
+            z.object({
+                replayId: z.string(),
+            }),
+        ),
+        async c => {
+            console.log(`"${c.req.valid("param").replayId}"`)
+
+            const replay = await c.env.R2_REPLAYS.get(c.req.valid("param").replayId)
+            const replayBuffer = await replay?.arrayBuffer()
+
+            if (replayBuffer === undefined) {
+                throw new HTTPException(404)
+            }
+
+            const replayText = bytesToBase64(new Uint8Array(replayBuffer))
+
+            return c.body(replayText, 200)
+        },
+    )
 
 function validateReplay(gamemode: string, replayModelBase64: string, worldname: string) {
     const world = worlds.find(x => x.worldname === worldname)
@@ -270,27 +275,26 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
             },
         )
 
-        const replayModel = ReplayModel.decode(
+        const replayInput = ReplayInputModel.decode(
             new Uint8Array(Buffer.from(replayModelBase64, "base64")),
         )
-        const replayFrames: ReplayFrame[] = []
 
-        const getRocket = game.store.entities.single(...rocketComponents)
-
-        applyReplay(replayModel, input => {
-            const rocket = getRocket()
-
-            replayFrames.push({
-                position: rocket.get("body").translation(),
-                rotation: rocket.get("body").rotation(),
-                thrust: input.thrust,
+        for (const frame of replayInput.frames) {
+            game.onUpdate({
+                thrust: frame.thrust,
+                rotation: frame.rotation,
             })
+        }
 
-            game.onUpdate(input)
+        const replay: ReplayModel = ReplayModel.create({
+            frames: replayInput.frames.map(x => ({
+                rotation: x.rotation,
+                thrust: x.thrust,
+            })),
         })
 
         return {
-            replayFrames,
+            replay,
             summary: game.store.resources.get("summary"),
         }
     } catch (e) {

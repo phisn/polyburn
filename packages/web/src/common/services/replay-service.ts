@@ -1,5 +1,5 @@
 import Dexie from "dexie"
-import { ReplayInput, ReplayModel } from "game/proto/replay"
+import { ReplayInputModel } from "game/proto/replay"
 import { bytesToBase64 } from "game/src/model/utils"
 import { ReplayDTO, ReplaySummaryDTO } from "shared/src/server/replay"
 import { useGlobalStore } from "../store"
@@ -13,7 +13,6 @@ interface PendingReplay {
     gamemode: string
 
     input: Uint8Array
-    model: Uint8Array
 }
 
 const db = new Dexie("polyburn-cache-replays") as Dexie & {
@@ -30,6 +29,7 @@ db.version(1).stores({
 
 export interface ExReplaySummaryDTO extends ReplaySummaryDTO {
     replayAvailable: boolean
+    replayUploaded: boolean
 }
 
 export class ReplayService {
@@ -45,13 +45,11 @@ export class ReplayService {
     async commit(
         worldname: string,
         gamemode: string,
-        replayModel: ReplayModel,
-        replayInput: ReplayInput,
+        replayInput: ReplayInputModel,
     ): Promise<string> {
-        const input = ReplayInput.encode(replayInput).finish()
-        const model = ReplayModel.encode(replayModel).finish()
+        const input = ReplayInputModel.encode(replayInput).finish()
 
-        const hashBuffer = await crypto.subtle.digest("SHA-512", model)
+        const hashBuffer = await crypto.subtle.digest("SHA-512", input)
         const hash = bytesToBase64(new Uint8Array(hashBuffer))
 
         const replay: PendingReplay = {
@@ -61,7 +59,6 @@ export class ReplayService {
             gamemode,
 
             input,
-            model,
         }
 
         try {
@@ -131,17 +128,19 @@ export class ReplayService {
 
             return responseJson.replays.map(x => ({
                 ...x,
+                replayUploaded: true,
                 replayAvailable: true,
             }))
         } catch (e) {
             console.error(e)
         }
 
-        const replays = await db.replaySummaries.where({ gamemode, worldname }).limit(25).toArray()
+        const replays = await db.replaySummaries.where({ gamemode, worldname }).sortBy("ticks")
 
         return Promise.all(
             replays.map(async x => ({
                 ...x,
+                replayUploaded: true,
                 replayAvailable: await db.replays
                     .where("id")
                     .equals(x.id)
@@ -188,7 +187,6 @@ export class ReplayService {
                 gamemode: pendingReplay.gamemode,
 
                 input: bytesToBase64(pendingReplay.input),
-                model: bytesToBase64(pendingReplay.model),
             },
         })
 

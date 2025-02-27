@@ -1,4 +1,4 @@
-import { ReplayInputMouse, SingleReplayInput } from "game/proto/replay"
+import { MouseInputModel } from "game/proto/replay"
 import { GamePlayerStore } from "../../../model/store"
 
 // const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
@@ -48,16 +48,11 @@ export class Mouse {
     }
 
     singleReplayInput() {
-        return SingleReplayInput.create({
-            input: {
-                $case: "mouse",
-                mouse: ReplayInputMouse.create({
-                    down: this.wasPointerDown,
-                    x: this.x,
-                    y: this.y,
-                    thrust: this._thrust,
-                }),
-            },
+        return MouseInputModel.create({
+            down: this.wasPointerDown,
+            x: this.x,
+            y: this.y,
+            thrust: this._thrust,
         })
     }
 

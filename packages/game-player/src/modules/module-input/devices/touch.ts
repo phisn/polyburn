@@ -1,4 +1,4 @@
-import { ReplayInputTouch, SingleReplayInput } from "game/proto/replay"
+import { TouchInputModel } from "game/proto/replay"
 import { Point } from "game/src/model/utils"
 import { GamePlayerStore } from "../../../model/store"
 
@@ -50,16 +50,11 @@ export class Touch {
     }
 
     singleReplayInput() {
-        return SingleReplayInput.create({
-            input: {
-                $case: "touch",
-                touch: ReplayInputTouch.create({
-                    rotationX: this.currentRotatePointer?.x,
-                    rotationY: this.currentRotatePointer?.y,
-                    thrustX: this.currentThrustPointer?.x,
-                    thrustY: this.currentThrustPointer?.y,
-                }),
-            },
+        return TouchInputModel.create({
+            rotationX: this.currentRotatePointer?.x,
+            rotationY: this.currentRotatePointer?.y,
+            thrustX: this.currentThrustPointer?.x,
+            thrustY: this.currentThrustPointer?.y,
         })
     }
 

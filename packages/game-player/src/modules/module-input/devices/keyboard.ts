@@ -1,4 +1,4 @@
-import { ReplayInputKeyboard, SingleReplayInput } from "game/proto/replay"
+import { KeyboardInputModel } from "game/proto/replay"
 
 export class Keyboard {
     private inputChanged = false
@@ -37,15 +37,10 @@ export class Keyboard {
     }
 
     singleReplayInput() {
-        return SingleReplayInput.create({
-            input: {
-                $case: "keyboard",
-                keyboard: ReplayInputKeyboard.create({
-                    l: this.keyboardLeft || this.keyboardUpA,
-                    r: this.keyboardRight || this.keyboardUpD,
-                    thrust: this._thrust,
-                }),
-            },
+        return KeyboardInputModel.create({
+            l: this.keyboardLeft || this.keyboardUpA,
+            r: this.keyboardRight || this.keyboardUpD,
+            thrust: this._thrust,
         })
     }
 

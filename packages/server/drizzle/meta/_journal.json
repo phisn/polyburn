@@ -8,6 +8,13 @@
       "when": 1739794471369,
       "tag": "0000_young_thunderbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1740176548446,
+      "tag": "0001_superb_king_bedlam",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+import "game/src/model/replay"
 import { createRoot } from "react-dom/client"
 import { BrowserRouter } from "react-router-dom"
 import { registerSW } from "virtual:pwa-register"

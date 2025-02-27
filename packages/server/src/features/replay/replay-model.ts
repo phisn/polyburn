@@ -11,9 +11,9 @@ export const replays = sqliteTable(
             .primaryKey()
             .$defaultFn(() => randomUUID()),
 
-        replayKey: text("replay-key").notNull(),
-        inputKey: text("input-key"),
-        inputModelKey: text("input-model-key"),
+        replayKey: text("replayKey").notNull(),
+        inputKey: text("inputKey"),
+        inputModelKey: text("inputModelKey"),
 
         deaths: integer("deaths").notNull(),
         gamemode: text("gamemode").notNull(),

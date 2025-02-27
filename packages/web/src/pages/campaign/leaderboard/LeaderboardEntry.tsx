@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom"
 import { ExReplaySummaryDTO } from "../../../common/services/replay-service"
 import { Ticks } from "../../../components/common/Ticks"
 import { Clock } from "../../../components/common/svg/Clock"
@@ -31,6 +32,12 @@ export function LeaderboardEntry(props: { replaySummary: ExReplaySummaryDTO }) {
 
     const placeColoring = placeColorings[props.replaySummary.rank ?? 0]
 
+    const navigate = useNavigate()
+
+    function onReplay() {
+        navigate(`/replay/${props.replaySummary.id}`)
+    }
+
     return (
         <>
             <div className={"flex h-[4.5rem] w-full items-center " + placeColoring?.root}>
@@ -48,7 +55,7 @@ export function LeaderboardEntry(props: { replaySummary: ExReplaySummaryDTO }) {
                 <div className="flex w-full justify-end space-x-1 pr-4">
                     {props.replaySummary.replayAvailable && (
                         <>
-                            <button className="btn btn-ghost btn-square">
+                            <button className="btn btn-ghost btn-square" onClick={onReplay}>
                                 <PlayCircle
                                     width="24"
                                     height="24"

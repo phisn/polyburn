@@ -3,7 +3,6 @@ import { GameLoop } from "game-web/src/game-player-loop"
 import { LobbyConfigResource } from "game-web/src/modules/module-lobby/module-lobby"
 import { ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
-import { encodeInputCompressed } from "game/src/model/replay"
 import { base64ToBytes } from "game/src/model/utils"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
@@ -120,17 +119,12 @@ export function usePlayerStore() {
                     try {
                         const inputCapture = gamePlayer.store.resources.get("inputCapture")
 
-                        const replayModel = ReplayModel.create({
-                            deltaInputs: encodeInputCompressed(inputCapture.modelInputs),
-                        })
-
                         const config = gamePlayer.store.resources.get("config")
 
                         const replayHash = await replayService.commit(
                             config.worldname,
                             config.gamemode,
 
-                            replayModel,
                             inputCapture.input,
                         )
 
@@ -139,7 +133,7 @@ export function usePlayerStore() {
 
                             gamePlayer,
                             replayHash,
-                            replayModel,
+                            replayModel: inputCapture.input,
                             uploadStatus: "unauthenticated",
                         })
                     } catch (e) {

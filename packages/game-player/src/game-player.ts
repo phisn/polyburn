@@ -25,6 +25,8 @@ export class GamePlayer implements GameLoopRunnable {
     private moduleUI: ModuleUI
     private moduleVisual: ModuleVisual
 
+    private reset = false
+
     constructor(config: GamePlayerConfig, lobbyConfig?: LobbyConfigResource) {
         const renderer = new WebGLRenderer({
             antialias: true,
@@ -47,6 +49,16 @@ export class GamePlayer implements GameLoopRunnable {
             this.store.resources.set("lobbyConfig", lobbyConfig)
             this.moduleLobby = new ModuleLobby(this.store)
         }
+
+        this.store.game.store.events.listen({
+            death: () => {
+                const summary = this.store.game.store.resources.get("summary")
+
+                if (summary.flags === 0) {
+                    this.reset = true
+                }
+            },
+        })
     }
 
     onDispose() {
@@ -65,9 +77,17 @@ export class GamePlayer implements GameLoopRunnable {
     }
 
     onFixedUpdate(last: boolean) {
+        if (this.reset) {
+            this.onReset()
+            this.reset = false
+        }
+
         this.moduleInput.onFixedUpdate()
 
-        this.tickGame()
+        if (this.store.resources.get("inputCapture").started) {
+            this.tickGame()
+        }
+
         this.moduleInterpolation.onFixedUpdate(last)
 
         this.moduleLobby?.onFixedUpdate()

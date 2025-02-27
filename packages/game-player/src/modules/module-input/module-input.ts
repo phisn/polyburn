@@ -1,13 +1,13 @@
-import { ReplayInput } from "game/proto/replay"
+import { ReplayInputModel } from "game/proto/replay"
 import { GameInput } from "game/src/game"
-import { GameInputCompressed, GameInputCompressor } from "game/src/model/replay"
+import { GameInputCompressor } from "game/src/model/replay"
 import { GamePlayerStore } from "../../model/store"
 import { Devices } from "./devices/devices"
 
 export interface InputCaptureResource {
     currentInput: GameInput
-    input: ReplayInput
-    modelInputs: GameInputCompressed[]
+    input: ReplayInputModel
+    started: boolean
 }
 
 export class ModuleInput {
@@ -17,8 +17,11 @@ export class ModuleInput {
     constructor(private store: GamePlayerStore) {
         this.store.resources.set("inputCapture", {
             currentInput: { rotation: 0, thrust: false },
-            input: ReplayInput.create(),
-            modelInputs: [],
+            input: ReplayInputModel.create({
+                worldname: store.resources.get("config").worldname,
+                gamemode: store.resources.get("config").gamemode,
+            }),
+            started: false,
         })
 
         this.devices = new Devices(store)
@@ -34,25 +37,29 @@ export class ModuleInput {
 
         const inputCapture = this.store.resources.get("inputCapture")
         inputCapture.currentInput = { rotation: 0, thrust: false }
-        inputCapture.modelInputs = []
+        inputCapture.input = ReplayInputModel.create({ frames: [] })
+        inputCapture.started = false
     }
 
     onFixedUpdate() {
+        const inputCapture = this.store.resources.get("inputCapture")
+
         this.devices.onFixedUpdate()
 
-        const modelInput = {
-            rotation: this.devices.rotation(),
-            thrust: this.devices.thrust(),
+        if (inputCapture.started === false) {
+            inputCapture.started = this.devices.thrust()
         }
 
-        const inputCapture = this.store.resources.get("inputCapture")
-        inputCapture.modelInputs.push(this.compressor.compress(modelInput))
-        inputCapture.currentInput = modelInput
+        if (inputCapture.started) {
+            inputCapture.currentInput = {
+                rotation: this.devices.rotation(),
+                thrust: this.devices.thrust(),
+            }
 
-        const realInput = this.devices.singelReplayInput()
-
-        if (realInput) {
-            inputCapture.input.inputs.push(realInput)
+            inputCapture.input.frames.push({
+                ...inputCapture.currentInput,
+                ...this.devices.singelReplayInput(),
+            })
         }
     }
 }

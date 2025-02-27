@@ -1,5 +1,5 @@
 import { f16round, getFloat16, setFloat16 } from "@petamoriken/float16"
-import { ReplayModel } from "../../proto/replay"
+import { ReplayInputModel } from "../../proto/replay"
 import { GameInput } from "../game"
 import { Point } from "./utils"
 
@@ -9,7 +9,7 @@ export interface ReplayFrame {
     thrust: boolean
 }
 
-export function encodeReplayFrames(replayFrames: ReplayFrame[]): Buffer {
+export function encodeReplayFrames(replayFrames: ReplayFrame[]): ArrayBuffer {
     const packets = [
         ...packFloats(replayFrames.map(x => x.position.x)),
         ...packFloats(replayFrames.map(x => x.position.y)),
@@ -19,7 +19,7 @@ export function encodeReplayFrames(replayFrames: ReplayFrame[]): Buffer {
 
     const packetsSize = packets.reduce((acc, x) => acc + x.size, 0)
 
-    const buffer = Buffer.alloc(packetsSize)
+    const buffer = new Uint8Array(packetsSize)
     const view = new DataView(buffer.buffer)
 
     let offset = 0
@@ -29,11 +29,11 @@ export function encodeReplayFrames(replayFrames: ReplayFrame[]): Buffer {
         offset += packet.size
     }
 
-    return buffer
+    return buffer.buffer
 }
 
-export function decodeReplayFrames(buffer: Buffer): ReplayFrame[] {
-    const view = new DataView(buffer.buffer)
+export function decodeReplayFrames(buffer: ArrayBufferLike): ReplayFrame[] {
+    const view = new DataView(buffer)
 
     const [x, offset0] = unpackFloats(view, 0)
     const [y, offset1] = unpackFloats(view, offset0)
@@ -76,7 +76,7 @@ function packFloats(floats: number[]): Packet[] {
 }
 
 function unpackFloats(view: DataView, offset: number): [number[], number] {
-    const size = view.getUint32(offset)
+    const size = view.getUint32(offset, true)
     const result: number[] = []
 
     offset += 4
@@ -89,17 +89,11 @@ function unpackFloats(view: DataView, offset: number): [number[], number] {
     return [result, offset]
 }
 
-export function applyReplay(replay: ReplayModel, onUpdate: (input: GameInput) => void) {
-    const replayDeltaInputs = decodeInputCompressed(replay.deltaInputs)
-
-    let accumulator = 0
-
-    for (const replayDeltaInput of replayDeltaInputs) {
-        accumulator += replayDeltaInput.rotationDelta
-
+export function applyReplay(replay: ReplayInputModel, onUpdate: (input: GameInput) => void) {
+    for (const frame of replay.frames) {
         const input = {
-            rotation: accumulator,
-            thrust: replayDeltaInput.thrust,
+            rotation: frame.rotation,
+            thrust: frame.thrust,
         }
 
         onUpdate(input)

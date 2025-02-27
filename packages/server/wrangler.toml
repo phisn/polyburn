@@ -1,4 +1,4 @@
-name = "server"
+name = "polyburn-worker"
 main = "src/index.ts"
 compatibility_date = "2024-10-02"
 compatibility_flags = [ "nodejs_compat" ]
@@ -11,9 +11,9 @@ local_protocol = "http"
 
 [vars]
 ENV_JWT_SECRET = "my_secret_password"
-ENV_URL_CLIENT = "http://localhost:3000,http://localhost:3002"
-ENV_URL_API = "http://localhost:3002"
-ENV_URL_REPLAYS = "https://replays.polyburn.com"
+ENV_URL_CLIENT = "http://localhost:3000,http://localhost:3002,https://polyburn.com"
+ENV_URL_API = "http://localhost:3002,https://api.polyburn.com"
+ENV_URL_REPLAYS = "http://localhost:3002/replay/frames"
 
 [[d1_databases]]
 migrations_dir = "drizzle"
@@ -32,7 +32,3 @@ bucket_name = "polyburn-maps"
 [[r2_buckets]]
 binding = "R2_REPLAYS"
 bucket_name = "polyburn-replays"
-
-[[migrations]]
-tag = "v1"
-new_classes = ["DurableObjectLobby"]

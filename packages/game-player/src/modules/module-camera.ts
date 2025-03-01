@@ -1,6 +1,6 @@
-import { levelComponents, LevelEntity } from "game/src/modules/module-level"
-import { rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
+import { EntityWith } from "game/src/framework/entity"
 import * as THREE from "three"
+import { GamePlayerComponents } from "../model/entity"
 import { GamePlayerStore } from "../model/store"
 
 type TransitionAnimation =
@@ -29,7 +29,7 @@ export class ModuleCamera extends THREE.OrthographicCamera {
     private configAnimationSpeed: number
     private configZoom: number
 
-    private getRocket: () => RocketEntity
+    private getRocket: () => EntityWith<GamePlayerComponents, "three" | "rocket" | "transform">
 
     private cameraTargetSize: THREE.Vector2 = new THREE.Vector2()
     private levelConstraintPosition: THREE.Vector2 = new THREE.Vector2()
@@ -46,8 +46,7 @@ export class ModuleCamera extends THREE.OrthographicCamera {
         this.configAnimationSpeed = 1.0 / 1000.0
         this.configZoom = 1920 * 0.04
 
-        this.getRocket = store.game.store.entities.single(...rocketComponents)
-        this.onReset()
+        this.getRocket = store.entities.single("three", "rocket", "transform")
 
         this.startAnimation = {
             progress: 0,
@@ -55,7 +54,7 @@ export class ModuleCamera extends THREE.OrthographicCamera {
             targetScale: 1,
         }
 
-        this.store.game.store.events.listen({
+        this.store.events.listen({
             captured: ({ level }) => {
                 this.updateLevelConstraintFromLevel(level)
 
@@ -79,15 +78,13 @@ export class ModuleCamera extends THREE.OrthographicCamera {
     }
 
     onReset() {
-        const rocket = this.getRocket()
-        const body = rocket.get("body")
+        const rocketEntity = this.getRocket()
+        const transform = rocketEntity.get("transform")
 
-        this.position.x = body.translation().x
-        this.position.y = body.translation().y
+        this.position.x = transform.point.x
+        this.position.y = transform.point.y
 
-        const firstLevel = this.store.game.store.entities
-            .multiple(...levelComponents)
-            .find(x => x.get("level").completed)
+        const firstLevel = this.store.entities.multiple("level").find(x => x.get("level").first)
 
         if (!firstLevel) {
             throw new Error("No first level found")
@@ -248,18 +245,15 @@ export class ModuleCamera extends THREE.OrthographicCamera {
             }
         }
 
-        const visuals = this.store.resources.get("visuals")
         const rocket = this.getRocket()
-        const rocketVisual = visuals.mapping.get(rocket.id)
+        const rocketThree = rocket.get("three")
 
-        if (rocketVisual === undefined) {
+        if (rocketThree === undefined) {
             throw new Error("Rocket visual not found")
         }
 
-        const rocketPositionInViewX =
-            rocketVisual.object.position.x - this.levelConstraintPosition.x
-        const rocketPositionInViewY =
-            rocketVisual.object.position.y - this.levelConstraintPosition.y
+        const rocketPositionInViewX = rocketThree.position.x - this.levelConstraintPosition.x
+        const rocketPositionInViewY = rocketThree.position.y - this.levelConstraintPosition.y
 
         const cameraPositionX =
             this.levelConstraintPosition.x +
@@ -278,17 +272,17 @@ export class ModuleCamera extends THREE.OrthographicCamera {
         }
     }
 
-    private updateLevelConstraintFromLevel(level: LevelEntity) {
+    private updateLevelConstraintFromLevel(level: EntityWith<GamePlayerComponents, "level">) {
         const levelComponent = level.get("level")
 
         this.levelConstraintSize = new THREE.Vector2(
-            levelComponent.cameraRect.right - levelComponent.cameraRect.left,
-            levelComponent.cameraRect.top - levelComponent.cameraRect.bottom,
+            levelComponent.bounding.right - levelComponent.bounding.left,
+            levelComponent.bounding.top - levelComponent.bounding.bottom,
         )
 
         this.levelConstraintPosition = new THREE.Vector2(
-            levelComponent.cameraRect.left,
-            levelComponent.cameraRect.bottom,
+            levelComponent.bounding.left,
+            levelComponent.bounding.bottom,
         )
     }
 

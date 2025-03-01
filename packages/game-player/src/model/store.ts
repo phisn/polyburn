@@ -1,24 +1,22 @@
-import * as RAPIER from "@dimforge/rapier2d"
+import { EntityStore, EntityWith, newEntityStore } from "game/src/framework/entity"
 import { EventStore } from "game/src/framework/event"
 import { ResourceStore } from "game/src/framework/resource"
-import { Game } from "game/src/game"
+import { GameConfig } from "game/src/game"
+import { Point } from "game/src/model/utils"
 import { LobbyUserDTO } from "shared/src/lobby-api/lobby-api"
 import { Scene, WebGLRenderer } from "three"
-import { GamePlayerConfig } from "../game-player"
 import { InputCaptureResource } from "../modules/module-input/module-input"
-import { InterpolationResource } from "../modules/module-interpolation"
-import { LobbyConfigResource } from "../modules/module-lobby/module-lobby"
-import { ReplayResource } from "../modules/module-replay"
-import { VisualsResource } from "../modules/module-visual/module-visual"
+import { GamePlayerComponents } from "./entity"
 
 export class GamePlayerStore {
     public events: EventStore<GamePlayerEvents>
-    public game: Game
+    public entities: EntityStore<GamePlayerComponents>
     public resources: ResourceStore<GamePlayerResources>
 
-    constructor(config: GamePlayerConfig, renderer: WebGLRenderer) {
+    constructor(config: GameConfig, renderer: WebGLRenderer) {
         this.events = new EventStore()
-        this.game = new Game(config, { rapier: RAPIER })
+        this.entities = newEntityStore()
+
         this.resources = new ResourceStore({
             renderer,
             scene: new Scene(),
@@ -29,17 +27,25 @@ export class GamePlayerStore {
 }
 
 export interface GamePlayerResources {
-    config: GamePlayerConfig
+    config: GameConfig
     inputCapture: InputCaptureResource
-    interpolation: InterpolationResource
-    lobbyConfig: LobbyConfigResource
     renderer: WebGLRenderer
-    replay: ReplayResource
     scene: Scene
-    visuals: VisualsResource
+    summary: SummaryResource
+}
+
+export interface SummaryResource {
+    ticks: number
 }
 
 export interface GamePlayerEvents {
+    captureChanged(props: {
+        level: EntityWith<GamePlayerComponents, "level">
+        started: boolean
+    }): void
+    captured(props: { level: EntityWith<GamePlayerComponents, "level"> }): void
+    death(props: { contactPoint: Point; normal: Point }): void
+
     lobbyConnected(otherUsers: LobbyUserDTO[]): void
     lobbyDisconnected(): void
     lobbyJoin(otherUser: LobbyUserDTO): void

@@ -1,3 +1,4 @@
+/*
 import { LobbyUserDTO } from "shared/src/lobby-api/lobby-api"
 import { UpdatePacketDTO } from "shared/src/lobby-api/update-packet"
 import { GamePlayerStore } from "../../model/store"
@@ -65,3 +66,4 @@ export class OtherUserRegistry {
         }
     }
 }
+*/

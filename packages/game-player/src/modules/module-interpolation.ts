@@ -1,70 +1,54 @@
-import { lerp, slerp, Transform } from "game/src/model/utils"
-import { Object3D } from "three"
+import { EntityWith } from "game/src/framework/entity"
+import { lerp, slerp } from "game/src/model/utils"
+import { GamePlayerComponents } from "../model/entity"
 import { GamePlayerStore } from "../model/store"
 
-export interface InterpolationResource {
-    register(object: Object3D, getTransform: () => Transform): { reset: () => void }
-}
-
-interface InterpolationRegistration {
-    getTransform: () => Transform
-    object: Object3D
-    source: Transform
-    target: Transform
-}
-
 export class ModuleInterpolation {
-    private registrations: InterpolationRegistration[]
+    private toInterpolate: readonly EntityWith<
+        GamePlayerComponents,
+        "interpolation" | "three" | "transform"
+    >[]
 
     constructor(private store: GamePlayerStore) {
-        store.resources.set("interpolation", {
-            register: (object, getTransform) => {
-                const registration = {
-                    object,
-                    source: getTransform(),
-                    target: getTransform(),
-                    getTransform,
-                }
+        this.toInterpolate = store.entities.multiple("interpolation", "three", "transform")
 
-                this.registrations.push(registration)
-
-                return {
-                    reset: () => {
-                        const transform = registration.getTransform()
-
-                        registration.source = transform
-                        registration.target = transform
-
-                        registration.object.position.x = transform.point.x
-                        registration.object.position.y = transform.point.y
-                        registration.object.rotation.z = transform.rotation
-                    },
-                }
-            },
+        const getRocket = store.entities.single("interpolation", "rocket", "three", "transform")
+        store.events.listen({
+            death: () => this.resetInterpolation(getRocket()),
         })
+    }
 
-        this.registrations = []
+    onReset() {
+        for (const toInterpolate of this.toInterpolate) {
+            this.resetInterpolation(toInterpolate)
+        }
     }
 
     onUpdate(overstep: number) {
-        for (const registration of this.registrations) {
-            registration.object.position.x = lerp(
-                registration.source.point.x,
-                registration.target.point.x,
+        for (const toInterpolate of this.toInterpolate) {
+            const interpolation = toInterpolate.get("interpolation")
+            const three = toInterpolate.get("three")
+
+            const x = lerp(
+                interpolation.sourceTransform.point.x,
+                interpolation.targetTransform.point.x,
                 overstep,
             )
 
-            registration.object.position.y = lerp(
-                registration.source.point.y,
-                registration.target.point.y,
+            const y = lerp(
+                interpolation.sourceTransform.point.y,
+                interpolation.targetTransform.point.y,
                 overstep,
             )
 
-            registration.object.rotation.z = slerp(
-                registration.source.rotation,
-                registration.target.rotation,
+            const rotation = slerp(
+                interpolation.sourceTransform.rotation,
+                interpolation.targetTransform.rotation,
                 overstep,
             )
+
+            three.position.set(x, y, 0)
+            three.rotation.set(0, 0, rotation)
         }
     }
 
@@ -73,17 +57,26 @@ export class ModuleInterpolation {
             return
         }
 
-        for (let i = 0; i < this.registrations.length; i++) {
-            const registration = this.registrations[i]
+        for (const toInterpolate of this.toInterpolate) {
+            const interpolation = toInterpolate.get("interpolation")
+            const transform = toInterpolate.get("transform")
 
-            if (registration.object.parent === null) {
-                console.warn("Interpolation object has no parent")
-                this.registrations[i] = this.registrations[this.registrations.length - 1]
-                this.registrations.pop()
-            } else {
-                registration.source = registration.target
-                registration.target = registration.getTransform()
-            }
+            interpolation.sourceTransform = interpolation.targetTransform
+            interpolation.targetTransform = transform
         }
+    }
+
+    private resetInterpolation(
+        entity: EntityWith<GamePlayerComponents, "interpolation" | "three" | "transform">,
+    ) {
+        const interpolation = entity.get("interpolation")
+        const three = entity.get("three")
+        const transform = entity.get("transform")
+
+        interpolation.sourceTransform = transform
+        interpolation.targetTransform = transform
+
+        three.position.set(transform.point.x, transform.point.y, 0)
+        three.rotation.set(0, 0, transform.rotation)
     }
 }

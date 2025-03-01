@@ -7,11 +7,11 @@ import { Point, Rect, Size, changeAnchor } from "../model/utils"
 import { RocketEntity, rocketComponents } from "./module-rocket"
 
 export interface LevelComponent {
-    start: boolean
-
     cameraRect: Rect
+    index: number
     position: Point
     rotation: number
+    start: boolean
 
     collidersCapturing: number
     completed: boolean
@@ -34,13 +34,20 @@ export class ModuleLevel {
         store.events.listen({
             collision: ({ e1, e2, started }) => {
                 if (e1?.has(...levelComponents) && e2?.has(...rocketComponents)) {
-                    this.handleCollision(e1, e2, started)
+                    this.handleCollision(e1, started)
                 }
 
                 if (e1?.has(...rocketComponents) && e2?.has(...levelComponents)) {
-                    this.handleCollision(e2, e1, started)
+                    this.handleCollision(e2, started)
                 }
             },
+        })
+
+        store.events.listen({
+            captured: ({ level }) =>
+                store.outputEvents.invoke.onCaptured?.({
+                    level: level.get("level").index,
+                }),
         })
     }
 
@@ -64,8 +71,9 @@ export class ModuleLevel {
             }))
             .reduce((a, b) => (a.distance < b.distance ? a : b))
 
-        for (const levelConfig of config.levels) {
-            this.constructLevel(levelConfig, levelConfig === firstLevelConfig)
+        for (let i = 0; i < config.levels.length; ++i) {
+            const levelConfig = config.levels[i]
+            this.constructLevel(i, levelConfig, levelConfig === firstLevelConfig)
         }
     }
 
@@ -108,13 +116,18 @@ export class ModuleLevel {
         })
     }
 
-    private handleCollision(level: LevelEntity, rocket: RocketEntity, started: boolean) {
+    private handleCollision(level: LevelEntity, started: boolean) {
         const levelComponent = level.get("level")
 
         if (started) {
             if (levelComponent.collidersCapturing === 0) {
                 this.progress = TICKS_TO_CAPTURE
                 this.progressLevel = level
+
+                this.store.outputEvents.invoke.setCapture?.({
+                    level: levelComponent.index,
+                    started: true,
+                })
             }
 
             levelComponent.collidersCapturing++
@@ -124,14 +137,13 @@ export class ModuleLevel {
             if (levelComponent.collidersCapturing === 0) {
                 this.progress = undefined
                 this.progressLevel = undefined
+
+                this.store.outputEvents.invoke.setCapture?.({
+                    level: levelComponent.index,
+                    started: false,
+                })
             }
         }
-
-        this.store.events.invoke.captureChanged?.({
-            rocket,
-            level,
-            started,
-        })
     }
 
     private constructBorder(levelComponent: LevelComponent) {
@@ -164,7 +176,7 @@ export class ModuleLevel {
         this.previousBorder = world.createCollider(colliderDesc)
     }
 
-    private constructLevel(levelConfig: LevelConfig, start: boolean) {
+    private constructLevel(index: number, levelConfig: LevelConfig, start: boolean) {
         const rapier = this.store.resources.get("rapier")
         const world = this.store.resources.get("world")
 
@@ -195,16 +207,16 @@ export class ModuleLevel {
         const level = this.store.entities.create({
             body,
             level: {
-                start,
-
                 cameraRect: {
                     left: levelConfig.cameraTopLeftX,
                     top: levelConfig.cameraTopLeftY,
                     right: levelConfig.cameraBottomRightX,
                     bottom: levelConfig.cameraBottomRightY,
                 },
+                index,
                 position,
                 rotation: levelConfig.rotation,
+                start,
 
                 collidersCapturing: 0,
                 completed: start,

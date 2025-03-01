@@ -54,7 +54,7 @@ export function FinishedPopup(props: { store: PlayerStore }) {
 }
 
 export function FinishedInfoContainer(props: { store: PlayerStoreFinished; onClick(): void }) {
-    const summary = props.store.gamePlayer.store.game.store.resources.get("summary")
+    const summary = props.store.gamePlayer.game.store.resources.get("summary")
 
     return (
         <InfoContainer

@@ -1,4 +1,4 @@
-import { LevelEntity } from "game/src/modules/module-level"
+import { Transform } from "game/src/model/utils"
 import * as THREE from "three"
 import { Svg } from "../svg"
 
@@ -16,10 +16,8 @@ export class Flag extends THREE.Object3D {
     private red: Svg
     private green: Svg
 
-    constructor(private level: LevelEntity) {
+    constructor(transform: Transform) {
         super()
-
-        const levelComponent = level.get("level")
 
         this.red = prototypeRed.clone()
         this.green = prototypeGreen.clone()
@@ -30,21 +28,13 @@ export class Flag extends THREE.Object3D {
         this.green.visible = false
 
         const scale = (0.15 * 1) / 25.0
-        this.position.set(levelComponent.position.x, levelComponent.position.y, 0)
-        this.rotation.set(0, 0, levelComponent.rotation)
+        this.position.set(transform.point.x, transform.point.y, 0)
+        this.rotation.set(0, 0, transform.rotation)
         this.scale.set(scale, -scale, 1.0)
     }
 
-    onUpdate() {
-        const levelComponent = this.level.get("level")
-
-        const shouldBeActive = levelComponent.collidersCapturing > 0 || levelComponent.completed
-
-        if (this.isActive !== shouldBeActive) {
-            this.isActive = shouldBeActive
-
-            this.red.visible = !shouldBeActive
-            this.green.visible = shouldBeActive
-        }
+    setActive(active: boolean) {
+        this.red.visible = !active
+        this.green.visible = active
     }
 }

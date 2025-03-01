@@ -1,9 +1,11 @@
+export {}
+/*
 import { LobbyUserDTO } from "shared/src/lobby-api/lobby-api"
 import { UpdateFrameDTO, UpdatePacketDTO } from "shared/src/lobby-api/update-packet"
 import { Object3D } from "three"
 import { Text } from "troika-three-text"
 import { GamePlayerStore } from "../../model/store"
-import { Rocket } from "../module-visual/objects/rocket"
+import { Rocket } from "../module-visual/objects/object-rocket"
 
 export class OtherUserGhost {
     private currentFrame: UpdateFrameDTO
@@ -97,3 +99,4 @@ export class OtherUserGhost {
         return this.otherUser
     }
 }
+*/

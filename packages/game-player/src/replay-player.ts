@@ -1,31 +1,33 @@
-import { ReplayModel } from "game/proto/replay"
+import { EventStore } from "game/src/framework/event"
 import { GameConfig } from "game/src/game"
+import { GameOutput, GameOutputEvents } from "game/src/model/store"
 import { Color, WebGLRenderer } from "three"
 import { GameLoopRunnable } from "./game-player-loop"
 import { GamePlayerStore } from "./model/store"
 import { ModuleCamera } from "./modules/module-camera"
 import { ModuleInterpolation } from "./modules/module-interpolation"
-import { ModuleLobby } from "./modules/module-lobby/module-lobby"
 import { ModuleParticles } from "./modules/module-particles/module-particles"
+import { ModuleSyncGame } from "./modules/module-sync-game"
 import { ModuleUI } from "./modules/module-ui/module-ui"
 import { ModuleVisual } from "./modules/module-visual/module-visual"
 
 export interface ReplayPlayerConfig extends GameConfig {
-    replay: ReplayModel
-    worldname: string
+    replay: GameOutput
 }
 
 export class ReplayPlayer implements GameLoopRunnable {
     public store: GamePlayerStore
 
+    private outputEvents: EventStore<GameOutputEvents>
+
     private moduleCamera: ModuleCamera
     private moduleInterpolation: ModuleInterpolation
-    private moduleLobby?: ModuleLobby
     private moduleParticles: ModuleParticles
+    private moduleSyncGame: ModuleSyncGame
     private moduleUI: ModuleUI
     private moduleVisual: ModuleVisual
 
-    constructor(config: ReplayPlayerConfig) {
+    constructor(private config: ReplayPlayerConfig) {
         const renderer = new WebGLRenderer({
             antialias: true,
             alpha: true,
@@ -34,29 +36,37 @@ export class ReplayPlayer implements GameLoopRunnable {
         renderer.setClearColor(Color.NAMES["black"], 1)
 
         this.store = new GamePlayerStore(config, renderer)
+        this.store.resources.set("summary", {
+            ticks: 0,
+        })
 
+        this.outputEvents = new EventStore()
+
+        /*
         this.store.resources.set("replay", {
             currentFrame: 0,
             frames: config.replay.frames,
         })
+            */
 
         this.moduleCamera = new ModuleCamera(this.store)
         this.moduleInterpolation = new ModuleInterpolation(this.store)
         this.moduleParticles = new ModuleParticles(this.store)
+        this.moduleSyncGame = new ModuleSyncGame(this.store, this.outputEvents)
         this.moduleUI = new ModuleUI(this.store)
         this.moduleVisual = new ModuleVisual(this.store)
+
+        this.onReset()
     }
 
     onDispose() {
         const renderer = this.store.resources.get("renderer")
         renderer.dispose()
-
-        this.moduleLobby?.onDispose()
     }
 
     onReset() {
-        this.store.game.onReset()
-
+        // this.store.game.onReset()
+        this.moduleSyncGame.onReset()
         this.moduleCamera.onReset()
     }
 
@@ -65,7 +75,6 @@ export class ReplayPlayer implements GameLoopRunnable {
 
         this.moduleInterpolation.onFixedUpdate(last)
 
-        this.moduleLobby?.onFixedUpdate()
         this.moduleUI.onFixedUpdate()
     }
 
@@ -74,7 +83,7 @@ export class ReplayPlayer implements GameLoopRunnable {
 
         this.moduleCamera.onUpdate(delta)
         this.moduleParticles.update(delta)
-        this.moduleVisual.onUpdate()
+        // this.moduleVisual.onUpdate()
 
         this.render()
 
@@ -82,12 +91,13 @@ export class ReplayPlayer implements GameLoopRunnable {
     }
 
     private tickGame() {
-        const replay = this.store.resources.get("replay")
-        const replayFrame = replay.frames[replay.currentFrame]
+        const frame = this.config.replay.frames[this.store.resources.get("summary").ticks]
 
-        this.store.game.onUpdate(replayFrame)
+        for (const [key, value] of Object.entries(frame)) {
+            this.outputEvents.invoke[key as keyof Partial<GameOutputEvents>]?.(value)
+        }
 
-        replay.currentFrame++
+        this.store.resources.get("summary").ticks++
     }
 
     private render() {

@@ -25,6 +25,8 @@ export class ModuleRocket {
     private firstInput = true
     private getRocket: () => RocketEntity
     private previousInput?: GameInput
+    private previousPosition: RAPIER.Vector2
+    private previousThrust: boolean
 
     constructor(private store: GameStore) {
         this.getRocket = store.entities.single(...rocketComponents)
@@ -51,6 +53,32 @@ export class ModuleRocket {
                 rocketComponent.spawnRotation = body.rotation()
             },
         })
+
+        store.events.listen({
+            death: ({ rocket, contactPoint, normal }) => {
+                const body = rocket.get("body")
+                const translation = body.translation()
+
+                this.previousPosition.x = translation.x
+                this.previousPosition.y = translation.y
+
+                this.store.outputEvents.invoke.setRocket?.({
+                    transform: {
+                        point: translation,
+                        rotation: body.rotation(),
+                    },
+                    velocity: body.linvel(),
+                })
+
+                store.outputEvents.invoke.onDeath?.({
+                    contactPoint,
+                    normal,
+                })
+            },
+        })
+
+        this.previousPosition = new (this.store.resources.get("rapier").Vector2)(0, 0)
+        this.previousThrust = false
     }
 
     onUpdate(input: GameInput) {
@@ -108,6 +136,32 @@ export class ModuleRocket {
             for (let colliderIndex = 0; colliderIndex < body.numColliders(); ++colliderIndex) {
                 this.handleActiveCollider(rocket, body.collider(colliderIndex))
             }
+        }
+
+        const translation = body.translation()
+
+        if (
+            translation.x !== this.previousPosition.x ||
+            translation.y !== this.previousPosition.y
+        ) {
+            this.previousPosition.x = translation.x
+            this.previousPosition.y = translation.y
+
+            this.store.outputEvents.invoke.setRocket?.({
+                transform: {
+                    point: translation,
+                    rotation: body.rotation(),
+                },
+                velocity: body.linvel(),
+            })
+        }
+
+        if (this.previousThrust !== input.thrust) {
+            this.store.outputEvents.invoke.setThrust?.({
+                started: input.thrust,
+            })
+
+            this.previousThrust = input.thrust
         }
     }
 
@@ -180,6 +234,18 @@ export class ModuleRocket {
             },
             body,
         })
+
+        this.previousPosition.x = body.translation().x
+        this.previousPosition.y = body.translation().y
+        this.previousThrust = false
+
+        this.store.outputEvents.invoke.setRocket?.({
+            transform: {
+                point: this.previousPosition,
+                rotation: body.rotation(),
+            },
+            velocity: body.linvel(),
+        })
     }
 
     private handleCollisionEvent(
@@ -236,19 +302,10 @@ export class ModuleRocket {
             y: cos(body.rotation()),
         }
 
-        const otherNormal = flipped ? contact.localNormal1() : contact.localNormal2()
+        const normal = this.normal(contact, flipped)
 
-        const otherNormalLength = sqrt(
-            otherNormal.x * otherNormal.x + otherNormal.y * otherNormal.y,
-        )
-
-        const otherNormalNormalized = {
-            x: otherNormal.x / otherNormalLength,
-            y: otherNormal.y / otherNormalLength,
-        }
-
-        const dx = otherNormalNormalized.x - upVector.x
-        const dy = otherNormalNormalized.y - upVector.y
+        const dx = normal.x - upVector.x
+        const dy = normal.y - upVector.y
 
         const velx = body.linvel().x
         const vely = body.linvel().y
@@ -264,6 +321,24 @@ export class ModuleRocket {
         const tooAngled =
             distance > rocketComponent.behaviorConfig.explosionAngle &&
             rocketComponent.framesSinceLastDeath > INVINCIBILITY_FRAMES
+
+        const fastEnough =
+            speedSquare > ROCKET_TOUCH_SPEED &&
+            rocketComponent.framesSinceLastDeath > INVINCIBILITY_FRAMES
+
+        if (fastEnough) {
+            const contactPoint = flipped
+                ? contact.solverContactPoint(0)
+                : contact.solverContactPoint(0)
+
+            this.store.outputEvents.invoke.onRocketCollision?.({
+                contactPoint: contactPoint ?? {
+                    x: 0,
+                    y: 0,
+                },
+                normal,
+            })
+        }
 
         if (tooFast || tooAngled) {
             rocketComponent.framesSinceLastDeath = 0
@@ -281,8 +356,21 @@ export class ModuleRocket {
                     x: 0,
                     y: 0,
                 },
-                normal: otherNormalNormalized,
+                normal,
             })
+        }
+    }
+
+    private normal(contact: RAPIER.TempContactManifold, flipped: boolean) {
+        const otherNormal = flipped ? contact.localNormal1() : contact.localNormal2()
+
+        const otherNormalLength = sqrt(
+            otherNormal.x * otherNormal.x + otherNormal.y * otherNormal.y,
+        )
+
+        return {
+            x: otherNormal.x / otherNormalLength,
+            y: otherNormal.y / otherNormalLength,
         }
     }
 
@@ -327,6 +415,8 @@ const ROCKET_COLLIDERS = [
 const INVINCIBILITY_FRAMES = 30
 
 const ROCKET_MAX_SPEED = 150
+
+const ROCKET_TOUCH_SPEED = 30
 
 const DEFAULT_BEHAVIOR_CONFIG: RocketBehaviorConfig = {
     thrustDistance: 1,

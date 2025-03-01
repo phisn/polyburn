@@ -1,6 +1,8 @@
+import { EntityWith } from "game/src/framework/entity"
 import { changeAnchor } from "game/src/model/utils"
-import { ROCKET_SIZE, rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
+import { ROCKET_SIZE } from "game/src/modules/module-rocket"
 import { Color } from "three"
+import { GamePlayerComponents } from "../../model/entity"
 import { GamePlayerStore } from "../../model/store"
 import {
     downBias,
@@ -62,19 +64,16 @@ const PARTICLE_TEMPLATE_DEATH: ParticleTemplate = () => ({
 
 export class ModuleParticles {
     private rocketTime = 0
-    private getRocket: () => RocketEntity
-
     private simulation: ParticleSimulation
 
+    private getRocket: () => EntityWith<GamePlayerComponents, "rocket" | "three">
+
     constructor(private store: GamePlayerStore) {
-        const shapes = store.game.store.entities
-            .multiple("shape")
-            .map(x => x.get("shape").vertices.map(x => x.position))
+        this.simulation = new ParticleSimulation(store)
 
-        this.simulation = new ParticleSimulation(store, shapes)
-        this.getRocket = store.game.store.entities.single(...rocketComponents)
+        this.getRocket = store.entities.single("rocket", "three")
 
-        store.game.store.events.listen({
+        store.events.listen({
             death: ({ normal, contactPoint }) => {
                 for (let i = 0; i < 50; ++i) {
                     const rotationFromNormal = Math.atan2(normal.y, normal.x)
@@ -93,24 +92,17 @@ export class ModuleParticles {
     update(delta: number) {
         this.simulation.onUpdate(delta)
 
-        const rocket = this.getRocket()
-        const rocketComponent = rocket.get("rocket")
+        const rocketEntity = this.getRocket()
+        const rocket = rocketEntity.get("rocket")
 
-        if (rocketComponent.thrust) {
+        if (rocket.thrust) {
+            const three = rocketEntity.get("three")
+
             this.rocketTime += delta
 
-            const rocketBody = rocket.get("body")
-
-            const visuals = this.store.resources.get("visuals")
-            const rocketVisual = visuals.mapping.get(rocket.id)
-
-            if (rocketVisual === undefined) {
-                return
-            }
-
             const spawnPosition = changeAnchor(
-                rocketVisual.object.position,
-                rocketVisual.object.rotation.z,
+                three.position,
+                three.rotation.z,
                 ROCKET_SIZE,
                 { x: 0.5, y: 0.5 },
                 { x: 0.5, y: 0.3 },
@@ -122,8 +114,8 @@ export class ModuleParticles {
                 this.simulation.createParticle(
                     PARTICLE_TEMPLATE_THRUST,
                     spawnPosition,
-                    rocketVisual.object.rotation.z,
-                    rocketBody.linvel(),
+                    three.rotation.z,
+                    rocket.velocity,
                     i,
                 )
             }

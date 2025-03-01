@@ -47,7 +47,7 @@ export interface EntityStore<Components extends object> {
 
     remove<K extends keyof Components>(entity: number | EntityWith<Components, K>): void
 
-    listen<K extends ComponentsWithModifier<Components>[]>(
+    listen<const K extends ComponentsWithModifier<Components>[]>(
         requirements: [...K],
         notifyAdded: Listener<K, Components>,
         notifyRemoved: Listener<K, Components>,
@@ -431,12 +431,19 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         if (existing) {
             const symbol = existing.add(notifyAdded, notifyRemoved)
 
+            // since notification can cause changes, we delay it
+            const delayNotifies = []
+
             for (const archeType of entityArcheTypes.values()) {
                 if (requirementsSatisfyComponents(requirements, archeType.components)) {
                     for (const [, entity] of archeType.entities) {
-                        notifyAdded(entity.facade)
+                        delayNotifies.push(() => notifyAdded(entity.facade))
                     }
                 }
+            }
+
+            for (const delayNotify of delayNotifies) {
+                delayNotify()
             }
 
             return () => void existing.remove(symbol)
@@ -446,14 +453,21 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
         listenerBatches.set(key, newListener)
         const symbol = newListener.add(notifyAdded, notifyRemoved)
 
+        // since notification can cause changes, we delay it
+        const delayNotifies = []
+
         for (const archeType of entityArcheTypes.values()) {
             if (requirementsSatisfyComponents(requirements, archeType.components)) {
                 for (const [, entity] of archeType.entities) {
-                    newListener.notifyAdded(entity.facade)
+                    delayNotifies.push(() => newListener.notifyAdded(entity.facade))
                 }
 
                 populateArcheTypeListener(archeType, newListener)
             }
+        }
+
+        for (const delayNotify of delayNotifies) {
+            delayNotify()
         }
 
         return () => void newListener.remove(symbol)

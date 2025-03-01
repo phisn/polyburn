@@ -8,6 +8,7 @@ import { ModuleWorld } from "./modules/module-world"
 
 export interface GameConfig {
     gamemode: string
+    worldname: string
     world: WorldConfig
 }
 

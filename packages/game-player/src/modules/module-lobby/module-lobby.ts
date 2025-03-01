@@ -1,4 +1,6 @@
-import { rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
+export {}
+/*
+import { RocketEntity } from "game/src/modules/module-rocket"
 import { lobbyId, UPDATE_POSITIONS_EVERY_MS } from "shared/src/lobby-api/lobby-api"
 import { ClientUpdateMessage } from "shared/src/lobby-api/message-client"
 import { serverMessage } from "shared/src/lobby-api/message-server"
@@ -40,7 +42,7 @@ export class ModuleLobby {
             frames: [],
         }
 
-        this.getRocket = store.game.store.entities.single(...rocketComponents)
+        this.getRocket = null as any // store.game.store.entities.single(...rocketComponents)
         this.timeSinceUpdate = Date.now()
 
         this.startWebsocket()
@@ -150,3 +152,5 @@ export class ModuleLobby {
         setTimeout(() => this.startWebsocket(), this.baseFailureTimeout * 2 ** this.failureCounter)
     }
 }
+
+*/

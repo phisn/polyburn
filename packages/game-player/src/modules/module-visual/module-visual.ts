@@ -1,142 +1,97 @@
-import { EntityWith } from "game/src/framework/entity"
-import { GameComponents } from "game/src/model/store"
-import { levelComponents } from "game/src/modules/module-level"
-import { rocketComponents } from "game/src/modules/module-rocket"
 import * as THREE from "three"
 import { GamePlayerStore } from "../../model/store"
 import { MutatableShapeGeometry } from "./mutatable-shape-geometry"
-import { Flag } from "./objects/flag"
-import { Rocket } from "./objects/rocket"
-
-export interface VisualsResource {
-    mapping: Map<number, Visuals>
-}
-
-export interface Visuals {
-    object: THREE.Object3D
-    resetInterpolation?: () => void
-}
+import { Flag, Flag as ObjectFlag } from "./objects/object-flag"
+import { Rocket as ObjectRocket } from "./objects/object-rocket"
 
 export class ModuleVisual {
-    private flags: Map<number, Flag>
-
     constructor(private store: GamePlayerStore) {
-        store.resources.set("visuals", {
-            mapping: new Map(),
-        })
+        const scene = store.resources.get("scene")
 
-        this.flags = new Map()
-
-        this.attachVisual(["shape"], entity => {
-            const shapeGeometry = new MutatableShapeGeometry(
-                entity.get("shape").vertices.map(vertex => ({
-                    position: new THREE.Vector2(vertex.position.x, vertex.position.y),
-                    color: vertex.color,
-                })),
-            )
-
-            const shapeMaterial = new THREE.MeshBasicMaterial({ vertexColors: true })
-            const shapeMesh = new THREE.Mesh(shapeGeometry, shapeMaterial)
-
-            shapeMaterial.depthTest = false
-            return shapeMesh
-        })
-
-        this.attachVisual(
-            levelComponents,
+        store.entities.listen(
+            ["level", "transform"],
             entity => {
-                if (entity.get("level").start) {
+                const level = entity.get("level")
+                const transform = entity.get("transform")
+
+                if (level.first) {
                     return
                 }
 
-                const flag = new Flag(entity)
-                this.flags.set(entity.id, flag)
-                return flag
+                const flagObject = new ObjectFlag(transform)
+                scene.add(flagObject)
+
+                entity.set("three", flagObject)
             },
             entity => {
-                this.flags.delete(entity.id)
+                if (entity.has("three") === false) {
+                    return
+                }
+
+                scene.remove(entity.get("three"))
             },
         )
 
-        this.attachVisual(rocketComponents, () => {
-            const rocket = new Rocket()
-            return rocket
-        })
+        store.entities.listen(
+            ["rocket", "transform"],
+            entity => {
+                console.log("got notified")
+                const transform = entity.get("transform")
+                const rocketObject = new ObjectRocket()
 
-        this.store.game.store.events.listen({
-            death: ({ rocket }) => {
-                const visuals = this.store.resources.get("visuals")
-                const rocketVisual = visuals.mapping.get(rocket.id)
+                rocketObject.position.set(transform.point.x, transform.point.y, 0)
+                rocketObject.rotation.set(0, 0, transform.rotation)
 
-                if (rocketVisual === undefined) {
+                scene.add(rocketObject)
+                entity.set("three", rocketObject)
+            },
+            entity => {
+                console.log("remove oiajsdoiasjd")
+                if (entity.has("three") === false) {
                     return
                 }
 
-                rocketVisual.resetInterpolation?.()
+                scene.remove(entity.get("three"))
             },
-        })
-    }
+        )
 
-    private attachVisual<K extends (keyof GameComponents)[]>(
-        requirements: K,
-        construct: (entity: EntityWith<GameComponents, K[number]>) => THREE.Object3D | undefined,
-        destruct?: (entity: EntityWith<GameComponents, K[number]>) => void,
-    ) {
-        this.store.game.store.entities.listen(
-            requirements,
+        store.entities.listen(
+            ["shape"],
             entity => {
-                const object = construct(entity)
+                const shapeGeometry = new MutatableShapeGeometry(
+                    entity.get("shape").vertices.map(vertex => ({
+                        position: new THREE.Vector2(vertex.position.x, vertex.position.y),
+                        color: vertex.color,
+                    })),
+                )
 
-                if (object) {
-                    const scene = this.store.resources.get("scene")
-                    scene.add(object)
+                const shapeMaterial = new THREE.MeshBasicMaterial({ vertexColors: true })
+                const shapeMesh = new THREE.Mesh(shapeGeometry, shapeMaterial)
 
-                    let resetInterpolation: undefined | (() => void)
+                shapeMaterial.depthTest = false
 
-                    if (entity.has("body")) {
-                        const body = entity.get("body")
+                scene.add(shapeMesh)
+                entity.set("three", shapeMesh)
+            },
+            entity => {
+                if (entity.has("three") === false) {
+                    return
+                }
 
-                        if (body.isDynamic()) {
-                            const interpolation = this.store.resources.get("interpolation")
+                scene.remove(entity.get("three"))
+            },
+        )
 
-                            const { reset } = interpolation.register(object, () => ({
-                                point: {
-                                    x: body.translation().x,
-                                    y: body.translation().y,
-                                },
-                                rotation: body.rotation(),
-                            }))
+        store.events.listen({
+            captureChanged: ({ level, started }) => {
+                if (level.has("three")) {
+                    const three = level.get("three")
 
-                            resetInterpolation = reset
-                        }
+                    if (three instanceof Flag) {
+                        three.setActive(started)
                     }
-
-                    const visuals = this.store.resources.get("visuals")
-                    visuals.mapping.set(entity.id, {
-                        object,
-                        resetInterpolation,
-                    })
                 }
             },
-            entity => {
-                const visuals = this.store.resources.get("visuals")
-                const visual = visuals.mapping.get(entity.id)
-
-                if (visual) {
-                    const scene = this.store.resources.get("scene")
-                    scene.remove(visual.object)
-                }
-
-                if (destruct) {
-                    destruct(entity)
-                }
-            },
-        )
-    }
-
-    onUpdate() {
-        for (const flag of this.flags.values()) {
-            flag.onUpdate()
-        }
+        })
     }
 }

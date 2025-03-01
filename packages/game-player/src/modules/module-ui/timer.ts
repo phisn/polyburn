@@ -26,7 +26,7 @@ export class Timer extends Object3D {
     }
 
     onFixedUpdate() {
-        const summary = this.store.game.store.resources.get("summary")
+        const summary = this.store.resources.get("summary")
         this.text.text = formatTicks(summary.ticks)
     }
 }

@@ -1,7 +1,7 @@
 import { GameLoop } from "game-web/src/game-player-loop"
 import { ReplayPlayer } from "game-web/src/replay-player"
-import { ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
+import { GameOutput } from "game/src/model/store"
 import { base64ToBytes } from "game/src/model/utils"
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
@@ -40,8 +40,7 @@ export function Replayer() {
         const replayDTO = await replayService.get(replayId)
 
         const replayRequest = await fetch(replayDTO.replayUrl)
-        const replayBinary = base64ToBytes(await replayRequest.text())
-        const replay = ReplayModel.decode(new Uint8Array(replayBinary.buffer))
+        const replay = await replayRequest.json<GameOutput>()
 
         const world = await worldService.get(replayDTO.worldname)
 

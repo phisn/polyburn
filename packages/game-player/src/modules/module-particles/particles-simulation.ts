@@ -1,3 +1,5 @@
+import RAPIER from "@dimforge/rapier2d"
+import { bytesToVertices } from "game/src/model/shape"
 import { Point } from "game/src/model/utils"
 import { makeCCW, quickDecomp } from "poly-decomp-es"
 import * as SAT from "sat"
@@ -34,7 +36,15 @@ export class ParticleSimulation {
     private instanceMatrix = new THREE.Matrix4()
     private maxInstances = 2048
 
-    constructor(store: GamePlayerStore, shapes: Point[][]) {
+    constructor(store: GamePlayerStore) {
+        const config = store.resources.get("config")
+
+        const shapesVerticies = config.world.gamemodes[config.gamemode].groups.flatMap(group =>
+            config.world.groups[group].shapes.map(x =>
+                bytesToVertices(RAPIER, x.vertices).map(x => x.position),
+            ),
+        )
+
         const geometry = new THREE.CircleGeometry(1, 32)
         const material = new THREE.MeshBasicMaterial({ color: 0xffffff })
 
@@ -44,7 +54,7 @@ export class ParticleSimulation {
         const scene = store.resources.get("scene")
         scene.add(this.particleMesh)
 
-        for (const shape of shapes) {
+        for (const shape of shapesVerticies) {
             const polygon = shape.map(p => [p.x, p.y] as [number, number])
 
             makeCCW(polygon)

@@ -987,4 +987,27 @@ describe("EntityStore", () => {
         unlisten1()
         unlisten2()
     })
+
+    it("should be correct if listen changes entity", () => {
+        let listened = 0
+
+        const entity = store.create({
+            position: { x: 0, y: 1 },
+        })
+
+        store.listen(
+            ["position"],
+            () => {
+                entity.set("velocity", {
+                    dx: 1,
+                    dy: 2,
+                })
+
+                listened++
+            },
+            () => {},
+        )
+
+        expect(listened).toBe(1)
+    })
 })

@@ -3710,6 +3710,11 @@ common-tags@^1.8.0:
   resolved "https://registry.yarnpkg.com/common-tags/-/common-tags-1.8.2.tgz#94ebb3c076d26032745fd54face7f688ef5ac9c6"
   integrity sha512-gk/Z852D2Wtb//0I+kRFNKKE9dIIVirjoqPoA1wJU+XePVXZfGeBpk45+A1rKO4Q43prqWBNY/MiIeRLbPWUaA==
 
+compress-json@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/compress-json/-/compress-json-3.1.1.tgz#44e47f78161e24e7d91de8a3afb1fe7ed9937a4e"
+  integrity sha512-PfW4WPGnWXXfcT0mvT9Y92Jsw95aK+eIb+XWXJC45DX2KNYRXeq5kw/FRkkFTHinXm4IwleABsjS5LNHLaxk0Q==
+
 concat-map@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"

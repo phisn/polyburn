@@ -8,17 +8,19 @@ import { LevelComponent, LevelEntity } from "../modules/module-level"
 import { RocketComponent, RocketEntity } from "../modules/module-rocket"
 import { ShapeComponent } from "../modules/module-shape"
 import { SummaryResource } from "../modules/module-world"
-import { Point } from "./utils"
+import { Point, Transform } from "./utils"
 
 export class GameStore {
     public resources: ResourceStore<GameResources>
     public events: EventStore<GameEvents>
     public entities: EntityStore<GameComponents>
+    public outputEvents: EventStore<GameOutputEvents>
 
     constructor() {
         this.resources = new ResourceStore()
         this.events = new EventStore()
         this.entities = newEntityStore()
+        this.outputEvents = new EventStore()
     }
 }
 
@@ -61,8 +63,26 @@ export interface GameEvents {
         normal: Point
     }): void
 
-    captureChanged(props: { rocket: RocketEntity; level: LevelEntity; started: boolean }): void
     captured(props: { rocket: RocketEntity; level: LevelEntity }): void
 
     finished(): void
+}
+
+export interface GameOutputFrame {
+    onCaptured?: { level: number }
+    onDeath?: { contactPoint: Point; normal: Point }
+    onRocketCollision?: { contactPoint: Point; normal: Point }
+
+    setCapture?: { level: number; started: boolean }
+    setRocket?: { transform: Transform; velocity: Point }
+    setThrust?: { started: boolean }
+}
+
+export interface GameOutput {
+    version: 1
+    frames: GameOutputFrame[]
+}
+
+export type GameOutputEvents = {
+    [K in keyof GameOutputFrame]-?: (props: Required<GameOutputFrame>[K]) => void
 }

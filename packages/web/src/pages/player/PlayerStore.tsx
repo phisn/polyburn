@@ -1,13 +1,11 @@
 import { GamePlayer } from "game-web/src/game-player"
 import { GameLoop } from "game-web/src/game-player-loop"
-import { LobbyConfigResource } from "game-web/src/modules/module-lobby/module-lobby"
 import { ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
 import { base64ToBytes } from "game/src/model/utils"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { ReplaySummaryDTO } from "shared/src/server/replay"
-import { authService } from "../../common/services/auth-service"
 import { replayService } from "../../common/services/replay-service"
 import { worldService } from "../../common/services/world-service"
 import { useGlobalStore } from "../../common/store"
@@ -114,7 +112,7 @@ export function usePlayerStore() {
                 gamePlayer: gamePlayer,
             })
 
-            gamePlayer.store.game.store.events.listen({
+            gamePlayer.game.store.events.listen({
                 finished: async () => {
                     try {
                         const inputCapture = gamePlayer.store.resources.get("inputCapture")
@@ -175,8 +173,6 @@ function useGamePlayer(
     }, [onError])
 
     useEffect(() => {
-        console.log("hello")
-
         if (params.worldname === undefined || params.gamemode === undefined) {
             console.error(params)
             navigate("/")
@@ -207,14 +203,13 @@ function useGamePlayer(
 
                 const world = WorldConfig.decode(base64ToBytes(worldDTO.model))
 
-                gamePlayer = new GamePlayer(
-                    {
+                gamePlayer = new GamePlayer({
+                    gameConfig: {
                         gamemode,
                         world,
                         worldname,
                     },
-                    lobbyConfig(),
-                )
+                })
 
                 setGamePair([gamePlayer, new GameLoop(gamePlayer)])
             })
@@ -241,6 +236,7 @@ function useGamePlayer(
     }, [gamePair])
 }
 
+/*
 function lobbyConfig(): LobbyConfigResource | undefined {
     const state = useGlobalStore.getState()
 
@@ -265,3 +261,5 @@ function lobbyConfig(): LobbyConfigResource | undefined {
         }
     }
 }
+
+*/

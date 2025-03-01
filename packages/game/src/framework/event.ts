@@ -37,5 +37,9 @@ export class EventStore<Events extends object> {
         }
     }
 
+    listenAll(events: Events): () => void {
+        return this.listen(events)
+    }
+
     public invoke: Partial<Events> = {}
 }

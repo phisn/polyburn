@@ -1,13 +1,16 @@
 import * as RAPIER from "@dimforge/rapier2d"
 import { zValidator } from "@hono/zod-validator"
+import { BSON } from "bson"
+import { compress } from "compress-json"
 import { and, eq } from "drizzle-orm"
 import { ReplayInputModel, ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
 import { Game } from "game/src/game"
-import { bytesToBase64 } from "game/src/model/utils"
+import { GameOutput, GameOutputFrame } from "game/src/model/store"
 import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
 import { ReplayDTO } from "shared/src/server/replay"
+import { gunzipSync, gzipSync } from "zlib"
 import { z } from "zod"
 import { Environment } from "../../env"
 import { users } from "../user/user-model"
@@ -174,7 +177,7 @@ export const routeReplay = new Hono<Environment>()
                 }
             }
 
-            const replayBuffer = ReplayModel.encode(result.replay).finish()
+            const replayBuffer = gzipSync(JSON.stringify(result.replay))
 
             const customMetadata: Record<string, string> = {
                 userId: "" + user.id,
@@ -247,9 +250,19 @@ export const routeReplay = new Hono<Environment>()
                 throw new HTTPException(404)
             }
 
-            const replayText = bytesToBase64(new Uint8Array(replayBuffer))
+            console.log("gzip size: ", replayBuffer.byteLength)
 
-            return c.body(replayText, 200)
+            const replayJson = JSON.parse(gunzipSync(replayBuffer).toString("ascii"))
+
+            console.log("raw json size: ", JSON.stringify(replayJson).length)
+            console.log("bson size: ", BSON.serialize(replayJson).length)
+            console.log("gzip bson size: ", gzipSync(BSON.serialize(replayJson)).length)
+            console.log(
+                "gzip json compress size: ",
+                gzipSync(JSON.stringify(BSON.serialize({ value: compress(replayJson) }))).length,
+            )
+
+            return c.json(replayJson as GameOutput)
         },
     )
 
@@ -265,25 +278,47 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
             new Uint8Array(Buffer.from(world.configBase64 ?? "", "base64")),
         )
 
+        const replayInput = ReplayInputModel.decode(
+            new Uint8Array(Buffer.from(replayModelBase64, "base64")),
+        )
+
         const game = new Game(
             {
-                world: worldConfig,
                 gamemode: gamemode,
+                world: worldConfig,
+                worldname,
             },
             {
                 rapier: RAPIER,
             },
         )
 
-        const replayInput = ReplayInputModel.decode(
-            new Uint8Array(Buffer.from(replayModelBase64, "base64")),
-        )
+        const output: GameOutput = {
+            version: 1,
+            frames: [],
+        }
+
+        let outputFrame: GameOutputFrame = {}
+
+        game.store.outputEvents.listenAll({
+            onCaptured: event => (outputFrame.onCaptured = event),
+            onDeath: event => (outputFrame.onDeath = event),
+            onRocketCollision: event => (outputFrame.onRocketCollision = event),
+            setCapture: event => (outputFrame.setCapture = event),
+            setRocket: event => (outputFrame.setRocket = event),
+            setThrust: event => (outputFrame.setThrust = event),
+        })
+
+        game.onReset()
 
         for (const frame of replayInput.frames) {
             game.onUpdate({
                 thrust: frame.thrust,
                 rotation: frame.rotation,
             })
+
+            output.frames.push(outputFrame)
+            outputFrame = {}
         }
 
         const replay: ReplayModel = ReplayModel.create({
@@ -294,7 +329,7 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
         })
 
         return {
-            replay,
+            replay: output,
             summary: game.store.resources.get("summary"),
         }
     } catch (e) {

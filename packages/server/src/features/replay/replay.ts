@@ -1,6 +1,8 @@
 import * as RAPIER from "@dimforge/rapier2d"
 import { zValidator } from "@hono/zod-validator"
+import * as messagepack from "@msgpack/msgpack"
 import { BSON } from "bson"
+import * as cbor2 from "cbor2"
 import { compress } from "compress-json"
 import { and, eq } from "drizzle-orm"
 import { ReplayInputModel, ReplayModel } from "game/proto/replay"
@@ -261,6 +263,44 @@ export const routeReplay = new Hono<Environment>()
                 "gzip json compress size: ",
                 gzipSync(JSON.stringify(BSON.serialize({ value: compress(replayJson) }))).length,
             )
+            console.log("cbor2 size: ", cbor2.encode(replayJson).length)
+            console.log("gzip cbor2 size: ", gzipSync(cbor2.encode(replayJson)).length)
+
+            const mask = z.array(
+                z
+                    .object({
+                        rocketChange: z.object({
+                            point: z.object({
+                                x: z.number(),
+                                y: z.number(),
+                            }),
+                            rotation: z.number(),
+                        }),
+                    })
+                    .optional(),
+            )
+
+            console.log(
+                JSON.stringify(replayJson) ===
+                    JSON.stringify(messagepack.decode(messagepack.encode(replayJson, {}), {})),
+            )
+
+            console.log("messagepack size: ", messagepack.encode(replayJson).length)
+            console.log("gzip messagepack size: ", gzipSync(messagepack.encode(replayJson)).length)
+
+            console.log("2 messagepack size: ")
+            console.log(
+                "2 gzip messagepack size: ",
+                gzipSync(messagepack.encode(replayJson)).length,
+            )
+
+            const randoms = Array.from({ length: 100000 }, () => ({
+                r: Math.random(),
+            }))
+
+            console.log("size1: ", randoms[2])
+            console.log("size1: ", messagepack.encode(randoms).byteLength)
+            console.log("size1: ", randoms.length * 2)
 
             return c.json(replayJson as GameOutput)
         },
@@ -301,12 +341,12 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
         let outputFrame: GameOutputFrame = {}
 
         game.store.outputEvents.listenAll({
-            onCaptured: event => (outputFrame.onCaptured = event),
-            onDeath: event => (outputFrame.onDeath = event),
-            onRocketCollision: event => (outputFrame.onRocketCollision = event),
-            setCapture: event => (outputFrame.setCapture = event),
-            setRocket: event => (outputFrame.setRocket = event),
-            setThrust: event => (outputFrame.setThrust = event),
+            levelCaptureChange: event => (outputFrame.levelCaptureChange = event),
+            levelCaptured: event => (outputFrame.levelCaptured = event),
+            rocketChange: event => (outputFrame.rocketChange = event),
+            rocketCollision: event => (outputFrame.rocketCollision = event),
+            rocketDeath: event => (outputFrame.rocketDeath = event),
+            rocketThrust: event => (outputFrame.rocketThrust = event),
         })
 
         game.onReset()

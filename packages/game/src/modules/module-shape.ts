@@ -1,5 +1,5 @@
 import { bytesToVertices, createShapeBody, ShapeVertex } from "../model/shape"
-import { GameStore } from "../model/store"
+import { GameStore } from "../store"
 
 export interface ShapeComponent {
     vertices: ShapeVertex[]

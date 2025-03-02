@@ -1,6 +1,5 @@
 import { ReplayInputModel } from "game/proto/replay"
 import { GameInput } from "game/src/game"
-import { GameInputCompressor } from "game/src/model/replay"
 import { GamePlayerStore } from "../../model/store"
 import { Devices } from "./devices/devices"
 
@@ -12,7 +11,6 @@ export interface InputCaptureResource {
 
 export class ModuleInput {
     private devices: Devices
-    private compressor: GameInputCompressor
 
     constructor(private store: GamePlayerStore) {
         this.store.resources.set("inputCapture", {
@@ -25,7 +23,6 @@ export class ModuleInput {
         })
 
         this.devices = new Devices(store)
-        this.compressor = new GameInputCompressor()
     }
 
     onDispose() {
@@ -33,8 +30,6 @@ export class ModuleInput {
     }
 
     onReset() {
-        this.compressor.reset()
-
         const inputCapture = this.store.resources.get("inputCapture")
         inputCapture.currentInput = { rotation: 0, thrust: false }
         inputCapture.input = ReplayInputModel.create({ frames: [] })

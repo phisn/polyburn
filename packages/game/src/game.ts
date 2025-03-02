@@ -1,10 +1,11 @@
 import RAPIER from "@dimforge/rapier2d"
 import { WorldConfig } from "../proto/world"
-import { GameStore } from "./model/store"
+import { GameOutput } from "./model/api"
 import { ModuleLevel } from "./modules/module-level"
-import { ModuleRocket } from "./modules/module-rocket"
+import { ModuleRocket, rocketComponents, RocketEntity } from "./modules/module-rocket"
 import { ModuleShape } from "./modules/module-shape"
 import { ModuleWorld } from "./modules/module-world"
+import { GameStore } from "./store"
 
 export interface GameConfig {
     gamemode: string
@@ -25,12 +26,10 @@ export class Game {
     public store: GameStore
 
     private moduleLevel: ModuleLevel
+    private moudleOutputCollect: ModuleOutputCollect
     private moduleRocket: ModuleRocket
     private moduleShape: ModuleShape
     private moduleWorld: ModuleWorld
-
-    private started = false
-    private reset = false
 
     constructor(config: GameConfig, deps: GameDependencies) {
         this.store = new GameStore()
@@ -38,41 +37,20 @@ export class Game {
         this.insertResources(config, deps)
 
         this.moduleLevel = new ModuleLevel(this.store)
+        this.moudleOutputCollect = new ModuleOutputCollect(this.store)
         this.moduleRocket = new ModuleRocket(this.store)
         this.moduleShape = new ModuleShape(this.store)
         this.moduleWorld = new ModuleWorld(this.store)
 
         this.onReset()
-
-        this.store.events.listen({
-            death: () => {
-                const summary = this.store.resources.get("summary")
-
-                if (summary.flags === 0) {
-                    this.reset = true
-                    this.started = false
-                }
-            },
-        })
     }
 
-    public onUpdate(input: GameInput) {
-        if (this.reset) {
-            this.onReset()
-            this.reset = false
-        }
-
-        if (this.started === false) {
-            if (input.thrust === false) {
-                return
-            }
-
-            this.started = true
-        }
-
+    public onUpdate(input: GameInput): GameOutput {
         this.moduleLevel.onUpdate(input)
         this.moduleRocket.onUpdate(input)
         this.moduleWorld.onUpdate(input)
+
+        return this.moudleOutputCollect.output()
     }
 
     public onReset() {
@@ -81,8 +59,6 @@ export class Game {
         this.moduleLevel.onReset()
         this.moduleRocket.onReset()
         this.moduleShape.onReset()
-
-        this.started = false
     }
 
     private insertResources(config: GameConfig, deps: GameDependencies) {
@@ -104,3 +80,73 @@ export class Game {
         this.store.resources.set("rapier", deps.rapier)
     }
 }
+
+class ModuleOutputCollect {
+    private currentOutput: GameOutput
+    private getRocket: () => RocketEntity
+
+    constructor(private store: GameStore) {
+        this.currentOutput = {
+            thrust: false,
+            transform: {
+                point: {
+                    x: 0,
+                    y: 0,
+                },
+                rotation: 0,
+            },
+            velocity: {
+                x: 0,
+                y: 0,
+            },
+        }
+
+        this.getRocket = this.store.entities.single(...rocketComponents)
+
+        this.store.events.listen({
+            death: ({ contactPoint, normal }) => {
+                this.currentOutput.onRocketDeath = {
+                    contactPoint,
+                    normal,
+                }
+            },
+            captureChanged: ({ level, started }) => {
+                this.currentOutput.onLevelCaptureChange = {
+                    level: level.get("level").index,
+                    started,
+                }
+            },
+            captured: ({ level }) => {
+                this.currentOutput.onLevelCaptured = {
+                    level: level.get("level").index,
+                }
+            },
+            rocketHit: ({ contactPoint, normal, speed }) => {
+                if (speed > ROCKET_TOUCH_SPEED) {
+                    this.currentOutput.onRocketCollision = {
+                        contactPoint,
+                        normal,
+                        speed,
+                    }
+                }
+            },
+        })
+    }
+
+    output(): GameOutput {
+        const rocketEntity = this.getRocket()
+        const body = rocketEntity.get("body")
+        const rocket = rocketEntity.get("rocket")
+
+        this.currentOutput.thrust = rocket.thrust
+        this.currentOutput.transform.point.x = body.translation().x
+        this.currentOutput.transform.point.y = body.translation().y
+        this.currentOutput.transform.rotation = body.rotation()
+        this.currentOutput.velocity.x = body.linvel().x
+        this.currentOutput.velocity.y = body.linvel().y
+
+        return this.currentOutput
+    }
+}
+
+const ROCKET_TOUCH_SPEED = 30

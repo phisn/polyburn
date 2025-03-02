@@ -1,7 +1,7 @@
 import RAPIER from "@dimforge/rapier2d"
 import { EntityWith } from "../framework/entity"
 import { GameInput } from "../game"
-import { GameComponents, GameStore } from "../model/store"
+import { GameComponents, GameStore } from "../store"
 import { levelComponents } from "./module-level"
 
 export interface SummaryResource {

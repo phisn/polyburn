@@ -1,14 +1,10 @@
 import RAPIER from "@dimforge/rapier2d"
-import { EventStore } from "game/src/framework/event"
+import { GameOutput } from "game/src/model/game-output"
 import { bytesToVertices } from "game/src/model/shape"
-import { GameOutputEvents } from "game/src/model/store"
 import { GamePlayerStore } from "../model/store"
 
 export class ModuleSyncGame {
-    constructor(
-        private store: GamePlayerStore,
-        outputEvents: EventStore<GameOutputEvents>,
-    ) {
+    constructor(private store: GamePlayerStore) {
         const config = this.store.resources.get("config")
 
         const groups = config.world.gamemodes[config.gamemode].groups.map(
@@ -83,31 +79,6 @@ export class ModuleSyncGame {
                 },
             })
         }
-
-        outputEvents.listen({
-            onCaptured: ({ level }) =>
-                this.store.events.invoke.captured?.({
-                    level: levelEntities[level],
-                }),
-            onDeath: ({ contactPoint, normal }) =>
-                this.store.events.invoke.death?.({
-                    contactPoint,
-                    normal,
-                }),
-
-            setCapture: ({ level, started }) =>
-                this.store.events.invoke.captureChanged?.({
-                    level: levelEntities[level],
-                    started,
-                }),
-            setRocket: ({ transform, velocity }) => {
-                rocketEntity.get("rocket").velocity = velocity
-                rocketEntity.set("transform", transform)
-            },
-            setThrust: ({ started }) => {
-                rocketEntity.get("rocket").thrust = started
-            },
-        })
     }
 
     onReset() {
@@ -120,4 +91,36 @@ export class ModuleSyncGame {
             rocket.thrust = false
         }
     }
+
+    onFixedUpdate(frame: GameOutput) {
+        if (frame.levelCaptureChange) {
+        }
+    }
+
+    /*
+
+        outputEvents.listen({
+            levelCaptureChange: ({ level, started }) =>
+                this.store.events.invoke.captureChanged?.({
+                    level: levelEntities[level],
+                    started,
+                }),
+            levelCaptured: ({ level }) =>
+                this.store.events.invoke.captured?.({
+                    level: levelEntities[level],
+                }),
+            rocketChange: ({ transform, velocity }) => {
+                rocketEntity.get("rocket").velocity = velocity
+                rocketEntity.set("transform", transform)
+            },
+            rocketDeath: ({ contactPoint, normal }) =>
+                this.store.events.invoke.death?.({
+                    contactPoint,
+                    normal,
+                }),
+            rocketThrust: ({ started }) => {
+                rocketEntity.get("rocket").thrust = started
+            },
+        })
+        */
 }

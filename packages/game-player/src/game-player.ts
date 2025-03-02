@@ -48,7 +48,7 @@ export class GamePlayer implements GameLoopRunnable {
         this.moduleInput = new ModuleInput(this.store)
         this.moduleInterpolation = new ModuleInterpolation(this.store)
         this.moduleParticles = new ModuleParticles(this.store)
-        this.moduleSyncGame = new ModuleSyncGame(this.store, this.game.store.outputEvents)
+        this.moduleSyncGame = new ModuleSyncGame(this.store)
         this.moduleUI = new ModuleUI(this.store)
         this.moduleVisual = new ModuleVisual(this.store)
 
@@ -117,7 +117,8 @@ export class GamePlayer implements GameLoopRunnable {
         this.store.resources.get("summary").ticks++
 
         const inputCapture = this.store.resources.get("inputCapture")
-        this.game.onUpdate(inputCapture.currentInput)
+        const output = this.game.onUpdate(inputCapture.currentInput)
+        this.moduleSyncGame.onFixedUpdate(output)
     }
 
     private render() {

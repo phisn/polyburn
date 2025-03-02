@@ -2,8 +2,8 @@ import RAPIER from "@dimforge/rapier2d"
 import { LevelConfig } from "../../proto/world"
 import { EntityWith } from "../framework/entity"
 import { GameInput } from "../game"
-import { GameComponents, GameStore } from "../model/store"
 import { Point, Rect, Size, changeAnchor } from "../model/utils"
+import { GameComponents, GameStore } from "../store"
 import { RocketEntity, rocketComponents } from "./module-rocket"
 
 export interface LevelComponent {
@@ -41,13 +41,6 @@ export class ModuleLevel {
                     this.handleCollision(e2, started)
                 }
             },
-        })
-
-        store.events.listen({
-            captured: ({ level }) =>
-                store.outputEvents.invoke.onCaptured?.({
-                    level: level.get("level").index,
-                }),
         })
     }
 
@@ -124,8 +117,8 @@ export class ModuleLevel {
                 this.progress = TICKS_TO_CAPTURE
                 this.progressLevel = level
 
-                this.store.outputEvents.invoke.setCapture?.({
-                    level: levelComponent.index,
+                this.store.events.invoke.captureChanged?.({
+                    level,
                     started: true,
                 })
             }
@@ -138,8 +131,8 @@ export class ModuleLevel {
                 this.progress = undefined
                 this.progressLevel = undefined
 
-                this.store.outputEvents.invoke.setCapture?.({
-                    level: levelComponent.index,
+                this.store.events.invoke.captureChanged?.({
+                    level,
                     started: false,
                 })
             }

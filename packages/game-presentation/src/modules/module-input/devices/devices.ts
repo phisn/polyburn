@@ -1,4 +1,4 @@
-import { ReplayFrameInputModel } from "game/proto/replay"
+import { RealInputModel } from "game/proto/replay"
 import { PresentationStore } from "../../../store"
 import { Keyboard } from "./keyboard"
 import { Mouse } from "./mouse"
@@ -9,8 +9,6 @@ const CHARCODE_ONE = "1".charCodeAt(0)
 const CHARCODE_NINE = "9".charCodeAt(0)
 
 type Device = "keyboard" | "mouse" | "touch"
-
-export type RawDeviceInput = Omit<ReplayFrameInputModel, "thrust" | "rotation">
 
 export class Devices {
     private deviceKeyboard: Keyboard
@@ -73,8 +71,8 @@ export class Devices {
         )
     }
 
-    singelReplayInput(): RawDeviceInput {
-        const result: RawDeviceInput = {}
+    singelReplayInput(): RealInputModel {
+        const result: RealInputModel = {}
 
         if (this.deviceKeyboard.pullInputChanged()) {
             result.realKeyboard = this.deviceKeyboard.singleReplayInput()

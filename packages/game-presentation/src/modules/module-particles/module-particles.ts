@@ -2,8 +2,7 @@ import { EntityWith } from "game/src/framework/entity"
 import { changeAnchor } from "game/src/model/utils"
 import { ROCKET_SIZE } from "game/src/modules/module-rocket"
 import { Color } from "three"
-import { GamePlayerComponents } from "../../model/entity"
-import { GamePlayerStore } from "../../model/store"
+import { PresentationComponents, PresentationStore } from "../../store"
 import {
     downBias,
     ParticleTemplate,
@@ -66,12 +65,12 @@ export class ModuleParticles {
     private rocketTime = 0
     private simulation: ParticleSimulation
 
-    private getRocket: () => EntityWith<GamePlayerComponents, "rocket" | "three">
+    private getRocket: () => EntityWith<PresentationComponents, "rocket" | "velocity" | "visual">
 
-    constructor(private store: GamePlayerStore) {
+    constructor(private store: PresentationStore) {
         this.simulation = new ParticleSimulation(store)
 
-        this.getRocket = store.entities.single("rocket", "three")
+        this.getRocket = store.entities.single("rocket", "velocity", "visual")
 
         store.events.listen({
             death: ({ normal, contactPoint }) => {
@@ -89,20 +88,21 @@ export class ModuleParticles {
         })
     }
 
-    update(delta: number) {
+    onUpdate(delta: number) {
         this.simulation.onUpdate(delta)
 
         const rocketEntity = this.getRocket()
         const rocket = rocketEntity.get("rocket")
 
         if (rocket.thrust) {
-            const three = rocketEntity.get("three")
+            const velocity = rocketEntity.get("velocity")
+            const visual = rocketEntity.get("visual")
 
             this.rocketTime += delta
 
             const spawnPosition = changeAnchor(
-                three.position,
-                three.rotation.z,
+                visual.position,
+                visual.rotation.z,
                 ROCKET_SIZE,
                 { x: 0.5, y: 0.5 },
                 { x: 0.5, y: 0.3 },
@@ -114,8 +114,8 @@ export class ModuleParticles {
                 this.simulation.createParticle(
                     PARTICLE_TEMPLATE_THRUST,
                     spawnPosition,
-                    three.rotation.z,
-                    rocket.velocity,
+                    visual.rotation.z,
+                    velocity,
                     i,
                 )
             }

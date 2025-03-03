@@ -1,5 +1,5 @@
 import { MouseInputModel } from "game/proto/replay"
-import { GamePlayerStore } from "../../../model/store"
+import { PresentationStore } from "../../../store"
 
 // const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
@@ -19,7 +19,7 @@ export class Mouse {
     public x = 0
     public y = 0
 
-    constructor(private store: GamePlayerStore) {
+    constructor(private store: PresentationStore) {
         this.onPointerEvent = this.onPointerEvent.bind(this)
 
         const renderer = this.store.resources.get("renderer")

@@ -1,14 +1,15 @@
-import * as RAPIER from "@dimforge/rapier2d"
+import RAPIER from "@dimforge/rapier2d"
 import { zValidator } from "@hono/zod-validator"
 import * as messagepack from "@msgpack/msgpack"
-import { BSON } from "bson"
-import * as cbor2 from "cbor2"
-import { compress } from "compress-json"
 import { and, eq } from "drizzle-orm"
-import { ReplayInputModel, ReplayModel } from "game/proto/replay"
+import { ReplayInputModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
+import { newEntityStore } from "game/src/framework/entity"
+import { EventStore } from "game/src/framework/event"
+import { ResourceStore } from "game/src/framework/resource"
 import { Game } from "game/src/game"
-import { GameOutput, GameOutputFrame } from "game/src/model/store"
+import { GameOutputEventsRaw, GameOutputReplay } from "game/src/model/api"
+import { GameStore } from "game/src/store"
 import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
 import { ReplayDTO } from "shared/src/server/replay"
@@ -256,16 +257,6 @@ export const routeReplay = new Hono<Environment>()
 
             const replayJson = JSON.parse(gunzipSync(replayBuffer).toString("ascii"))
 
-            console.log("raw json size: ", JSON.stringify(replayJson).length)
-            console.log("bson size: ", BSON.serialize(replayJson).length)
-            console.log("gzip bson size: ", gzipSync(BSON.serialize(replayJson)).length)
-            console.log(
-                "gzip json compress size: ",
-                gzipSync(JSON.stringify(BSON.serialize({ value: compress(replayJson) }))).length,
-            )
-            console.log("cbor2 size: ", cbor2.encode(replayJson).length)
-            console.log("gzip cbor2 size: ", gzipSync(cbor2.encode(replayJson)).length)
-
             const mask = z.array(
                 z
                     .object({
@@ -302,7 +293,7 @@ export const routeReplay = new Hono<Environment>()
             console.log("size1: ", messagepack.encode(randoms).byteLength)
             console.log("size1: ", randoms.length * 2)
 
-            return c.json(replayJson as GameOutput)
+            return c.json(replayJson)
         },
     )
 
@@ -322,55 +313,88 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
             new Uint8Array(Buffer.from(replayModelBase64, "base64")),
         )
 
-        const game = new Game(
-            {
-                gamemode: gamemode,
-                world: worldConfig,
-                worldname,
-            },
-            {
+        const store: GameStore = {
+            entities: newEntityStore(),
+            events: new EventStore(),
+            resources: new ResourceStore({
+                config: {
+                    gamemode: gamemode,
+                    world: worldConfig,
+                    worldname,
+                },
                 rapier: RAPIER,
-            },
-        )
+            }),
+        }
 
-        const output: GameOutput = {
+        const game = new Game(store)
+
+        const replay: GameOutputReplay = {
             version: 1,
             frames: [],
         }
 
-        let outputFrame: GameOutputFrame = {}
+        const getRocket = store.entities.single("rocket", "transform", "velocity")
+        let outputEvents: GameOutputEventsRaw = {}
 
-        game.store.outputEvents.listenAll({
-            levelCaptureChange: event => (outputFrame.levelCaptureChange = event),
-            levelCaptured: event => (outputFrame.levelCaptured = event),
-            rocketChange: event => (outputFrame.rocketChange = event),
-            rocketCollision: event => (outputFrame.rocketCollision = event),
-            rocketDeath: event => (outputFrame.rocketDeath = event),
-            rocketThrust: event => (outputFrame.rocketThrust = event),
+        store.events.listen({
+            captureChanged: event => {
+                outputEvents.onLevelCaptureChange = {
+                    level: event.level.get("level").index,
+                    started: event.started,
+                }
+            },
+            captured: event => {
+                outputEvents.onLevelCaptured = {
+                    level: event.level.get("level").index,
+                }
+            },
+            death: event => {
+                outputEvents.onRocketDeath = {
+                    contactPoint: event.contactPoint,
+                    normal: event.normal,
+                }
+            },
+            finished: () => {
+                const summary = store.resources.get("summary")
+
+                outputEvents.onFinish = {
+                    deaths: summary.deaths,
+                    ticks: summary.ticks,
+                }
+            },
+            rocketHit: event => {
+                outputEvents.onRocketCollision = {
+                    contactPoint: event.contactPoint,
+                    normal: event.normal,
+                    speed: event.speed,
+                }
+            },
         })
 
         game.onReset()
 
         for (const frame of replayInput.frames) {
+            outputEvents = {}
+
             game.onUpdate({
                 thrust: frame.thrust,
                 rotation: frame.rotation,
             })
 
-            output.frames.push(outputFrame)
-            outputFrame = {}
+            const rocketEntity = getRocket()
+
+            replay.frames.push({
+                thrust: rocketEntity.get("rocket").thrust,
+                transform: rocketEntity.get("transform"),
+                velocity: rocketEntity.get("velocity"),
+
+                ...outputEvents,
+            })
         }
 
-        const replay: ReplayModel = ReplayModel.create({
-            frames: replayInput.frames.map(x => ({
-                rotation: x.rotation,
-                thrust: x.thrust,
-            })),
-        })
-
         return {
-            replay: output,
-            summary: game.store.resources.get("summary"),
+            replay: outputEvents,
+            summary: store.resources.get("summary"),
         }
     } catch (e) {
         console.error(e)

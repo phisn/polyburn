@@ -1,6 +1,6 @@
 import { TouchInputModel } from "game/proto/replay"
 import { Point } from "game/src/model/utils"
-import { GamePlayerStore } from "../../../model/store"
+import { PresentationStore } from "../../../store"
 
 export class Touch {
     private inputChanged: boolean = false
@@ -21,7 +21,7 @@ export class Touch {
 
     private touchEvents = ["touchstart", "touchend", "touchmove", "touchcancel"] as const
 
-    constructor(private store: GamePlayerStore) {
+    constructor(private store: PresentationStore) {
         this.onTouchEvent = this.onTouchEvent.bind(this)
 
         const renderer = this.store.resources.get("renderer")

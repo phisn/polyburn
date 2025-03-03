@@ -1,5 +1,5 @@
 {
-    "name": "game-web",
+    "name": "game-presentation",
     "private": true,
     "version": "1.0.0",
     "type": "module",

@@ -18,8 +18,17 @@ export interface RocketComponent {
     thrust: boolean
 }
 
-export const rocketComponents = ["rocket", "body"] satisfies (keyof GameComponents)[]
-export type RocketEntity = EntityWith<GameComponents, (typeof rocketComponents)[number]>
+export const rocketComponents = [
+    "body",
+    "rocket",
+    "transform",
+    "velocity",
+] satisfies (keyof GameComponents)[]
+
+export type RocketEntity<Components extends GameComponents = GameComponents> = EntityWith<
+    Components,
+    (typeof rocketComponents)[number]
+>
 
 export class ModuleRocket {
     private firstInput = true
@@ -27,7 +36,7 @@ export class ModuleRocket {
     private previousInput?: GameInput
 
     constructor(private store: GameStore) {
-        this.getRocket = store.entities.single(...rocketComponents)
+        this.getRocket = store.entities.single("body", ...rocketComponents)
 
         store.events.listen({
             collision: ({ c1, c2, e1, e2, started }) => {
@@ -40,15 +49,15 @@ export class ModuleRocket {
                 }
             },
             captured: ({ rocket }) => {
-                const body = rocket.get("body")
+                const transform = rocket.get("transform")
                 const rocketComponent = rocket.get("rocket")
 
                 rocketComponent.spawnPosition = {
-                    x: body.translation().x,
-                    y: body.translation().y,
+                    x: transform.point.x,
+                    y: transform.point.y,
                 }
 
-                rocketComponent.spawnRotation = body.rotation()
+                rocketComponent.spawnRotation = transform.rotation
             },
             rocketHit: ({ angle, contactPoint, normal, rocket, speed }) => {
                 const rocketComponent = rocket.get("rocket")
@@ -142,7 +151,14 @@ export class ModuleRocket {
             this.store.entities.remove(rocket)
         }
 
-        const rocketConfig = this.store.resources.get("config").rocket
+        const config = this.store.resources.get("config")
+
+        const groups = config.world.gamemodes[config.gamemode].groups.map(
+            groupName => config.world.groups[groupName],
+        )
+
+        const [rocketConfig] = groups.flatMap(group => group.rockets)
+
         const rapier = this.store.resources.get("rapier")
         const world = this.store.resources.get("world")
 
@@ -184,7 +200,7 @@ export class ModuleRocket {
 
         let behavior = DEFAULT_BEHAVIOR_CONFIG
 
-        if (this.store.resources.get("config").gameConfig.gamemode.toLowerCase() === "hard") {
+        if (config.gamemode.toLowerCase() === "hard") {
             behavior = HARD_BEHAVIOR_CONFIG
         }
 
@@ -202,7 +218,15 @@ export class ModuleRocket {
                 thrust: false,
             },
             body,
-        })
+            transform: {
+                point: center,
+                rotation: rocketConfig.rotation,
+            },
+            velocity: {
+                x: 0,
+                y: 0,
+            },
+        }) satisfies RocketEntity
     }
 
     private handleCollisionEvent(

@@ -1,5 +1,5 @@
 import { ReplayFrameInputModel } from "game/proto/replay"
-import { GamePlayerStore } from "../../../model/store"
+import { PresentationStore } from "../../../store"
 import { Keyboard } from "./keyboard"
 import { Mouse } from "./mouse"
 import { Touch } from "./touch"
@@ -21,7 +21,7 @@ export class Devices {
     private rotationSpeed = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
     private rotationSpeedIndex = 2
 
-    constructor(store: GamePlayerStore) {
+    constructor(store: PresentationStore) {
         this.deviceKeyboard = new Keyboard()
         this.deviceMouse = new Mouse(store)
         this.deviceTouch = new Touch(store)

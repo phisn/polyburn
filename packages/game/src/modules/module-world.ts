@@ -12,10 +12,16 @@ export interface SummaryResource {
 }
 
 export class ModuleWorld {
+    private bodiesWithTransform: readonly EntityWith<GameComponents, "body" | "transform">[]
+    private bodiesWithVelocity: readonly EntityWith<GameComponents, "body" | "velocity">[]
+
     private bodyToEntity: Map<number, EntityWith<GameComponents, "body">>
     private queue: RAPIER.EventQueue
 
     constructor(private store: GameStore) {
+        this.bodiesWithTransform = store.entities.multiple("body", "transform")
+        this.bodiesWithVelocity = store.entities.multiple("body", "velocity")
+
         this.bodyToEntity = new Map()
         this.queue = new RAPIER.EventQueue(false)
 
@@ -54,6 +60,29 @@ export class ModuleWorld {
     onUpdate(_input: GameInput) {
         const world = this.store.resources.get("world")
         world.step(this.queue)
+
+        for (const bodyEntity of this.bodiesWithTransform) {
+            const body = bodyEntity.get("body")
+
+            if (body.isSleeping() === false) {
+                const transform = bodyEntity.get("transform")
+
+                transform.point.x = body.translation().x
+                transform.point.y = body.translation().y
+                transform.rotation = body.rotation()
+            }
+        }
+
+        for (const bodyEntity of this.bodiesWithVelocity) {
+            const body = bodyEntity.get("body")
+
+            if (body.isSleeping() === false) {
+                const velocity = bodyEntity.get("velocity")
+
+                velocity.x = body.linvel().x
+                velocity.y = body.linvel().y
+            }
+        }
 
         this.queue.drainCollisionEvents((h1, h2, started) => {
             const c1 = world.getCollider(h1)

@@ -143,7 +143,12 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
     }
 
     // signals that a property changed from existing to not existing or vice versa
-    function entityPropertyChanged(entity: EntityInternal, from: string, to: string) {
+    function entityPropertyChanged(
+        entity: EntityInternal,
+        from: string,
+        to: string,
+        action?: () => void,
+    ) {
         const listenersToRemove = entity.archeType.componentToListenerBatches.get(from)
 
         if (listenersToRemove) {
@@ -151,6 +156,8 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
                 listener.notifyRemoved(entity.facade)
             }
         }
+
+        action?.()
 
         entity.archeType.entities.delete(entity.id)
 
@@ -379,13 +386,15 @@ export function newEntityStore<Components extends object>(): EntityStore<Compone
                     return true
                 },
                 delete(component: string) {
-                    const result = delete entity.components[component]
+                    const isIn = component in entity.components
 
-                    if (result) {
-                        entityPropertyChanged(entity, component, ModifierNot + component)
+                    if (isIn) {
+                        entityPropertyChanged(entity, component, ModifierNot + component, () => {
+                            delete entity.components[component]
+                        })
                     }
 
-                    return result
+                    return isIn
                 },
 
                 // very ugly that we have to cast here. but has method

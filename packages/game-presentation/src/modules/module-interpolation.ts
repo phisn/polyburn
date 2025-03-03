@@ -1,21 +1,39 @@
 import { EntityWith } from "game/src/framework/entity"
-import { lerp, slerp } from "game/src/model/utils"
-import { GamePlayerComponents } from "../model/entity"
-import { GamePlayerStore } from "../model/store"
+import { lerp, slerp, Transform } from "game/src/model/utils"
+import { PresentationComponents, PresentationStore } from "../store"
+
+export interface InterpolationComponent {
+    sourceTransform: Transform
+    targetTransform: Transform
+}
 
 export class ModuleInterpolation {
     private toInterpolate: readonly EntityWith<
-        GamePlayerComponents,
-        "interpolation" | "three" | "transform"
+        PresentationComponents,
+        "interpolation" | "transform" | "visual"
     >[]
 
-    constructor(private store: GamePlayerStore) {
-        this.toInterpolate = store.entities.multiple("interpolation", "three", "transform")
+    constructor(private store: PresentationStore) {
+        this.toInterpolate = store.entities.multiple("interpolation", "transform", "visual")
 
-        const getRocket = store.entities.single("interpolation", "rocket", "three", "transform")
+        const getRocket = store.entities.single("interpolation", "rocket", "transform", "visual")
+
         store.events.listen({
             death: () => this.resetInterpolation(getRocket()),
         })
+
+        store.entities.listen(
+            ["transform", "velocity"],
+            entity => {
+                const transform = entity.get("transform")
+
+                entity.set("interpolation", {
+                    sourceTransform: transform,
+                    targetTransform: transform,
+                })
+            },
+            entity => {},
+        )
     }
 
     onReset() {
@@ -27,7 +45,7 @@ export class ModuleInterpolation {
     onUpdate(overstep: number) {
         for (const toInterpolate of this.toInterpolate) {
             const interpolation = toInterpolate.get("interpolation")
-            const three = toInterpolate.get("three")
+            const visual = toInterpolate.get("visual")
 
             const x = lerp(
                 interpolation.sourceTransform.point.x,
@@ -47,8 +65,8 @@ export class ModuleInterpolation {
                 overstep,
             )
 
-            three.position.set(x, y, 0)
-            three.rotation.set(0, 0, rotation)
+            visual.position.set(x, y, 0)
+            visual.rotation.set(0, 0, rotation)
         }
     }
 
@@ -67,16 +85,16 @@ export class ModuleInterpolation {
     }
 
     private resetInterpolation(
-        entity: EntityWith<GamePlayerComponents, "interpolation" | "three" | "transform">,
+        entity: EntityWith<PresentationComponents, "interpolation" | "transform" | "visual">,
     ) {
         const interpolation = entity.get("interpolation")
-        const three = entity.get("three")
+        const visual = entity.get("visual")
         const transform = entity.get("transform")
 
         interpolation.sourceTransform = transform
         interpolation.targetTransform = transform
 
-        three.position.set(transform.point.x, transform.point.y, 0)
-        three.rotation.set(0, 0, transform.rotation)
+        visual.position.set(transform.point.x, transform.point.y, 0)
+        visual.rotation.set(0, 0, transform.rotation)
     }
 }

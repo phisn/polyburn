@@ -24,7 +24,7 @@
         "dexie": "^3.2.4",
         "dexie-react-hooks": "^1.1.6",
         "game": "*",
-        "game-web": "*",
+        "game-presentation": "*",
         "hono": "4.6.9",
         "immer": "^10.1.1",
         "js-sdsl": "^4.4.2",

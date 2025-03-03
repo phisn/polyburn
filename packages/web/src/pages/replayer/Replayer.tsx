@@ -1,5 +1,10 @@
-import { GameLoop } from "game-web/src/game-player-loop"
-import { ReplayPlayer } from "game-web/src/replay-player"
+export function Replayer() {
+    return <></>
+}
+
+/*
+import { GameLoop } from "game-presentation/src/game-player-loop"
+import { ReplayPlayer } from "game-presentation/src/replay-player"
 import { WorldConfig } from "game/proto/world"
 import { GameOutput } from "game/src/model/store"
 import { base64ToBytes } from "game/src/model/utils"
@@ -28,10 +33,10 @@ export function Replayer() {
     const replayId = params.replayId
 
     /* eslint-disable-next-line react-hooks/rules-of-hooks */
-    const [replayer, setReplayer] = useState<ReplayPlayer | undefined>(undefined)
-    /* eslint-disable-next-line react-hooks/rules-of-hooks */
-    const [_gameloop, setGameloop] = useState<GameLoop | undefined>(undefined)
-
+// const [replayer, setReplayer] = useState<ReplayPlayer | undefined>(undefined)
+/* eslint-disable-next-line react-hooks/rules-of-hooks */
+//const [_gameloop, setGameloop] = useState<GameLoop | undefined>(undefined)
+/*
     async function setup() {
         if (replayer !== undefined) {
             return
@@ -83,6 +88,7 @@ export function Replayer() {
     }
 
     /* eslint-disable-next-line react-hooks/rules-of-hooks */
+/*
     useEffect(() => {
         setup().catch(e => {
             console.error(e)
@@ -126,3 +132,4 @@ export function ReplayCanvas(props: { replayer: ReplayPlayer }) {
 
     return <div id="canvas-root"></div>
 }
+*/

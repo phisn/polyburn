@@ -1,5 +1,5 @@
-import { GamePlayer } from "game-web/src/game-player"
-import { GameLoop } from "game-web/src/game-player-loop"
+import { PresentationGameLoop } from "game-presentation/src/presentation-game-loop"
+import { PresentationPlay } from "game-presentation/src/presentation-play"
 import { ReplayModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
 import { base64ToBytes } from "game/src/model/utils"
@@ -20,7 +20,7 @@ export interface PlayerStoreError {
 export interface PlayerStoreFinished {
     status: "finished"
 
-    gamePlayer: GamePlayer
+    gamePlayer: PresentationPlay
     replayHash: string
     replayModel: ReplayModel
     uploadStatus: "uploading" | "uploaded" | "unauthenticated" | "error"
@@ -36,7 +36,7 @@ export interface PlayerStoreLoading {
 export interface PlayerStoreRunning {
     status: "running"
 
-    gamePlayer: GamePlayer
+    gamePlayer: PresentationPlay
 }
 
 export type PlayerStore =
@@ -112,7 +112,7 @@ export function usePlayerStore() {
                 gamePlayer: gamePlayer,
             })
 
-            gamePlayer.game.store.events.listen({
+            gamePlayer.store.events.listen({
                 finished: async () => {
                     try {
                         const inputCapture = gamePlayer.store.resources.get("inputCapture")
@@ -153,10 +153,12 @@ export function usePlayerStore() {
 }
 
 function useGamePlayer(
-    onCreated: (gamePlayer: GamePlayer, gameLoop: GameLoop) => void,
+    onCreated: (gamePlayer: PresentationPlay, gameLoop: PresentationGameLoop) => void,
     onError: (message: string, error?: Error) => void,
 ) {
-    const [gamePair, setGamePair] = useState<[GamePlayer, GameLoop] | undefined>(undefined)
+    const [presentationPair, setPresentation] = useState<
+        [PresentationPlay, PresentationGameLoop] | undefined
+    >(undefined)
 
     const navigate = useNavigate()
     const params = useParams()
@@ -182,7 +184,7 @@ function useGamePlayer(
         const worldname = params.worldname
         const gamemode = params.gamemode
 
-        let gamePlayer: GamePlayer
+        let presentationPlay: PresentationPlay
 
         worldService
             .get(params.worldname)
@@ -203,15 +205,13 @@ function useGamePlayer(
 
                 const world = WorldConfig.decode(base64ToBytes(worldDTO.model))
 
-                gamePlayer = new GamePlayer({
-                    gameConfig: {
-                        gamemode,
-                        world,
-                        worldname,
-                    },
+                presentationPlay = new PresentationPlay({
+                    gamemode,
+                    world,
+                    worldname,
                 })
 
-                setGamePair([gamePlayer, new GameLoop(gamePlayer)])
+                setPresentation([presentationPlay, new PresentationGameLoop(presentationPlay)])
             })
             .catch(error => {
                 onErrorRef.current("Failed to create game player", error)
@@ -219,21 +219,21 @@ function useGamePlayer(
             })
 
         return () => {
-            if (gamePlayer) {
-                gamePlayer.onDispose()
+            if (presentationPlay) {
+                presentationPlay.onDispose()
             }
         }
     }, [params, navigate])
 
     useEffect(() => {
-        if (gamePair === undefined) {
+        if (presentationPair === undefined) {
             return
         }
 
-        onCreatedRef.current(...gamePair)
+        onCreatedRef.current(...presentationPair)
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [gamePair])
+    }, [presentationPair])
 }
 
 /*

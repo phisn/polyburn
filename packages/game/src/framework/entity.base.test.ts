@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vitest } from "vitest"
+import { Point } from "../model/utils"
 import { Entity, EntityStore, EntityWith, newEntityStore } from "./entity"
 
 interface Components {
@@ -606,8 +607,6 @@ describe("EntityStore", () => {
 
         const changing2 = store.changing("not-velocity")
 
-        console.log(changes)
-
         expect(changes.added.length).toBe(2)
         expect(changes.removed.length).toBe(0)
         expect(changes.added[0].get("position")).toEqual({ x: 0, y: 0 })
@@ -1009,5 +1008,26 @@ describe("EntityStore", () => {
         )
 
         expect(listened).toBe(1)
+    })
+
+    it("it should provide deleted component in listen", () => {
+        const entity = store.create({
+            position: { x: 0, y: 0 },
+        })
+
+        let component: undefined | Point
+
+        store.listen(
+            ["position"],
+            () => {},
+            entity => {
+                console.log("removal", entity.get("position"))
+                component = entity.get("position")
+            },
+        )
+
+        entity.delete("position")
+
+        expect(component).toStrictEqual({ x: 0, y: 0 })
     })
 })

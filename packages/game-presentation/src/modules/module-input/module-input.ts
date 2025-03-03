@@ -1,6 +1,6 @@
 import { ReplayInputModel } from "game/proto/replay"
 import { GameInput } from "game/src/game"
-import { GamePlayerStore } from "../../model/store"
+import { PresentationStore } from "../../store"
 import { Devices } from "./devices/devices"
 
 export interface InputCaptureResource {
@@ -12,7 +12,7 @@ export interface InputCaptureResource {
 export class ModuleInput {
     private devices: Devices
 
-    constructor(private store: GamePlayerStore) {
+    constructor(private store: PresentationStore) {
         this.store.resources.set("inputCapture", {
             currentInput: { rotation: 0, thrust: false },
             input: ReplayInputModel.create({

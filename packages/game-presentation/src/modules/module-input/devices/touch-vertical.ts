@@ -1,4 +1,4 @@
-import { GamePlayerStore } from "../../../model/store"
+import { PresentationStore } from "../../../store"
 
 export class TouchVertical {
     private pointer?: {
@@ -15,7 +15,7 @@ export class TouchVertical {
 
     private touchEvents = ["touchstart", "touchend", "touchmove", "touchcancel"] as const
 
-    constructor(private store: GamePlayerStore) {
+    constructor(private store: PresentationStore) {
         this.onTouchEvent = this.onTouchEvent.bind(this)
 
         const renderer = this.store.resources.get("renderer")

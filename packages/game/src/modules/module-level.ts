@@ -2,23 +2,24 @@ import RAPIER from "@dimforge/rapier2d"
 import { LevelConfig } from "../../proto/world"
 import { EntityWith } from "../framework/entity"
 import { GameInput } from "../game"
-import { Point, Rect, Size, changeAnchor } from "../model/utils"
+import { changeAnchor, Point, Rect, Size, Transform } from "../model/utils"
 import { GameComponents, GameStore } from "../store"
-import { RocketEntity, rocketComponents } from "./module-rocket"
+import { rocketComponents, RocketEntity } from "./module-rocket"
 
 export interface LevelComponent {
     cameraRect: Rect
     index: number
-    position: Point
-    rotation: number
     start: boolean
 
     collidersCapturing: number
     completed: boolean
 }
 
-export const levelComponents = ["level", "body"] satisfies (keyof GameComponents)[]
-export type LevelEntity = EntityWith<GameComponents, (typeof levelComponents)[number]>
+export const levelComponents = ["level", "transform"] satisfies (keyof GameComponents)[]
+export type LevelEntity<Components extends GameComponents = GameComponents> = EntityWith<
+    Components,
+    (typeof levelComponents)[number]
+>
 
 export class ModuleLevel {
     private getRocket: () => RocketEntity
@@ -29,7 +30,7 @@ export class ModuleLevel {
     private previousBorder?: RAPIER.Collider
 
     constructor(private store: GameStore) {
-        this.getRocket = store.entities.single(...rocketComponents)
+        this.getRocket = store.entities.single("body", ...rocketComponents)
 
         store.events.listen({
             collision: ({ e1, e2, started }) => {
@@ -54,18 +55,25 @@ export class ModuleLevel {
 
         const config = this.store.resources.get("config")
 
-        const { level: firstLevelConfig } = config.levels
+        const groups = config.world.gamemodes[config.gamemode].groups.map(
+            groupName => config.world.groups[groupName],
+        )
+
+        const levels = groups.flatMap(group => group.levels)
+        const [rocket] = groups.flatMap(group => group.rockets)
+
+        const { level: firstLevelConfig } = levels
             .map(level => ({
                 level,
                 distance: Math.sqrt(
-                    (level.positionX - config.rocket.positionX) ** 2 +
-                        (level.positionY - config.rocket.positionY) ** 2,
+                    (level.positionX - rocket.positionX) ** 2 +
+                        (level.positionY - rocket.positionY) ** 2,
                 ),
             }))
             .reduce((a, b) => (a.distance < b.distance ? a : b))
 
-        for (let i = 0; i < config.levels.length; ++i) {
-            const levelConfig = config.levels[i]
+        for (let i = 0; i < levels.length; ++i) {
+            const levelConfig = levels[i]
             this.constructLevel(i, levelConfig, levelConfig === firstLevelConfig)
         }
     }
@@ -95,8 +103,12 @@ export class ModuleLevel {
         this.progressLevel = undefined
 
         const world = this.store.resources.get("world")
-        const body = captured.get("body")
-        world.removeRigidBody(body)
+
+        if (captured.has("body")) {
+            const body = captured.get("body")
+            world.removeRigidBody(body)
+            captured.delete("body")
+        }
 
         const levelComponent = captured.get("level")
         levelComponent.completed = true
@@ -173,15 +185,18 @@ export class ModuleLevel {
         const rapier = this.store.resources.get("rapier")
         const world = this.store.resources.get("world")
 
-        const position = {
-            x: levelConfig.positionX,
-            y: levelConfig.positionY,
+        const transform: Transform = {
+            point: {
+                x: levelConfig.positionX,
+                y: levelConfig.positionY,
+            },
+            rotation: levelConfig.rotation,
         }
 
         const body = world.createRigidBody(new rapier.RigidBodyDesc(rapier.RigidBodyType.Fixed))
 
         const captureBox = calculateCaptureBox(
-            position,
+            transform.point,
             levelConfig.rotation,
             levelConfig.captureAreaLeft,
             levelConfig.captureAreaRight,
@@ -207,14 +222,13 @@ export class ModuleLevel {
                     bottom: levelConfig.cameraBottomRightY,
                 },
                 index,
-                position,
-                rotation: levelConfig.rotation,
                 start,
 
                 collidersCapturing: 0,
                 completed: start,
             },
-        })
+            transform,
+        }) satisfies LevelEntity
 
         if (start) {
             this.constructBorder(level.get("level"))

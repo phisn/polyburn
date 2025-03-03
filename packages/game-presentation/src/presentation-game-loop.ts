@@ -1,16 +1,16 @@
-export interface GameLoopRunnable {
+export interface PresentationRunnable {
     onFixedUpdate(last: boolean): void
     onUpdate(delta: number, overstep: number): void
 }
 
-export class GameLoop {
+export class PresentationGameLoop {
     private animationFrame: number | undefined
     private previous_time: DOMHighResTimeStamp | undefined
     private loop_time = 0
 
     private tickrate = 1000 / 60
 
-    constructor(private runnable: GameLoopRunnable) {
+    constructor(private runnable: PresentationRunnable) {
         this.tick = this.tick.bind(this)
     }
 

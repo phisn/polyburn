@@ -1,5 +1,5 @@
 import { OrthographicCamera, Scene } from "three"
-import { GamePlayerStore } from "../../model/store"
+import { PresentationStore } from "../../store"
 import { Timer } from "./timer"
 
 export class ModuleUI {
@@ -8,7 +8,7 @@ export class ModuleUI {
 
     private timer: Timer
 
-    constructor(private store: GamePlayerStore) {
+    constructor(private store: PresentationStore) {
         this.camera = new OrthographicCamera(-1, 1, 1, -1, -100, 100)
         this.scene = new Scene()
 

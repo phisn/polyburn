@@ -1,22 +1,21 @@
 import { EventStore } from "game/src/framework/event"
-import { GameConfig } from "game/src/game"
-import { GameOutput, GameOutputEvents } from "game/src/model/store"
+import { GameConfig } from "game/src/store"
 import { Color, WebGLRenderer } from "three"
 import { GameLoopRunnable } from "./game-player-loop"
-import { GamePlayerStore } from "./model/store"
 import { ModuleCamera } from "./modules/module-camera"
 import { ModuleInterpolation } from "./modules/module-interpolation"
 import { ModuleParticles } from "./modules/module-particles/module-particles"
 import { ModuleSyncGame } from "./modules/module-sync-game"
 import { ModuleUI } from "./modules/module-ui/module-ui"
 import { ModuleVisual } from "./modules/module-visual/module-visual"
+import { PresentationStore } from "./store"
 
 export interface ReplayPlayerConfig extends GameConfig {
     replay: GameOutput
 }
 
 export class ReplayPlayer implements GameLoopRunnable {
-    public store: GamePlayerStore
+    public store: PresentationStore
 
     private outputEvents: EventStore<GameOutputEvents>
 
@@ -35,7 +34,7 @@ export class ReplayPlayer implements GameLoopRunnable {
         renderer.autoClear = false
         renderer.setClearColor(Color.NAMES["black"], 1)
 
-        this.store = new GamePlayerStore(config, renderer)
+        this.store = new PresentationStore(config, renderer)
         this.store.resources.set("summary", {
             ticks: 0,
         })
@@ -82,7 +81,7 @@ export class ReplayPlayer implements GameLoopRunnable {
         this.moduleInterpolation.onUpdate(overstep)
 
         this.moduleCamera.onUpdate(delta)
-        this.moduleParticles.update(delta)
+        this.moduleParticles.onUpdate(delta)
         // this.moduleVisual.onUpdate()
 
         this.render()

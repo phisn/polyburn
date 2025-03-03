@@ -4,7 +4,7 @@ import { Point } from "game/src/model/utils"
 import { makeCCW, quickDecomp } from "poly-decomp-es"
 import * as SAT from "sat"
 import * as THREE from "three"
-import { GamePlayerStore } from "../../model/store"
+import { PresentationStore } from "../../store"
 import { Environment, aabbFromCircle, newEnvironment } from "./particle-environment"
 import {
     ParticleTemplate,
@@ -36,7 +36,7 @@ export class ParticleSimulation {
     private instanceMatrix = new THREE.Matrix4()
     private maxInstances = 2048
 
-    constructor(store: GamePlayerStore) {
+    constructor(store: PresentationStore) {
         const config = store.resources.get("config")
 
         const shapesVerticies = config.world.gamemodes[config.gamemode].groups.flatMap(group =>

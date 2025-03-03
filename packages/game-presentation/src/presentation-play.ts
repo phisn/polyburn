@@ -1,35 +1,31 @@
-import RAPIER from "@dimforge/rapier2d"
-import { Game, GameConfig } from "game/src/game"
+import { Game } from "game/src/game"
+import { GameConfig } from "game/src/store"
 import { Color, WebGLRenderer } from "three"
-import { GameLoopRunnable } from "./game-player-loop"
-import { GamePlayerStore } from "./model/store"
 import { ModuleCamera } from "./modules/module-camera"
 import { ModuleInput } from "./modules/module-input/module-input"
 import { ModuleInterpolation } from "./modules/module-interpolation"
 import { ModuleParticles } from "./modules/module-particles/module-particles"
-import { ModuleSyncGame } from "./modules/module-sync-game"
 import { ModuleUI } from "./modules/module-ui/module-ui"
 import { ModuleVisual } from "./modules/module-visual/module-visual"
+import { PresentationRunnable } from "./presentation-game-loop"
+import { PresentationStore } from "./store"
 
-export interface GamePlayerConfig {
-    gameConfig: GameConfig
-}
+export interface PresentationPlayConfig extends GameConfig {}
 
-export class GamePlayer implements GameLoopRunnable {
+export class PresentationPlay implements PresentationRunnable {
     public game: Game
-    public store: GamePlayerStore
+    public store: PresentationStore
 
     private moduleCamera: ModuleCamera
     private moduleInput: ModuleInput
     private moduleInterpolation: ModuleInterpolation
     private moduleParticles: ModuleParticles
-    private moduleSyncGame: ModuleSyncGame
     private moduleUI: ModuleUI
     private moduleVisual: ModuleVisual
 
     private reset = false
 
-    constructor(config: GamePlayerConfig) {
+    constructor(config: PresentationPlayConfig) {
         const renderer = new WebGLRenderer({
             antialias: true,
             alpha: true,
@@ -37,24 +33,19 @@ export class GamePlayer implements GameLoopRunnable {
         renderer.autoClear = false
         renderer.setClearColor(Color.NAMES["black"], 1)
 
-        this.game = new Game(config.gameConfig, { rapier: RAPIER })
-
-        this.store = new GamePlayerStore(config.gameConfig, renderer)
-        this.store.resources.set("summary", {
-            ticks: 0,
-        })
+        this.store = new PresentationStore(config, renderer)
+        this.game = new Game(this.store)
 
         this.moduleCamera = new ModuleCamera(this.store)
         this.moduleInput = new ModuleInput(this.store)
         this.moduleInterpolation = new ModuleInterpolation(this.store)
         this.moduleParticles = new ModuleParticles(this.store)
-        this.moduleSyncGame = new ModuleSyncGame(this.store)
         this.moduleUI = new ModuleUI(this.store)
         this.moduleVisual = new ModuleVisual(this.store)
 
-        this.game.store.events.listen({
+        this.store.events.listen({
             death: () => {
-                const summary = this.game.store.resources.get("summary")
+                const summary = this.store.resources.get("summary")
 
                 if (summary.flags === 0) {
                     this.reset = true
@@ -62,7 +53,9 @@ export class GamePlayer implements GameLoopRunnable {
             },
         })
 
+        console.log("before reset")
         this.onReset()
+        console.log("after reset")
     }
 
     onDispose() {
@@ -75,8 +68,9 @@ export class GamePlayer implements GameLoopRunnable {
     onReset() {
         this.store.resources.get("summary").ticks = 0
 
+        console.log("in before reset")
         this.game.onReset()
-        this.moduleSyncGame.onReset()
+        console.log("in after reset")
 
         this.moduleInterpolation.onReset()
 
@@ -105,8 +99,7 @@ export class GamePlayer implements GameLoopRunnable {
         this.moduleInterpolation.onUpdate(overstep)
 
         this.moduleCamera.onUpdate(delta)
-        this.moduleParticles.update(delta)
-        // this.moduleVisual.onUpdate()
+        this.moduleParticles.onUpdate(delta)
 
         this.render()
 
@@ -117,8 +110,7 @@ export class GamePlayer implements GameLoopRunnable {
         this.store.resources.get("summary").ticks++
 
         const inputCapture = this.store.resources.get("inputCapture")
-        const output = this.game.onUpdate(inputCapture.currentInput)
-        this.moduleSyncGame.onFixedUpdate(output)
+        this.game.onUpdate(inputCapture.currentInput)
     }
 
     private render() {

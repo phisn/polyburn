@@ -1,41 +1,46 @@
+import { levelComponents } from "game/src/modules/module-level"
+import { rocketComponents } from "game/src/modules/module-rocket"
+import { shapeComponents } from "game/src/modules/module-shape"
 import * as THREE from "three"
-import { GamePlayerStore } from "../../model/store"
+import { PresentationStore } from "../../store"
 import { MutatableShapeGeometry } from "./mutatable-shape-geometry"
 import { Flag, Flag as ObjectFlag } from "./objects/object-flag"
 import { Rocket as ObjectRocket } from "./objects/object-rocket"
 
 export class ModuleVisual {
-    constructor(private store: GamePlayerStore) {
+    constructor(private store: PresentationStore) {
         const scene = store.resources.get("scene")
 
         store.entities.listen(
-            ["level", "transform"],
+            levelComponents,
             entity => {
                 const level = entity.get("level")
                 const transform = entity.get("transform")
 
-                if (level.first) {
+                if (level.start) {
                     return
                 }
 
                 const flagObject = new ObjectFlag(transform)
                 scene.add(flagObject)
 
-                entity.set("three", flagObject)
+                entity.set("visual", flagObject)
             },
             entity => {
-                if (entity.has("three") === false) {
+                if (entity.has("visual") === false) {
                     return
                 }
 
-                scene.remove(entity.get("three"))
+                scene.remove(entity.get("visual"))
             },
         )
 
+        console.log("before listen")
+
         store.entities.listen(
-            ["rocket", "transform"],
+            rocketComponents,
             entity => {
-                console.log("got notified")
+                console.log("got add")
                 const transform = entity.get("transform")
                 const rocketObject = new ObjectRocket()
 
@@ -43,20 +48,22 @@ export class ModuleVisual {
                 rocketObject.rotation.set(0, 0, transform.rotation)
 
                 scene.add(rocketObject)
-                entity.set("three", rocketObject)
+                entity.set("visual", rocketObject)
             },
             entity => {
-                console.log("remove oiajsdoiasjd")
-                if (entity.has("three") === false) {
+                console.log("got remove")
+                if (entity.has("visual") === false) {
                     return
                 }
 
-                scene.remove(entity.get("three"))
+                scene.remove(entity.get("visual"))
             },
         )
 
+        console.log("after listen")
+
         store.entities.listen(
-            ["shape"],
+            shapeComponents,
             entity => {
                 const shapeGeometry = new MutatableShapeGeometry(
                     entity.get("shape").vertices.map(vertex => ({
@@ -71,24 +78,24 @@ export class ModuleVisual {
                 shapeMaterial.depthTest = false
 
                 scene.add(shapeMesh)
-                entity.set("three", shapeMesh)
+                entity.set("visual", shapeMesh)
             },
             entity => {
-                if (entity.has("three") === false) {
+                if (entity.has("visual") === false) {
                     return
                 }
 
-                scene.remove(entity.get("three"))
+                scene.remove(entity.get("visual"))
             },
         )
 
         store.events.listen({
             captureChanged: ({ level, started }) => {
-                if (level.has("three")) {
-                    const three = level.get("three")
+                if (level.has("visual")) {
+                    const visual = level.get("visual")
 
-                    if (three instanceof Flag) {
-                        three.setActive(started)
+                    if (visual instanceof Flag) {
+                        visual.setActive(started)
                     }
                 }
             },

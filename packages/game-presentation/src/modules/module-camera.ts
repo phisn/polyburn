@@ -1,7 +1,7 @@
 import { EntityWith } from "game/src/framework/entity"
+import { rocketComponents, RocketEntity } from "game/src/modules/module-rocket"
 import * as THREE from "three"
-import { GamePlayerComponents } from "../model/entity"
-import { GamePlayerStore } from "../model/store"
+import { PresentationComponents, PresentationStore } from "../store"
 
 type TransitionAnimation =
     | undefined
@@ -29,7 +29,7 @@ export class ModuleCamera extends THREE.OrthographicCamera {
     private configAnimationSpeed: number
     private configZoom: number
 
-    private getRocket: () => EntityWith<GamePlayerComponents, "three" | "rocket" | "transform">
+    private getRocket: () => RocketEntity<PresentationComponents>
 
     private cameraTargetSize: THREE.Vector2 = new THREE.Vector2()
     private levelConstraintPosition: THREE.Vector2 = new THREE.Vector2()
@@ -39,14 +39,14 @@ export class ModuleCamera extends THREE.OrthographicCamera {
     private transitionAnimation: TransitionAnimation = undefined
     private startAnimation: StartAnimation = undefined
 
-    constructor(private store: GamePlayerStore) {
+    constructor(private store: PresentationStore) {
         super()
 
         this.position.z = 5
         this.configAnimationSpeed = 1.0 / 1000.0
         this.configZoom = 1920 * 0.04
 
-        this.getRocket = store.entities.single("three", "rocket", "transform")
+        this.getRocket = store.entities.single(...rocketComponents)
 
         this.startAnimation = {
             progress: 0,
@@ -84,7 +84,7 @@ export class ModuleCamera extends THREE.OrthographicCamera {
         this.position.x = transform.point.x
         this.position.y = transform.point.y
 
-        const firstLevel = this.store.entities.multiple("level").find(x => x.get("level").first)
+        const firstLevel = this.store.entities.multiple("level").find(x => x.get("level").start)
 
         if (!firstLevel) {
             throw new Error("No first level found")
@@ -246,14 +246,15 @@ export class ModuleCamera extends THREE.OrthographicCamera {
         }
 
         const rocket = this.getRocket()
-        const rocketThree = rocket.get("three")
 
-        if (rocketThree === undefined) {
-            throw new Error("Rocket visual not found")
+        if (rocket.has("visual") === false) {
+            return
         }
 
-        const rocketPositionInViewX = rocketThree.position.x - this.levelConstraintPosition.x
-        const rocketPositionInViewY = rocketThree.position.y - this.levelConstraintPosition.y
+        const visual = rocket.get("visual")
+
+        const rocketPositionInViewX = visual.position.x - this.levelConstraintPosition.x
+        const rocketPositionInViewY = visual.position.y - this.levelConstraintPosition.y
 
         const cameraPositionX =
             this.levelConstraintPosition.x +
@@ -272,17 +273,17 @@ export class ModuleCamera extends THREE.OrthographicCamera {
         }
     }
 
-    private updateLevelConstraintFromLevel(level: EntityWith<GamePlayerComponents, "level">) {
+    private updateLevelConstraintFromLevel(level: EntityWith<PresentationComponents, "level">) {
         const levelComponent = level.get("level")
 
         this.levelConstraintSize = new THREE.Vector2(
-            levelComponent.bounding.right - levelComponent.bounding.left,
-            levelComponent.bounding.top - levelComponent.bounding.bottom,
+            levelComponent.cameraRect.right - levelComponent.cameraRect.left,
+            levelComponent.cameraRect.top - levelComponent.cameraRect.bottom,
         )
 
         this.levelConstraintPosition = new THREE.Vector2(
-            levelComponent.bounding.left,
-            levelComponent.bounding.bottom,
+            levelComponent.cameraRect.left,
+            levelComponent.cameraRect.bottom,
         )
     }
 

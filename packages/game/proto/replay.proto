@@ -1,25 +1,14 @@
 syntax = "proto3";
 
-message ReplayModel {
-    repeated ReplayFrameModel frames = 1;
-}
-
-message ReplayFrameModel {
-    bool thrust = 1;
-    float rotation = 2;
-}
-
 message ReplayInputModel {
-    repeated ReplayFrameInputModel frames = 1;
+    string worldname = 1;
+    string gamemode = 2;
 
-    string worldname = 2;
-    string gamemode = 3;
+    bytes input_deterministic = 3;
+    repeated RealInputModel input_real = 4;
 }
 
-message ReplayFrameInputModel {
-    bool thrust = 1;
-    float rotation = 2;
-
+message RealInputModel {
     optional KeyboardInputModel real_keyboard = 3;
     optional MouseInputModel real_mouse = 4;
     optional TouchInputModel real_touch = 5;

@@ -65,11 +65,13 @@ export class ModuleWorld {
             const body = bodyEntity.get("body")
 
             if (body.isSleeping() === false) {
-                const transform = bodyEntity.get("transform")
-
-                transform.point.x = body.translation().x
-                transform.point.y = body.translation().y
-                transform.rotation = body.rotation()
+                bodyEntity.set("transform", {
+                    point: {
+                        x: body.translation().x,
+                        y: body.translation().y,
+                    },
+                    rotation: body.rotation(),
+                })
             }
         }
 
@@ -77,10 +79,10 @@ export class ModuleWorld {
             const body = bodyEntity.get("body")
 
             if (body.isSleeping() === false) {
-                const velocity = bodyEntity.get("velocity")
-
-                velocity.x = body.linvel().x
-                velocity.y = body.linvel().y
+                bodyEntity.set("velocity", {
+                    x: body.linvel().x,
+                    y: body.linvel().y,
+                })
             }
         }
 

@@ -1030,4 +1030,29 @@ describe("EntityStore", () => {
 
         expect(component).toStrictEqual({ x: 0, y: 0 })
     })
+
+    /*
+    it("should exist in notify deleted after deletion", () => {
+        const entity = store.create({
+            position: { x: 0, y: 0 },
+        })
+
+        const removed = vitest.fn()
+
+        store.listen(["position", "health"], () => {}, removed)
+
+        store.listen(
+            ["position"],
+            entity => {
+                entity.set("health", { hp: 100 })
+            },
+            entity => {
+                entity.delete("health")
+            },
+        )
+
+        store.remove(entity)
+        expect(removed).toBeCalledTimes(1)
+    })
+    */
 })

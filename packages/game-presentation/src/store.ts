@@ -6,7 +6,7 @@ import { GameComponents, GameConfig, GameEvents, GameResources, GameStore } from
 import { LobbyUserDTO } from "shared/src/lobby-api/lobby-api"
 import * as THREE from "three"
 import { Scene, WebGLRenderer } from "three"
-import { InputCaptureResource } from "./modules/module-input/module-input"
+import { InputResource } from "./modules/module-input/module-input"
 import { InterpolationComponent } from "./modules/module-interpolation"
 
 export class PresentationStore implements GameStore {
@@ -40,7 +40,7 @@ export interface PresentationEvents extends GameEvents<PresentationComponents> {
 }
 
 export interface PresentationResources extends GameResources {
-    inputCapture: InputCaptureResource
+    inputCapture: InputResource
     renderer: WebGLRenderer
     scene: Scene
 }

@@ -1,6 +1,6 @@
 import { PresentationGameLoop } from "game-presentation/src/presentation-game-loop"
 import { PresentationPlay } from "game-presentation/src/presentation-play"
-import { ReplayModel } from "game/proto/replay"
+import { ReplayInputModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
 import { base64ToBytes } from "game/src/model/utils"
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -22,7 +22,7 @@ export interface PlayerStoreFinished {
 
     gamePlayer: PresentationPlay
     replayHash: string
-    replayModel: ReplayModel
+    replayModel: ReplayInputModel
     uploadStatus: "uploading" | "uploaded" | "unauthenticated" | "error"
 
     bestReplaySummary?: ReplaySummaryDTO
@@ -116,6 +116,7 @@ export function usePlayerStore() {
                 finished: async () => {
                     try {
                         const inputCapture = gamePlayer.store.resources.get("inputCapture")
+                        const input = inputCapture.reconstructInput()
 
                         const config = gamePlayer.store.resources.get("config")
 
@@ -123,7 +124,7 @@ export function usePlayerStore() {
                             config.worldname,
                             config.gamemode,
 
-                            inputCapture.input,
+                            input,
                         )
 
                         setStore({
@@ -131,7 +132,7 @@ export function usePlayerStore() {
 
                             gamePlayer,
                             replayHash,
-                            replayModel: inputCapture.input,
+                            replayModel: input,
                             uploadStatus: "unauthenticated",
                         })
                     } catch (e) {

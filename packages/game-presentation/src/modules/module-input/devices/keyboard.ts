@@ -59,11 +59,12 @@ export class Keyboard {
 
     onFixedUpdate() {
         if (this.keyboardLeft || this.keyboardUpA) {
-            this._rotation += 0.001 * 0.16 * this.rotationSpeed
+            console.log(this._rotation)
+            this._rotation += 0.12 * 0.16 * this.rotationSpeed
         }
 
         if (this.keyboardRight || this.keyboardUpD) {
-            this._rotation -= 0.001 * 0.16 * this.rotationSpeed
+            this._rotation -= 0.12 * 0.16 * this.rotationSpeed
         }
 
         this._thrust = this.keyboardUpArrow || this.keyboardUpW || this.keyboardUpSpace

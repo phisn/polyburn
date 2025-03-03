@@ -9,6 +9,7 @@ import { EventStore } from "game/src/framework/event"
 import { ResourceStore } from "game/src/framework/resource"
 import { Game } from "game/src/game"
 import { GameOutputEventsRaw, GameOutputReplay } from "game/src/model/api"
+import { applyDeterministicInput as applyReplayInputModel } from "game/src/model/deterministic-input"
 import { GameStore } from "game/src/store"
 import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
@@ -309,7 +310,7 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
             new Uint8Array(Buffer.from(world.configBase64 ?? "", "base64")),
         )
 
-        const replayInput = ReplayInputModel.decode(
+        const replayInputModel = ReplayInputModel.decode(
             new Uint8Array(Buffer.from(replayModelBase64, "base64")),
         )
 
@@ -373,7 +374,7 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
 
         game.onReset()
 
-        for (const frame of replayInput.frames) {
+        applyReplayInputModel(replayInputModel, frame => {
             outputEvents = {}
 
             game.onUpdate({
@@ -390,11 +391,17 @@ function validateReplay(gamemode: string, replayModelBase64: string, worldname: 
 
                 ...outputEvents,
             })
+        })
+
+        const summary = store.resources.get("summary")
+
+        if (summary.finished === false) {
+            return undefined
         }
 
         return {
-            replay: outputEvents,
-            summary: store.resources.get("summary"),
+            replay,
+            summary,
         }
     } catch (e) {
         console.error(e)

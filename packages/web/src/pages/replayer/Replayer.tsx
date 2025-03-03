@@ -1,12 +1,7 @@
-export function Replayer() {
-    return <></>
-}
-
-/*
-import { GameLoop } from "game-presentation/src/game-player-loop"
-import { ReplayPlayer } from "game-presentation/src/replay-player"
+import { PresentationGameLoop } from "game-presentation/src/presentation-game-loop"
+import { PresentationReplay } from "game-presentation/src/presentation-replay"
 import { WorldConfig } from "game/proto/world"
-import { GameOutput } from "game/src/model/store"
+import { GameOutputReplay } from "game/src/model/api"
 import { base64ToBytes } from "game/src/model/utils"
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
@@ -33,10 +28,10 @@ export function Replayer() {
     const replayId = params.replayId
 
     /* eslint-disable-next-line react-hooks/rules-of-hooks */
-// const [replayer, setReplayer] = useState<ReplayPlayer | undefined>(undefined)
-/* eslint-disable-next-line react-hooks/rules-of-hooks */
-//const [_gameloop, setGameloop] = useState<GameLoop | undefined>(undefined)
-/*
+    const [replayer, setReplayer] = useState<PresentationReplay | undefined>(undefined)
+    /* eslint-disable-next-line react-hooks/rules-of-hooks */
+    const [_gameloop, setGameloop] = useState<PresentationGameLoop | undefined>(undefined)
+
     async function setup() {
         if (replayer !== undefined) {
             return
@@ -45,7 +40,7 @@ export function Replayer() {
         const replayDTO = await replayService.get(replayId)
 
         const replayRequest = await fetch(replayDTO.replayUrl)
-        const replay = await replayRequest.json<GameOutput>()
+        const replay = await replayRequest.json<GameOutputReplay>()
 
         const world = await worldService.get(replayDTO.worldname)
 
@@ -73,14 +68,14 @@ export function Replayer() {
             return
         }
 
-        const _replayer = new ReplayPlayer({
+        const _replayer = new PresentationReplay({
             replay,
             gamemode: replayDTO.gamemode,
             world: worldConfig,
             worldname: replayDTO.worldname,
         })
 
-        const gameLoop = new GameLoop(_replayer)
+        const gameLoop = new PresentationGameLoop(_replayer)
         gameLoop.start()
 
         setReplayer(_replayer)
@@ -88,7 +83,6 @@ export function Replayer() {
     }
 
     /* eslint-disable-next-line react-hooks/rules-of-hooks */
-/*
     useEffect(() => {
         setup().catch(e => {
             console.error(e)
@@ -103,7 +97,7 @@ export function Replayer() {
     return <ReplayCanvas replayer={replayer} />
 }
 
-export function ReplayCanvas(props: { replayer: ReplayPlayer }) {
+export function ReplayCanvas(props: { replayer: PresentationReplay }) {
     const canvas = props.replayer.store.resources.get("renderer").domElement
 
     useEffect(() => {
@@ -132,4 +126,3 @@ export function ReplayCanvas(props: { replayer: ReplayPlayer }) {
 
     return <div id="canvas-root"></div>
 }
-*/

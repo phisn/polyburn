@@ -32,7 +32,7 @@ export class ModuleInterpolation {
                     targetTransform: transform,
                 })
             },
-            entity => {},
+            () => void 0,
         )
     }
 

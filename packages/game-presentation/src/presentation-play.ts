@@ -53,9 +53,7 @@ export class PresentationPlay implements PresentationRunnable {
             },
         })
 
-        console.log("before reset")
         this.onReset()
-        console.log("after reset")
     }
 
     onDispose() {
@@ -68,9 +66,7 @@ export class PresentationPlay implements PresentationRunnable {
     onReset() {
         this.store.resources.get("summary").ticks = 0
 
-        console.log("in before reset")
         this.game.onReset()
-        console.log("in after reset")
 
         this.moduleInterpolation.onReset()
 

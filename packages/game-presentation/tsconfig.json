@@ -3,5 +3,11 @@
     "compilerOptions": {
         "noEmit": true
     },
-    "include": ["src", "types", "troika-three-text.d.ts", "troika-three-text.d.ts"]
+    "include": [
+        "src",
+        "types",
+        "troika-three-text.d.ts",
+        "troika-three-text.d.ts",
+        "../game/src/model/deterministic-input.ts"
+    ]
 }

@@ -64,8 +64,6 @@ export class PresentationPlay implements PresentationRunnable {
     }
 
     onReset() {
-        this.store.resources.get("summary").ticks = 0
-
         this.game.onReset()
 
         this.moduleInterpolation.onReset()
@@ -103,8 +101,6 @@ export class PresentationPlay implements PresentationRunnable {
     }
 
     private tickGame() {
-        this.store.resources.get("summary").ticks++
-
         const inputCapture = this.store.resources.get("inputCapture")
         this.game.onUpdate(inputCapture.currentInput)
     }

@@ -15,6 +15,13 @@
       "when": 1740176548446,
       "tag": "0001_superb_king_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1741097005027,
+      "tag": "0002_glamorous_skrulls",
+      "breakpoints": true
     }
   ]
 }

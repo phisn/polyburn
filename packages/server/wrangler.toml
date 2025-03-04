@@ -31,4 +31,5 @@ bucket_name = "polyburn-maps"
 
 [[r2_buckets]]
 binding = "R2_REPLAYS"
-bucket_name = "polyburn-replays"
+bucket_name = "polyburn-replays-v2"
+

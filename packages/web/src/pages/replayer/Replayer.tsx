@@ -40,7 +40,7 @@ export function Replayer() {
         const replayDTO = await replayService.get(replayId)
 
         const replayRequest = await fetch(replayDTO.replayUrl)
-        const replay = await replayRequest.json<GameOutputReplay>()
+        const replay = await GameOutputReplay.decode(await replayRequest.bytes())
 
         const world = await worldService.get(replayDTO.worldname)
 

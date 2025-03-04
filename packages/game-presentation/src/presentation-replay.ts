@@ -98,7 +98,7 @@ export class PresentationReplay implements PresentationRunnable {
     private tickGame() {
         const summary = this.store.resources.get("summary")
 
-        if (summary.ticks < this.config.replay.frames.length) {
+        if (summary.ticks >= this.config.replay.frames.length) {
             return
         }
 

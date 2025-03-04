@@ -1,6 +1,5 @@
 import RAPIER from "@dimforge/rapier2d"
 import { zValidator } from "@hono/zod-validator"
-import * as messagepack from "@msgpack/msgpack"
 import { and, eq } from "drizzle-orm"
 import { ReplayInputModel } from "game/proto/replay"
 import { WorldConfig } from "game/proto/world"
@@ -14,7 +13,7 @@ import { GameStore } from "game/src/store"
 import { Hono } from "hono"
 import { HTTPException } from "hono/http-exception"
 import { ReplayDTO } from "shared/src/server/replay"
-import { gunzipSync, gzipSync } from "zlib"
+import { gzipSync } from "zlib"
 import { z } from "zod"
 import { Environment } from "../../env"
 import { users } from "../user/user-model"
@@ -181,7 +180,7 @@ export const routeReplay = new Hono<Environment>()
                 }
             }
 
-            const replayBuffer = gzipSync(JSON.stringify(result.replay))
+            const replayBuffer = await GameOutputReplay.encode(result.replay)
 
             const customMetadata: Record<string, string> = {
                 userId: "" + user.id,
@@ -189,9 +188,13 @@ export const routeReplay = new Hono<Environment>()
                 worldname: json.worldname,
             }
 
-            const inputObject = await c.env.R2_INPUTS.put(crypto.randomUUID(), inputBuffer, {
-                customMetadata,
-            })
+            const inputObject = await c.env.R2_INPUTS.put(
+                crypto.randomUUID(),
+                gzipSync(inputBuffer),
+                {
+                    customMetadata,
+                },
+            )
 
             const replayObject = await c.env.R2_REPLAYS.put(crypto.randomUUID(), replayBuffer, {
                 customMetadata,
@@ -254,47 +257,7 @@ export const routeReplay = new Hono<Environment>()
                 throw new HTTPException(404)
             }
 
-            console.log("gzip size: ", replayBuffer.byteLength)
-
-            const replayJson = JSON.parse(gunzipSync(replayBuffer).toString("ascii"))
-
-            const mask = z.array(
-                z
-                    .object({
-                        rocketChange: z.object({
-                            point: z.object({
-                                x: z.number(),
-                                y: z.number(),
-                            }),
-                            rotation: z.number(),
-                        }),
-                    })
-                    .optional(),
-            )
-
-            console.log(
-                JSON.stringify(replayJson) ===
-                    JSON.stringify(messagepack.decode(messagepack.encode(replayJson, {}), {})),
-            )
-
-            console.log("messagepack size: ", messagepack.encode(replayJson).length)
-            console.log("gzip messagepack size: ", gzipSync(messagepack.encode(replayJson)).length)
-
-            console.log("2 messagepack size: ")
-            console.log(
-                "2 gzip messagepack size: ",
-                gzipSync(messagepack.encode(replayJson)).length,
-            )
-
-            const randoms = Array.from({ length: 100000 }, () => ({
-                r: Math.random(),
-            }))
-
-            console.log("size1: ", randoms[2])
-            console.log("size1: ", messagepack.encode(randoms).byteLength)
-            console.log("size1: ", randoms.length * 2)
-
-            return c.json(replayJson)
+            return c.body(replayBuffer)
         },
     )
 

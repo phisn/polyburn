@@ -57,10 +57,28 @@ export const GameOutputReplay = {
         forceFloat32: true,
     } satisfies EncoderOptions,
 
-    decode(value: Uint8Array): GameOutputReplay {
-        return decode(value, this.encoderOptions) as GameOutputReplay
+    async decode(value: Uint8Array): Promise<GameOutputReplay> {
+        const decompressed = await new Response(
+            new ReadableStream({
+                start(x) {
+                    x.enqueue(value)
+                    x.close()
+                },
+            }).pipeThrough(new DecompressionStream("gzip")),
+        ).bytes()
+
+        return decode(decompressed, this.encoderOptions) as GameOutputReplay
     },
-    encode(value: GameOutputReplay): Uint8Array {
-        return encode(value, this.encoderOptions)
+    async encode(value: GameOutputReplay): Promise<Uint8Array> {
+        const encoded = encode(value, this.encoderOptions)
+
+        return await new Response(
+            new ReadableStream({
+                start(x) {
+                    x.enqueue(encoded)
+                    x.close()
+                },
+            }).pipeThrough(new CompressionStream("gzip")),
+        ).bytes()
     },
 }

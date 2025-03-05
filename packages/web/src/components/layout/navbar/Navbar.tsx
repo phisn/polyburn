@@ -15,7 +15,7 @@ export function Navbar() {
                 onClick={() => window.open("https://github.com/phisn/polyburn")}
             >
                 <GithubSvg width="24" height="24" />
-                <div className="xs:flex hidden">Github</div>
+                <div className="xs:flex hidden">GitHub</div>
                 {/*<BackArrowSvg width="48" height="48" />*/}
             </div>
             <div className="justify-self-center">

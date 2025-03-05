@@ -25,13 +25,15 @@ export const createStoreSliceFocus: StateCreator<EditorStore, [], [], StoreSlice
     },
 
     select(...id) {
-        set(state => {
+        set(_state => {
+            /*
             const selected = [...state.selected, ...id].filter((value, index, self) => {
                 return self.indexOf(value) === index && state.world.entities.has(value)
             })
+            */
 
             return {
-                selected,
+                selected: id,
             }
         })
     },

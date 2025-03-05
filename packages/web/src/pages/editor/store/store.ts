@@ -1,93 +1,44 @@
-import { Point } from "game/src/model/utils"
-import { MutableRefObject, createContext, useContext } from "react"
-import { Vector3 } from "three"
-import { StoreApi, createStore, useStore } from "zustand"
-import { BehaviorEvent } from "../behaviors/behaviors"
-import { StoreSliceFocus, createStoreSliceFocus } from "./store-slice-focus"
-import { StoreSliceWorld, createStoreSliceWorld } from "./store-slice-world"
+import { EntityStore, newEntityStore } from "game/src/framework/entity"
+import { EventStore } from "game/src/framework/event"
+import { ResourceStore } from "game/src/framework/resource"
+import { createContext } from "react"
+import { Scene, WebGLRenderer } from "three"
+import { proxyMap } from "valtio/utils"
+import { EditorComponents, EditorModel } from "./model"
 
-export interface EditorStore extends StoreSliceWorld, StoreSliceFocus {
-    listeners: Map<number, MutableRefObject<(event: BehaviorEvent) => void>[]>
+export class EditorStore {
+    public entities: EntityStore<EditorComponents>
+    public events: EventStore<EditorEvents>
+    public resources: ResourceStore<EditorResources>
 
-    contextMenu?: {
-        element: () => JSX.Element
-        point: Point
+    constructor() {
+        this.entities = newEntityStore()
+        this.events = new EventStore()
+
+        this.resources = new ResourceStore({
+            model: {
+                entityBundles: proxyMap(),
+                gamemodes: proxyMap(),
+                groups: proxyMap(),
+            },
+            renderer: new WebGLRenderer(),
+            scene: new Scene(),
+        })
     }
-
-    zoomTargetOrientation: { inWorld: Vector3; inWindow: Point }
-    zoomTarget: number
-
-    openContextMenu(point: Point, element: () => JSX.Element): void
-
-    listen(id: number, listener: MutableRefObject<(event: BehaviorEvent) => void>): () => void
-    publish(event: BehaviorEvent): void
-
-    setZoomTarget(zoom: number, orientation: { inWorld: Vector3; inWindow: Point }): void
 }
 
-export const createEditorStore = () =>
-    createStore<EditorStore>((set, get, store) => ({
-        ...createStoreSliceWorld(set, get, store),
-        ...createStoreSliceFocus(set, get, store),
+export interface EditorEvents {}
 
-        listeners: new Map(),
-
-        zoomTarget: 50,
-        zoomTargetOrientation: { inWorld: new Vector3(), inWindow: new Vector3() },
-
-        contextMenu: undefined,
-        openContextMenu(point, element) {
-            set(() => ({
-                contextMenu: {
-                    element,
-                    point,
-                },
-            }))
-        },
-        listen(id, listener) {
-            set(state => ({
-                listeners: new Map(state.listeners).set(id, [
-                    ...(state.listeners.get(id) ?? []),
-                    listener,
-                ]),
-            }))
-
-            return () => {
-                set(state => {
-                    const listeners = new Map(state.listeners)
-                    listeners.delete(id)
-
-                    return {
-                        listeners,
-                    }
-                })
-            }
-        },
-        publish(event) {
-            for (const listener of get().listeners.get(event.targetId) ?? []) {
-                listener.current(event)
-            }
-        },
-        setZoomTarget(zoom, orientation) {
-            set(() => ({
-                zoomTarget: zoom,
-                zoomTargetOrientation: orientation,
-            }))
-        },
-    }))
-
-export const editorStoreContext = createContext<StoreApi<EditorStore> | undefined>(undefined)
-
-export function useEditorContext() {
-    const store = useContext(editorStoreContext)
-
-    if (store === undefined) {
-        throw new Error("useEditorStore must be used within a EditorStoreProvider")
-    }
-
-    return store
+export interface EditorResources {
+    model: EditorModel
+    renderer: WebGLRenderer
+    scene: Scene
+    undoRedo: UndoRedo
 }
 
-export function useEditorStore<T>(selector: (store: EditorStore) => T) {
-    return useStore(useEditorContext(), selector)
+export interface UndoRedo {
+    undo: (() => void)[]
+    redo: (() => void)[]
 }
+
+export const EditorStoreContext = createContext<EditorStore | undefined>(undefined)

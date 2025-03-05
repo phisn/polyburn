@@ -3,7 +3,7 @@ import { Layout } from "./Layout"
 import { Navbar } from "./navbar/Navbar"
 
 export function LayoutWithMenu() {
-    const mobileClass = isMobile ? "" : "space-y-2"
+    const mobileClass = isMobile ? "" : ""
 
     return (
         <div

@@ -1,5 +1,4 @@
-import { Object3D } from "three"
-import { proxy } from "valtio"
+import { Mesh, MeshBasicMaterial, Object3D, PlaneGeometry } from "three"
 import { subscribeMapChanges } from "../../store/model"
 import { EditorStore } from "../../store/store"
 import { VisualRocket } from "./visual-rocket"
@@ -46,30 +45,11 @@ export class ModuleCanvas {
             }),
         )
 
-        model.entityBundles.set(0, {
-            type: "rocket",
-            rocket: store.entities.create({
-                identity: proxy({
-                    bundleId: 0,
-                    type: "object",
-                }),
-                transform: proxy({
-                    point: {
-                        x: 0,
-                        y: 0,
-                    },
-                    rotation: 0,
-                }),
-            }),
-        })
-
-        /*
-        const geometry = new THREE.PlaneGeometry(1, 1)
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-        const square = new THREE.Mesh(geometry, material)
+        const geometry = new PlaneGeometry(1, 1)
+        const material = new MeshBasicMaterial({ color: 0x00ff00 })
+        const square = new Mesh(geometry, material)
 
         scene.add(square)
-        */
     }
 
     onDispose() {

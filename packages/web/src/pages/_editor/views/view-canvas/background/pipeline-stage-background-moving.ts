@@ -1,4 +1,4 @@
-import { ConsumeEvent } from "../pipeline/pipeline-event"
+import { ConsumeEvent } from "../../../../editor/views/canvas/canvas-event"
 import { PipelineStage } from "../pipeline/pipeline-stage"
 
 export const pipelineStageBackgroundMoving: PipelineStage = (event, { three, state, store }) => {

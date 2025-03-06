@@ -1,7 +1,7 @@
+import { CanvasEvent, ConsumeEvent } from "../../../../editor/views/canvas/canvas-event"
 import { PipelineContext } from "./pipeline-context"
-import { ConsumeEvent, PipelineEvent } from "./pipeline-event"
 
 export type PipelineStage = (
-    event: PipelineEvent,
+    event: CanvasEvent,
     context: PipelineContext,
 ) => typeof ConsumeEvent | void

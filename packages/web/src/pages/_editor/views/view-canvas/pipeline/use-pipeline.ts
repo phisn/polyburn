@@ -1,12 +1,12 @@
 import { useStore } from "@react-three/fiber"
 import { useMemo, useRef } from "react"
+import { ConsumeEvent } from "../../../../editor/views/canvas/canvas-event"
+import { usePipelineEvent } from "../../../../editor/views/canvas/use-canvas-event"
 import { pipelineStageFactories as componentPipelineStages } from "../../../behaviors/behavior-pipeline"
 import { useEditorContext } from "../../../store/store"
 import { pipelineStageBackgroundDefault } from "../background/pipeline-stage-background-default"
 import { pipelineStageBackgroundMoving } from "../background/pipeline-stage-background-moving"
 import { PipelineContext } from "./pipeline-context"
-import { ConsumeEvent } from "./pipeline-event"
-import { usePipelineEvent } from "./use-pipeline-event"
 
 const pipelineStages = [
     pipelineStageBackgroundMoving,

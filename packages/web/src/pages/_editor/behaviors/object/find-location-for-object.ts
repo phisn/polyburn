@@ -1,11 +1,11 @@
 import { changeAnchor, Point } from "game/src/model/utils"
+import { CanvasEvent } from "../../../editor/views/canvas/canvas-event"
 import { snapDistance } from "../../constants"
 import { ImmutableEntityWith } from "../../entities/entity"
-import { PipelineEvent } from "../../views/view-canvas/pipeline/pipeline-event"
 import { findClosestEdge } from "../shape/find-closest-edge"
 
 export const findLocationForObject = (
-    event: PipelineEvent,
+    event: CanvasEvent,
     targetEntity: ImmutableEntityWith<"object">,
     shapeEntities: ImmutableEntityWith<"shape">[],
 ) => {

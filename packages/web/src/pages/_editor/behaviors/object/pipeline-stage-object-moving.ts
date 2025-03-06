@@ -1,6 +1,6 @@
+import { ConsumeEvent } from "../../../editor/views/canvas/canvas-event"
 import { EntityWith } from "../../entities/entity"
 import { WorldState } from "../../store/model/world-state"
-import { ConsumeEvent } from "../../views/view-canvas/pipeline/pipeline-event"
 import { PipelineStage } from "../../views/view-canvas/pipeline/pipeline-stage"
 import { findLocationForObject } from "./find-location-for-object"
 import { MovingEntityEntry } from "./pipeline-state-moving"

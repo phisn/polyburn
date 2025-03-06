@@ -12,6 +12,10 @@ export interface EditorComponents {
     shape: {
         vertices: ShapeVertex[]
     }
+    size: {
+        width: number
+        height: number
+    }
     transform: Transform
 }
 
@@ -33,7 +37,7 @@ export interface EntityBundleLevel {
 export interface EntityBundleRocket {
     type: "rocket"
 
-    rocket: EntityWith<EditorComponents, "identity" | "transform">
+    rocket: EntityWith<EditorComponents, "identity" | "size" | "transform">
 }
 
 export interface EntityBundleShape {

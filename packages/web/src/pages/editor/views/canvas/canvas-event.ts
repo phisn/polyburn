@@ -1,6 +1,6 @@
 import { Vector3 } from "three"
 
-export interface PipelineEvent {
+export interface CanvasEvent {
     type: string
 
     position: Vector3

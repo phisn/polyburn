@@ -4,7 +4,13 @@ import { snapDistance } from "../../constants"
 import { EditorComponents } from "../../store/model"
 import { CanvasEvent } from "../../views/canvas/canvas-event"
 
-export function isPointInsideEntity(transform: Transform, size: Size) {
+export const cursor = {
+    default: () => void (document.body.style.cursor = "default"),
+    grabbable: () => void (document.body.style.cursor = "grab"),
+    grabbing: () => void (document.body.style.cursor = "grabbing"),
+}
+
+export function isPointInsideEntity(point: Point, transform: Transform, size: Size) {
     const triangleArea = (a: Point, b: Point, c: Point) => {
         return (
             Math.abs(b.x * a.y - a.x * b.y + (c.x * b.y - b.x * c.y) + (a.x * c.y - c.x * a.y)) / 2
@@ -13,10 +19,10 @@ export function isPointInsideEntity(transform: Transform, size: Size) {
 
     const { topLeft, topRight, bottomLeft, bottomRight } = entityRect(transform, size)
 
-    const apd = triangleArea(topLeft, bottomLeft, transform.point)
-    const dpc = triangleArea(bottomLeft, bottomRight, transform.point)
-    const cpb = triangleArea(bottomRight, topRight, transform.point)
-    const pba = triangleArea(topRight, topLeft, transform.point)
+    const apd = triangleArea(topLeft, bottomLeft, point)
+    const dpc = triangleArea(bottomLeft, bottomRight, point)
+    const cpb = triangleArea(bottomRight, topRight, point)
+    const pba = triangleArea(topRight, topLeft, point)
 
     const total = apd + dpc + cpb + pba
 
@@ -29,28 +35,28 @@ export function entityRect(transform: Transform, size: Size) {
         transform.point,
         transform.rotation,
         size,
-        { x: 0, y: 1 },
+        { x: 0.5, y: 0.5 },
         { x: 0, y: 0 },
     )
     const bottomRight = changeAnchor(
         transform.point,
         transform.rotation,
         size,
-        { x: 0, y: 1 },
+        { x: 0.5, y: 0.5 },
         { x: 1, y: 1 },
     )
     const topRight = changeAnchor(
         transform.point,
         transform.rotation,
         size,
-        { x: 0, y: 1 },
+        { x: 0.5, y: 0.5 },
         { x: 1, y: 0 },
     )
     const bottomLeft = changeAnchor(
         transform.point,
         transform.rotation,
         size,
-        { x: 0, y: 1 },
+        { x: 0.5, y: 0.5 },
         { x: 0, y: 1 },
     )
 
@@ -63,7 +69,7 @@ export function entityRect(transform: Transform, size: Size) {
 }
 
 export function findClosestEdge(
-    shapeEntities: EntityWith<EditorComponents, "shape" | "transform">[],
+    shapeEntities: readonly EntityWith<EditorComponents, "shape" | "transform">[],
     point: Point,
     snapDistance: number,
 ) {
@@ -78,13 +84,13 @@ export function findClosestEdge(
 
         for (let j = 0; j < shape.vertices.length; ++j) {
             const p1 = {
-                x: shape.vertices[j].position.x + transform.point.x,
-                y: shape.vertices[j].position.y + transform.point.y,
+                x: shape.vertices[j].point.x + transform.point.x,
+                y: shape.vertices[j].point.y + transform.point.y,
             }
 
             const p2 = {
-                x: shape.vertices[(j + 1) % shape.vertices.length].position.x + transform.point.x,
-                y: shape.vertices[(j + 1) % shape.vertices.length].position.y + transform.point.y,
+                x: shape.vertices[(j + 1) % shape.vertices.length].point.x + transform.point.x,
+                y: shape.vertices[(j + 1) % shape.vertices.length].point.y + transform.point.y,
             }
 
             const closest = getClosestPointOnLine(p1, p2, point)
@@ -100,7 +106,7 @@ export function findClosestEdge(
     }
 
     if (minDistance > snapDistance) {
-        return null
+        return undefined
     }
 
     return { point: closestPoint, edge: edgeIndices, shapeIndex }
@@ -120,8 +126,8 @@ export function findClosestVertex(
 
     for (let i = 0; i < shape.vertices.length; ++i) {
         const vertex = {
-            x: shape.vertices[i].position.x + transform.point.x,
-            y: shape.vertices[i].position.y + transform.point.y,
+            x: shape.vertices[i].point.x + transform.point.x,
+            y: shape.vertices[i].point.y + transform.point.y,
         }
 
         const distance = getDistance(vertex, point)
@@ -175,7 +181,7 @@ export function getDistance(a: Point, b: Point) {
 export const findLocationForObject = (
     event: CanvasEvent,
     targetEntity: EntityWith<EditorComponents, "transform" | "size">,
-    shapeEntities: EntityWith<EditorComponents, "shape" | "transform">[],
+    shapeEntities: readonly EntityWith<EditorComponents, "shape" | "transform">[],
 ) => {
     const edge = findEdgeForEntity(event.position, true, shapeEntities)
 
@@ -211,7 +217,7 @@ export const findLocationForObject = (
 export const findEdgeForEntity = (
     position: Point,
     snap: boolean,
-    shapes: EntityWith<EditorComponents, "shape" | "transform">[],
+    shapes: readonly EntityWith<EditorComponents, "shape" | "transform">[],
 ) => {
     const edge = findClosestEdge(shapes, position, snapDistance)
 
@@ -226,13 +232,13 @@ export const findEdgeForEntity = (
     // edge.edge contains the two indices of the edge's vertices
 
     const edgeStart = {
-        x: shape.vertices[edge.edge[0]].position.x + transform.point.x,
-        y: shape.vertices[edge.edge[0]].position.y + transform.point.y,
+        x: shape.vertices[edge.edge[0]].point.x + transform.point.x,
+        y: shape.vertices[edge.edge[0]].point.y + transform.point.y,
     }
 
     const edgeEnd = {
-        x: shape.vertices[edge.edge[1]].position.x + transform.point.x,
-        y: shape.vertices[edge.edge[1]].position.y + transform.point.y,
+        x: shape.vertices[edge.edge[1]].point.x + transform.point.x,
+        y: shape.vertices[edge.edge[1]].point.y + transform.point.y,
     }
 
     const rotation = Math.atan2(edgeEnd.y - edgeStart.y, edgeEnd.x - edgeStart.x) + Math.PI

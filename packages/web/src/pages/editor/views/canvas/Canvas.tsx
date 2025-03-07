@@ -11,7 +11,7 @@ export function Canvas() {
     }
 
     // ;(store.resources.get("camera") as any).manual = false
-    store.resources.get("camera").zoom = 50
+    store.resources.get("camera").zoom = 20
 
     return (
         <RawCanvas camera={store.resources.get("camera")} scene={store.resources.get("scene")}>

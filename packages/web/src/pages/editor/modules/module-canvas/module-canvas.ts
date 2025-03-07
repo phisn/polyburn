@@ -2,6 +2,7 @@ import { Mesh, MeshBasicMaterial, Object3D, PlaneGeometry } from "three"
 import { subscribeMapChanges } from "../../store/model"
 import { EditorStore } from "../../store/store"
 import { VisualRocket } from "./visual-rocket"
+import { VisualShape } from "./visual-shape"
 
 export class ModuleCanvas {
     private visuals: Map<number, Object3D>
@@ -24,14 +25,19 @@ export class ModuleCanvas {
                         case "level":
                             break
                         case "rocket": {
-                            const visual = new VisualRocket(bundle)
+                            const visual = new VisualRocket(store, bundle)
                             scene.add(visual)
                             this.visuals.set(key, visual)
 
                             break
                         }
-                        case "shape":
+                        case "shape": {
+                            const visual = new VisualShape(store, bundle)
+                            scene.add(visual)
+                            this.visuals.set(key, visual)
+
                             break
+                        }
                     }
                 },
                 removed: key => {

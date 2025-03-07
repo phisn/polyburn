@@ -1,6 +1,5 @@
 import { EntityWith } from "game/src/framework/entity"
-import { ShapeVertex } from "game/src/model/shape"
-import { Rect, Transform } from "game/src/model/utils"
+import { Point, Rect, Transform } from "game/src/model/utils"
 import { subscribe } from "valtio/vanilla"
 
 export interface EditorComponents {
@@ -10,13 +9,18 @@ export interface EditorComponents {
         type: "object" | "shape"
     }
     shape: {
-        vertices: ShapeVertex[]
+        vertices: EditorShapeVertex[]
     }
     size: {
         width: number
         height: number
     }
     transform: Transform
+}
+
+export interface EditorShapeVertex {
+    point: Point
+    color: number
 }
 
 export interface EditorModel {
@@ -28,6 +32,7 @@ export interface EditorModel {
 export type EditorEntityBundle = EntityBundleLevel | EntityBundleRocket | EntityBundleShape
 
 export interface EntityBundleLevel {
+    id: number
     type: "level"
 
     bounding: EntityWith<EditorComponents, "bounding" | "identity" | "transform">
@@ -35,12 +40,14 @@ export interface EntityBundleLevel {
 }
 
 export interface EntityBundleRocket {
+    id: number
     type: "rocket"
 
     rocket: EntityWith<EditorComponents, "identity" | "size" | "transform">
 }
 
 export interface EntityBundleShape {
+    id: number
     type: "shape"
 
     shape: EntityWith<EditorComponents, "identity" | "shape" | "transform">

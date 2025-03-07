@@ -1,27 +1,37 @@
 import { Object3D } from "three"
 import { subscribe } from "valtio"
 import { EntityBundleRocket } from "../../store/model"
+import { EditorStore } from "../../store/store"
 import { ObjectRocket } from "./object-rocket"
 
 export class VisualRocket extends Object3D {
-    constructor(bundle: EntityBundleRocket) {
+    constructor(store: EditorStore, bundle: EntityBundleRocket) {
         super()
 
-        const rocket = new ObjectRocket()
+        const focus = store.resources.get("focus")
         const transform = bundle.rocket.get("transform")
 
-        console.log(rocket.position, rocket.rotation)
+        const rocket = new ObjectRocket()
+        this.add(rocket)
 
-        const callback = () => {
+        const callbackTransform = () => {
             rocket.position.set(transform.point.x, transform.point.y, 0)
             rocket.rotation.set(0, 0, transform.rotation)
-
-            console.log(transform.point, transform.rotation)
         }
 
-        subscribe(transform, callback)
-        callback()
+        subscribe(transform, callbackTransform)
+        callbackTransform()
 
-        this.add(rocket)
+        const callbackFocus = () => {
+            if (focus.bundlesSelected.has(bundle.id)) {
+                rocket.setColor("#ffbb00")
+            } else if (focus.bundlesHighlighted.has(bundle.id)) {
+                rocket.setColor("#ffdd66")
+            } else {
+                rocket.setColor()
+            }
+        }
+
+        subscribe(focus, callbackFocus)
     }
 }

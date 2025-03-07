@@ -1,4 +1,4 @@
-import { EntityStore, EntityWith, newEntityStore } from "game/src/framework/entity"
+import { EntityStore, newEntityStore } from "game/src/framework/entity"
 import { EventStore } from "game/src/framework/event"
 import { ResourceStore } from "game/src/framework/resource"
 import { createContext } from "react"
@@ -20,19 +20,19 @@ export class EditorStore {
 
 export interface EditorEvents {
     canvas(event: CanvasEvent): void
+    mutation(undo: () => void, redo: () => void): void
 }
 
 export interface EditorResources {
     camera: OrthographicCamera
+    focus: {
+        bundlesHighlighted: Set<number>
+        bundlesSelected: Set<number>
+    }
     model: EditorModel
     renderer: WebGLRenderer
     scene: Scene
-    selection: Selection
     undoRedo: UndoRedo
-}
-
-export interface Selection {
-    selected: EntityWith<EditorComponents, "identity">[]
 }
 
 export interface UndoRedo {

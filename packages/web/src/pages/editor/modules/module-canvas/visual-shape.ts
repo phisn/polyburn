@@ -31,6 +31,15 @@ export class VisualShape extends Object3D {
         const shapeMesh = new Mesh(this.shapeGeometry, shapeMaterial)
         this.add(shapeMesh)
 
+        subscribe(shape, () => {
+            this.shapeGeometry.update(
+                shape.vertices.map(vertex => ({
+                    position: new Vector2(vertex.point.x, vertex.point.y),
+                    color: vertex.color,
+                })),
+            )
+        })
+
         const callbackTransform = () => {
             shapeMesh.position.set(transform.point.x, transform.point.y, 0)
             shapeMesh.rotation.set(0, 0, transform.rotation)
@@ -42,11 +51,11 @@ export class VisualShape extends Object3D {
         callbackTransform()
 
         const callbackFocus = () => {
-            if (focus.bundlesSelected.has(bundle.id)) {
-                shapeMaterial.color.set("#ffbb00")
-                this.colorModified = true
-            } else if (focus.bundlesHighlighted.has(bundle.id)) {
+            if (focus.bundlesHighlighted.has(bundle.id)) {
                 shapeMaterial.color.set("#ffdd66")
+                this.colorModified = true
+            } else if (focus.bundlesSelected.has(bundle.id)) {
+                shapeMaterial.color.set("#ffbb00")
                 this.colorModified = true
             } else if (this.colorModified) {
                 shapeMaterial.color.set(this.color)

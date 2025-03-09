@@ -24,12 +24,6 @@ export class HandlerBackground {
             return
         }
 
-        const focus = this.store.resources.get("focus")
-
-        if (focus.bundlesHighlighted.size > 0) {
-            focus.bundlesHighlighted.clear()
-        }
-
         if (event.leftButtonClicked) {
             const camera = this.store.resources.get("camera")
 
@@ -75,6 +69,7 @@ export class HandlerBackground {
                 Math.abs(this.state.startPosition.y - camera.position.y) < 0.01
             ) {
                 if (focus.bundlesSelected.size > 0) {
+                    console.log("clear")
                     focus.bundlesSelected.clear()
                 }
             }

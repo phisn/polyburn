@@ -33,15 +33,22 @@ export class ModuleCanvasInput {
     }
 
     private handleEvent(event: CanvasEvent) {
+        const focus = this.store.resources.get("focus")
+
+        if (focus.bundlesHighlighted.size > 0) {
+            focus.bundlesHighlighted.clear()
+        }
+
+        if (focus.highlightPoints.length > 0) {
+            focus.highlightPoints.length = 0
+        }
+
         cursor.default()
 
         this.handlerBackground.handleMoving(event)
         this.handlerObject.handleMoving(event)
         this.handlerShape.handleMoving(event)
         this.handlerShape.handleVertex(event)
-
-        this.handlerObject.handleSelected(event)
-        this.handlerShape.handleSelected(event)
 
         this.handlerObject.handleDefault(event)
         this.handlerShape.handleDefault(event)

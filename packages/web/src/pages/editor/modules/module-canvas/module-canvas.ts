@@ -41,6 +41,7 @@ export class ModuleCanvas {
                     }
                 },
                 removed: key => {
+                    console.log("delete")
                     const visual = this.visuals.get(key)
 
                     if (visual) {

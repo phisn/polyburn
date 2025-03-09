@@ -82,14 +82,18 @@ export class HandlerObject {
         }
     }
 
-    handleSelected(_event: CanvasEvent) {}
-
     handleMoving(event: CanvasEvent) {
         if (event.consumed || this.state.type !== "moving") {
             return
         }
 
         event.consumed = true
+
+        const focus = this.store.resources.get("focus")
+
+        for (const { entity } of this.state.moving) {
+            focus.bundlesHighlighted.add(entity.get("identity").bundleId)
+        }
 
         if (event.leftButtonDown) {
             cursor.grabbing()

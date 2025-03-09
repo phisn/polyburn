@@ -17,6 +17,7 @@ export class EditorModules {
             proxy({
                 bundlesHighlighted: proxySet<number>(),
                 bundlesSelected: proxySet<number>(),
+                highlightPoints: [],
             }),
         )
         store.resources.set("model", {

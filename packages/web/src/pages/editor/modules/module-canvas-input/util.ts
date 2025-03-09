@@ -8,6 +8,8 @@ export const cursor = {
     default: () => void (document.body.style.cursor = "default"),
     grabbable: () => void (document.body.style.cursor = "grab"),
     grabbing: () => void (document.body.style.cursor = "grabbing"),
+    notAllowed: () => void (document.body.style.cursor = "not-allowed"),
+    pointer: () => void (document.body.style.cursor = "pointer"),
 }
 
 export function isPointInsideEntity(point: Point, transform: Transform, size: Size) {

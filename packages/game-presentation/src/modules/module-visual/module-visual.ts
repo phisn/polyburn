@@ -1,13 +1,16 @@
+import { EntityWith } from "game/src/framework/entity"
 import { levelComponents } from "game/src/modules/module-level"
 import { rocketComponents } from "game/src/modules/module-rocket"
 import { shapeComponents } from "game/src/modules/module-shape"
 import * as THREE from "three"
-import { PresentationStore } from "../../store"
+import { PresentationComponents, PresentationStore } from "../../store"
 import { MutatableShapeGeometry } from "./mutatable-shape-geometry"
 import { Flag, Flag as ObjectFlag } from "./objects/object-flag"
 import { Rocket as ObjectRocket } from "./objects/object-rocket"
 
 export class ModuleVisual {
+    private rockets: readonly EntityWith<PresentationComponents, "rocket" | "visual">[]
+
     constructor(private store: PresentationStore) {
         const scene = store.resources.get("scene")
 
@@ -35,8 +38,6 @@ export class ModuleVisual {
             },
         )
 
-        console.log("before listen")
-
         store.entities.listen(
             rocketComponents,
             entity => {
@@ -59,8 +60,6 @@ export class ModuleVisual {
                 scene.remove(entity.get("visual"))
             },
         )
-
-        console.log("after listen")
 
         store.entities.listen(
             shapeComponents,
@@ -100,5 +99,17 @@ export class ModuleVisual {
                 }
             },
         })
+
+        this.rockets = this.store.entities.multiple("rocket", "visual")
+    }
+
+    onUpdate(delta: number) {
+        for (const rocket of this.rockets) {
+            const visual = rocket.get("visual")
+
+            if (visual instanceof ObjectRocket) {
+                visual.onUpdate(delta)
+            }
+        }
     }
 }

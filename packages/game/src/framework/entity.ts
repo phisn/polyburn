@@ -1,4 +1,4 @@
-export interface Entity<Type, Components extends Type> {
+export interface Entity<Type, Components extends Type = Type> {
     get id(): number
 
     get<K extends keyof Type>(component: K): Type[K]

@@ -1,17 +1,17 @@
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
 
-export interface Point {
+export type Point = {
     x: number
     y: number
 }
 
-export interface Transform {
+export type Transform = {
     point: Point
     rotation: number
 }
 
-export interface Rect {
+export type Rect = {
     left: number
     top: number
     right: number

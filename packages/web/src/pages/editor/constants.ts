@@ -1,3 +1,5 @@
+export const grid = 1
+
 export const baseZoom = 25
 export const baseZoomFactor = 1 / baseZoom
 

@@ -94,6 +94,7 @@ export class PresentationPlay implements PresentationRunnable {
 
         this.moduleCamera.onUpdate(delta)
         this.moduleParticles.onUpdate(delta)
+        this.moduleVisual.onUpdate(delta)
 
         this.render()
 

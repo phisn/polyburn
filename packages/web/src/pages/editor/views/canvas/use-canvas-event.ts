@@ -1,6 +1,7 @@
 import { useThree } from "@react-three/fiber"
 import { useEffect, useRef } from "react"
 import { Vector3 } from "three"
+import { grid } from "../../constants"
 import { CanvasEvent } from "./canvas-event"
 
 export function usePipelineEvent(onEvent: (event: CanvasEvent) => void) {
@@ -34,8 +35,8 @@ export function usePipelineEvent(onEvent: (event: CanvasEvent) => void) {
                 position: position,
 
                 positionInGrid: new Vector3(
-                    Math.round(position.x * 4) * 0.25,
-                    Math.round(position.y * 4) * 0.25,
+                    Math.round(position.x * grid) / grid,
+                    Math.round(position.y * grid) / grid,
                     0,
                 ),
                 positionInWindow: { x: raw.offsetX, y: raw.offsetY },

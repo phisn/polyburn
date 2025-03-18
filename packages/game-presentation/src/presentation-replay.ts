@@ -88,7 +88,7 @@ export class PresentationReplay implements PresentationRunnable {
 
         this.moduleCamera.onUpdate(delta)
         this.moduleParticles.onUpdate(delta)
-        // this.moduleVisual.onUpdate()
+        this.moduleVisual.onUpdate(delta)
 
         this.render()
 

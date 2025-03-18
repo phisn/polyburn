@@ -26,24 +26,20 @@ export interface EditorEvents {
 
 export interface EditorResources {
     camera: OrthographicCamera
-    focus: {
-        bundlesHighlighted: Set<number>
-        bundlesSelected: Set<number>
-
-        highlightPoints: {
-            color: string
-            point: Point
-        }[]
-    }
+    focus: FocusResource
     model: EditorModel
     renderer: WebGLRenderer
     scene: Scene
-    undoRedo: UndoRedo
 }
 
-export interface UndoRedo {
-    undo: (() => void)[]
-    redo: (() => void)[]
+interface FocusResource {
+    bundlesHighlighted: Set<number>
+    bundlesSelected: Set<number>
+
+    highlightPoints: {
+        color: string
+        point: Point
+    }[]
 }
 
 export const EditorStoreContext = createContext<EditorStore | undefined>(undefined)

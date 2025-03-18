@@ -1,4 +1,5 @@
 import { EntityWith } from "game/src/framework/entity"
+import { Point, Transform } from "game/src/model/utils"
 import {
     highlightColor,
     highlightDeleteColor,
@@ -25,6 +26,11 @@ export class HandlerShape {
           }
         | {
               type: "moving"
+              moving: {
+                  entity: EntityWith<EditorComponents, "identity" | "transform">
+                  offset: Point
+                  before: Transform
+              }[]
           }
         | {
               type: "vertex"
@@ -54,6 +60,7 @@ export class HandlerShape {
         for (const shapeEntity of this.shapes) {
             const identity = shapeEntity.get("identity")
             const shape = shapeEntity.get("shape")
+            const transform = shapeEntity.get("transform")
 
             if (focus.bundlesSelected.has(identity.bundleId)) {
                 const closestVertex = findClosestVertex(shapeEntity, event.position, snapDistance)
@@ -145,6 +152,24 @@ export class HandlerShape {
                         cursor.grabbable()
                     }
 
+                    if (event.leftButtonClicked && event.ctrlKey) {
+                        this.state = {
+                            type: "moving",
+                            moving: [
+                                {
+                                    before: transform,
+                                    entity: shapeEntity,
+                                    offset: {
+                                        x: transform.point.x - event.positionInGrid.x,
+                                        y: transform.point.y - event.positionInGrid.y,
+                                    },
+                                },
+                            ],
+                        }
+
+                        this.handleMoving(event)
+                    }
+
                     return
                 }
             } else {
@@ -160,7 +185,19 @@ export class HandlerShape {
                     if (event.leftButtonClicked && event.ctrlKey) {
                         this.state = {
                             type: "moving",
+                            moving: [
+                                {
+                                    before: transform,
+                                    entity: shapeEntity,
+                                    offset: {
+                                        x: transform.point.x - event.positionInGrid.x,
+                                        y: transform.point.y - event.positionInGrid.y,
+                                    },
+                                },
+                            ],
                         }
+
+                        this.handleMoving(event)
                     } else if (event.leftButtonClicked) {
                         focus.bundlesSelected.add(identity.bundleId)
                     }
@@ -175,7 +212,37 @@ export class HandlerShape {
         }
     }
 
-    handleMoving(_event: CanvasEvent) {}
+    handleMoving(event: CanvasEvent) {
+        if (event.consumed || this.state.type !== "moving") {
+            return
+        }
+
+        event.consumed = true
+
+        const focus = this.store.resources.get("focus")
+
+        for (const { entity } of this.state.moving) {
+            focus.bundlesHighlighted.add(entity.get("identity").bundleId)
+        }
+
+        if (event.leftButtonDown) {
+            cursor.grabbing()
+
+            for (const { entity, offset } of this.state.moving) {
+                const transform = entity.get("transform")
+
+                transform.point.x = event.positionInGrid.x + offset.x
+                transform.point.y = event.positionInGrid.y + offset.y
+                transform.rotation = 0
+            }
+        } else {
+            cursor.grabbable()
+
+            this.state = {
+                type: "default",
+            }
+        }
+    }
 
     handleVertex(event: CanvasEvent) {
         if (event.consumed || this.state.type !== "vertex") {

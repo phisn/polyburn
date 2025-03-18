@@ -1,4 +1,4 @@
-import { ConsumeEvent } from "../../../editor/views/canvas/canvas-event"
+import { ConsumeEvent } from "../../../__editor/views/canvas/canvas-event"
 import { ImmutableEntityWith } from "../../entities/entity"
 import { PipelineStage } from "../../views/view-canvas/pipeline/pipeline-stage"
 import { pipelineStageObjectMoving } from "./pipeline-stage-object-moving"

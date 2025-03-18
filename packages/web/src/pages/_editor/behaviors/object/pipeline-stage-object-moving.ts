@@ -1,4 +1,4 @@
-import { ConsumeEvent } from "../../../editor/views/canvas/canvas-event"
+import { ConsumeEvent } from "../../../__editor/views/canvas/canvas-event"
 import { EntityWith } from "../../entities/entity"
 import { WorldState } from "../../store/model/world-state"
 import { PipelineStage } from "../../views/view-canvas/pipeline/pipeline-stage"

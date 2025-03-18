@@ -1,5 +1,5 @@
 import { changeAnchor, Point } from "game/src/model/utils"
-import { CanvasEvent } from "../../../editor/views/canvas/canvas-event"
+import { CanvasEvent } from "../../../__editor/views/canvas/canvas-event"
 import { snapDistance } from "../../constants"
 import { ImmutableEntityWith } from "../../entities/entity"
 import { findClosestEdge } from "../shape/find-closest-edge"

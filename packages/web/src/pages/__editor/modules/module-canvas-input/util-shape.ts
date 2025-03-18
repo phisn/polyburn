@@ -1,6 +1,6 @@
 import { EntityWith } from "game/src/framework/entity"
 import { Point } from "game/src/model/utils"
-import { EditorComponents, EditorShapeVertex } from "../../store/model"
+import { EditableShapeVertex, EditorComponents } from "../../store/model"
 
 export function averageColor(a: number, b: number): number {
     const ra = (a & 0xff0000) >> 16
@@ -18,7 +18,7 @@ export function averageColor(a: number, b: number): number {
     return (rc << 16) | (gc << 8) | bc
 }
 
-export function shapeArea(vertices: EditorShapeVertex[]): number {
+export function shapeArea(vertices: EditableShapeVertex[]): number {
     if (vertices.length < 3) {
         return 0
     }
@@ -40,7 +40,7 @@ export function shapeArea(vertices: EditorShapeVertex[]): number {
     return Math.abs(area) / 2
 }
 
-export function canRemoveVertex(vertexIndex: number, vertices: EditorShapeVertex[]) {
+export function canRemoveVertex(vertexIndex: number, vertices: EditableShapeVertex[]) {
     if (vertices.length <= 3) {
         return false
     }
@@ -58,7 +58,7 @@ export function canRemoveVertex(vertexIndex: number, vertices: EditorShapeVertex
 export function findIntersection(
     firstIndex: number,
     secondIndex: number,
-    vertices: EditorShapeVertex[],
+    vertices: EditableShapeVertex[],
 ) {
     function intersects(a: Point, b: Point, c: Point, d: Point) {
         const lacd = (d.y - a.y) * (c.x - a.x)
@@ -102,7 +102,7 @@ export function findIntersection(
 }
 
 // resolving intersections can be very complex. to prevent undesired results we only try to resolve intersections once
-export function resolveConflictsAround(vertexIndex: number, vertices: EditorShapeVertex[]) {
+export function resolveConflictsAround(vertexIndex: number, vertices: EditableShapeVertex[]) {
     const left = (vertexIndex - 1 + vertices.length) % vertices.length
     const right = (vertexIndex + 1) % vertices.length
 

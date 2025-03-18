@@ -6,7 +6,7 @@ import {
     highlightOverrideColor,
     snapDistance,
 } from "../../constants"
-import { EditorComponents, EditorShapeVertex } from "../../store/model"
+import { EditableShapeVertex, EditorComponents } from "../../store/model"
 import { EditorStore } from "../../store/store"
 import { CanvasEvent } from "../../views/canvas/canvas-event"
 import { cursor, findClosestEdge, findClosestVertex } from "./util"
@@ -37,7 +37,7 @@ export class HandlerShape {
 
               duplicate?: {
                   index: number
-                  vertex: EditorShapeVertex
+                  vertex: EditableShapeVertex
               }
               index: number
               shape: EntityWith<EditorComponents, "identity" | "shape" | "transform">

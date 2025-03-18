@@ -1,24 +1,17 @@
 import { EntityWith } from "game/src/framework/entity"
-import { Point, Rect, Transform } from "game/src/model/utils"
+import { Point, Rect, Size, Transform } from "game/src/model/utils"
 import { subscribe } from "valtio/vanilla"
 
 export interface EditorComponents {
     bounding: Rect
-    identity: {
-        bundleId: number
-        type: "object" | "shape"
-    }
-    shape: {
-        vertices: EditorShapeVertex[]
-    }
-    size: {
-        width: number
-        height: number
-    }
+    shape: EditableShape
+    size: Size
     transform: Transform
 }
 
-export interface EditorShapeVertex {
+export interface EditableShape {}
+
+export interface EditableShapeVertex {
     point: Point
     color: number
 }

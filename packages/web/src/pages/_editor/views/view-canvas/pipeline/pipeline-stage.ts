@@ -1,4 +1,4 @@
-import { CanvasEvent, ConsumeEvent } from "../../../../editor/views/canvas/canvas-event"
+import { CanvasEvent, ConsumeEvent } from "../../../../__editor/views/canvas/canvas-event"
 import { PipelineContext } from "./pipeline-context"
 
 export type PipelineStage = (

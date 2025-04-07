@@ -1,28 +1,19 @@
+import { OrthographicCamera } from "@react-three/drei"
 import { Canvas as RawCanvas } from "@react-three/fiber"
-import { Fragment, useContext } from "react"
-import { useSnapshot } from "valtio"
-import { baseZoom } from "../../constants"
-import { EditorStoreContext } from "../../store/store"
-import { usePipelineEvent } from "./use-canvas-event"
+import { EventHandler } from "./event/EventHandler"
+import { Visual } from "./visual/Visual"
 
 export function Canvas() {
-    const store = useContext(EditorStoreContext)
-
-    if (store === undefined) {
-        throw new Error("EditorStore not found")
-    }
-
-    // ;(store.resources.get("camera") as any).manual = false
-    store.resources.get("camera").zoom = 20
-
     return (
-        <RawCanvas camera={store.resources.get("camera")} scene={store.resources.get("scene")}>
-            <HighlightPoints />
-            <PipelineEvent />
+        <RawCanvas>
+            <EventHandler />
+            <Visual />
+            <OrthographicCamera />
         </RawCanvas>
     )
 }
 
+/*
 function HighlightPoints() {
     const store = useContext(EditorStoreContext)
 
@@ -61,3 +52,5 @@ function PipelineEvent() {
 
     return <></>
 }
+
+*/

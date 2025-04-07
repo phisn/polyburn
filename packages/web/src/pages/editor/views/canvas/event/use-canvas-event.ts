@@ -1,11 +1,11 @@
 import { useThree } from "@react-three/fiber"
 import { useEffect, useRef } from "react"
 import { Vector3 } from "three"
-import { grid } from "../../constants"
-import { CanvasEvent } from "./canvas-event"
+import { grid } from "../../../constants"
+import { Event } from "./event"
 
-export function usePipelineEvent(onEvent: (event: CanvasEvent) => void) {
-    const lastNativeEventRef = useRef<CanvasEvent | undefined>()
+export function usePipelineEvent(onEvent: (event: Event) => void) {
+    const lastNativeEventRef = useRef<Event | undefined>()
 
     const canvas = useThree(state => state.gl.domElement)
     const camera = useThree(state => state.camera)
@@ -29,7 +29,7 @@ export function usePipelineEvent(onEvent: (event: CanvasEvent) => void) {
 
             position.unproject(camera)
 
-            const event: CanvasEvent = {
+            const event: Event = {
                 type: raw.type,
 
                 position: position,

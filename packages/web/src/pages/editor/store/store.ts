@@ -1,14 +1,5 @@
-import { OrthographicCamera, Scene, WebGLRenderer } from "three"
-import { createStore } from "zustand"
+import { create } from "zustand"
 
-export interface EditorStore {
-    camera: OrthographicCamera
-    renderer: WebGLRenderer
-    scene: Scene
-}
+export interface EditorStore {}
 
-export const editorStore = createStore<EditorStore>((_set, _get) => ({
-    camera: new OrthographicCamera(),
-    renderer: new WebGLRenderer(),
-    scene: new Scene(),
-}))
+export const useEditorStore = create<EditorStore>((_set, _get) => ({}))

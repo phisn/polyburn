@@ -6272,10 +6272,10 @@ kind-of@^6.0.3:
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.3.tgz#07c05034a6c349fa06e24fa35aa76db4580ce4dd"
   integrity sha512-dcS1ul+9tmeD95T+x28/ehLgd9mENa3LsvDTtzm3vyBEO7RPptvAD+t44WVXaUjTBRcrpFeFlC8WCruUR456hw==
 
-koota@^0.2.3:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/koota/-/koota-0.2.3.tgz#d38c345490531a39a3e262ed3887309c9f074231"
-  integrity sha512-s1g2x5T8wmmnBLsVbgLtpKptwcrIxAPJONS3V5zUUAG+MEQYP9DaR/h8PXF3h4aQTOBE2TeTODoLCqYX3M2nJA==
+koota@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/koota/-/koota-0.3.0.tgz#714977edc305972fc3ed1234685af88cce24e351"
+  integrity sha512-mzZiZWdETbwb23pZKU3Oh61DMawDCeLlNj+Fb7vKw7dljzE6mfjNK//9gccbXuDRKPbpUhj6kCH0v1d/e5497Q==
 
 leva@^0.10.0:
   version "0.10.0"

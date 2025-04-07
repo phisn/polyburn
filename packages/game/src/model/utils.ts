@@ -18,7 +18,7 @@ export type Rect = {
     bottom: number
 }
 
-export interface Size {
+export type Size = {
     width: number
     height: number
 }

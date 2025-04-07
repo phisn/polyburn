@@ -1,34 +1,27 @@
-import { useEffect, useState } from "react"
-import { EditorModules } from "./modules/modules"
-import { EditorStore, EditorStoreContext } from "./store/store"
+import { createWorld } from "koota"
+import { WorldProvider } from "koota/react"
+import { useEffect, useRef } from "react"
+import { editorActions } from "./store/world"
 import { Canvas } from "./views/canvas/Canvas"
 import { Hierarchy } from "./views/hierarchy/Hierarchy"
 
 export function Editor() {
-    const [store, setStore] = useState<EditorStore | undefined>()
+    const worldRef = useRef(createWorld())
 
     useEffect(() => {
-        const store = new EditorStore()
-        const modules = new EditorModules(store)
-
-        setStore(store)
+        const rocket = editorActions(worldRef.current).spawnRocket({ x: 0, y: 0 })
 
         return () => {
-            modules.onDispose()
-            setStore(undefined)
+            rocket.destroy()
         }
     }, [])
 
-    if (store === undefined) {
-        return undefined
-    }
-
     return (
-        <EditorStoreContext.Provider value={store}>
+        <WorldProvider world={worldRef.current}>
             <div className="relative h-max w-full grow">
                 <Canvas />
                 <Hierarchy />
             </div>
-        </EditorStoreContext.Provider>
+        </WorldProvider>
     )
 }

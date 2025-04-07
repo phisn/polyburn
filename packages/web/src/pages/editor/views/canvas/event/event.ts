@@ -1,6 +1,10 @@
-import { Vector3 } from "three"
+import { Camera, Vector3 } from "three"
 
-export interface CanvasEvent {
+export interface EventContext {
+    camera: Camera
+}
+
+export interface Event {
     type: string
 
     position: Vector3
@@ -23,5 +27,3 @@ export interface CanvasEvent {
 
     consumed: boolean
 }
-
-export const ConsumeEvent = Symbol("ConsumeEvent")

@@ -1,6 +1,8 @@
 import { Point } from "game/src/model/utils"
-import { EditorStore } from "../../store/store"
-import { CanvasEvent } from "../../views/canvas/canvas-event"
+import { World } from "koota"
+import { EditorStore } from "../../../store/store"
+import { editorActions } from "../../../store/world"
+import { Event } from "./event"
 
 export class HandlerBackground {
     private state:
@@ -13,19 +15,24 @@ export class HandlerBackground {
               startPosition: Point
           }
 
-    constructor(private store: EditorStore) {
+    constructor(
+        private store: EditorStore,
+        private world: World,
+    ) {
         this.state = {
             type: "default",
         }
     }
 
-    handleDefault(event: CanvasEvent) {
+    handleDefault(event: Event) {
         if (event.consumed || this.state.type !== "default") {
             return
         }
 
+        editorActions(this.world).clearHighlights()
+
         if (event.leftButtonClicked) {
-            const camera = this.store.resources.get("camera")
+            const camera = this.store.camera
 
             this.state = {
                 type: "moving",
@@ -45,13 +52,12 @@ export class HandlerBackground {
         }
     }
 
-    handleMoving(event: CanvasEvent) {
+    handleMoving(event: Event) {
         if (event.consumed || this.state.type !== "moving") {
             return
         }
 
-        const camera = this.store.resources.get("camera")
-        const focus = this.store.resources.get("focus")
+        const camera = this.store.camera
 
         if (event.leftButtonDown) {
             camera.position.set(
@@ -68,10 +74,7 @@ export class HandlerBackground {
                 Math.abs(this.state.startPosition.x - camera.position.x) < 0.01 &&
                 Math.abs(this.state.startPosition.y - camera.position.y) < 0.01
             ) {
-                if (focus.bundlesSelected.size > 0) {
-                    console.log("clear")
-                    focus.bundlesSelected.clear()
-                }
+                editorActions(this.world).clearSelected()
             }
 
             this.state = { type: "default" }

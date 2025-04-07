@@ -1,14 +1,11 @@
-import { EntityWith } from "game/src/framework/entity"
 import { changeAnchor, Point, Transform } from "game/src/model/utils"
+import { Entity, World } from "koota"
 import { deepClone } from "valtio/utils"
-import { EditorComponents } from "../../store/model"
-import { EditorStore } from "../../store/store"
-import { CanvasEvent } from "../../views/canvas/canvas-event"
+import { BehaviorSize, BehaviorTransform, editorActions, Shape } from "../../../store/world"
+import { Event, EventContext } from "./event"
 import { cursor, findEdgeForEntity, isPointInsideEntity } from "./util"
 
 export class HandlerObject {
-    private objects: readonly EntityWith<EditorComponents, "identity" | "size" | "transform">[]
-    private shapes: readonly EntityWith<EditorComponents, "shape" | "transform">[]
     private state:
         | {
               type: "default"
@@ -16,37 +13,34 @@ export class HandlerObject {
         | {
               type: "moving"
               moving: {
-                  entity: EntityWith<EditorComponents, "identity" | "size" | "transform">
+                  entity: Entity
                   offset: Point
                   before: Transform
               }[]
           }
 
-    constructor(private store: EditorStore) {
-        this.objects = store.entities.multiple("identity", "size", "transform")
-        this.shapes = store.entities.multiple("shape", "transform")
+    constructor(
+        private context: EventContext,
+        private world: World,
+    ) {
         this.state = {
             type: "default",
         }
     }
 
-    handleDefault(event: CanvasEvent) {
+    handleDefault(event: Event) {
         if (event.consumed || event.type === "wheel") {
             return
         }
 
-        const focus = this.store.resources.get("focus")
-
-        for (const entity of this.objects) {
-            const identity = entity.get("identity")
-            const transform = entity.get("transform")
-            const size = entity.get("size")
+        for (const entity of this.world.query(BehaviorTransform, BehaviorSize)) {
+            const size = entity.get(BehaviorSize)!
+            const transform = entity.get(BehaviorTransform)!
 
             const isInside = isPointInsideEntity(event.position, transform, size)
 
             if (isInside) {
-                focus.bundlesHighlighted.clear()
-                focus.bundlesHighlighted.add(identity.bundleId)
+                editorActions(this.world).highlight(entity)
 
                 if (event.ctrlKey) {
                     if (event.leftButtonClicked) {
@@ -71,10 +65,9 @@ export class HandlerObject {
                         cursor.grabbable()
                     }
                 } else if (event.leftButtonClicked && event.shiftKey) {
-                    focus.bundlesSelected.add(identity.bundleId)
+                    editorActions(this.world).selectAdditive(entity)
                 } else if (event.leftButtonClicked) {
-                    focus.bundlesSelected.clear()
-                    focus.bundlesSelected.add(identity.bundleId)
+                    editorActions(this.world).select(entity)
                 }
 
                 event.consumed = true
@@ -82,18 +75,12 @@ export class HandlerObject {
         }
     }
 
-    handleMoving(event: CanvasEvent) {
+    handleMoving(event: Event) {
         if (event.consumed || this.state.type !== "moving") {
             return
         }
 
         event.consumed = true
-
-        const focus = this.store.resources.get("focus")
-
-        for (const { entity } of this.state.moving) {
-            focus.bundlesHighlighted.add(entity.get("identity").bundleId)
-        }
 
         if (event.leftButtonDown) {
             cursor.grabbing()
@@ -103,7 +90,7 @@ export class HandlerObject {
             }
 
             for (const { entity, offset } of this.state.moving) {
-                const transform = entity.get("transform")
+                const transform = entity.get(BehaviorTransform)!
 
                 transform.point.x = event.positionInGrid.x + offset.x
                 transform.point.y = event.positionInGrid.y + offset.y
@@ -118,7 +105,7 @@ export class HandlerObject {
         }
     }
 
-    private tryClipObjectToShape(event: CanvasEvent) {
+    private tryClipObjectToShape(event: Event) {
         if (this.state.type !== "moving") {
             throw new Error("Expected moving state")
         }
@@ -129,10 +116,10 @@ export class HandlerObject {
 
         const [first] = this.state.moving
 
-        const size = first.entity.get("size")
-        const transform = first.entity.get("transform")
+        const size = first.entity.get(BehaviorSize)!
+        const transform = first.entity.get(BehaviorTransform)!
 
-        const edge = findEdgeForEntity(event.position, true, this.shapes)
+        const edge = findEdgeForEntity(event.position, true, this.world.query(Shape))
 
         if (edge === undefined) {
             return false

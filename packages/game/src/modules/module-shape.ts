@@ -1,5 +1,6 @@
 import { EntityWith } from "../framework/entity"
-import { bytesToVertices, createShapeBody, ShapeVertex } from "../model/shape"
+import { bytesToVertices, createShapeBody } from "../model/shape"
+import { ShapeVertex } from "../model/utils"
 import { GameComponents, GameStore } from "../store"
 
 export interface ShapeComponent {
@@ -30,7 +31,7 @@ export class ModuleShape {
         )
 
         for (const shapeConfig of groups.flatMap(group => group.shapes)) {
-            const vertices = bytesToVertices(rapier, shapeConfig.vertices)
+            const vertices = bytesToVertices(shapeConfig.vertices)
             createShapeBody(rapier, world, vertices)
 
             this.store.entities.create({

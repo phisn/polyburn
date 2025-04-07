@@ -1,23 +1,29 @@
 import { Svg } from "@react-three/drei"
+import { Entity } from "koota"
+import { useQuery, useTrait, useTraitEffect } from "koota/react"
 import { useRef } from "react"
 import { MeshBasicMaterial, Object3D } from "three"
 import { entityGraphicRegistry } from "../../../../_editor/graphics-assets/entity-graphic-registry"
 import { EntityGraphicType } from "../../../../_editor/graphics-assets/entity-graphic-type"
 import { highlightColor, selectHightlightColor, selectObjectColor } from "../../../constants"
-import { useEntityEvent } from "../../../store/events"
-import { useEditorStore } from "../../../store/store"
-import { EditorRocket } from "../../../store/world"
+import { BehaviorTransform, Highlighted, Rocket, Selected } from "../../../store/world"
 
 export function VisualRockets() {
-    //    const rockets = useQuery(Rocket)
+    const rockets = useQuery(Rocket)
 
-    return <></>
+    return (
+        <>
+            {rockets.map(rocket => (
+                <VisualRocket key={rocket.id()} entity={rocket} />
+            ))}
+        </>
+    )
 }
 
-function VisualRocket(props: { key: string; entity: EditorRocket }) {
+function VisualRocket(props: { entity: Entity }) {
     const meshRef = useRef<Object3D>(null)
 
-    useEntityEvent(props.key, "transform", transform => {
+    useTraitEffect(props.entity, BehaviorTransform, transform => {
         if (transform === undefined) {
             return
         }
@@ -30,8 +36,8 @@ function VisualRocket(props: { key: string; entity: EditorRocket }) {
 
     const material = new MeshBasicMaterial({ color: "#ffffff" })
 
-    const highlighted = useEditorStore(x => x.highlighted.has(props.key))
-    const selected = useEditorStore(x => x.selected.has(props.key))
+    const highlighted = useTrait(props.entity, Highlighted)
+    const selected = useTrait(props.entity, Selected)
 
     if (highlighted && selected) {
         material.color.set(selectHightlightColor)
@@ -42,16 +48,13 @@ function VisualRocket(props: { key: string; entity: EditorRocket }) {
     } else {
         material.color.set("#ffffff")
     }
+    const transform = props.entity.get(BehaviorTransform)
 
     return (
         <object3D position={[-0.5 * graphicEntry.size.width, 0.5 * graphicEntry.size.height, 0]}>
             <Svg
-                position={[
-                    props.entity.transform?.point.x ?? 0,
-                    props.entity.transform?.point.y ?? 0,
-                    0,
-                ]}
-                rotation={[0, 0, props.entity.transform?.rotation ?? 0]}
+                position={[transform?.point.x ?? 0, transform?.point.y ?? 0, 0]}
+                rotation={[0, 0, transform?.rotation ?? 0]}
                 fillMaterial={material}
                 ref={meshRef}
                 src={graphicEntry.src}

@@ -23,6 +23,11 @@ export type Size = {
     height: number
 }
 
+export interface ShapeVertex {
+    point: Point
+    color: number
+}
+
 export const changeAnchor = (
     position: Point,
     rotation: number,

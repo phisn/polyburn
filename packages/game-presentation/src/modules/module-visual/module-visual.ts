@@ -64,13 +64,7 @@ export class ModuleVisual {
         store.entities.listen(
             shapeComponents,
             entity => {
-                const shapeGeometry = new MutatableShapeGeometry(
-                    entity.get("shape").vertices.map(vertex => ({
-                        position: new THREE.Vector2(vertex.position.x, vertex.position.y),
-                        color: vertex.color,
-                    })),
-                )
-
+                const shapeGeometry = new MutatableShapeGeometry(entity.get("shape").vertices)
                 const shapeMaterial = new THREE.MeshBasicMaterial({ vertexColors: true })
                 const shapeMesh = new THREE.Mesh(shapeGeometry, shapeMaterial)
 

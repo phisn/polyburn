@@ -1,10 +1,6 @@
 import RAPIER from "@dimforge/rapier2d"
 import { f16round, getFloat16, setFloat16 } from "@petamoriken/float16"
-
-export interface ShapeVertex {
-    position: RAPIER.Vector2
-    color: number
-}
+import { ShapeVertex } from "./utils"
 
 export function createShapeBody(
     rapier: typeof RAPIER,
@@ -28,24 +24,24 @@ export function createShapeBody(
 
 export function verticesForShape(vertices: ShapeVertex[]): [Float32Array, number, number] {
     const left = vertices.reduce(
-        (a, vertex) => Math.min(a, vertex.position.x),
+        (a, vertex) => Math.min(a, vertex.point.x),
         Number.POSITIVE_INFINITY,
     )
 
     const top = vertices.reduce(
-        (a, vertex) => Math.min(a, vertex.position.y),
+        (a, vertex) => Math.min(a, vertex.point.y),
         Number.POSITIVE_INFINITY,
     )
 
     const verticesRaw = new Float32Array(vertices.length * 2 + 2)
 
     for (const [index, vertex] of vertices.entries()) {
-        verticesRaw[index * 2] = vertex.position.x - left
-        verticesRaw[index * 2 + 1] = vertex.position.y - top
+        verticesRaw[index * 2] = vertex.point.x - left
+        verticesRaw[index * 2 + 1] = vertex.point.y - top
     }
 
-    verticesRaw[verticesRaw.length - 2] = vertices[0].position.x - left
-    verticesRaw[verticesRaw.length - 1] = vertices[0].position.y - top
+    verticesRaw[verticesRaw.length - 2] = vertices[0].point.x - left
+    verticesRaw[verticesRaw.length - 1] = vertices[0].point.y - top
 
     return [verticesRaw, top, left]
 }
@@ -54,19 +50,19 @@ export function verticesToBytes(vertices: ShapeVertex[]) {
     const u8 = new Uint8Array(4 + vertices.length * 8)
     const view = new DataView(u8.buffer)
 
-    view.setFloat32(0, vertices[0].position.x, true)
-    view.setFloat32(4, vertices[0].position.y, true)
+    view.setFloat32(0, vertices[0].point.x, true)
+    view.setFloat32(4, vertices[0].point.y, true)
 
     const aggregated = {
-        x: vertices[0].position.x,
-        y: vertices[0].position.y,
+        x: vertices[0].point.x,
+        y: vertices[0].point.y,
     }
 
     view.setUint32(8, vertices[0].color, true)
 
     for (let vertexIndex = 1; vertexIndex < vertices.length; vertexIndex++) {
-        const roundx = f16round(vertices[vertexIndex].position.x - aggregated.x)
-        const roundy = f16round(vertices[vertexIndex].position.y - aggregated.y)
+        const roundx = f16round(vertices[vertexIndex].point.x - aggregated.x)
+        const roundy = f16round(vertices[vertexIndex].point.y - aggregated.y)
 
         aggregated.x += roundx
         aggregated.y += roundy
@@ -80,7 +76,7 @@ export function verticesToBytes(vertices: ShapeVertex[]) {
     return u8
 }
 
-export function bytesToVertices(rapier: typeof RAPIER, bytes: Uint8Array) {
+export function bytesToVertices(bytes: Uint8Array) {
     const vertices: ShapeVertex[] = []
 
     const view = new DataView(
@@ -88,7 +84,7 @@ export function bytesToVertices(rapier: typeof RAPIER, bytes: Uint8Array) {
     )
 
     vertices.push({
-        position: {
+        point: {
             x: view.getFloat32(0, true),
             y: view.getFloat32(4, true),
         },
@@ -96,8 +92,8 @@ export function bytesToVertices(rapier: typeof RAPIER, bytes: Uint8Array) {
     })
 
     const aggregated = {
-        x: vertices[0].position.x,
-        y: vertices[0].position.y,
+        x: vertices[0].point.x,
+        y: vertices[0].point.y,
     }
 
     for (let byteCount = 12; byteCount < bytes.byteLength; byteCount += 8) {
@@ -105,7 +101,7 @@ export function bytesToVertices(rapier: typeof RAPIER, bytes: Uint8Array) {
         aggregated.y += getFloat16(view, byteCount + 2, true)
 
         vertices.push({
-            position: new rapier.Vector2(aggregated.x, aggregated.y),
+            point: { x: aggregated.x, y: aggregated.y },
             color: view.getUint32(byteCount + 4, true),
         })
     }

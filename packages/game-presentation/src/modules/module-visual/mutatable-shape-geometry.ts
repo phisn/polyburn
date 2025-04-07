@@ -1,6 +1,6 @@
-import { ShapeVertex } from "game/src/model/shape"
 import { Point } from "game/src/model/utils"
-import { BufferGeometry, Color, Float32BufferAttribute, ShapeUtils } from "three"
+import { BufferGeometry, Color, Float32BufferAttribute, ShapeUtils, Vector2 } from "three"
+import { ShapeVertex } from "../../../../game/src/model/utils"
 
 export class MutatableShapeGeometry extends BufferGeometry {
     constructor(shapeVertices?: ShapeVertex[]) {
@@ -12,7 +12,7 @@ export class MutatableShapeGeometry extends BufferGeometry {
     }
 
     update(shapeVertices: ShapeVertex[]) {
-        const vertices = shapeVertices.map(vertex => vertex.position)
+        const vertices = shapeVertices.map(vertex => new Vector2(vertex.point.x, vertex.point.y))
 
         // check direction of vertices
         const iterate = ShapeUtils.isClockWise(vertices) ? iterateInOrder : iterateInReverseOrder

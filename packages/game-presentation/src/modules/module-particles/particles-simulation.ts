@@ -1,4 +1,3 @@
-import RAPIER from "@dimforge/rapier2d"
 import { bytesToVertices } from "game/src/model/shape"
 import { Point } from "game/src/model/utils"
 import { makeCCW, quickDecomp } from "poly-decomp-es"
@@ -41,7 +40,7 @@ export class ParticleSimulation {
 
         const shapesVerticies = config.world.gamemodes[config.gamemode].groups.flatMap(group =>
             config.world.groups[group].shapes.map(x =>
-                bytesToVertices(RAPIER, x.vertices).map(x => x.position),
+                bytesToVertices(x.vertices).map(x => x.point),
             ),
         )
 

@@ -1,7 +1,7 @@
 import { changeAnchor, Point, Size, Transform } from "game/src/model/utils"
-import { Entity } from "koota"
+import { Immutable } from "immer"
 import { snapDistance } from "../../../constants"
-import { BehaviorShape, BehaviorSize, BehaviorTransform } from "../../../store/world"
+import { EditorEntityWith } from "../../../store/world"
 import { Event } from "./event"
 
 export const cursor = {
@@ -71,7 +71,7 @@ export function entityRect(transform: Transform, size: Size) {
 }
 
 export function findClosestEdge(
-    shapeEntities: readonly Entity[],
+    shapeEntities: Immutable<EditorEntityWith<"transform" | "vertices">[]>,
     point: Point,
     snapDistance: number,
 ) {
@@ -81,18 +81,21 @@ export function findClosestEdge(
     let shapeIndex = 0
 
     for (let i = 0; i < shapeEntities.length; ++i) {
-        const shape = shapeEntities[i].get(BehaviorShape)!
-        const transform = shapeEntities[i].get(BehaviorTransform)!
+        const shape = shapeEntities[i]
 
         for (let j = 0; j < shape.vertices.length; ++j) {
             const p1 = {
-                x: shape.vertices[j].point.x + transform.point.x,
-                y: shape.vertices[j].point.y + transform.point.y,
+                x: shape.vertices[j].point.x + shape.transform.point.x,
+                y: shape.vertices[j].point.y + shape.transform.point.y,
             }
 
             const p2 = {
-                x: shape.vertices[(j + 1) % shape.vertices.length].point.x + transform.point.x,
-                y: shape.vertices[(j + 1) % shape.vertices.length].point.y + transform.point.y,
+                x:
+                    shape.vertices[(j + 1) % shape.vertices.length].point.x +
+                    shape.transform.point.x,
+                y:
+                    shape.vertices[(j + 1) % shape.vertices.length].point.y +
+                    shape.transform.point.y,
             }
 
             const closest = getClosestPointOnLine(p1, p2, point)
@@ -114,18 +117,19 @@ export function findClosestEdge(
     return { point: closestPoint, edge: edgeIndices, shapeIndex }
 }
 
-export function findClosestVertex(shapeEntity: Entity, point: Point, snapDistance: number) {
-    const shape = shapeEntity.get(BehaviorShape)!
-    const transform = shapeEntity.get(BehaviorTransform)!
-
+export function findClosestVertex(
+    shapeEntity: Immutable<EditorEntityWith<"transform" | "vertices">>,
+    point: Point,
+    snapDistance: number,
+) {
     let minDistance = Number.MAX_VALUE
     let closestPoint: Point = { x: 0, y: 0 }
     let vertexIndex = 0
 
-    for (let i = 0; i < shape.vertices.length; ++i) {
+    for (let i = 0; i < shapeEntity.vertices.length; ++i) {
         const vertex = {
-            x: shape.vertices[i].point.x + transform.point.x,
-            y: shape.vertices[i].point.y + transform.point.y,
+            x: shapeEntity.vertices[i].point.x + shapeEntity.transform.point.x,
+            y: shapeEntity.vertices[i].point.y + shapeEntity.transform.point.y,
         }
 
         const distance = getDistance(vertex, point)
@@ -178,8 +182,8 @@ export function getDistance(a: Point, b: Point) {
 
 export const findLocationForObject = (
     event: Event,
-    targetEntity: Entity,
-    shapeEntities: readonly Entity[],
+    targetEntity: Immutable<EditorEntityWith<"size" | "transform">>,
+    shapeEntities: Immutable<EditorEntityWith<"transform" | "vertices">[]>,
 ) => {
     const edge = findEdgeForEntity(event.position, true, shapeEntities)
 
@@ -187,7 +191,7 @@ export const findLocationForObject = (
         const transposed = changeAnchor(
             edge.point,
             edge.rotation,
-            targetEntity.get(BehaviorSize)!,
+            targetEntity.size,
             { x: 1, y: 0 },
             { x: 0.5, y: 1 },
         )
@@ -201,7 +205,7 @@ export const findLocationForObject = (
     const transposed = changeAnchor(
         event.positionInGrid,
         0,
-        targetEntity.get(BehaviorSize)!,
+        targetEntity.size,
         { x: 1, y: 0 },
         { x: 0.5, y: 0.5 },
     )
@@ -212,27 +216,30 @@ export const findLocationForObject = (
     }
 }
 
-export const findEdgeForEntity = (position: Point, snap: boolean, shapes: readonly Entity[]) => {
+export const findEdgeForEntity = (
+    position: Point,
+    snap: boolean,
+    shapes: Immutable<EditorEntityWith<"transform" | "vertices">[]>,
+) => {
     const edge = findClosestEdge(shapes, position, snapDistance)
 
     if (!edge) {
         return edge
     }
 
-    const shape = shapes[edge.shapeIndex].get(BehaviorShape)!
-    const transform = shapes[edge.shapeIndex].get(BehaviorTransform)!
+    const shape = shapes[edge.shapeIndex]
 
     // edge.point is the closest point on the edge
     // edge.edge contains the two indices of the edge's vertices
 
     const edgeStart = {
-        x: shape.vertices[edge.edge[0]].point.x + transform.point.x,
-        y: shape.vertices[edge.edge[0]].point.y + transform.point.y,
+        x: shape.vertices[edge.edge[0]].point.x + shape.transform.point.x,
+        y: shape.vertices[edge.edge[0]].point.y + shape.transform.point.y,
     }
 
     const edgeEnd = {
-        x: shape.vertices[edge.edge[1]].point.x + transform.point.x,
-        y: shape.vertices[edge.edge[1]].point.y + transform.point.y,
+        x: shape.vertices[edge.edge[1]].point.x + shape.transform.point.x,
+        y: shape.vertices[edge.edge[1]].point.y + shape.transform.point.y,
     }
 
     const rotation = Math.atan2(edgeEnd.y - edgeStart.y, edgeEnd.x - edgeStart.x) + Math.PI

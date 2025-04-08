@@ -1,6 +1,7 @@
 import { Point } from "game/src/model/utils"
-import { World } from "koota"
-import { editorActions } from "../../../store/world"
+import { Immutable } from "immer"
+import { useEditorStore } from "../../../store/store"
+import { EditorWorld } from "../../../store/world"
 import { Event, EventContext } from "./event"
 
 export class HandlerBackground {
@@ -16,7 +17,7 @@ export class HandlerBackground {
 
     constructor(
         private context: EventContext,
-        private world: World,
+        private world: Immutable<EditorWorld>,
     ) {
         this.state = {
             type: "default",
@@ -28,7 +29,8 @@ export class HandlerBackground {
             return
         }
 
-        editorActions(this.world).clearHighlights()
+        console.log("clear")
+        useEditorStore.getState().highlight()
 
         if (event.leftButtonClicked) {
             const camera = this.context.camera
@@ -73,7 +75,7 @@ export class HandlerBackground {
                 Math.abs(this.state.startPosition.x - camera.position.x) < 0.01 &&
                 Math.abs(this.state.startPosition.y - camera.position.y) < 0.01
             ) {
-                editorActions(this.world).clearSelected()
+                useEditorStore.getState().select()
             }
 
             this.state = { type: "default" }

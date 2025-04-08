@@ -7,6 +7,9 @@ import { Event } from "./event"
 export function usePipelineEvent(onEvent: (event: Event) => void) {
     const lastNativeEventRef = useRef<Event | undefined>()
 
+    const onEventRef = useRef(onEvent)
+    onEventRef.current = onEvent
+
     const canvas = useThree(state => state.gl.domElement)
     const camera = useThree(state => state.camera)
 
@@ -65,7 +68,7 @@ export function usePipelineEvent(onEvent: (event: Event) => void) {
             }
 
             lastNativeEventRef.current = event
-            onEvent(event)
+            onEventRef.current(event)
 
             if (event.consumed) {
                 raw.stopPropagation()
@@ -94,7 +97,7 @@ export function usePipelineEvent(onEvent: (event: Event) => void) {
 
             switch (event.code) {
                 case "ShiftLeft":
-                    onEvent(
+                    onEventRef.current(
                         (lastNativeEventRef.current = {
                             ...lastNativeEventRef.current,
                             type: event.type,
@@ -106,7 +109,7 @@ export function usePipelineEvent(onEvent: (event: Event) => void) {
                     break
 
                 case "ControlLeft":
-                    onEvent(
+                    onEventRef.current(
                         (lastNativeEventRef.current = {
                             ...lastNativeEventRef.current,
                             type: event.type,
@@ -132,7 +135,7 @@ export function usePipelineEvent(onEvent: (event: Event) => void) {
 
             switch (event.code) {
                 case "ShiftLeft":
-                    onEvent(
+                    onEventRef.current(
                         (lastNativeEventRef.current = {
                             ...lastNativeEventRef.current,
                             type: event.type,
@@ -145,7 +148,7 @@ export function usePipelineEvent(onEvent: (event: Event) => void) {
                     break
 
                 case "ControlLeft":
-                    onEvent(
+                    onEventRef.current(
                         (lastNativeEventRef.current = {
                             ...lastNativeEventRef.current,
                             type: event.type,
@@ -177,7 +180,7 @@ export function usePipelineEvent(onEvent: (event: Event) => void) {
                 window.document.body.style.cursor = "default"
             }
 
-            onEvent(
+            onEventRef.current(
                 (lastNativeEventRef.current = {
                     ...lastNativeEventRef.current,
                     type: event.type,
@@ -206,5 +209,5 @@ export function usePipelineEvent(onEvent: (event: Event) => void) {
             window.removeEventListener("wheel", onWheel)
             canvas.removeEventListener("contextmenu", onContextMenu)
         }
-    }, [canvas, camera, invalidate, onEvent])
+    }, [canvas, camera, invalidate])
 }

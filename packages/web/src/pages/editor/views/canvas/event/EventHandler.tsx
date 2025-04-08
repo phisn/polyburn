@@ -1,7 +1,8 @@
 import { useThree } from "@react-three/fiber"
-import { useWorld } from "koota/react"
 import { DependencyList, useEffect, useMemo, useRef } from "react"
 import { OrthographicCamera } from "three"
+import { deepClone } from "valtio/utils"
+import { useEditorStore } from "../../../store/store"
 import { EventContext } from "./event"
 import { HandlerBackground } from "./handler-background"
 import { HandlerObject } from "./handler-object"
@@ -11,7 +12,7 @@ import { cursor } from "./util"
 
 export function EventHandler() {
     const camera = useThree(x => x.camera)
-    const world = useWorld()
+    const world = useEditorStore(x => x.world)
 
     const context: EventContext = useMemo(
         () => ({
@@ -19,6 +20,13 @@ export function EventHandler() {
         }),
         [camera],
     )
+
+    useEffect(() => {
+        console.log(
+            "eff",
+            JSON.stringify(Object.values(deepClone(world).entities).map(x => x.transform)),
+        )
+    }, [context, world])
 
     const handlerBackground = useRefDerived(
         () => new HandlerBackground(context, world),
@@ -45,24 +53,29 @@ export function EventHandler() {
 }
 
 export function useRefDerived<T>(f: () => T, deps: DependencyList): T {
-    const firstRenderRef = useRef(true)
     const ref = useRef<T>()
+
+    const fRef = useRef(f)
+    fRef.current = f
+
+    const depsRef = useRef(deps)
+    let differentDeps = false
+
+    for (let i = 0; i < deps.length; ++i) {
+        if (deps[i] !== depsRef.current) {
+            differentDeps = true
+            break
+        }
+    }
+
+    if (differentDeps) {
+        ref.current = f()
+        depsRef.current = deps
+    }
 
     if (ref.current === undefined) {
         ref.current = f()
     }
-
-    useEffect(
-        () => {
-            if (firstRenderRef.current) {
-                firstRenderRef.current = false
-            } else {
-                ref.current = f()
-            }
-        },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        deps,
-    )
 
     return ref.current
 }

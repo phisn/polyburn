@@ -1,6 +1,6 @@
 import { LEVEL_SIZE } from "game/src/modules/module-level"
 import { ROCKET_SIZE } from "game/src/modules/module-rocket"
-import { baseZoomFactor } from "../constants"
+import { baseZoomFactor } from "../../../../constants"
 import { EntityGraphicType } from "./entity-graphic-type"
 
 export interface EntityGraphicRegisterEntry {

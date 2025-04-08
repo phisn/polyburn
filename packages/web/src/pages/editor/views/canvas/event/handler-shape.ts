@@ -1,19 +1,15 @@
-import { Point, Transform } from "game/src/model/utils"
-import { Entity, World } from "koota"
+import deepEqual from "deep-equal"
+import { Point, ShapeVertex, Transform } from "game/src/model/utils"
+import { Immutable } from "immer"
+import { deepClone } from "valtio/utils"
 import {
     highlightColor,
     highlightDeleteColor,
     highlightOverrideColor,
     snapDistance,
 } from "../../../constants"
-import {
-    BehaviorShape,
-    BehaviorTransform,
-    EditableShapeVertex,
-    editorActions,
-    Highlighted,
-    Selected,
-} from "../../../store/world"
+import { useEditorStore } from "../../../store/store"
+import { EditorEntityWith, EditorWorld, entitiesWith } from "../../../store/world"
 import { Event, EventContext } from "./event"
 import { cursor, findClosestEdge, findClosestVertex } from "./util"
 import {
@@ -31,10 +27,12 @@ export class HandlerShape {
           }
         | {
               type: "moving"
+
               moving: {
-                  entity: Entity
+                  current: Transform
+                  entity: Immutable<EditorEntityWith<"transform">>
+                  entityKey: string
                   offset: Point
-                  before: Transform
               }[]
           }
         | {
@@ -42,19 +40,26 @@ export class HandlerShape {
 
               duplicate?: {
                   index: number
-                  vertex: EditableShapeVertex
+                  vertex: ShapeVertex
               }
+
+              current: ShapeVertex[]
+              entity: Immutable<EditorEntityWith<"transform" | "vertices">>
+              entityKey: string
               index: number
-              shape: Entity
           }
+
+    private shapes: Immutable<[string, EditorEntityWith<"transform" | "vertices">][]>
 
     constructor(
         private context: EventContext,
-        private world: World,
+        private world: Immutable<EditorWorld>,
     ) {
         this.state = {
             type: "default",
         }
+
+        this.shapes = [...entitiesWith(world, "transform", "vertices")]
     }
 
     handleDefault(event: Event) {
@@ -62,31 +67,34 @@ export class HandlerShape {
             return
         }
 
-        for (const shapeEntity of this.world.query(BehaviorShape, BehaviorTransform)) {
-            const shape = shapeEntity.get(BehaviorShape)!
-            const transform = shapeEntity.get(BehaviorTransform)!
+        for (const [key, shape] of this.shapes) {
+            const selected = useEditorStore.getState().selected.has(key)
 
-            if (shapeEntity.has(Selected)) {
-                const closestVertex = findClosestVertex(shapeEntity, event.position, snapDistance)
+            if (selected) {
+                const closestVertex = findClosestVertex(shape, event.position, snapDistance)
 
                 if (closestVertex) {
                     event.consumed = true
                     cursor.grabbable()
 
                     if (event.ctrlKey) {
-                        shapeEntity.add(
-                            Highlighted({
-                                point: {
-                                    ...closestVertex.point,
-                                    color: highlightDeleteColor,
-                                },
-                            }),
-                        )
+                        useEditorStore.getState().highlight(key, {
+                            point: closestVertex.point,
+                            color: highlightDeleteColor,
+                        })
 
                         if (event.leftButtonClicked && shape.vertices.length > 3) {
-                            shape.vertices.splice(closestVertex.vertexIndex, 1)
+                            useEditorStore.getState().updateWorld(world => {
+                                const entity = world.entities[key]
+
+                                if ("vertices" in entity) {
+                                    entity.vertices.splice(closestVertex.vertexIndex, 1)
+                                }
+                            })
                         } else if (event.leftButtonClicked) {
-                            shapeEntity.destroy()
+                            useEditorStore.getState().updateWorld(world => {
+                                delete world.entities[key]
+                            })
                         }
 
                         return
@@ -97,26 +105,25 @@ export class HandlerShape {
 
                         this.state = {
                             type: "vertex",
+
+                            entity: shape,
+                            entityKey: key,
                             index: closestVertex.vertexIndex,
-                            shape: shapeEntity,
+                            current: deepClone(shape.vertices) as ShapeVertex[],
                         }
 
                         this.handleVertex(event)
                     }
 
-                    shapeEntity.add(
-                        Highlighted({
-                            point: {
-                                ...closestVertex.point,
-                                color: highlightColor,
-                            },
-                        }),
-                    )
+                    useEditorStore.getState().highlight(key, {
+                        point: closestVertex.point,
+                        color: highlightColor,
+                    })
 
                     return
                 }
 
-                const closestEdge = findClosestEdge([shapeEntity], event.position, snapDistance)
+                const closestEdge = findClosestEdge([shape], event.position, snapDistance)
 
                 if (closestEdge) {
                     cursor.pointer()
@@ -124,7 +131,8 @@ export class HandlerShape {
                     if (event.leftButtonClicked) {
                         cursor.grabbing()
 
-                        shape.vertices.splice(closestEdge.edge[0] + 1, 0, {
+                        const vertices = deepClone(shape.vertices) as ShapeVertex[]
+                        vertices.splice(closestEdge.edge[0] + 1, 0, {
                             color: averageColor(
                                 shape.vertices[closestEdge.edge[0]].color,
                                 shape.vertices[closestEdge.edge[1]].color,
@@ -135,31 +143,28 @@ export class HandlerShape {
                             },
                         })
 
-                        console.log(closestEdge.edge[0], closestEdge.edge[1])
-
                         this.state = {
                             type: "vertex",
+
+                            entity: shape,
+                            entityKey: key,
                             index: closestEdge.edge[0] + 1,
-                            shape: shapeEntity,
+                            current: vertices,
                         }
 
                         this.handleVertex(event)
                     } else {
-                        shapeEntity.add(
-                            Highlighted({
-                                point: {
-                                    ...closestEdge.point,
-                                    color: highlightColor,
-                                },
-                            }),
-                        )
+                        useEditorStore.getState().highlight(key, {
+                            point: closestEdge.point,
+                            color: highlightColor,
+                        })
                     }
 
                     event.consumed = true
                     return
                 }
 
-                const isPointInside = isPointInsideShape(shapeEntity, event.position)
+                const isPointInside = isPointInsideShape(shape, event.position)
 
                 if (isPointInside) {
                     event.consumed = true
@@ -173,11 +178,12 @@ export class HandlerShape {
                             type: "moving",
                             moving: [
                                 {
-                                    before: transform,
-                                    entity: shapeEntity,
+                                    current: deepClone(shape.transform),
+                                    entity: shape,
+                                    entityKey: key,
                                     offset: {
-                                        x: transform.point.x - event.positionInGrid.x,
-                                        y: transform.point.y - event.positionInGrid.y,
+                                        x: shape.transform.point.x - event.positionInGrid.x,
+                                        y: shape.transform.point.y - event.positionInGrid.y,
                                     },
                                 },
                             ],
@@ -189,10 +195,10 @@ export class HandlerShape {
                     return
                 }
             } else {
-                const isInside = isPointInsideShape(shapeEntity, event.position)
+                const isInside = isPointInsideShape(shape, event.position)
 
                 if (isInside) {
-                    shapeEntity.add(Highlighted)
+                    useEditorStore.getState().highlight(key)
 
                     if (event.ctrlKey) {
                         cursor.grabbable()
@@ -203,21 +209,20 @@ export class HandlerShape {
                             type: "moving",
                             moving: [
                                 {
-                                    before: transform,
-                                    entity: shapeEntity,
+                                    current: deepClone(shape.transform),
+                                    entity: shape,
+                                    entityKey: key,
                                     offset: {
-                                        x: transform.point.x - event.positionInGrid.x,
-                                        y: transform.point.y - event.positionInGrid.y,
+                                        x: shape.transform.point.x - event.positionInGrid.x,
+                                        y: shape.transform.point.y - event.positionInGrid.y,
                                     },
                                 },
                             ],
                         }
 
                         this.handleMoving(event)
-                    } else if (event.leftButtonClicked && event.shiftKey) {
-                        editorActions(this.world).selectAdditive(shapeEntity)
                     } else if (event.leftButtonClicked) {
-                        editorActions(this.world).select(shapeEntity)
+                        useEditorStore.getState().select(key, event.shiftKey)
                     }
 
                     if (event.rightButtonClicked) {
@@ -240,17 +245,31 @@ export class HandlerShape {
         if (event.leftButtonDown) {
             cursor.grabbing()
 
-            for (const { entity, offset } of this.state.moving) {
-                const transform = entity.get(BehaviorTransform)!
+            for (const { current, entityKey, offset } of this.state.moving) {
+                current.point.x = event.positionInGrid.x + offset.x
+                current.point.y = event.positionInGrid.y + offset.y
+                current.rotation = 0
 
-                transform.point.x = event.positionInGrid.x + offset.x
-                transform.point.y = event.positionInGrid.y + offset.y
-                transform.rotation = 0
-
-                entity.changed(BehaviorTransform)
+                useEditorStore.getState().invoke(entityKey, "transform", current)
             }
         } else {
             cursor.grabbable()
+
+            const state = this.state.moving
+
+            if (state.every(x => deepEqual(x.entity.transform, x.current)) === false) {
+                useEditorStore.getState().updateWorld(world => {
+                    for (const { entityKey, current } of state) {
+                        const entity = world.entities[entityKey]
+
+                        if ("transform" in entity) {
+                            entity.transform.point.x = current.point.x
+                            entity.transform.point.y = current.point.y
+                            entity.transform.rotation = current.rotation
+                        }
+                    }
+                })
+            }
 
             this.state = {
                 type: "default",
@@ -263,45 +282,41 @@ export class HandlerShape {
             return
         }
 
-        const shape = this.state.shape.get(BehaviorShape)!
         const state = this.state
-        const transform = this.state.shape.get(BehaviorTransform)!
-
-        this.state.shape.changed(BehaviorShape)
 
         if (event.leftButtonDown) {
+            event.consumed = true
             cursor.grabbing()
 
-            const vertexInShape = shape.vertices[this.state.index]
+            const vertexInShape = state.current[state.index]
 
             const point = {
-                x: event.positionInGrid.x - transform.point.x,
-                y: event.positionInGrid.y - transform.point.y,
+                x: event.positionInGrid.x - state.entity.transform.point.x,
+                y: event.positionInGrid.y - state.entity.transform.point.y,
             }
 
             if (point.x === vertexInShape.point.x && point.y === vertexInShape.point.y) {
-                editorActions(this.world).highlight(state.shape, {
+                useEditorStore.getState().highlight(state.entityKey, {
                     point: {
-                        x: vertexInShape.point.x + transform.point.x,
-                        y: vertexInShape.point.y + transform.point.y,
-
-                        color:
-                            this.state.duplicate === undefined
-                                ? highlightColor
-                                : highlightOverrideColor,
+                        x: vertexInShape.point.x + state.entity.transform.point.x,
+                        y: vertexInShape.point.y + state.entity.transform.point.y,
                     },
+
+                    color:
+                        this.state.duplicate === undefined
+                            ? highlightColor
+                            : highlightOverrideColor,
                 })
 
                 return
             }
 
-            if (this.state.duplicate) {
-                shape.vertices[this.state.index] = this.state.duplicate.vertex
-                shape.vertices.splice(this.state.duplicate.index, 0, vertexInShape)
+            if (state.duplicate) {
+                state.current[state.index] = state.duplicate.vertex
+                state.current.splice(state.duplicate.index, 0, vertexInShape)
 
-                this.state.index = this.state.duplicate.index
-
-                this.state.duplicate = undefined
+                state.index = state.duplicate.index
+                state.duplicate = undefined
             }
 
             const previousX = vertexInShape.point.x
@@ -310,51 +325,55 @@ export class HandlerShape {
             vertexInShape.point.x = point.x
             vertexInShape.point.y = point.y
 
-            const duplicateIndex = shape.vertices.findIndex(
+            const duplicateIndex = state.current.findIndex(
                 (v, i) =>
-                    v.point.x === shape.vertices[state.index].point.x &&
-                    v.point.y === shape.vertices[state.index].point.y &&
+                    v.point.x === state.current[state.index].point.x &&
+                    v.point.y === state.current[state.index].point.y &&
                     i !== state.index,
             )
 
             if (duplicateIndex !== -1) {
-                if (!canRemoveVertex(this.state.index, shape.vertices)) {
+                if (!canRemoveVertex(this.state.index, state.current)) {
                     vertexInShape.point.x = previousX
                     vertexInShape.point.y = previousY
 
-                    editorActions(this.world).highlight(state.shape, {
+                    useEditorStore.getState().highlight(state.entityKey, {
                         point: {
-                            x: vertexInShape.point.x + transform.point.x,
-                            y: vertexInShape.point.y + transform.point.y,
-                            color: highlightColor,
+                            x: vertexInShape.point.x + state.entity.transform.point.x,
+                            y: vertexInShape.point.y + state.entity.transform.point.y,
                         },
+                        color: highlightColor,
                     })
 
                     cursor.notAllowed()
 
+                    useEditorStore.getState().invoke(state.entityKey, "vertices", state.current)
+
                     return
                 }
 
-                editorActions(this.world).highlight(state.shape, {
+                useEditorStore.getState().highlight(state.entityKey, {
                     point: {
-                        x: vertexInShape.point.x + transform.point.x,
-                        y: vertexInShape.point.y + transform.point.y,
-                        color: highlightOverrideColor,
+                        x: vertexInShape.point.x + state.entity.transform.point.x,
+                        y: vertexInShape.point.y + state.entity.transform.point.y,
                     },
+                    color: highlightOverrideColor,
                 })
 
                 this.state.duplicate = {
                     index: this.state.index,
-                    vertex: shape.vertices[duplicateIndex],
+                    vertex: state.current[duplicateIndex],
                 }
 
-                shape.vertices[duplicateIndex] = vertexInShape
-                shape.vertices.splice(this.state.index, 1)
+                state.current[duplicateIndex] = vertexInShape
+                state.current.splice(this.state.index, 1)
 
                 this.state.index =
                     this.state.index < duplicateIndex ? duplicateIndex - 1 : duplicateIndex
+
+                useEditorStore.getState().invoke(state.entityKey, "vertices", state.current)
             } else {
-                const area = shapeArea(shape.vertices)
+                const area = shapeArea(state.current)
 
                 if (area <= 0.1) {
                     vertexInShape.point.x = previousX
@@ -365,15 +384,17 @@ export class HandlerShape {
                     return
                 }
 
-                const conflict = resolveConflictsAround(this.state.index, shape.vertices)
+                const conflict = resolveConflictsAround(this.state.index, state.current)
 
-                editorActions(this.world).highlight(state.shape, {
+                useEditorStore.getState().highlight(state.entityKey, {
                     point: {
-                        x: vertexInShape.point.x + transform.point.x,
-                        y: vertexInShape.point.y + transform.point.y,
-                        color: highlightColor,
+                        x: vertexInShape.point.x + state.entity.transform.point.x,
+                        y: vertexInShape.point.y + state.entity.transform.point.y,
                     },
+                    color: highlightColor,
                 })
+
+                useEditorStore.getState().invoke(state.entityKey, "vertices", state.current)
 
                 if (conflict === null) {
                     vertexInShape.point.x = previousX
@@ -388,11 +409,19 @@ export class HandlerShape {
                     this.state.index = conflict
                 }
             }
-
-            event.consumed = true
         } else {
             this.state = {
                 type: "default",
+            }
+
+            if (deepEqual(state.entity.vertices, state.current) === false) {
+                useEditorStore.getState().updateWorld(world => {
+                    const entity = world.entities[state.entityKey]
+
+                    if ("vertices" in entity) {
+                        entity.vertices = deepClone(state.current)
+                    }
+                })
             }
 
             this.handleDefault(event)

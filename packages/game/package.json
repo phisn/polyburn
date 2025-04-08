@@ -20,7 +20,7 @@
         "protobufjs": "^7.2.4",
         "ts-proto": "^1.156.6",
         "typescript": "latest",
-        "zod": "^3.24.2"
+        "zod": "3.23.8"
     },
     "devDependencies": {
         "@protobuf-ts/protoc": "^2.9.1",

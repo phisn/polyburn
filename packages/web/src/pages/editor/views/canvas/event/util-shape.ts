@@ -1,6 +1,6 @@
-import { Point } from "game/src/model/utils"
-import { Entity } from "koota"
-import { BehaviorShape, BehaviorTransform, EditableShapeVertex } from "../../../store/world"
+import { Point, ShapeVertex } from "game/src/model/utils"
+import { Immutable } from "immer"
+import { EditorEntityWith } from "../../../store/world"
 
 export function averageColor(a: number, b: number): number {
     const ra = (a & 0xff0000) >> 16
@@ -18,7 +18,7 @@ export function averageColor(a: number, b: number): number {
     return (rc << 16) | (gc << 8) | bc
 }
 
-export function shapeArea(vertices: EditableShapeVertex[]): number {
+export function shapeArea(vertices: ShapeVertex[]): number {
     if (vertices.length < 3) {
         return 0
     }
@@ -40,7 +40,7 @@ export function shapeArea(vertices: EditableShapeVertex[]): number {
     return Math.abs(area) / 2
 }
 
-export function canRemoveVertex(vertexIndex: number, vertices: EditableShapeVertex[]) {
+export function canRemoveVertex(vertexIndex: number, vertices: ShapeVertex[]) {
     if (vertices.length <= 3) {
         return false
     }
@@ -55,11 +55,7 @@ export function canRemoveVertex(vertexIndex: number, vertices: EditableShapeVert
     return vertices.length > 3 && !findIntersection(left, right, vertices)
 }
 
-export function findIntersection(
-    firstIndex: number,
-    secondIndex: number,
-    vertices: EditableShapeVertex[],
-) {
+export function findIntersection(firstIndex: number, secondIndex: number, vertices: ShapeVertex[]) {
     function intersects(a: Point, b: Point, c: Point, d: Point) {
         const lacd = (d.y - a.y) * (c.x - a.x)
         const racd = (c.y - a.y) * (d.x - a.x)
@@ -102,7 +98,7 @@ export function findIntersection(
 }
 
 // resolving intersections can be very complex. to prevent undesired results we only try to resolve intersections once
-export function resolveConflictsAround(vertexIndex: number, vertices: EditableShapeVertex[]) {
+export function resolveConflictsAround(vertexIndex: number, vertices: ShapeVertex[]) {
     const left = (vertexIndex - 1 + vertices.length) % vertices.length
     const right = (vertexIndex + 1) % vertices.length
 
@@ -157,25 +153,25 @@ export function resolveConflictsAround(vertexIndex: number, vertices: EditableSh
     return vertexIndex
 }
 
-export function isPointInsideShape(entity: Entity, point: Point): boolean {
+export function isPointInsideShape(
+    shape: Immutable<EditorEntityWith<"transform" | "vertices">>,
+    point: Point,
+): boolean {
     let isInside = false
-
-    const shape = entity.get(BehaviorShape)!
-    const transform = entity.get(BehaviorTransform)!
 
     const numVertices = shape.vertices.length
 
     let j = numVertices - 1
 
     let vertexAtJ = {
-        x: shape.vertices[j].point.x + transform.point.x,
-        y: shape.vertices[j].point.y + transform.point.y,
+        x: shape.vertices[j].point.x + shape.transform.point.x,
+        y: shape.vertices[j].point.y + shape.transform.point.y,
     }
 
     for (let i = 0; i < numVertices; i++) {
         const vertexAtI = {
-            x: shape.vertices[i].point.x + transform.point.x,
-            y: shape.vertices[i].point.y + transform.point.y,
+            x: shape.vertices[i].point.x + shape.transform.point.x,
+            y: shape.vertices[i].point.y + shape.transform.point.y,
         }
 
         if (
@@ -195,25 +191,32 @@ export function isPointInsideShape(entity: Entity, point: Point): boolean {
     return isInside
 }
 
-export function findClosestEdge(shapes: readonly Entity[], point: Point, snapDistance: number) {
+export function findClosestEdge(
+    shapes: Immutable<EditorEntityWith<"transform" | "vertices">[]>,
+    point: Point,
+    snapDistance: number,
+) {
     let minDistance = Number.MAX_VALUE
     let closestPoint: Point = { x: 0, y: 0 }
     let edgeIndices: [number, number] = [0, 0]
     let shapeIndex = 0
 
     for (let i = 0; i < shapes.length; ++i) {
-        const shape = shapes[i].get(BehaviorShape)!
-        const transform = shapes[i].get(BehaviorTransform)!
+        const shape = shapes[i]
 
         for (let j = 0; j < shape.vertices.length; ++j) {
             const p1 = {
-                x: shape.vertices[j].point.x + transform.point.x,
-                y: shape.vertices[j].point.y + transform.point.y,
+                x: shape.vertices[j].point.x + shape.transform.point.x,
+                y: shape.vertices[j].point.y + shape.transform.point.y,
             }
 
             const p2 = {
-                x: shape.vertices[(j + 1) % shape.vertices.length].point.x + transform.point.x,
-                y: shape.vertices[(j + 1) % shape.vertices.length].point.y + transform.point.y,
+                x:
+                    shape.vertices[(j + 1) % shape.vertices.length].point.x +
+                    shape.transform.point.x,
+                y:
+                    shape.vertices[(j + 1) % shape.vertices.length].point.y +
+                    shape.transform.point.y,
             }
 
             const closest = getClosestPointOnLine(p1, p2, point)
@@ -235,18 +238,19 @@ export function findClosestEdge(shapes: readonly Entity[], point: Point, snapDis
     return { point: closestPoint, edge: edgeIndices, shapeIndex }
 }
 
-export function findClosestVertex(entity: Entity, point: Point, snapDistance: number) {
+export function findClosestVertex(
+    shape: Immutable<EditorEntityWith<"transform" | "vertices">>,
+    point: Point,
+    snapDistance: number,
+) {
     let minDistance = Number.MAX_VALUE
     let closestPoint: Point = { x: 0, y: 0 }
     let vertexIndex = 0
 
-    const shape = entity.get(BehaviorShape)!
-    const transform = entity.get(BehaviorTransform)!
-
     for (let i = 0; i < shape.vertices.length; ++i) {
         const vertex = {
-            x: shape.vertices[i].point.x + transform.point.x,
-            y: shape.vertices[i].point.y + transform.point.y,
+            x: shape.vertices[i].point.x + shape.transform.point.x,
+            y: shape.vertices[i].point.y + shape.transform.point.y,
         }
 
         const distance = getDistance(vertex, point)

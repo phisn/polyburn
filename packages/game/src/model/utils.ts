@@ -1,32 +1,38 @@
 import cos from "@stdlib/math/base/special/cos"
 import sin from "@stdlib/math/base/special/sin"
+import { z } from "zod"
 
-export type Point = {
-    x: number
-    y: number
-}
+export type Point = z.infer<typeof Point>
+export const Point = z.object({
+    x: z.number(),
+    y: z.number(),
+})
 
-export type Transform = {
-    point: Point
-    rotation: number
-}
+export type Transform = z.infer<typeof Transform>
+export const Transform = z.object({
+    point: Point,
+    rotation: z.number(),
+})
 
-export type Rect = {
-    left: number
-    top: number
-    right: number
-    bottom: number
-}
+export type Rect = z.infer<typeof Rect>
+export const Rect = z.object({
+    left: z.number(),
+    top: z.number(),
+    right: z.number(),
+    bottom: z.number(),
+})
 
-export type Size = {
-    width: number
-    height: number
-}
+export type Size = z.infer<typeof Size>
+export const Size = z.object({
+    width: z.number(),
+    height: z.number(),
+})
 
-export interface ShapeVertex {
-    point: Point
-    color: number
-}
+export type ShapeVertex = z.infer<typeof ShapeVertex>
+export const ShapeVertex = z.object({
+    point: Point,
+    color: z.number(),
+})
 
 export const changeAnchor = (
     position: Point,

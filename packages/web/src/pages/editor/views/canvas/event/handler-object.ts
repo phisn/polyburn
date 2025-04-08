@@ -1,7 +1,9 @@
+import deepEqual from "deep-equal"
 import { changeAnchor, Point, Transform } from "game/src/model/utils"
-import { Entity, World } from "koota"
+import { Immutable } from "immer"
 import { deepClone } from "valtio/utils"
-import { BehaviorSize, BehaviorTransform, editorActions, Shape } from "../../../store/world"
+import { useEditorStore } from "../../../store/store"
+import { EditorEntityWith, EditorWorld, entitiesWith } from "../../../store/world"
 import { Event, EventContext } from "./event"
 import { cursor, findEdgeForEntity, isPointInsideEntity } from "./util"
 
@@ -13,19 +15,31 @@ export class HandlerObject {
         | {
               type: "moving"
               moving: {
-                  entity: Entity
+                  current: Transform
+                  entity: Immutable<EditorEntityWith<"transform">>
+                  entityKey: string
                   offset: Point
-                  before: Transform
               }[]
           }
 
+    private shapes: Immutable<EditorEntityWith<"transform" | "vertices">[]>
+    private objects: Immutable<[string, EditorEntityWith<"size" | "transform">][]>
+
     constructor(
         private context: EventContext,
-        private world: World,
+        private world: Immutable<EditorWorld>,
     ) {
         this.state = {
             type: "default",
         }
+
+        this.objects = [...entitiesWith(world, "size", "transform")]
+        this.shapes = [...entitiesWith(world, "transform", "vertices").map(([_, entity]) => entity)]
+
+        console.log(
+            "asdf",
+            JSON.stringify(Object.values(deepClone(world).entities).map(x => x.transform)),
+        )
     }
 
     handleDefault(event: Event) {
@@ -33,14 +47,11 @@ export class HandlerObject {
             return
         }
 
-        for (const entity of this.world.query(BehaviorTransform, BehaviorSize)) {
-            const size = entity.get(BehaviorSize)!
-            const transform = entity.get(BehaviorTransform)!
-
-            const isInside = isPointInsideEntity(event.position, transform, size)
+        for (const [key, entity] of this.objects) {
+            const isInside = isPointInsideEntity(event.position, entity.transform, entity.size)
 
             if (isInside) {
-                editorActions(this.world).highlight(entity)
+                useEditorStore.getState().highlight(key)
 
                 if (event.ctrlKey) {
                     if (event.leftButtonClicked) {
@@ -50,12 +61,13 @@ export class HandlerObject {
                             type: "moving",
                             moving: [
                                 {
+                                    current: deepClone(entity.transform),
                                     entity,
+                                    entityKey: key,
                                     offset: {
-                                        x: transform.point.x - event.positionInGrid.x,
-                                        y: transform.point.y - event.positionInGrid.y,
+                                        x: entity.transform.point.x - event.positionInGrid.x,
+                                        y: entity.transform.point.y - event.positionInGrid.y,
                                     },
-                                    before: deepClone(transform),
                                 },
                             ],
                         }
@@ -64,10 +76,8 @@ export class HandlerObject {
                     } else {
                         cursor.grabbable()
                     }
-                } else if (event.leftButtonClicked && event.shiftKey) {
-                    editorActions(this.world).selectAdditive(entity)
                 } else if (event.leftButtonClicked) {
-                    editorActions(this.world).select(entity)
+                    useEditorStore.getState().select(key, event.shiftKey)
                 }
 
                 event.consumed = true
@@ -89,18 +99,34 @@ export class HandlerObject {
                 return
             }
 
-            for (const { entity, offset } of this.state.moving) {
-                const transform = entity.get(BehaviorTransform)!
+            for (const { entityKey, offset, current } of this.state.moving) {
+                current.point.x = event.positionInGrid.x + offset.x
+                current.point.y = event.positionInGrid.y + offset.y
+                current.rotation = 0
 
-                // console.log("test")
-                transform.point.x = event.positionInGrid.x + offset.x
-                transform.point.y = event.positionInGrid.y + offset.y
-                transform.rotation = 1
-
-                entity.changed(BehaviorTransform)
+                useEditorStore.getState().invoke(entityKey, "transform", current)
             }
         } else {
             cursor.grabbable()
+
+            const state = this.state.moving
+
+            if (state.every(x => deepEqual(x.entity.transform, x.current)) === false) {
+                useEditorStore.getState().updateWorld(world => {
+                    for (const { entityKey, current } of state) {
+                        const entity = world.entities[entityKey]
+
+                        if ("transform" in entity) {
+                            entity.transform.point.x = current.point.x
+                            entity.transform.point.y = current.point.y
+                            console.log("set", current.rotation)
+                            entity.transform.rotation = current.rotation
+
+                            console.log("moving to: ", deepClone(entity.transform))
+                        }
+                    }
+                })
+            }
 
             this.state = {
                 type: "default",
@@ -119,10 +145,11 @@ export class HandlerObject {
 
         const [first] = this.state.moving
 
-        const size = first.entity.get(BehaviorSize)!
-        const transform = first.entity.get(BehaviorTransform)!
+        if (!("size" in first.entity)) {
+            return false
+        }
 
-        const edge = findEdgeForEntity(event.position, true, this.world.query(Shape))
+        const edge = findEdgeForEntity(event.position, true, this.shapes)
 
         if (edge === undefined) {
             return false
@@ -131,18 +158,17 @@ export class HandlerObject {
         const transposed = changeAnchor(
             edge.point,
             edge.rotation,
-            size,
+            first.entity.size,
             { x: 0.5, y: 0.5 },
             { x: 0.5, y: 1 },
         )
 
-        transform.point.x = transposed.x
-        transform.point.y = transposed.y
-        transform.rotation = edge.rotation
+        first.current.point.x = transposed.x
+        first.current.point.y = transposed.y
+        console.log(edge.rotation)
+        first.current.rotation = edge.rotation
 
-        console.log(transform)
-
-        first.entity.changed(BehaviorTransform)
+        useEditorStore.getState().invoke(first.entityKey, "transform", first.current)
 
         return true
     }

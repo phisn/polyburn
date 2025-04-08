@@ -1,6 +1,5 @@
-import { Point } from "game/src/model/utils"
+import { Point, ShapeVertex } from "game/src/model/utils"
 import { BufferGeometry, Color, Float32BufferAttribute, ShapeUtils, Vector2 } from "three"
-import { EditableShapeVertex } from "../../../store/world"
 
 function IterateInOrder(vertices: Point[], callback: (i: number, vertex: Point) => void) {
     for (let i = 0; i < vertices.length; i++) {
@@ -15,7 +14,7 @@ function IterateInReverseOrder(vertices: Point[], callback: (i: number, vertex: 
 }
 
 export class MutatableShapeGeometry extends BufferGeometry {
-    constructor(shapeVertices?: EditableShapeVertex[]) {
+    constructor(shapeVertices?: readonly ShapeVertex[]) {
         super()
 
         if (shapeVertices) {
@@ -23,7 +22,7 @@ export class MutatableShapeGeometry extends BufferGeometry {
         }
     }
 
-    update(shapeVertices: EditableShapeVertex[]) {
+    update(shapeVertices: readonly ShapeVertex[]) {
         const vertices = shapeVertices.map(vertex => new Vector2(vertex.point.x, vertex.point.y))
 
         // check direction of vertices

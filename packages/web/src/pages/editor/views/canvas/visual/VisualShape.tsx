@@ -1,102 +1,70 @@
-import { Entity } from "koota"
-import { useQuery, useTrait, useTraitEffect } from "koota/react"
-import { useRef } from "react"
+import { useMemo, useRef } from "react"
 import { Mesh, MeshBasicMaterial } from "three"
-import {
-    baseZoom,
-    highlightColor,
-    selectHightlightColor,
-    selectObjectColor,
-} from "../../../constants"
-import {
-    BehaviorShape,
-    BehaviorTransform,
-    Highlighted,
-    Selected,
-    Shape,
-} from "../../../store/world"
+import { highlightColor, selectHightlightColor, selectObjectColor } from "../../../constants"
+
+import { Immutable } from "immer"
+import { useEditorStore } from "../../../store/store"
+import { useEntityEvent } from "../../../store/store-events"
+import { EditorShape } from "../../../store/world"
 import { MutatableShapeGeometry } from "./MutatableShapeGeometry"
 
 export function VisualShapes() {
-    const rockets = useQuery(Shape)
+    const entities = useEditorStore(x => x.world.entities)
 
     return (
         <>
-            {rockets.map(rocket => (
-                <VisualShape key={rocket.id()} entity={rocket} />
-            ))}
+            {Object.keys(entities)
+                .map(key => [key, entities[key]] as const)
+                .map(
+                    ([id, entity]) =>
+                        entity.type === "shape" && <VisualShape key={id} id={id} entity={entity} />,
+                )}
         </>
     )
 }
 
-function VisualShape(props: { entity: Entity }) {
+function VisualShape(props: { id: string; entity: Immutable<EditorShape> }) {
     const meshRef = useRef<Mesh>(null)
     const geometryRef = useRef<MutatableShapeGeometry>(undefined!)
 
     if (geometryRef.current === undefined) {
-        geometryRef.current = new MutatableShapeGeometry()
-
-        const shape = props.entity.get(BehaviorShape)
-
-        if (shape) {
-            geometryRef.current.update(shape.vertices)
-        }
+        geometryRef.current = new MutatableShapeGeometry(props.entity.vertices)
     }
 
-    useTraitEffect(props.entity, BehaviorTransform, transform => {
-        if (transform === undefined) {
-            return
-        }
-
+    useEntityEvent(props.id, "transform", transform => {
         meshRef.current?.position.set(transform.point.x, transform.point.y, 0)
         meshRef.current?.rotation.set(0, 0, transform.rotation)
     })
 
-    useTraitEffect(props.entity, BehaviorShape, shape => {
-        if (shape === undefined) {
-            return
-        }
-
-        geometryRef.current.update(shape.vertices)
+    useEntityEvent(props.id, "vertices", vertices => {
+        geometryRef.current.update(vertices)
     })
 
-    const material = new MeshBasicMaterial({ color: "#ffffff" })
+    const highlighted = useEditorStore(x => x.highlighted.has(props.id))
+    const selected = useEditorStore(x => x.selected.has(props.id))
 
-    const highlighted = useTrait(props.entity, Highlighted)
-    const selected = useTrait(props.entity, Selected)
+    const material = useMemo(() => {
+        const material = new MeshBasicMaterial({ color: "#ffffff" })
 
-    if (highlighted && selected) {
-        material.color.set(selectHightlightColor)
-    } else if (highlighted) {
-        material.color.set(highlightColor)
-    } else if (selected) {
-        material.color.set(selectObjectColor)
-    } else {
-        material.color.set("#ffffff")
-    }
+        if (highlighted && selected) {
+            material.color.set(selectHightlightColor)
+        } else if (highlighted) {
+            material.color.set(highlightColor)
+        } else if (selected) {
+            material.color.set(selectObjectColor)
+        } else {
+            material.color.set("#ffffff")
+        }
 
-    const transform = props.entity.get(BehaviorTransform)
+        return material
+    }, [highlighted, selected])
 
     return (
-        <>
-            {highlighted?.point && (
-                <>
-                    <mesh position={[highlighted.point.x, highlighted.point.y, 1]}>
-                        <circleGeometry args={[0.016 * baseZoom]} />
-                        <meshBasicMaterial color={highlighted.point.color} />
-                    </mesh>
-                    <mesh position={[highlighted.point.x, highlighted.point.y, 0.5]}>
-                        <circleGeometry args={[0.018 * baseZoom]} />
-                        <meshBasicMaterial color={"#000000"} />
-                    </mesh>
-                </>
-            )}
-            <mesh
-                position={[transform?.point.x ?? 0, transform?.point.y ?? 0, 0]}
-                ref={meshRef}
-                geometry={geometryRef.current}
-                material={material}
-            />
-        </>
+        <mesh
+            position={[props.entity.transform.point.x, props.entity.transform.point.y, 0]}
+            ref={meshRef}
+            geometry={geometryRef.current}
+            material={material}
+        />
     )
 }

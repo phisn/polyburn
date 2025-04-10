@@ -1,7 +1,6 @@
 import { useThree } from "@react-three/fiber"
-import { DependencyList, useEffect, useMemo, useRef } from "react"
+import { DependencyList, useMemo, useRef } from "react"
 import { OrthographicCamera } from "three"
-import { deepClone } from "valtio/utils"
 import { useEditorStore } from "../../../store/store"
 import { EventContext } from "./event"
 import { HandlerBackground } from "./handler-background"
@@ -20,13 +19,6 @@ export function EventHandler() {
         }),
         [camera],
     )
-
-    useEffect(() => {
-        console.log(
-            "eff",
-            JSON.stringify(Object.values(deepClone(world).entities).map(x => x.transform)),
-        )
-    }, [context, world])
 
     const handlerBackground = useRefDerived(
         () => new HandlerBackground(context, world),

@@ -89,6 +89,7 @@ export class HandlerShape {
 
                                 if ("vertices" in entity) {
                                     entity.vertices.splice(closestVertex.vertexIndex, 1)
+                                    console.log("delete")
                                 }
                             })
                         } else if (event.leftButtonClicked) {

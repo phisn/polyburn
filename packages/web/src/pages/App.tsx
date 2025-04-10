@@ -16,10 +16,10 @@ export function App() {
                 <Route path="/" element={<LayoutWithMenu />}>
                     <Route path="/" element={<Navigate to="/campaign" replace />} />
                     <Route path="/campaign" element={<Campaign />} />
-                    <Route path="/editor" element={<Editor />} />
                 </Route>
                 <Route path="/" element={<Layout />}>
                     <Route path="/" element={<Navigate to="/campaign" replace />} />
+                    <Route path="/editor" element={<Editor />} />
                     <Route path="/play/:worldname/:gamemode" element={<Player />} />
                     <Route path="/replay/:replayId" element={<Replayer />} />
                     <Route path="/slot" element={<Slot />} />

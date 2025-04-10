@@ -20,11 +20,11 @@ function HighlightPoint() {
         return (
             <>
                 <mesh position={[highlightPoint.point.x, highlightPoint.point.y, 1]}>
-                    <circleGeometry args={[0.016 * baseZoom]} />
+                    <circleGeometry args={[0.01 * baseZoom]} />
                     <meshBasicMaterial color={highlightPoint.color} />
                 </mesh>
                 <mesh position={[highlightPoint.point.x, highlightPoint.point.y, 0.5]}>
-                    <circleGeometry args={[0.018 * baseZoom]} />
+                    <circleGeometry args={[0.012 * baseZoom]} />
                     <meshBasicMaterial color={"#000000"} />
                 </mesh>
             </>

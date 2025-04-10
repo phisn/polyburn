@@ -1,44 +1,53 @@
+import { ChevronDown } from "../../../../components/common/svg/ChevronDown"
+import { ChevronRightSvg } from "../../../../components/common/svg/ChevronRight"
+import { LayersSvg } from "../../../../components/common/svg/Layers"
+import { useEditorStore } from "../../store/store"
+import { EditorContainer } from "../EditorContainer"
+
 export function Hierarchy() {
+    const world = useEditorStore(x => x.world)
+
     return (
-        <>
-            <div className="flex h-full flex-col p-1">
-                <div className="border-base-200 h-full w-full rounded-xl border-2 pt-4">
-                    {/*entities.map(entity => {
-                        const isSelected = selected.includes(entity.id)
-
-                        const { bgDefault, bgHover } = isSelected
-                            ? {
-                                  bgDefault: "bg-base-200",
-                                  bgHover: "bg-base-100",
-                              }
-                            : {
-                                  bgDefault: "bg-base-300",
-                                  bgHover: "bg-base-200",
-                              }
-
-                        function onClick() {
-                            if (isSelected) {
-                                deselect(entity.id)
-                            } else {
-                                select(entity.id)
-                            }
-                        }
-
-                        return (
-                            <div
-                                className={`hover:${bgHover} ${bgDefault} flex items-center space-x-2 p-1 px-5 transition hover:cursor-pointer`}
-                                onClick={onClick}
-                            >
-                                <div className="text-base-100 text-sm">{entity.id}</div>
-                                <RocketSvg width="16" height="16" />
-                                <div>{EntityType[entity.type]}</div>
+        <EditorContainer>
+            <div>
+                <div className="p-4 text-gray-400">Gamemodes</div>
+                <div>
+                    <Entry>Normal</Entry>
+                    <div>
+                        <Entry open>Reverse</Entry>
+                        <div className="py-1">
+                            <div className="hover:bg-base-200 flex items-center space-x-2 px-4 py-1 pl-8 transition hover:cursor-pointer">
+                                <LayersSvg width="16" height="16" />
+                                <div>Shapes</div>
                             </div>
-                        )
-                        
-                    })*/}
-                    <div className="divider divider-vertical" />
+                            <div className="hover:bg-base-200 flex items-center space-x-2 px-4 py-1 pl-8 transition hover:cursor-pointer">
+                                <LayersSvg width="16" height="16" />
+                                <div>Reverse</div>
+                            </div>
+                        </div>
+                    </div>
+                    <Entry>Hard</Entry>
+                </div>
+                <div className="divider" />
+                <div className="p-4 text-gray-400">Groups</div>
+                <div>
+                    <Entry>Shapes</Entry>
+                    <Entry>Normal</Entry>
+                    <Entry>Normal Rocket</Entry>
+                    <Entry>Hard Rocket</Entry>
+                    <Entry>Reverse</Entry>
                 </div>
             </div>
-        </>
+        </EditorContainer>
+    )
+}
+
+function Entry(props: { children: React.ReactNode; open?: boolean }) {
+    return (
+        <div className="hover:bg-base-200 flex items-center space-x-2 px-4 py-2 transition hover:cursor-pointer">
+            {props.open && <ChevronDown width="16" height="16" />}
+            {!props.open && <ChevronRightSvg width="16" height="16" />}
+            <div>{props.children}</div>
+        </div>
     )
 }

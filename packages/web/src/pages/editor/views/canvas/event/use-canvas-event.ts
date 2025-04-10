@@ -73,6 +73,7 @@ export function usePipelineEvent(onEvent: (event: Event) => void) {
             if (event.consumed) {
                 raw.stopPropagation()
                 raw.preventDefault()
+                canvas.setPointerCapture(raw.pointerId)
             }
 
             // on demand rendering only renders if the scene changes. usually the scene is changed directly

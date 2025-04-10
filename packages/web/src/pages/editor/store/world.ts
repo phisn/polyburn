@@ -7,6 +7,7 @@ export const EditorFlag = z.object({
     type: z.literal("flag"),
 
     bounds: Rect,
+    group: z.string().optional(),
     size: Size,
     transform: Transform,
 })
@@ -15,6 +16,7 @@ export type EditorRocket = z.infer<typeof EditorRocket>
 export const EditorRocket = z.object({
     type: z.literal("rocket"),
 
+    group: z.string().optional(),
     size: Size,
     transform: Transform,
 })
@@ -22,12 +24,19 @@ export const EditorRocket = z.object({
 export type EditorShape = z.infer<typeof EditorShape>
 export const EditorShape = z.object({
     type: z.literal("shape"),
+
+    group: z.string().optional(),
     transform: Transform,
     vertices: z.array(ShapeVertex),
 })
 
 export type EditorEntity = z.infer<typeof EditorEntity>
 export const EditorEntity = z.discriminatedUnion("type", [EditorFlag, EditorRocket, EditorShape])
+
+export type EditorGamemode = z.infer<typeof EditorGamemode>
+export const EditorGamemode = z.object({
+    groups: z.array(z.string()),
+})
 
 export type EditorWorld = z.infer<typeof EditorWorld>
 export const EditorWorld = z.object({

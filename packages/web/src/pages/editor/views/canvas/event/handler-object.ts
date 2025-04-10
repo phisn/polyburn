@@ -35,11 +35,6 @@ export class HandlerObject {
 
         this.objects = [...entitiesWith(world, "size", "transform")]
         this.shapes = [...entitiesWith(world, "transform", "vertices").map(([_, entity]) => entity)]
-
-        console.log(
-            "asdf",
-            JSON.stringify(Object.values(deepClone(world).entities).map(x => x.transform)),
-        )
     }
 
     handleDefault(event: Event) {

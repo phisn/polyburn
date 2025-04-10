@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { Mesh, MeshBasicMaterial } from "three"
 import { highlightColor, selectHightlightColor, selectObjectColor } from "../../../constants"
 
@@ -28,8 +28,14 @@ function VisualShape(props: { id: string; entity: Immutable<EditorShape> }) {
     const geometryRef = useRef<MutatableShapeGeometry>(undefined!)
 
     if (geometryRef.current === undefined) {
-        geometryRef.current = new MutatableShapeGeometry(props.entity.vertices)
+        geometryRef.current = new MutatableShapeGeometry()
     }
+
+    useEffect(() => {
+        if (geometryRef.current) {
+            geometryRef.current.update(props.entity.vertices)
+        }
+    }, [props.entity.vertices])
 
     useEntityEvent(props.id, "transform", transform => {
         meshRef.current?.position.set(transform.point.x, transform.point.y, 0)

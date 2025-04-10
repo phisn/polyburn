@@ -29,7 +29,6 @@ export class HandlerBackground {
             return
         }
 
-        console.log("clear")
         useEditorStore.getState().highlight()
 
         if (event.leftButtonClicked) {

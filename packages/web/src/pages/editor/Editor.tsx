@@ -27,7 +27,7 @@ export function Editor() {
 
 function Navbar() {
     return (
-        <div className="bg-base-300 border-base-200 pointer-events-auto flex w-min items-center rounded-2xl">
+        <div className="border-base-200 pointer-events-auto flex w-min items-center rounded-2xl border-2 bg-black bg-opacity-50 backdrop-blur-2xl">
             <div className="join flex">
                 <div className="join-item btn btn-square btn-ghost rounded-2xl">
                     <List width="24" height="24" />

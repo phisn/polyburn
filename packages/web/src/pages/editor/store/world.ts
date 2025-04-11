@@ -41,6 +41,7 @@ export const EditorGamemode = z.object({
 export type EditorWorld = z.infer<typeof EditorWorld>
 export const EditorWorld = z.object({
     entities: z.record(z.string(), EditorEntity),
+    gamemodes: z.record(z.string(), EditorGamemode),
 })
 
 export function* entitiesWith<T extends (keyof EntityComponents)[]>(

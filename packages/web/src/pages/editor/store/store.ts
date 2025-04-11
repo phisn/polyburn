@@ -14,8 +14,10 @@ export interface EditorStore extends EventSlice {
     highlighted: ReadonlySet<string>
     highlightPoint?: HighlightPoint
     selected: ReadonlySet<string>
+    selectedGamemode?: string
     highlight(key?: string, point?: HighlightPoint): void
     select(key?: string, additive?: boolean): void
+    selectGamemode(gamemode?: string): void
 
     world: Immutable<EditorWorld>
     worldRedo: WorldChange[]
@@ -64,8 +66,24 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
             }
         })
     },
+    selectGamemode(gamemode) {
+        set(() => ({
+            selectedGamemode: gamemode,
+        }))
+    },
 
     world: {
+        gamemodes: {
+            Normal: {
+                groups: [],
+            },
+            Reverse: {
+                groups: [],
+            },
+            Hard: {
+                groups: [],
+            },
+        },
         entities: {
             "first-entity": {
                 type: "rocket",

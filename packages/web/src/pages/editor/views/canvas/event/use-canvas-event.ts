@@ -67,12 +67,18 @@ export function usePipelineEvent(onEvent: (event: Event) => void) {
                 consumed: raw.type === "pointerleave",
             }
 
-            lastNativeEventRef.current = event
+            if (event.consumed) {
+                lastNativeEventRef.current = undefined
+            } else {
+                lastNativeEventRef.current = event
+            }
+
             onEventRef.current(event)
 
             if (event.consumed) {
                 raw.stopPropagation()
                 raw.preventDefault()
+
                 canvas.setPointerCapture(raw.pointerId)
             }
 

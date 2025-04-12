@@ -89,7 +89,6 @@ export class HandlerShape {
 
                                 if ("vertices" in entity) {
                                     entity.vertices.splice(closestVertex.vertexIndex, 1)
-                                    console.log("delete")
                                 }
                             })
                         } else if (event.leftButtonClicked) {
@@ -191,6 +190,9 @@ export class HandlerShape {
                         }
 
                         this.handleMoving(event)
+                    } else if (event.leftButtonClicked) {
+                        console.log("test")
+                        useEditorStore.getState().select(key, event.shiftKey)
                     }
 
                     return

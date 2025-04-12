@@ -12,7 +12,7 @@ export function Editor() {
                 <Canvas />
             </div>
 
-            <div className="pointer-events-none absolute bottom-0 left-0 right-0 top-0 z-10 flex grow space-x-4 p-4">
+            <div className="pointer-events-none absolute bottom-0 left-0 right-0 top-0 z-10 flex grow select-none space-x-4 p-4">
                 <Hierarchy />
 
                 <div className="flex-grow">

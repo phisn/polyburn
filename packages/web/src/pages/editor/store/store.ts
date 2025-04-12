@@ -15,9 +15,11 @@ export interface EditorStore extends EventSlice {
     highlightPoint?: HighlightPoint
     selected: ReadonlySet<string>
     selectedGamemode?: string
+    selectedGroup?: string
     highlight(key?: string, point?: HighlightPoint): void
     select(key?: string, additive?: boolean): void
     selectGamemode(gamemode?: string): void
+    selectGroup(group?: string): void
 
     world: Immutable<EditorWorld>
     worldRedo: WorldChange[]
@@ -51,31 +53,51 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
     },
     select(key, additive) {
         set(state => {
-            const selected = []
+            const selected: Set<string> = additive ? new Set(state.selected) : new Set()
 
             if (key) {
-                selected.push(key)
-            }
+                const exists = get().selected.has(key)
 
-            if (additive) {
-                selected.push(...state.selected)
+                if (exists) {
+                    selected.delete(key)
+                } else {
+                    selected.add(key)
+                }
             }
 
             return {
-                selected: new Set(selected),
+                selected,
             }
         })
     },
     selectGamemode(gamemode) {
+        set(state => {
+            if (
+                gamemode &&
+                state.selectedGroup &&
+                !state.world.gamemodes[gamemode].groups.includes(state.selectedGroup)
+            ) {
+                return {
+                    selectedGamemode: gamemode,
+                    selectedGroup: undefined,
+                }
+            }
+
+            return {
+                selectedGamemode: gamemode,
+            }
+        })
+    },
+    selectGroup(group) {
         set(() => ({
-            selectedGamemode: gamemode,
+            selectedGroup: group,
         }))
     },
 
     world: {
         gamemodes: {
             Normal: {
-                groups: [],
+                groups: ["Normal"],
             },
             Reverse: {
                 groups: [],
@@ -87,6 +109,8 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
         entities: {
             "first-entity": {
                 type: "rocket",
+
+                group: "Normal",
                 size: ROCKET_SIZE,
                 transform: {
                     point: {

@@ -9,27 +9,10 @@ import { EditorRocket } from "../../../store/world"
 import { entityGraphicRegistry } from "./graphics-assets/entity-graphic-registry"
 import { EntityGraphicType } from "./graphics-assets/entity-graphic-type"
 
-export function VisualRockets() {
-    const world = useEditorStore(x => x.world)
-
-    return (
-        <>
-            {Object.keys(world.entities)
-                .map(key => [key, world.entities[key]] as const)
-                .map(
-                    ([id, entity]) =>
-                        entity.type === "rocket" && (
-                            <VisualRocket key={id} id={id} entity={entity} />
-                        ),
-                )}
-        </>
-    )
-}
-
-function VisualRocket(props: { id: string; entity: Immutable<EditorRocket> }) {
+export function VisualRocket(props: { entityKey: string; entity: Immutable<EditorRocket> }) {
     const meshRef = useRef<Object3D>(null)
 
-    useEntityEvent(props.id, "transform", transform => {
+    useEntityEvent(props.entityKey, "transform", transform => {
         if (transform === undefined) {
             return
         }
@@ -38,8 +21,8 @@ function VisualRocket(props: { id: string; entity: Immutable<EditorRocket> }) {
         meshRef.current?.rotation.set(0, 0, transform.rotation)
     })
 
-    const highlighted = useEditorStore(x => x.highlighted.has(props.id))
-    const selected = useEditorStore(x => x.selected.has(props.id))
+    const highlighted = useEditorStore(x => x.highlighted.has(props.entityKey))
+    const selected = useEditorStore(x => x.selected.has(props.entityKey))
 
     const material = useMemo(() => {
         const material = new MeshBasicMaterial({ color: "#ffffff" })

@@ -72,26 +72,54 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
     },
     selectGamemode(gamemode) {
         set(state => {
+            const selected = new Set(state.selected)
+            let selectedGroup = state.selectedGroup
+
             if (
                 gamemode &&
-                state.selectedGroup &&
-                !state.world.gamemodes[gamemode].groups.includes(state.selectedGroup)
+                selectedGroup &&
+                !state.world.gamemodes[gamemode].groups.includes(selectedGroup)
             ) {
-                return {
-                    selectedGamemode: gamemode,
-                    selectedGroup: undefined,
+                selectedGroup = undefined
+            }
+
+            if (gamemode) {
+                for (const entityKey of state.selected) {
+                    const entityGroup = state.world.entities[entityKey].group
+
+                    if (
+                        entityGroup &&
+                        !state.world.gamemodes[gamemode].groups.includes(entityGroup)
+                    ) {
+                        selected.delete(entityKey)
+                    }
                 }
             }
 
             return {
+                selected,
                 selectedGamemode: gamemode,
+                selectedGroup,
             }
         })
     },
     selectGroup(group) {
-        set(() => ({
-            selectedGroup: group,
-        }))
+        set(state => {
+            const selected = new Set(state.selected)
+
+            if (group !== undefined) {
+                for (const entityKey of state.selected) {
+                    if ((state.world.entities[entityKey].group ?? "") !== group) {
+                        selected.delete(entityKey)
+                    }
+                }
+            }
+
+            return {
+                selected,
+                selectedGroup: group,
+            }
+        })
     },
 
     world: {

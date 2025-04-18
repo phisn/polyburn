@@ -30,6 +30,10 @@ export function EventHandler() {
     useCanvasEvent(event => {
         cursor.default()
 
+        if (event.consumed) {
+            useEditorStore.getState().highlight()
+        }
+
         handlerBackground.handleMoving(event)
         handlerObject.handleMoving(event)
         handlerShape.handleMoving(event)

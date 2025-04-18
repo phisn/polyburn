@@ -125,7 +125,7 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
     world: {
         gamemodes: {
             Normal: {
-                groups: ["Normal"],
+                groups: ["Normal", "Normal2", ""],
             },
             Reverse: {
                 groups: [],

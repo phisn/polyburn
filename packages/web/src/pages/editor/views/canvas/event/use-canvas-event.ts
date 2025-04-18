@@ -77,7 +77,7 @@ export function usePipelineEvent(onEvent: (event: Event) => void) {
 
             if (event.consumed) {
                 raw.stopPropagation()
-                raw.preventDefault()
+                // raw.preventDefault()
 
                 canvas.setPointerCapture(raw.pointerId)
             }

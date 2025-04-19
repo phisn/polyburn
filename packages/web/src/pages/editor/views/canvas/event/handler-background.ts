@@ -60,13 +60,10 @@ export class HandlerBackground {
         const camera = this.context.camera
 
         if (event.leftButtonDown) {
-            camera.position.set(
-                this.state.offsetPosition.x - event.positionInWindow.x / camera.zoom,
-                this.state.offsetPosition.y + event.positionInWindow.y / camera.zoom,
-                camera.position.z,
-            )
-
-            camera.updateProjectionMatrix()
+            useEditorStore.getState().setCamera({
+                x: this.state.offsetPosition.x - event.positionInWindow.x / camera.zoom,
+                y: this.state.offsetPosition.y + event.positionInWindow.y / camera.zoom,
+            })
 
             event.consumed = true
         } else {

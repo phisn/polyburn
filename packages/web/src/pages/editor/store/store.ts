@@ -1,6 +1,14 @@
 import { Point } from "game/src/model/utils"
 import { ROCKET_SIZE } from "game/src/modules/module-rocket"
-import { enableMapSet, enablePatches, Immutable, Patch, produceWithPatches } from "immer"
+import {
+    applyPatches,
+    enableMapSet,
+    enablePatches,
+    Immutable,
+    Patch,
+    produceWithPatches,
+} from "immer"
+import { z } from "zod"
 import { create } from "zustand"
 import { createEventSlice, EventSlice } from "./store-events"
 import { EditorWorld } from "./world"
@@ -11,6 +19,13 @@ interface HighlightPoint {
 }
 
 export interface EditorStore extends EventSlice {
+    camera: Point
+    cameraTarget?: { source: Point; target: Point }
+    cameraZoom: number
+    setCamera(point: Point): void
+    setCameraTarget(point?: Point): void
+    setCameraZoom(zoom: number): void
+
     highlighted: ReadonlySet<string>
     highlightPoint?: HighlightPoint
     selected: ReadonlySet<string>
@@ -24,6 +39,8 @@ export interface EditorStore extends EventSlice {
     world: Immutable<EditorWorld>
     worldRedo: WorldChange[]
     worldUndo: WorldChange[]
+    undo(): void
+    redo(): void
     updateWorld(f: (world: EditorWorld) => void): void
 }
 
@@ -32,8 +49,42 @@ export interface WorldChange {
     undo: Patch[]
 }
 
+export const WorldChange = z.object({
+    redo: z.array(z.any()),
+    undo: z.array(z.any()),
+})
+
 export const useEditorStore = create<EditorStore>((set, get, api) => ({
     ...createEventSlice(set, get, api),
+
+    camera: { x: 0, y: 0 },
+    cameraTarget: undefined,
+    cameraZoom: 50,
+    setCamera(point) {
+        set(() => ({
+            camera: point,
+        }))
+    },
+    setCameraTarget(point) {
+        if (point) {
+            set(state => ({
+                cameraTarget: {
+                    source: state.camera,
+                    target: point,
+                },
+            }))
+        } else {
+            set(() => ({
+                cameraTarget: undefined,
+            }))
+        }
+    },
+    setCameraZoom(zoom) {
+        set(() => ({
+            cameraTarget: undefined,
+            cameraZoom: zoom,
+        }))
+    },
 
     highlighted: new Set(),
     highlightPoint: undefined,
@@ -192,6 +243,38 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
     },
     worldRedo: [],
     worldUndo: [],
+    undo() {
+        set(state => {
+            if (state.worldUndo.length === 0) {
+                console.warn("Tried to undo without having available undos")
+                return {}
+            }
+
+            const [change, ...remaining] = state.worldUndo
+
+            return {
+                world: applyPatches(state.world, change.undo),
+                worldRedo: [change, ...state.worldRedo],
+                worldUndo: remaining,
+            }
+        })
+    },
+    redo() {
+        set(state => {
+            if (state.worldRedo.length === 0) {
+                console.warn("Tried to redo without having available redos")
+                return {}
+            }
+
+            const [change, ...remaining] = state.worldRedo
+
+            return {
+                world: applyPatches(state.world, change.redo),
+                worldRedo: remaining,
+                worldUndo: [change, ...state.worldUndo],
+            }
+        })
+    },
     updateWorld(f) {
         set(state => {
             const [world, redo, undo] = produceWithPatches(state.world, f)
@@ -204,7 +287,7 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
             return {
                 world,
                 worldRedo: [],
-                worldUndo: [...state.worldUndo, change],
+                worldUndo: [change, ...state.worldUndo],
             }
         })
     },

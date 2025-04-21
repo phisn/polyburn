@@ -69,21 +69,6 @@ export class HandlerBackground {
                 windowPoint: { ...event.positionInWindow },
                 worldPoint: { ...event.position },
             })
-
-            /*
-            useEditorStore.getState().setCameraZoom(newZoom)
-            const canvasSize = useEditorStore.getState().canvasSize
-
-            const canvasCenter = {
-                x: canvasSize.width * 0.5,
-                y: canvasSize.height * 0.5,
-            }
-
-            useEditorStore.getState().setCamera({
-                x: event.position.x + (canvasCenter.x - event.positionInWindow.x) / newZoom,
-                y: event.position.y - (canvasCenter.y - event.positionInWindow.y) / newZoom,
-            })
-            */
         }
     }
 

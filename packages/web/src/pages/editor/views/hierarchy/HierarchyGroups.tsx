@@ -153,7 +153,7 @@ function HierarchyGroupAdd(props: { gamemodeSelected: string }) {
                     <div
                         ref={containerRef}
                         tabIndex={-1}
-                        className="bg-base-300 border-base-200 absolute -left-4 right-0 m-2 w-screen max-w-xs rounded-2xl border p-2 py-4"
+                        className="bg-base-300 absolute -left-4 right-0 m-2 w-screen max-w-xs rounded-2xl  p-2 py-4"
                     >
                         <div className="relative px-5">
                             <ZoomInSvg className="absolute left-7 top-2" />

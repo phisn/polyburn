@@ -45,20 +45,22 @@ export function CameraTargetMoveAnimation() {
 
     useEffect(() => {
         if (target) {
-            let time = 0
+            let startTime: number | undefined
             let frame: number | undefined
 
-            const cameraAnimationFrame = (delta: number) => {
-                time += delta
+            const cameraAnimationFrame = (timestamp: number) => {
+                if (startTime === undefined) {
+                    startTime = timestamp
+                }
 
-                const ratio = Math.min(1, time / 250_000)
+                const elapsed = timestamp - startTime
+                const duration = 250
+                const ratio = Math.min(1, elapsed / duration)
 
                 setPosition({
                     x: lerp(target.source.x, target.target.x, easeOutCubic(ratio)),
                     y: lerp(target.source.y, target.target.y, easeOutCubic(ratio)),
                 })
-
-                console.log(time, ratio)
 
                 if (ratio < 1) {
                     frame = requestAnimationFrame(cameraAnimationFrame)
@@ -89,13 +91,17 @@ export function CameraTargetZoomAnimation() {
 
     useEffect(() => {
         if (cameraZoomTarget) {
-            let time = 0
+            let startTime: number | undefined
             let frame: number | undefined
 
-            const cameraAnimationFrame = (delta: number) => {
-                time += delta
+            const cameraAnimationFrame = (timestamp: number) => {
+                if (startTime === undefined) {
+                    startTime = timestamp
+                }
 
-                const ratio = Math.min(1, time / 5_000_000)
+                const elapsed = timestamp - startTime
+                const duration = 250
+                const ratio = Math.min(1, elapsed / duration)
 
                 const zoom =
                     2 **

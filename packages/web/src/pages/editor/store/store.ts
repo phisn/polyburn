@@ -1,4 +1,5 @@
 import { Point, Size } from "game/src/model/utils"
+import { LEVEL_SIZE } from "game/src/modules/module-level"
 import { ROCKET_SIZE } from "game/src/modules/module-rocket"
 import {
     applyPatches,
@@ -10,11 +11,13 @@ import {
 } from "immer"
 import { z } from "zod"
 import { create } from "zustand"
+import { BoundsSide } from "../views/canvas/event/util-bounds"
 import { createEventSlice, EventSlice } from "./store-events"
-import { EditorWorld } from "./world"
+import { EditorEntity, EditorWorld } from "./world"
 
 interface HighlightPoint {
-    point: Point
+    x: number
+    y: number
     color: string
 }
 
@@ -36,13 +39,21 @@ export interface EditorStore extends EventSlice {
 
     highlighted: ReadonlySet<string>
     highlightPoint?: HighlightPoint
+    highlightLine?: BoundsSide | "all"
     selected: ReadonlySet<string>
     selectedGamemode?: string
     selectedGroup?: string
-    highlight(key?: string, point?: HighlightPoint): void
+    highlight(
+        key?: string,
+        props?: {
+            point?: HighlightPoint
+            line?: BoundsSide | "all"
+        },
+    ): void
     select(key?: string, additive?: boolean): void
     selectGamemode(gamemode?: string): void
     selectGroup(group?: string): void
+    isEntityActive(entity: Immutable<EditorEntity>): boolean
 
     world: Immutable<EditorWorld>
     worldRedo: WorldChange[]
@@ -67,7 +78,7 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
 
     camera: { x: 0, y: 0 },
     cameraTarget: undefined,
-    cameraZoom: 50,
+    cameraZoom: 20,
     canvasSize: { width: 0, height: 0 },
     setCamera(point) {
         set(() => ({
@@ -116,15 +127,17 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
     highlightPoint: undefined,
     selected: new Set(),
 
-    highlight(key, point) {
+    highlight(key, props) {
         if ((key && !get().highlighted.has(key)) || (!key && get().highlighted.size !== 0)) {
             set(() => ({
                 highlighted: new Set<string>(key ? [key] : undefined),
-                highlightPoint: point,
+                highlightLine: props?.line,
+                highlightPoint: props?.point,
             }))
         } else {
             set(() => ({
-                highlightPoint: point,
+                highlightLine: props?.line,
+                highlightPoint: props?.point,
             }))
         }
     },
@@ -198,6 +211,18 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
             }
         })
     },
+    isEntityActive(entity) {
+        const state = get()
+
+        return (
+            (state.selectedGamemode === undefined ||
+                entity.group === undefined ||
+                state.world.gamemodes[state.selectedGamemode].groups.includes(
+                    entity.group ?? "",
+                )) &&
+            (state.selectedGroup === undefined || (entity.group ?? "") === state.selectedGroup)
+        )
+    },
 
     world: {
         gamemodes: {
@@ -264,6 +289,26 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
                         color: 0xffffff,
                     },
                 ],
+            },
+            "third-entity": {
+                type: "flag",
+
+                group: "Normal",
+                size: LEVEL_SIZE,
+                transform: {
+                    point: {
+                        x: 0,
+                        y: 0,
+                    },
+                    rotation: 0,
+                },
+                bounds: {
+                    top: -5,
+                    left: -5,
+                    right: 5,
+                    bottom: 5,
+                },
+                capture: [-5, 5],
             },
         },
     },

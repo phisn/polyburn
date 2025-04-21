@@ -61,7 +61,7 @@ export function HierarchyGroups() {
                 <div>Groups</div>
                 {gamemodeSelected && <HierarchyGroupAdd gamemodeSelected={gamemodeSelected} />}
             </div>
-            <div>
+            <div className="scrollbar-thin scrollbar-track-base-300 scrollbar-thumb-base-100 max-h-96 overflow-y-auto">
                 {groups.map(([group, entities]) => (
                     <HierarchyEntryGroup key={group} group={group} entities={entities ?? []} />
                 ))}

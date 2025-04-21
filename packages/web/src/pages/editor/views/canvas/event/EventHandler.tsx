@@ -4,6 +4,7 @@ import { OrthographicCamera } from "three"
 import { useEditorStore } from "../../../store/store"
 import { EventContext } from "./event"
 import { HandlerBackground } from "./handler-background"
+import { HandlerBounds } from "./handler-bounds"
 import { HandlerObject } from "./handler-object"
 import { HandlerShape } from "./handler-shape"
 import { usePipelineEvent as useCanvasEvent } from "./use-canvas-event"
@@ -24,6 +25,7 @@ export function EventHandler() {
         () => new HandlerBackground(context, world),
         [context, world],
     )
+    const handlerBounds = useRefDerived(() => new HandlerBounds(context, world), [context, world])
     const handlerObject = useRefDerived(() => new HandlerObject(context, world), [context, world])
     const handlerShape = useRefDerived(() => new HandlerShape(context, world), [context, world])
 
@@ -35,10 +37,13 @@ export function EventHandler() {
         }
 
         handlerBackground.handleMoving(event)
+        handlerBounds.handleMoving(event)
+        handlerBounds.handleMovingSide(event)
         handlerObject.handleMoving(event)
         handlerShape.handleMoving(event)
         handlerShape.handleVertex(event)
 
+        handlerBounds.handleDefault(event)
         handlerObject.handleDefault(event)
         handlerShape.handleDefault(event)
 

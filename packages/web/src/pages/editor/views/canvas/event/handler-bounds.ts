@@ -1,11 +1,15 @@
 import deepEqual from "deep-equal"
-import { changeAnchor } from "game/src/model/utils"
+import { Point } from "game/src/model/utils"
 import { Immutable } from "immer"
-import { deepClone } from "valtio/utils"
 import { useEditorStore } from "../../../store/store"
 import { EditorEntityWith, EditorWorld, entitiesWith } from "../../../store/world"
 import { Event, EventContext } from "./event"
-import { cursor, findEdgeForEntity, isPointInsideEntity } from "./util"
+import { cursor } from "./util"
+import {
+    boundsSides,
+    chooseAxis,
+    findCameraLineCloseTo as findBoundLineCloseTo,
+} from "./util-bounds"
 
 type BoundsSide = "left" | "right" | "top" | "bottom"
 
@@ -16,18 +20,19 @@ export class HandlerBounds {
           }
         | {
               type: "moving"
-              moving: {
-                  entity: Immutable<EditorEntityWith<"bounds">>
-                  offset: { x: number; y: number }
-              }
+              entity: Immutable<EditorEntityWith<"bounds">>
+              entityKey: string
+              offset: Point
           }
         | {
               type: "moving-line"
               side: BoundsSide
+              entity: Immutable<EditorEntityWith<"bounds">>
+              entityKey: string
+              offset: number
           }
 
-    private shapes: Immutable<EditorEntityWith<"transform" | "vertices">[]>
-    private objects: Immutable<[string, EditorEntityWith<"size" | "transform">][]>
+    private bounds: Immutable<[string, EditorEntityWith<"bounds" | "transform">][]>
 
     constructor(
         private context: EventContext,
@@ -37,8 +42,7 @@ export class HandlerBounds {
             type: "default",
         }
 
-        this.objects = [...entitiesWith(world, "size", "transform")]
-        this.shapes = [...entitiesWith(world, "transform", "vertices").map(([_, entity]) => entity)]
+        this.bounds = [...entitiesWith(world, "bounds", "transform")]
     }
 
     handleDefault(event: Event) {
@@ -46,37 +50,43 @@ export class HandlerBounds {
             return
         }
 
-        for (const [key, entity] of this.objects) {
-            const isInside = isPointInsideEntity(event.position, entity.transform, entity.size)
+        for (const [key, entity] of this.bounds) {
+            if (!useEditorStore.getState().isEntityActive(entity)) {
+                continue
+            }
 
-            if (isInside) {
-                useEditorStore.getState().highlight(key)
+            const sideOfLine = findBoundLineCloseTo(entity, event.position)
 
-                if (event.ctrlKey) {
-                    if (event.leftButtonClicked) {
-                        cursor.grabbing()
+            if (sideOfLine) {
+                if (event.leftButtonClicked && event.ctrlKey) {
+                    cursor.grabbing()
 
-                        this.state = {
-                            type: "moving",
-                            moving: [
-                                {
-                                    current: deepClone(entity.transform),
-                                    entity,
-                                    entityKey: key,
-                                    offset: {
-                                        x: entity.transform.point.x - event.positionInGrid.x,
-                                        y: entity.transform.point.y - event.positionInGrid.y,
-                                    },
-                                },
-                            ],
-                        }
-
-                        this.handleMoving(event)
-                    } else {
-                        cursor.grabbable()
+                    this.state = {
+                        type: "moving",
+                        entity,
+                        entityKey: key,
+                        offset: event.positionInGrid,
                     }
+
+                    this.handleMoving(event)
                 } else if (event.leftButtonClicked) {
-                    useEditorStore.getState().select(key, event.shiftKey)
+                    cursor.grabbing()
+
+                    this.state = {
+                        type: "moving-line",
+                        entity,
+                        entityKey: key,
+                        side: sideOfLine,
+                        offset: chooseAxis(sideOfLine, event.positionInGrid),
+                    }
+
+                    this.handleMovingSide(event)
+                } else if (event.ctrlKey) {
+                    cursor.grabbable()
+                    useEditorStore.getState().highlight(key, { line: "all" })
+                } else {
+                    cursor.grabbable()
+                    useEditorStore.getState().highlight(key, { line: sideOfLine })
                 }
 
                 event.consumed = true
@@ -91,38 +101,29 @@ export class HandlerBounds {
 
         event.consumed = true
 
+        const newBounds = { ...this.state.entity.bounds }
+
+        for (const side of boundsSides) {
+            newBounds[side] =
+                newBounds[side] -
+                chooseAxis(side, this.state.offset) +
+                chooseAxis(side, event.positionInGrid)
+        }
+
         if (event.leftButtonDown) {
             cursor.grabbing()
-
-            if (this.tryClipObjectToShape(event)) {
-                return
-            }
-
-            for (const { entityKey, offset, current } of this.state.moving) {
-                current.point.x = event.positionInGrid.x + offset.x
-                current.point.y = event.positionInGrid.y + offset.y
-                current.rotation = 0
-
-                useEditorStore.getState().invoke(entityKey, "transform", current)
-            }
+            useEditorStore.getState().invoke(this.state.entityKey, "bounds", newBounds)
         } else {
             cursor.grabbable()
 
-            const state = this.state.moving
+            const state = this.state
 
-            if (state.every(x => deepEqual(x.entity.transform, x.current)) === false) {
+            if (!deepEqual(newBounds, state.entity.bounds)) {
                 useEditorStore.getState().updateWorld(world => {
-                    for (const { entityKey, current } of state) {
-                        const entity = world.entities[entityKey]
+                    const entity = world.entities[state.entityKey]
 
-                        if ("transform" in entity) {
-                            entity.transform.point.x = current.point.x
-                            entity.transform.point.y = current.point.y
-                            console.log("set", current.rotation)
-                            entity.transform.rotation = current.rotation
-
-                            console.log("moving to: ", deepClone(entity.transform))
-                        }
+                    if ("bounds" in entity) {
+                        entity.bounds = newBounds
                     }
                 })
             }
@@ -133,42 +134,53 @@ export class HandlerBounds {
         }
     }
 
-    private tryClipObjectToShape(event: Event) {
-        if (this.state.type !== "moving") {
-            throw new Error("Expected moving state")
+    handleMovingSide(event: Event) {
+        if (event.consumed || this.state.type !== "moving-line") {
+            return
         }
 
-        if (this.state.moving.length !== 1) {
-            return false
+        event.consumed = true
+
+        const newBounds = { ...this.state.entity.bounds }
+
+        newBounds[this.state.side] =
+            newBounds[this.state.side] -
+            this.state.offset +
+            chooseAxis(this.state.side, event.positionInGrid)
+
+        if (event.leftButtonDown) {
+            cursor.grabbing()
+            useEditorStore.getState().invoke(this.state.entityKey, "bounds", newBounds)
+        } else {
+            cursor.grabbable()
+
+            if (newBounds.left > newBounds.right) {
+                const temp = newBounds.left
+                newBounds.left = newBounds.right
+                newBounds.right = temp
+            }
+
+            if (newBounds.top > newBounds.bottom) {
+                const temp = newBounds.top
+                newBounds.top = newBounds.bottom
+                newBounds.bottom = temp
+            }
+
+            const state = this.state
+
+            if (!deepEqual(newBounds, state.entity.bounds)) {
+                useEditorStore.getState().updateWorld(world => {
+                    const entity = world.entities[state.entityKey]
+
+                    if ("bounds" in entity) {
+                        entity.bounds = newBounds
+                    }
+                })
+            }
+
+            this.state = {
+                type: "default",
+            }
         }
-
-        const [first] = this.state.moving
-
-        if (!("size" in first.entity)) {
-            return false
-        }
-
-        const edge = findEdgeForEntity(event.position, true, this.shapes)
-
-        if (edge === undefined) {
-            return false
-        }
-
-        const transposed = changeAnchor(
-            edge.point,
-            edge.rotation,
-            first.entity.size,
-            { x: 0.5, y: 0.5 },
-            { x: 0.5, y: 1 },
-        )
-
-        first.current.point.x = transposed.x
-        first.current.point.y = transposed.y
-        console.log(edge.rotation)
-        first.current.rotation = edge.rotation
-
-        useEditorStore.getState().invoke(first.entityKey, "transform", first.current)
-
-        return true
     }
 }

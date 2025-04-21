@@ -43,6 +43,10 @@ export class HandlerObject {
         }
 
         for (const [key, entity] of this.objects) {
+            if (!useEditorStore.getState().isEntityActive(entity)) {
+                continue
+            }
+
             const isInside = isPointInsideEntity(event.position, entity.transform, entity.size)
 
             if (isInside) {
@@ -114,10 +118,7 @@ export class HandlerObject {
                         if ("transform" in entity) {
                             entity.transform.point.x = current.point.x
                             entity.transform.point.y = current.point.y
-                            console.log("set", current.rotation)
                             entity.transform.rotation = current.rotation
-
-                            console.log("moving to: ", deepClone(entity.transform))
                         }
                     }
                 })

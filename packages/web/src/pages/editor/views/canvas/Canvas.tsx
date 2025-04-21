@@ -2,7 +2,6 @@ import { OrthographicCamera as DreiOrthographicCamera } from "@react-three/drei"
 import { Canvas as RawCanvas, useThree } from "@react-three/fiber"
 import { lerp } from "game/src/model/utils"
 import { useEffect } from "react"
-import { OrthographicCamera, Vector3 } from "three"
 import { useEditorStore } from "../../store/store"
 import { EventHandler } from "./event/EventHandler"
 import { Visual } from "./visual/Visual"
@@ -11,65 +10,34 @@ export function Canvas() {
     return (
         <RawCanvas frameloop="always">
             <Camera />
-            <CameraScroll />
-            <CameraTargetAnimation />
+            <CameraTargetMoveAnimation />
+            <CameraTargetZoomAnimation />
             <EventHandler />
+            <SyncCanvasSize />
             <Visual />
         </RawCanvas>
     )
+}
+
+function SyncCanvasSize() {
+    const setCanvasSize = useEditorStore(x => x.setCanvasSize)
+    const size = useThree(x => x.size)
+
+    useEffect(() => {
+        setCanvasSize({
+            width: size.width,
+            height: size.height,
+        })
+    }, [setCanvasSize, size.width, size.height])
+
+    return <></>
 }
 
 function easeOutCubic(x: number): number {
     return 1 - Math.pow(1 - x, 3)
 }
 
-export function CameraScroll() {
-    const camera = useThree(x => x.camera) as OrthographicCamera
-    const canvas = useThree(x => x.gl.domElement)
-
-    const setPosition = useEditorStore(x => x.setCamera)
-    const setZoom = useEditorStore(x => x.setCameraZoom)
-
-    useEffect(() => {
-        const onScroll = (raw: WheelEvent) => {
-            const zoom = useEditorStore.getState().cameraZoom
-
-            if ((raw.deltaY < 0 && zoom < 80) || (raw.deltaY > 0 && zoom > 2)) {
-                const newZoom = 2 ** (Math.log2(zoom) - raw.deltaY / 100)
-                setZoom(newZoom)
-
-                const canvasCenter = {
-                    x: canvas.width * 0.5,
-                    y: canvas.height * 0.5,
-                }
-
-                const position = useEditorStore.getState().camera
-                const positionWindow = camera.worldToLocal(new Vector3(position.x, position.y, 0))
-
-                console.log(position, positionWindow)
-
-                setPosition({
-                    x: position.x + (canvasCenter.x - positionWindow.x) / newZoom,
-                    y: position.y - (canvasCenter.y - positionWindow.y) / newZoom,
-                })
-            }
-
-            // prevent browser scrolling
-            raw.stopPropagation()
-            raw.preventDefault()
-        }
-
-        canvas.addEventListener("wheel", onScroll)
-
-        return () => {
-            canvas.removeEventListener("wheel", onScroll)
-        }
-    }, [canvas, camera, setPosition, setZoom])
-
-    return <></>
-}
-
-export function CameraTargetAnimation() {
+export function CameraTargetMoveAnimation() {
     const target = useEditorStore(x => x.cameraTarget)
 
     const setTarget = useEditorStore(x => x.setCameraTarget)
@@ -83,7 +51,7 @@ export function CameraTargetAnimation() {
             const cameraAnimationFrame = (delta: number) => {
                 time += delta
 
-                const ratio = Math.min(1, time / 10_000_000)
+                const ratio = Math.min(1, time / 250_000)
 
                 setPosition({
                     x: lerp(target.source.x, target.target.x, easeOutCubic(ratio)),
@@ -112,6 +80,71 @@ export function CameraTargetAnimation() {
     return <></>
 }
 
+export function CameraTargetZoomAnimation() {
+    const cameraZoomTarget = useEditorStore(x => x.cameraZoomTarget)
+    const setCameraZoomTarget = useEditorStore(x => x.setCameraZoomTarget)
+    const setCamera = useEditorStore(x => x.setCamera)
+
+    const camera = useThree(x => x.camera)
+
+    useEffect(() => {
+        if (cameraZoomTarget) {
+            let time = 0
+            let frame: number | undefined
+
+            const cameraAnimationFrame = (delta: number) => {
+                time += delta
+
+                const ratio = Math.min(1, time / 5_000_000)
+
+                const zoom =
+                    2 **
+                    lerp(
+                        Math.log2(cameraZoomTarget.source),
+                        Math.log2(cameraZoomTarget.target),
+                        easeOutCubic(ratio),
+                    )
+
+                useEditorStore.setState({
+                    cameraZoom: zoom,
+                })
+
+                const canvasSize = useEditorStore.getState().canvasSize
+
+                const canvasCenter = {
+                    x: canvasSize.width * 0.5,
+                    y: canvasSize.height * 0.5,
+                }
+
+                useEditorStore.getState().setCamera({
+                    x:
+                        cameraZoomTarget.sourcePoint.x +
+                        (canvasCenter.x - cameraZoomTarget.sourcePointWindow.x) / zoom,
+                    y:
+                        cameraZoomTarget.sourcePoint.y -
+                        (canvasCenter.y - cameraZoomTarget.sourcePointWindow.y) / zoom,
+                })
+
+                if (ratio < 1) {
+                    frame = requestAnimationFrame(cameraAnimationFrame)
+                } else {
+                    setCameraZoomTarget()
+                }
+            }
+
+            frame = requestAnimationFrame(cameraAnimationFrame)
+
+            return () => {
+                if (frame) {
+                    cancelAnimationFrame(frame)
+                }
+            }
+        }
+    }, [camera, cameraZoomTarget, setCamera, setCameraZoomTarget])
+
+    return <></>
+}
+
 export function Camera() {
     const position = useEditorStore(x => x.camera)
     const zoom = useEditorStore(x => x.cameraZoom)
@@ -126,45 +159,3 @@ export function Camera() {
         />
     )
 }
-
-/*
-function HighlightPoints() {
-    const store = useContext(EditorStoreContext)
-
-    if (store === undefined) {
-        throw new Error("EditorStore not found")
-    }
-
-    const focus = useSnapshot(store.resources.get("focus"))
-
-    return (
-        <>
-            {focus.highlightPoints.map((x, i) => (
-                <Fragment key={i}>
-                    <mesh position={[x.point.x, x.point.y, 1]}>
-                        <circleGeometry args={[0.016 * baseZoom]} />
-                        <meshBasicMaterial color={x.color} />
-                    </mesh>
-                    <mesh position={[x.point.x, x.point.y, 0.5]}>
-                        <circleGeometry args={[0.018 * baseZoom]} />
-                        <meshBasicMaterial color={"#000000"} />
-                    </mesh>
-                </Fragment>
-            ))}
-        </>
-    )
-}
-
-function PipelineEvent() {
-    const store = useContext(EditorStoreContext)
-
-    if (store === undefined) {
-        throw new Error("EditorStore not found")
-    }
-
-    usePipelineEvent(event => store.events.invoke.canvas?.(event))
-
-    return <></>
-}
-
-*/

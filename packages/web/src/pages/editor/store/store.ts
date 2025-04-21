@@ -1,4 +1,4 @@
-import { Point } from "game/src/model/utils"
+import { Point, Size } from "game/src/model/utils"
 import { ROCKET_SIZE } from "game/src/modules/module-rocket"
 import {
     applyPatches,
@@ -22,9 +22,17 @@ export interface EditorStore extends EventSlice {
     camera: Point
     cameraTarget?: { source: Point; target: Point }
     cameraZoom: number
+    cameraZoomTarget?: {
+        source: number
+        sourcePoint: Point
+        sourcePointWindow: Point
+        target: number
+    }
+    canvasSize: Size
     setCamera(point: Point): void
     setCameraTarget(point?: Point): void
-    setCameraZoom(zoom: number): void
+    setCameraZoomTarget(props?: { zoom: number; worldPoint: Point; windowPoint: Point }): void
+    setCanvasSize(size: Size): void
 
     highlighted: ReadonlySet<string>
     highlightPoint?: HighlightPoint
@@ -60,6 +68,7 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
     camera: { x: 0, y: 0 },
     cameraTarget: undefined,
     cameraZoom: 50,
+    canvasSize: { width: 0, height: 0 },
     setCamera(point) {
         set(() => ({
             camera: point,
@@ -79,10 +88,27 @@ export const useEditorStore = create<EditorStore>((set, get, api) => ({
             }))
         }
     },
-    setCameraZoom(zoom) {
+    setCameraZoomTarget(props) {
+        set(state => {
+            if (props) {
+                return {
+                    cameraZoomTarget: {
+                        source: state.cameraZoom,
+                        sourcePoint: props.worldPoint,
+                        sourcePointWindow: props.windowPoint,
+                        target: props.zoom,
+                    },
+                }
+            } else {
+                return {
+                    cameraZoomTarget: undefined,
+                }
+            }
+        })
+    },
+    setCanvasSize(size) {
         set(() => ({
-            cameraTarget: undefined,
-            cameraZoom: zoom,
+            canvasSize: size,
         }))
     },
 

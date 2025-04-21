@@ -43,6 +43,7 @@ export function EventHandler() {
         handlerShape.handleDefault(event)
 
         handlerBackground.handleDefault(event)
+        handlerBackground.handleScroll(event)
     })
 
     return <></>

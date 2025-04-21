@@ -52,6 +52,41 @@ export class HandlerBackground {
         }
     }
 
+    handleScroll(event: Event) {
+        if (event.type !== "wheel") {
+            return
+        }
+
+        const zoomTarget = useEditorStore.getState().cameraZoomTarget
+        const zoom = zoomTarget?.target ?? useEditorStore.getState().cameraZoom
+
+        if ((event.scroll < 0 && zoom < 80) || (event.scroll > 0 && zoom > 2)) {
+            const SCROLL_FACTOR = 200
+            const newZoom = 2 ** (Math.log2(zoom) - event.scroll / SCROLL_FACTOR)
+
+            useEditorStore.getState().setCameraZoomTarget({
+                zoom: newZoom,
+                windowPoint: { ...event.positionInWindow },
+                worldPoint: { ...event.position },
+            })
+
+            /*
+            useEditorStore.getState().setCameraZoom(newZoom)
+            const canvasSize = useEditorStore.getState().canvasSize
+
+            const canvasCenter = {
+                x: canvasSize.width * 0.5,
+                y: canvasSize.height * 0.5,
+            }
+
+            useEditorStore.getState().setCamera({
+                x: event.position.x + (canvasCenter.x - event.positionInWindow.x) / newZoom,
+                y: event.position.y - (canvasCenter.y - event.positionInWindow.y) / newZoom,
+            })
+            */
+        }
+    }
+
     handleMoving(event: Event) {
         if (event.consumed || this.state.type !== "moving") {
             return

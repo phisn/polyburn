@@ -1,16 +1,18 @@
-import { Svg } from "@react-three/drei"
 import { Immutable } from "immer"
 import { useMemo, useRef } from "react"
 import { MeshBasicMaterial, Object3D } from "three"
 import { highlightColor, selectHightlightColor, selectObjectColor } from "../../../constants"
 import { useEditorStore } from "../../../store/store"
 import { useEntityEvent } from "../../../store/store-events"
-import { EditorFlag } from "../../../store/world"
+import { EditorGravitation } from "../../../store/world"
 import { entityGraphicRegistry } from "./graphics-assets/entity-graphic-registry"
 import { EntityGraphicType } from "./graphics-assets/entity-graphic-type"
 import { VisualLines, VisualLinesRef } from "./VisualLines"
 
-export function VisualLevel(props: { entityKey: string; entity: Immutable<EditorFlag> }) {
+export function VisualGravitation(props: {
+    entityKey: string
+    entity: Immutable<EditorGravitation>
+}) {
     const meshRef = useRef<Object3D>(null)
     const linesRef = useRef<VisualLinesRef>(null)
 
@@ -52,24 +54,6 @@ export function VisualLevel(props: { entityKey: string; entity: Immutable<Editor
 
     return (
         <>
-            <object3D
-                ref={meshRef}
-                position={[
-                    props.entity.transform?.point.x ?? 0,
-                    props.entity.transform?.point.y ?? 0,
-                    0.1,
-                ]}
-                rotation={[0, 0, props.entity.transform?.rotation ?? 0]}
-            >
-                <Svg
-                    position={[-0.5 * graphicEntry.size.width, 0.5 * graphicEntry.size.height, 0]}
-                    fillMaterial={material}
-                    ref={meshRef}
-                    src={graphicEntry.src}
-                    scale={graphicEntry.scale}
-                />
-            </object3D>
-
             {highlightedLine === "all" && (
                 <VisualLines
                     ref={linesRef}
@@ -97,9 +81,9 @@ export function VisualLevel(props: { entityKey: string; entity: Immutable<Editor
     )
 }
 
-export const LevelCameraColor = "#FF7E2E"
-export const LevelCameraHoverColor = "#9326FF"
-export const LevelCameraSelectColor = "#CE19FE"
+export const LevelCameraColor = "#4444cc"
+export const LevelCameraHoverColor = "#2222aa"
+export const LevelCameraSelectColor = "#111199"
 export const LevelCameraDragColor = "red"
 
 const graphicEntry = entityGraphicRegistry[EntityGraphicType.RedFlag]

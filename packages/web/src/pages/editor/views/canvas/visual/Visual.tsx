@@ -2,6 +2,7 @@ import { Immutable } from "immer"
 import { baseZoom } from "../../../constants"
 import { useEditorStore } from "../../../store/store"
 import { EditorEntity } from "../../../store/world"
+import { VisualGravitation } from "./VisualGravitation"
 import { VisualLevel } from "./VisualLevel"
 import { VisualRocket } from "./VisualRocket"
 import { VisualShape } from "./VisualShape"
@@ -31,6 +32,8 @@ function VisualEntity(props: { entityKey: string; entity: Immutable<EditorEntity
     switch (props.entity.type) {
         case "flag":
             return <VisualLevel entityKey={props.entityKey} entity={props.entity} />
+        case "gravitation":
+            return <VisualGravitation entityKey={props.entityKey} entity={props.entity} />
         case "rocket":
             return <VisualRocket entityKey={props.entityKey} entity={props.entity} />
         case "shape":

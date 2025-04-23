@@ -22,6 +22,17 @@ interface HighlightPoint {
 }
 
 export interface EditorStore extends EventSlice {
+    canvasContextMenu?: {
+        entityKey?: string
+        position: Point
+        positionWindow: Point
+    }
+    setCanvasContextMenu(props?: {
+        entityKey?: string
+        position: Point
+        positionWindow: Point
+    }): void
+
     camera: Point
     cameraTarget?: { source: Point; target: Point }
     cameraZoom: number
@@ -75,6 +86,13 @@ export const WorldChange = z.object({
 
 export const useEditorStore = create<EditorStore>((set, get, api) => ({
     ...createEventSlice(set, get, api),
+
+    canvasContextMenu: undefined,
+    setCanvasContextMenu(props) {
+        set({
+            canvasContextMenu: props,
+        })
+    },
 
     camera: { x: 0, y: 0 },
     cameraTarget: undefined,

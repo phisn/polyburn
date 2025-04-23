@@ -199,6 +199,14 @@ export class HandlerShape {
                         useEditorStore.getState().select(key, event.shiftKey)
                     }
 
+                    if (event.rightButtonClicked) {
+                        useEditorStore.getState().setCanvasContextMenu({
+                            entityKey: key,
+                            position: event.positionInGrid,
+                            positionWindow: event.positionInWindow,
+                        })
+                    }
+
                     return
                 }
             } else {
@@ -233,7 +241,11 @@ export class HandlerShape {
                     }
 
                     if (event.rightButtonClicked) {
-                        console.warn("Todo!")
+                        useEditorStore.getState().setCanvasContextMenu({
+                            entityKey: key,
+                            position: event.positionInGrid,
+                            positionWindow: event.positionInWindow,
+                        })
                     }
 
                     event.consumed = true

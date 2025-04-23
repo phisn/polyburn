@@ -1,21 +1,27 @@
 import { OrthographicCamera as DreiOrthographicCamera } from "@react-three/drei"
 import { Canvas as RawCanvas, useThree } from "@react-three/fiber"
 import { lerp } from "game/src/model/utils"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useEditorStore } from "../../store/store"
+import { CanvasContextMenu } from "./CanvasContextMenu"
 import { EventHandler } from "./event/EventHandler"
 import { Visual } from "./visual/Visual"
 
 export function Canvas() {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+
     return (
-        <RawCanvas frameloop="always">
-            <Camera />
-            <CameraTargetMoveAnimation />
-            <CameraTargetZoomAnimation />
-            <EventHandler />
-            <SyncCanvasSize />
-            <Visual />
-        </RawCanvas>
+        <>
+            <CanvasContextMenu />
+            <RawCanvas ref={canvasRef} frameloop="always">
+                <Camera />
+                <CameraTargetMoveAnimation />
+                <CameraTargetZoomAnimation />
+                <EventHandler />
+                <SyncCanvasSize />
+                <Visual />
+            </RawCanvas>
+        </>
     )
 }
 

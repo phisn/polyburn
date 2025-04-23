@@ -1,4 +1,5 @@
 import { Immutable } from "immer"
+import { ContextMenu } from "radix-ui"
 import { MouseEvent, useEffect, useMemo, useRef, useState } from "react"
 import { DndProvider, useDrag, useDrop } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
@@ -119,6 +120,7 @@ function HierarchyGroupAdd(props: { gamemodeSelected: string }) {
         ),
         [],
     )
+
     useEffect(() => {
         const onClick = (event: globalThis.MouseEvent) => {
             if (
@@ -249,6 +251,7 @@ function HierarchyEntryGroup(props: {
     group: string
     entities: Immutable<[string, EditorEntity]>[]
 }) {
+    const gamemodeSelected = useEditorStore(x => x.selectedGamemode)
     const selected = useEditorStore(x => x.selectedGroup === props.group)
     const otherSelected = useEditorStore(x => !selected && x.selectedGroup !== undefined)
     const world = useEditorStore(x => x.world)
@@ -291,51 +294,113 @@ function HierarchyEntryGroup(props: {
         }
     }
 
-    return (
-        <div>
-            <div ref={drop} className="py-1">
-                <div
-                    onClick={onClick}
-                    className={
-                        "flex items-center justify-between px-6 py-1 transition hover:cursor-pointer " +
-                        (otherSelected ? " text-base-100 " : "") +
-                        (!otherSelected && props.group.length > 0 ? " text-primary " : "") +
-                        (!otherSelected && props.group.length === 0 ? " text-secondary " : "") +
-                        (selected ? " bg-base-100 hover:bg-[#424242] " : "") +
-                        (!selected ? " hover:bg-base-200 " : "") +
-                        (isDraggingOver ? " bg-base-200 " : "")
-                    }
-                >
-                    {props.group.length > 0 && (
-                        <div className="flex items-center space-x-2">
-                            <LayersSvg width="16" height="16" />
-                            <div>{props.group}</div>
-                        </div>
-                    )}
-                    {props.group.length === 0 && <div className="italic">Ungrouped</div>}
+    function onRemove() {
+        console.log(props.group, "remove ")
+        updateWorld(world => {
+            const target = props.group === "" ? undefined : props.group
 
-                    {otherSelected && (
-                        <div className="text-base-100 flex justify-end px-2">
-                            <EyeSlashSvg width="16" height="16" />
+            for (const entityKey in world.entities) {
+                if (world.entities[entityKey].group === target) {
+                    delete world.entities[entityKey]
+                }
+            }
+
+            for (const gamemodeKey in world.gamemodes) {
+                world.gamemodes[gamemodeKey].groups = world.gamemodes[gamemodeKey].groups.filter(
+                    x => x !== props.group,
+                )
+            }
+        })
+    }
+
+    function onUnlist(gamemode: string) {
+        console.log(props.group, "going to ")
+        updateWorld(world => {
+            console.log(props.group, "is being removed")
+            world.gamemodes[gamemode].groups = world.gamemodes[gamemode].groups.filter(
+                x => x !== props.group,
+            )
+        })
+    }
+
+    return (
+        <ContextMenu.Root>
+            <ContextMenu.Trigger>
+                <div>
+                    <div ref={drop} className="py-1">
+                        <div
+                            onClick={onClick}
+                            className={
+                                "flex items-center justify-between px-6 py-1 transition hover:cursor-pointer " +
+                                (otherSelected ? " text-base-100 " : "") +
+                                (!otherSelected && props.group.length > 0 ? " text-primary " : "") +
+                                (!otherSelected && props.group.length === 0
+                                    ? " text-secondary "
+                                    : "") +
+                                (selected ? " bg-base-100 hover:bg-[#424242] " : "") +
+                                (!selected ? " hover:bg-base-200 " : "") +
+                                (isDraggingOver ? " bg-base-200 " : "")
+                            }
+                        >
+                            {props.group.length > 0 && (
+                                <div className="flex items-center space-x-2">
+                                    <LayersSvg width="16" height="16" />
+                                    <div>{props.group}</div>
+                                </div>
+                            )}
+                            {props.group.length === 0 && <div className="italic">Ungrouped</div>}
+
+                            {otherSelected && (
+                                <div className="text-base-100 flex justify-end px-2">
+                                    <EyeSlashSvg width="16" height="16" />
+                                </div>
+                            )}
+                            {selected && <div className="flex justify-end px-2"></div>}
                         </div>
-                    )}
-                    {selected && <div className="flex justify-end px-2"></div>}
+                    </div>
+                    <div className="flex">
+                        <div className="divider divider-horizontal mr-1" />
+                        <div className="mr-4 w-full">
+                            {props.entities.map(([entityKey, entity]) => (
+                                <HierarchyEntryEntity
+                                    key={entityKey}
+                                    entityKey={entityKey}
+                                    entitiy={entity}
+                                    hidden={otherSelected}
+                                />
+                            ))}
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div className="flex">
-                <div className="divider divider-horizontal mr-1" />
-                <div className="mr-4 w-full">
-                    {props.entities.map(([entityKey, entity]) => (
-                        <HierarchyEntryEntity
-                            key={entityKey}
-                            entityKey={entityKey}
-                            entitiy={entity}
-                            hidden={otherSelected}
-                        />
-                    ))}
-                </div>
-            </div>
-        </div>
+            </ContextMenu.Trigger>
+            <ContextMenu.Portal>
+                <ContextMenu.Content className="z-50">
+                    <ul className="menu bg-base-300 rounded-box ">
+                        {props.group !== "" && (
+                            <li>
+                                <ContextMenu.Item onClick={onRemove}>
+                                    <a>Remove</a>
+                                </ContextMenu.Item>
+                            </li>
+                        )}
+                        {props.group !== "" && gamemodeSelected && (
+                            <li>
+                                <ContextMenu.Item onClick={() => onUnlist(gamemodeSelected)}>
+                                    <a>Unlist from gamemode</a>
+                                </ContextMenu.Item>
+                            </li>
+                        )}
+                        {props.group === "" && (
+                            <li>
+                                <ContextMenu.Item onClick={onRemove}>
+                                    <a>Remove all entities</a>
+                                </ContextMenu.Item>
+                            </li>
+                        )}
+                    </ul>
+                </ContextMenu.Content>
+            </ContextMenu.Portal>
+        </ContextMenu.Root>
     )
 }
 

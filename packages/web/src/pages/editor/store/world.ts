@@ -19,6 +19,17 @@ export const EditorFlag = z.object({
     transform: Transform,
 })
 
+export type EditorGravitation = z.infer<typeof EditorGravitation>
+export const EditorGravitation = z.object({
+    type: z.literal("gravitation"),
+
+    bounds: Rect,
+    gravitation: Point,
+
+    group: z.string().optional(),
+    transform: Transform,
+})
+
 export type EditorRocket = z.infer<typeof EditorRocket>
 export const EditorRocket = z.object({
     type: z.literal("rocket"),
@@ -38,7 +49,12 @@ export const EditorShape = z.object({
 })
 
 export type EditorEntity = z.infer<typeof EditorEntity>
-export const EditorEntity = z.discriminatedUnion("type", [EditorFlag, EditorRocket, EditorShape])
+export const EditorEntity = z.discriminatedUnion("type", [
+    EditorFlag,
+    EditorGravitation,
+    EditorRocket,
+    EditorShape,
+])
 
 export type EditorGamemode = z.infer<typeof EditorGamemode>
 export const EditorGamemode = z.object({
@@ -83,7 +99,7 @@ export function editorWorldToConfig(world: Immutable<EditorWorld>): WorldConfig 
     const anyUngrouped = !Object.values(world.entities).every(x => x.group !== undefined)
 
     if (anyUngrouped) {
-        config.groups[UNGROUPED_GROUP] = { levels: [], rockets: [], shapes: [] }
+        config.groups[UNGROUPED_GROUP] = { levels: [], gravitations: [], rockets: [], shapes: [] }
     }
 
     for (const gamemodeKey in world.gamemodes) {
@@ -91,7 +107,7 @@ export function editorWorldToConfig(world: Immutable<EditorWorld>): WorldConfig 
         config.gamemodes[gamemodeKey] = { groups: [...gamemode.groups] }
 
         for (const group of gamemode.groups) {
-            config.groups[group] = { levels: [], rockets: [], shapes: [] }
+            config.groups[group] = { levels: [], gravitations: [], rockets: [], shapes: [] }
         }
 
         if (anyUngrouped) {
@@ -116,6 +132,21 @@ export function editorWorldToConfig(world: Immutable<EditorWorld>): WorldConfig 
                         positionX: entity.transform.point.x - LEVEL_SIZE.width * 0.5,
                         positionY: entity.transform.point.y + LEVEL_SIZE.height * 0.5,
                         rotation: entity.transform.rotation,
+                    })
+
+                    break
+                case "gravitation":
+                    console.log({
+                        positionX: entity.bounds.left + entity.transform.point.x,
+                        positionY: entity.bounds.top + entity.transform.point.y,
+                    })
+                    group.gravitations.push({
+                        gravitationX: entity.gravitation.x,
+                        gravitationY: entity.gravitation.y,
+                        height: entity.bounds.bottom - entity.bounds.top,
+                        width: entity.bounds.right - entity.bounds.left,
+                        positionX: entity.bounds.left + entity.transform.point.x,
+                        positionY: entity.bounds.top + entity.transform.point.y,
                     })
 
                     break
@@ -158,7 +189,7 @@ export function configToEditorWorld(config: WorldConfig): EditorWorld {
     for (const gamemodeKey in config.gamemodes) {
         const gamemode = config.gamemodes[gamemodeKey]
         editorWorld.gamemodes[gamemodeKey] = {
-            groups: gamemode.groups.filter(group => group !== UNGROUPED_GROUP),
+            groups: gamemode.groups.filter((group: string) => group !== UNGROUPED_GROUP),
         }
     }
 
@@ -195,6 +226,37 @@ export function configToEditorWorld(config: WorldConfig): EditorWorld {
             }
 
             editorWorld.entities[id] = flag
+        }
+
+        for (const gravitation of group.gravitations) {
+            const id = generateUUID()
+
+            const editorGravitation: EditorGravitation = {
+                type: "gravitation",
+                bounds: {
+                    left: 0,
+                    top: 0,
+                    right: gravitation.width,
+                    bottom: gravitation.height,
+                },
+                gravitation: {
+                    x: gravitation.gravitationX,
+                    y: gravitation.gravitationY,
+                },
+                transform: {
+                    point: {
+                        x: gravitation.positionX,
+                        y: gravitation.positionY,
+                    },
+                    rotation: 0,
+                },
+            }
+
+            if (!isUngrouped) {
+                editorGravitation.group = groupKey
+            }
+
+            editorWorld.entities[id] = editorGravitation
         }
 
         for (const rocket of group.rockets) {

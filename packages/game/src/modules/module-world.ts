@@ -116,7 +116,10 @@ export class ModuleWorld {
         }
 
         const rapier = this.store.resources.get("rapier")
-        this.store.resources.set("world", new rapier.World(new rapier.Vector2(0, -20)))
+        this.store.resources.set(
+            "world",
+            new rapier.World(new rapier.Vector2(0, DEFAULT_GRAVITATION)),
+        )
 
         this.store.resources.set("summary", {
             deaths: 0,
@@ -126,3 +129,5 @@ export class ModuleWorld {
         })
     }
 }
+
+export const DEFAULT_GRAVITATION = -20

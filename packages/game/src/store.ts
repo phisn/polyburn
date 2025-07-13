@@ -4,6 +4,7 @@ import { EntityStore, EntityWith } from "./framework/entity"
 import { EventStore } from "./framework/event"
 import { ResourceStore } from "./framework/resource"
 import { Point, Transform } from "./model/utils"
+import { GravitationComponent } from "./modules/module-gravitation"
 import { LevelComponent, LevelEntity } from "./modules/module-level"
 import { RocketComponent, RocketEntity } from "./modules/module-rocket"
 import { ShapeComponent } from "./modules/module-shape"
@@ -29,8 +30,9 @@ export interface GameResources {
 }
 
 export interface GameComponents {
-    level: LevelComponent
     body: RAPIER.RigidBody
+    gravitation: GravitationComponent
+    level: LevelComponent
     rocket: RocketComponent
     shape: ShapeComponent
     transform: Transform

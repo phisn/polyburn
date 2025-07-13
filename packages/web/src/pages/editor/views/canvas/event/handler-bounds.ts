@@ -89,6 +89,14 @@ export class HandlerBounds {
                     useEditorStore.getState().highlight(key, { line: sideOfLine })
                 }
 
+                if (event.rightButtonClicked) {
+                    useEditorStore.getState().setCanvasContextMenu({
+                        entityKey: key,
+                        position: event.positionInGrid,
+                        positionWindow: event.positionInWindow,
+                    })
+                }
+
                 event.consumed = true
             }
         }

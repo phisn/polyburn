@@ -1,3 +1,4 @@
+import { ModuleGravitation } from "./modules/module-gravitation"
 import { ModuleLevel } from "./modules/module-level"
 import { ModuleRocket } from "./modules/module-rocket"
 import { ModuleShape } from "./modules/module-shape"
@@ -10,12 +11,14 @@ export interface GameInput {
 }
 
 export class Game {
+    private moduleGravitation: ModuleGravitation
     private moduleLevel: ModuleLevel
     private moduleRocket: ModuleRocket
     private moduleShape: ModuleShape
     private moduleWorld: ModuleWorld
 
     constructor(private store: GameStore) {
+        this.moduleGravitation = new ModuleGravitation(this.store)
         this.moduleLevel = new ModuleLevel(this.store)
         this.moduleRocket = new ModuleRocket(this.store)
         this.moduleShape = new ModuleShape(this.store)
@@ -25,6 +28,7 @@ export class Game {
     }
 
     public onUpdate(input: GameInput) {
+        this.moduleGravitation.onUpdate(input)
         this.moduleLevel.onUpdate(input)
         this.moduleRocket.onUpdate(input)
         this.moduleWorld.onUpdate(input)
@@ -33,6 +37,7 @@ export class Game {
     public onReset() {
         this.moduleWorld.onReset()
 
+        this.moduleGravitation.onReset()
         this.moduleLevel.onReset()
         this.moduleRocket.onReset()
         this.moduleShape.onReset()

@@ -6,13 +6,13 @@ import { Line2 } from "three-stdlib"
 import { EditorEntityWith } from "../../../store/world"
 import { BoundsSide, boundsSides, linesFromBounds } from "../event/util-bounds"
 
-export interface VisualLevelLinesRef {
+export interface VisualLinesRef {
     setLineTo(side: BoundsSide, position: Point): void
     setBounds(bounds: Rect): void
     setPosition(point: Point): void
 }
 
-export const VisualLevelLines = forwardRef(function LevelCameraLines(
+export const VisualLines = forwardRef(function LevelCameraLines(
     props: {
         entity: Immutable<EditorEntityWith<"bounds" | "transform">>
         color: string
@@ -21,7 +21,7 @@ export const VisualLevelLines = forwardRef(function LevelCameraLines(
         dashed?: boolean
         alwaysShowDashed?: BoundsSide
     },
-    ref: React.Ref<VisualLevelLinesRef>,
+    ref: React.Ref<VisualLinesRef>,
 ) {
     const lines = linesFromBounds(props.entity)
 

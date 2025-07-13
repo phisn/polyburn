@@ -32,6 +32,8 @@ export class HandlerBackground {
         useEditorStore.getState().highlight()
 
         if (event.leftButtonClicked) {
+            useEditorStore.getState().setCanvasContextMenu()
+
             const camera = this.context.camera
 
             this.state = {
@@ -50,12 +52,21 @@ export class HandlerBackground {
 
             event.consumed = true
         }
+
+        if (event.rightButtonClicked) {
+            useEditorStore.getState().setCanvasContextMenu({
+                position: event.positionInGrid,
+                positionWindow: event.positionInWindow,
+            })
+        }
     }
 
     handleScroll(event: Event) {
         if (event.type !== "wheel") {
             return
         }
+
+        useEditorStore.getState().setCanvasContextMenu()
 
         const zoomTarget = useEditorStore.getState().cameraZoomTarget
         const zoom = zoomTarget?.target ?? useEditorStore.getState().cameraZoom
